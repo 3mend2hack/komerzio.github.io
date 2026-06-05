@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Confirmar pago en efectivo · CUBAZON</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .confirm-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .confirm-header {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .confirm-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .order-id {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+            margin-top: 15px;
+            display: inline-block;
+            font-family: monospace;
+        }
+        
+        .confirm-body {
+            padding: 30px;
+        }
+        
+        .status-card {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .status-card i {
+            font-size: 32px;
+            color: #ffc107;
+        }
+        
+        .status-card h3 {
+            color: #856404;
+            margin-bottom: 5px;
+        }
+        
+        .status-card p {
+            color: #856404;
+            font-size: 14px;
+        }
+        
+        .warning-card {
+            background: #fee2e2;
+            border-left: 4px solid #dc2626;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .warning-card i {
+            font-size: 32px;
+            color: #dc2626;
+        }
+        
+        .warning-card h3 {
+            color: #991b1b;
+            margin-bottom: 5px;
+        }
+        
+        .warning-card p {
+            color: #991b1b;
+            font-size: 14px;
+        }
+        
+        .info-card {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+        
+        .total-row {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+        
+        .total-row .info-label {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .total-row .info-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #dc2626;
+        }
+        
+        .products-list {
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .product-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .product-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+        
+        .product-details {
+            flex: 1;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .product-meta {
+            font-size: 13px;
+            color: #64748b;
+        }
+        
+        .product-price {
+            font-weight: 700;
+            color: #dc2626;
+            text-align: right;
+            min-width: 100px;
+        }
+        
+        .whatsapp-card {
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 25px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .whatsapp-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .whatsapp-info i {
+            font-size: 32px;
+            color: #25D366;
+        }
+        
+        .whatsapp-info span {
+            font-weight: 600;
+            color: #166534;
+        }
+        
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-whatsapp:hover {
+            background: #20bd5a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37,211,102,0.3);
+        }
+        
+        .btn-confirm {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-confirm:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(249,115,22,0.4);
+        }
+        
+        .btn-confirm:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .timer {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .timer span {
+            font-size: 24px;
+            font-weight: 700;
+            color: #dc2626;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 60px;
+            color: #dc2626;
+        }
+        
+        @media (max-width: 640px) {
+            .confirm-body { padding: 20px; }
+            .product-item { flex-wrap: wrap; }
+            .product-price { text-align: left; margin-left: 75px; }
+            .whatsapp-card { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="confirm-container">
+        <div id="loadingContent" class="loading">
+            <i class="fa fa-spinner fa-pulse fa-3x"></i>
+            <p style="margin-top: 15px;">Cargando información del pedido...</p>
+        </div>
+        
+        <div id="mainContent" style="display: none;"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { supabase } from '/js/supabase-client.js';
+        import { auth } from '/js/auth.js';
+        
+        // Número fijo de CUBAZON
+        const NUMERO_CUBAZON = '5356591892';
+        
+        // Obtener ID de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const pedidoId = urlParams.get('id');
+        
+        let pedidoData = null;
+        let usuario = null;
+        let tiempoRestante = 48 * 60 * 60;
+        let timerInterval = null;
+        
+        function actualizarTimer() {
+            const horas = Math.floor(tiempoRestante / 3600);
+            const minutos = Math.floor((tiempoRestante % 3600) / 60);
+            const segundos = tiempoRestante % 60;
+            
+            const timerElement = document.getElementById('timerDisplay');
+            if (timerElement) {
+                timerElement.innerHTML = `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+            }
+            
+            if (tiempoRestante <= 0) {
+                clearInterval(timerInterval);
+                anularPedido();
+            }
+            tiempoRestante--;
+        }
+        
+        async function anularPedido() {
+            if (!pedidoData) return;
+            const { error } = await supabase
+                .from('pedidos')
+                .update({ estado: 'anulado' })
+                .eq('id', pedidoId);
+            if (!error) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pedido anulado',
+                    text: 'El tiempo para confirmar ha expirado. Tu pedido ha sido cancelado.',
+                    confirmButtonText: 'Entendido'
+                }).then(() => {
+                    window.location.href = '/mi-cuenta.html';
+                });
+            }
+        }
+        
+        // Enviar mensaje al número de CUBAZON
+        window.enviarWhatsApp = function() {
+            if (!pedidoData) return;
+            
+            const items = pedidoData.items || [];
+            let productosTexto = '';
+            items.forEach(item => {
+                productosTexto += `• ${item.nombre} x${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)} CUP\n`;
+            });
+            
+            const mensaje = `📦 *NUEVO PEDIDO - CONFIRMAR*\n\n` +
+                `*Pedido #:* ${pedidoId.slice(0, 8)}\n` +
+                `*Cliente:* ${pedidoData.cliente?.nombre || 'Cliente'}\n` +
+                `*Teléfono:* ${pedidoData.cliente?.telefono || 'No especificado'}\n` +
+                `*Dirección:* ${pedidoData.cliente?.direccion || 'No especificada'}\n` +
+                `*Localidad:* ${pedidoData.cliente?.localidad || 'No especificada'}\n\n` +
+                `*Productos:*\n${productosTexto}\n` +
+                `*Total a pagar:* $${pedidoData.total?.toFixed(2)} CUP\n\n` +
+                `✅ *El cliente ha confirmado su pedido y acepta los términos.*\n\n` +
+                `Por favor, coordinar la entrega.`;
+            
+            const mensajeCodificado = encodeURIComponent(mensaje);
+            window.open(`https://wa.me/${NUMERO_CUBAZON}?text=${mensajeCodificado}`, '_blank');
+        };
+        
+        // Confirmar pedido (solo actualiza estado, NO redirige a WhatsApp)
+        window.confirmarPedido = async function() {
+            const btn = document.getElementById('confirmBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Procesando...';
+            
+            try {
+                // Verificar si la columna fecha_confirmacion existe, si no, no la usamos
+                let updateData = { estado: 'confirmado' };
+                
+                // Intentar agregar fecha_confirmacion solo si la columna existe
+                try {
+                    const { data: columns } = await supabase
+                        .from('pedidos')
+                        .select('fecha_confirmacion')
+                        .limit(1);
+                    updateData.fecha_confirmacion = new Date().toISOString();
+                } catch (e) {
+                    console.log('Columna fecha_confirmacion no existe, omitiendo');
+                }
+                
+                const { error } = await supabase
+                    .from('pedidos')
+                    .update(updateData)
+                    .eq('id', pedidoId);
+                
+                if (error) throw error;
+                
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Pedido confirmado!',
+                    text: 'Tu pedido ha sido confirmado. En breve nos comunicaremos contigo.',
+                    confirmButtonText: 'Ver mis pedidos'
+                }).then(() => {
+                    window.location.href = '/mi-cuenta.html';
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire('Error', error.message || 'No se pudo confirmar el pedido', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa fa-check-circle"></i> Confirmar compra';
+            }
+        };
+        
+        async function cargarPedido() {
+            if (!pedidoId) {
+                document.getElementById('loadingContent').innerHTML = `
+                    <div class="error">
+                        <i class="fa fa-exclamation-triangle fa-3x"></i>
+                        <h2>Pedido no encontrado</h2>
+                        <p>No se encontró información del pedido.</p>
+                        <a href="/" class="btn" style="display: inline-block; margin-top: 20px; background: #f97316; color: white; padding: 12px 30px; border-radius: 40px; text-decoration: none;">Ir al inicio</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                if (auth.isAuthenticated()) {
+                    usuario = auth.getUsuario();
+                }
+                
+                const { data, error } = await supabase
+                    .from('pedidos')
+                    .select('*')
+                    .eq('id', pedidoId)
+                    .single();
+                
+                if (error || !data) throw new Error('Pedido no encontrado');
+                
+                pedidoData = data;
+                
+                const fechaCreacion = new Date(data.created_at);
+                const ahora = new Date();
+                const diffHoras = (ahora - fechaCreacion) / (1000 * 60 * 60);
+                
+                if (diffHoras > 48 || data.estado === 'anulado') {
+                    document.getElementById('loadingContent').innerHTML = `
+                        <div class="error">
+                            <i class="fa fa-clock-o fa-3x"></i>
+                            <h2>Pedido expirado</h2>
+                            <p>El tiempo para confirmar este pedido ha expirado.</p>
+                            <a href="/" class="btn" style="display: inline-block; margin-top: 20px; background: #f97316; color: white; padding: 12px 30px; border-radius: 40px; text-decoration: none;">Ir al inicio</a>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const segundosTranscurridos = Math.floor((ahora - fechaCreacion) / 1000);
+                tiempoRestante = Math.max(0, (48 * 60 * 60) - segundosTranscurridos);
+                
+                renderizarContenido();
+                
+                if (tiempoRestante > 0) {
+                    timerInterval = setInterval(actualizarTimer, 1000);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loadingContent').innerHTML = `
+                    <div class="error">
+                        <i class="fa fa-exclamation-triangle fa-3x"></i>
+                        <h2>Error</h2>
+                        <p>No se pudo cargar la información del pedido.</p>
+                        <a href="/" class="btn" style="display: inline-block; margin-top: 20px; background: #f97316; color: white; padding: 12px 30px; border-radius: 40px; text-decoration: none;">Ir al inicio</a>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderizarContenido() {
+            document.getElementById('loadingContent').style.display = 'none';
+            const container = document.getElementById('mainContent');
+            container.style.display = 'block';
+            
+            const items = pedidoData.items || [];
+            
+            let productosHtml = '';
+            items.forEach(item => {
+                productosHtml += `
+                    <div class="product-item">
+                        <img src="${item.imagen_url || '/assets/images/no-image.jpg'}" onerror="this.src='/assets/images/no-image.jpg'">
+                        <div class="product-details">
+                            <div class="product-name">${item.nombre}</div>
+                            <div class="product-meta">Cantidad: ${item.cantidad}</div>
+                        </div>
+                        <div class="product-price">$${(item.precio * item.cantidad).toFixed(2)}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = `
+                <div class="confirm-header">
+                    <h1><i class="fa fa-hand-peace-o"></i> ¡Casi listo!</h1>
+                    <div class="order-id">Pedido #${pedidoId.slice(0, 8)}</div>
+                </div>
+                
+                <div class="confirm-body">
+                    <div class="status-card">
+                        <i class="fa fa-clock-o"></i>
+                        <div>
+                            <h3>Pedido pendiente de confirmación</h3>
+                            <p>Por favor confirma tu compra en los próximos 48 horas</p>
+                        </div>
+                    </div>
+                    
+                    <div class="warning-card">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        <div>
+                            <h3>⚠️ Importante</h3>
+                            <p>Si no confirmas en 48 horas, el pedido se anulará automáticamente.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timer">
+                        <i class="fa fa-hourglass-half"></i>
+                        <strong>Tiempo restante para confirmar:</strong><br>
+                        <span id="timerDisplay">--:--:--</span>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3 style="margin-bottom: 15px;"><i class="fa fa-shopping-cart"></i> Resumen del pedido</h3>
+                        <div class="products-list">${productosHtml}</div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">Subtotal:</span>
+                            <span class="info-value">$${pedidoData.subtotal?.toFixed(2) || '0.00'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Envío:</span>
+                            <span class="info-value">$${pedidoData.envio?.toFixed(2) || '0.00'}</span>
+                        </div>
+                        ${pedidoData.descuento > 0 ? `
+                            <div class="info-row">
+                                <span class="info-label">Descuento:</span>
+                                <span class="info-value" style="color: #059669;">-$${pedidoData.descuento?.toFixed(2)}</span>
+                            </div>
+                        ` : ''}
+                        <div class="total-row">
+                            <span class="info-label">Total a pagar:</span>
+                            <span class="info-value">$${pedidoData.total?.toFixed(2)} CUP</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3 style="margin-bottom: 15px;"><i class="fa fa-user"></i> Datos del cliente</h3>
+                        <div class="info-row">
+                            <span class="info-label">Nombre:</span>
+                            <span class="info-value">${pedidoData.cliente?.nombre || 'No especificado'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Teléfono:</span>
+                            <span class="info-value">${pedidoData.cliente?.telefono || 'No especificado'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Dirección:</span>
+                            <span class="info-value">${pedidoData.cliente?.direccion || 'No especificada'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Localidad:</span>
+                            <span class="info-value">${pedidoData.cliente?.localidad || 'No especificada'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="whatsapp-card">
+                        <div class="whatsapp-info">
+                            <i class="fa fa-whatsapp"></i>
+                            <div>
+                                <span>Notificar a CUBAZON sobre tu pedido</span>
+                                <p style="font-size: 12px; color: #166534;">Envía un mensaje para coordinar la entrega</p>
+                            </div>
+                        </div>
+                        <button class="btn-whatsapp" onclick="enviarWhatsApp()">
+                            <i class="fa fa-whatsapp"></i> Notificar a CUBAZON
+                        </button>
+                    </div>
+                    
+                    <button class="btn-confirm" id="confirmBtn" onclick="confirmarPedido()">
+                        <i class="fa fa-check-circle"></i> Confirmar compra
+                    </button>
+                    
+                    <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #94a3b8;">
+                        <i class="fa fa-shield"></i> Al confirmar aceptas que el pago se realizará contra entrega
+                    </p>
+                </div>
+            `;
+            
+            actualizarTimer();
+        }
+        
+        cargarPedido();
+    </script>
+</body>
+</html>

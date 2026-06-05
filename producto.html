@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    
+    <!-- META TAGS DINÁMICOS (se actualizan con JavaScript) -->
+    <title id="metaTitle">Cargando producto · CUBAZON</title>
+    <meta name="description" id="metaDescription" content="Descubre productos increíbles en CUBAZON">
+    
+    <!-- Open Graph / Facebook / WhatsApp / Telegram -->
+    <meta property="og:title" id="ogTitle" content="CUBAZON - Producto">
+    <meta property="og:description" id="ogDescription" content="Compra este producto en CUBAZON">
+    <meta property="og:image" id="ogImage" content="https://cubazon.dpdns.org/android-chrome-512x512.png">
+    <meta property="og:url" id="ogUrl" content="https://cubazon.dpdns.org">
+    <meta property="og:type" content="product">
+    <meta property="og:site_name" content="CUBAZON">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" id="twitterTitle" content="CUBAZON - Producto">
+    <meta name="twitter:description" id="twitterDescription" content="Compra este producto en CUBAZON">
+    <meta name="twitter:image" id="twitterImage" content="https://cubazon.dpdns.org/android-chrome-512x512.png">
+    
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            color: #0f1111;
+            line-height: 1.5;
+        }
+        
+        /* ===== HEADER COMPLETO ===== */
+        #header-wrap {
+            background: #0f172a;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .header-header { padding: 10px 20px; width: 100%; }
+        .container.row {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .header-logo img { height: 50px; width: auto; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .saldo-mini-card {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .saldo-mini-card i { font-size: 16px; }
+        .login-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 30px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .login-btn:hover {
+            background: #f97316;
+            border-color: #f97316;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+        }
+        .sora-cart { position: relative; }
+        .sora-cart-details {
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sora-cart-details:hover {
+            background: #f97316;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+        }
+        .sora-cart-details:after {
+            content: '\f290';
+            font-family: 'FontAwesome';
+            font-size: 20px;
+        }
+        .simpleCart_quantity {
+            background: #f97316;
+            color: white;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-size: 11px;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .sora-cart-description {
+            position: absolute;
+            right: 0;
+            top: 50px;
+            width: 350px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            padding: 15px;
+            display: none;
+            z-index: 1000;
+        }
+        .sora-cart:hover .sora-cart-description { display: block; }
+        .simpleCart_items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        .cart-preview-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .cart-preview-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+        .cart-preview-item-details { flex: 1; }
+        .cart-preview-item-name { font-size: 13px; font-weight: 500; color: #0f1111; margin-bottom: 4px; }
+        .cart-preview-item-price { font-size: 14px; font-weight: 700; color: #b12704; }
+        .cart-preview-item-quantity { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+        .cart-preview-quantity-btn {
+            width: 24px; height: 24px; background: #f0f2f5; border: 1px solid #ddd; border-radius: 4px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .cart-preview-quantity-number {
+            font-weight: 600; min-width: 35px; text-align: center; font-size: 16px;
+            color: #0f1111; background: #ffffff; padding: 4px 0; border-radius: 4px;
+            border: 1px solid #d0d0d0;
+        }
+        .cart-preview-item-remove { color: #565959; cursor: pointer; }
+        .cart-preview-item-remove:hover { color: #dc3545; }
+        .cart-preview-footer { border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px; background: white; }
+        .cart-preview-total { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 10px; }
+        .cart-preview-buttons { display: flex; gap: 10px; }
+        .cart-preview-btn {
+            flex: 1; padding: 10px; border: none; border-radius: 20px; font-weight: 600;
+            font-size: 13px; cursor: pointer; text-align: center; text-decoration: none;
+        }
+        .cart-preview-btn-primary { background: #ffd814; color: #0f1111; }
+        .cart-preview-btn-primary:hover { background: #f7ca00; }
+        .cart-preview-btn-secondary { background: #f0f2f5; color: #0f1111; }
+        .header-menu {
+            background: #1e293b;
+            padding: 0 20px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .header-menu::-webkit-scrollbar { display: none; }
+        #main-menu ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+            padding: 10px 0;
+            margin: 0;
+            white-space: nowrap;
+        }
+        #main-menu ul li a {
+            color: #e2e8f0;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 5px 0;
+            display: block;
+            transition: color 0.2s;
+            text-decoration: none;
+        }
+        #main-menu ul li a:hover { color: #f97316; }
+        
+        /* ===== PRODUCTO DETALLE ===== */
+        .product-detail-container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .official-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+        }
+        
+        .official-badge i { font-size: 16px; }
+        
+        .product-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        
+        .product-gallery { position: relative; }
+        
+        .main-image {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #f8fafc;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s;
+        }
+        
+        .main-image:hover { transform: scale(1.02); }
+        
+        .main-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            padding: 20px;
+        }
+        
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .product-title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.2;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+        
+        .product-price-card {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .price-section .price-label {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        
+        .price-container {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .current-price {
+            font-size: 42px;
+            font-weight: 800;
+            color: #dc2626;
+        }
+        
+        .current-price small {
+            font-size: 18px;
+            font-weight: 400;
+            color: #64748b;
+            margin-left: 5px;
+        }
+        
+        .original-price {
+            font-size: 20px;
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+        
+        .discount-badge {
+            background: #dc2626;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        
+        .savings-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #16a34a;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .price-breakdown {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 13px;
+            color: #64748b;
+        }
+        
+        .price-breakdown span {
+            font-weight: 600;
+            color: #dc2626;
+        }
+        
+        .product-stock {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+        
+        .stock-available {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .stock-low {
+            background: #fef9c3;
+            color: #d97706;
+            border: 1px solid #fde047;
+        }
+        
+        .stock-out {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 16px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #0f172a;
+            box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(245,158,11,0.4);
+        }
+        
+        .btn-buy-now {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+        }
+        
+        .btn-buy-now:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(249,115,22,0.4);
+        }
+        
+        .btn-share {
+            background: #25D366;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37,211,102,0.3);
+        }
+        
+        .btn-share:hover {
+            background: #128C7E;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(37,211,102,0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .product-agotado-large {
+            background: #dc2626;
+            color: white;
+            padding: 18px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .shipping-card {
+            background: #f0f9ff;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #bae6fd;
+        }
+        
+        .shipping-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #0369a1;
+        }
+        
+        .shipping-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .shipping-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #0c4a6e;
+        }
+        
+        .shipping-item i { width: 24px; color: #0284c7; }
+        
+        .guarantee-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .guarantee-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #0f172a;
+        }
+        
+        .guarantee-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .guarantee-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #475569;
+        }
+        
+        .guarantee-item i { color: #16a34a; }
+        
+        .product-description {
+            margin-top: 40px;
+            background: white;
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        
+        .product-description h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #0f172a;
+        }
+        
+        .product-description h2 i { color: #f97316; }
+        
+        .product-description p {
+            color: #475569;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        
+        .product-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        
+        .product-tag {
+            background: #f1f5f9;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            color: #475569;
+            transition: all 0.2s;
+        }
+        
+        .product-tag:hover {
+            background: #f97316;
+            color: white;
+        }
+        
+        #footer-wrapper {
+            background: #0f172a;
+            color: white;
+            padding: 50px 20px;
+            margin-top: 50px;
+        }
+        .footer-widgets-wrap {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+        .footer a { color: #cbd5e1; text-decoration: none; }
+        .footer a:hover { color: #f97316; }
+        #sub-footer-wrapper {
+            background: #1e293b;
+            padding: 20px;
+            text-align: center;
+            color: #cbd5e1;
+        }
+        .back-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            display: none;
+            transition: all 0.3s;
+            z-index: 99;
+            border: none;
+            box-shadow: 0 4px 12px rgba(249,115,22,0.4);
+        }
+        .back-top:hover { transform: translateY(-5px) scale(1.1); }
+        
+        .loading-container {
+            text-align: center;
+            padding: 100px 20px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        .loading-container i {
+            font-size: 64px;
+            color: #f97316;
+            margin-bottom: 20px;
+        }
+        .error-container {
+            text-align: center;
+            padding: 100px 20px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        .error-container i {
+            font-size: 64px;
+            color: #dc2626;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 1024px) {
+            .product-detail-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 25px;
+            }
+            .main-image { aspect-ratio: 1/1; }
+        }
+        @media (max-width: 768px) {
+            .header-logo img { height: 35px; }
+            .login-btn span { display: none; }
+            .login-btn { padding: 8px; border-radius: 50%; }
+            .saldo-mini-card span { display: none; }
+            .saldo-mini-card { padding: 5px 10px; }
+            .product-title { font-size: 24px; }
+            .current-price { font-size: 32px; }
+            .product-actions { flex-direction: column; }
+            .btn { padding: 14px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="outer-wrapper">
+        <!-- HEADER COMPLETO -->
+        <div id="header-wrap">
+            <div class="header-header">
+                <div class="container row">
+                    <div class="header-logo">
+                        <a href="/">
+                            <img src="https://i.postimg.cc/MZRbKh98/Cubazon.png" alt="CUBAZON">
+                        </a>
+                    </div>
+                    
+                    <div class="header-right">
+                        <div id="saldoHeaderCard" class="saldo-mini-card" style="display: none;">
+                            <i class="fa fa-credit-card"></i>
+                            <span id="saldoHeaderAmount">$0.00</span>
+                        </div>
+
+                        <a href="/login.html" class="login-btn" id="loginBtnHeader">
+                            <i class="fa fa-user"></i>
+                            <span>Iniciar sesión</span>
+                        </a>
+                        
+                        <div class="sora-cart">
+                            <div class="sora-cart-details">
+                                <span class="simpleCart_quantity" id="cart-counter">0</span>
+                            </div>
+                            <div class="sora-cart-description" id="cart-preview">
+                                <div class="simpleCart_items"></div>
+                                <div class="cart-preview-footer">
+                                    <div class="cart-preview-total">
+                                        <span>Total:</span>
+                                        <span id="cart-preview-total-amount">$0.00 CUP</span>
+                                    </div>
+                                    <div class="cart-preview-buttons">
+                                        <a href="/p/cart.html" class="cart-preview-btn cart-preview-btn-primary">Ver Carrito</a>
+                                        <button onclick="window.vaciarCarrito()" class="cart-preview-btn cart-preview-btn-secondary">Vaciar</button>
+                                        <a href="/p/checkout.html" class="cart-preview-btn cart-preview-btn-primary">Pagar</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-menu">
+                <div class="container row">
+                    <div id="main-menu">
+                        <ul>
+                            <li><a href="/">Inicio</a></li>
+                            <li><a href="/categoria.html?cat=ofertas">Ofertas</a></li>
+                            <li><a href="/categoria.html?cat=Electrónica">Electrónica</a></li>
+                            <li><a href="/categoria.html?cat=Ropa">Ropa</a></li>
+                            <li><a href="/categoria.html?cat=Hogar">Hogar</a></li>
+                            <li><a href="/buscar.html"><i class="fa fa-search"></i> Buscar</a></li>
+                            <li><a href="/lista-deseos.html"><i class="fa fa-heart"></i> Mi Lista</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="product-content" class="product-detail-container">
+            <div id="loadingContainer" class="loading-container">
+                <i class="fa fa-spinner fa-pulse"></i>
+                <h2>Cargando producto...</h2>
+                <p>Por favor espera</p>
+            </div>
+            
+            <div id="errorContainer" class="error-container" style="display: none;">
+                <i class="fa fa-exclamation-triangle"></i>
+                <h2>Producto no encontrado</h2>
+                <p>El producto que buscas no existe o ha sido eliminado.</p>
+                <a href="/" class="btn btn-primary" style="display: inline-block; padding: 12px 30px; text-decoration: none; margin-top: 20px;">
+                    <i class="fa fa-arrow-left"></i> Volver al inicio
+                </a>
+            </div>
+            
+            <div id="productContainer" style="display: none;"></div>
+        </div>
+
+        <!-- FOOTER -->
+        <div id="footer-wrapper">
+            <div class="footer-widgets-wrap">
+                <div class="footer">
+                    <h3 style="color: white; margin-bottom: 20px;">CUBAZON</h3>
+                    <p style="color: #cbd5e1; margin-bottom: 15px;">Tu tienda online de confianza en Sagua de Tánamo.</p>
+                    <p style="color: #cbd5e1;"><i class="fa fa-map-marker"></i> Sagua de Tánamo, Holguín, Cuba</p>
+                </div>
+                <div class="footer">
+                    <h3 style="color: white; margin-bottom: 20px;">Enlaces rápidos</h3>
+                    <ul style="list-style: none;">
+                        <li style="margin-bottom: 10px;"><a href="/sobre-nosotros.html">Sobre nosotros</a></li>
+                        <li style="margin-bottom: 10px;"><a href="/terminos.html">Términos y condiciones</a></li>
+                        <li style="margin-bottom: 10px;"><a href="/faq.html">Preguntas frecuentes</a></li>
+                        <li style="margin-bottom: 10px;"><a href="/contacto.html">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer">
+                    <h3 style="color: white; margin-bottom: 20px;">Atención al cliente</h3>
+                    <p style="color: #cbd5e1; margin-bottom: 10px;"><i class="fa fa-phone"></i> +53 56591892</p>
+                    <p style="color: #cbd5e1; margin-bottom: 10px;"><i class="fa fa-envelope"></i> cubazon.oficial@gmail.com</p>
+                    <p style="color: #cbd5e1;"><i class="fa fa-whatsapp"></i> +53 56591892</p>
+                </div>
+            </div>
+        </div>
+        <div id="sub-footer-wrapper">
+            <p>© 2026 CUBAZON · Diseñado por Des.Joshua_Technology · Todos los derechos reservados</p>
+        </div>
+
+        <div class="back-top" title="Volver arriba">
+            <i class="fa fa-chevron-up"></i>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { supabase } from '/js/supabase-client.js';
+        import { auth } from '/js/auth.js';
+        import { initCarrito } from '/js/cart.js';
+        
+        // ========== INICIALIZAR CARRITO ==========
+        const carrito = initCarrito();
+        window.carrito = carrito;
+        window.cart = carrito;
+        window.vaciarCarrito = () => carrito.vaciar();
+        
+        carrito.cargarDeLocalStorage();
+        carrito.actualizarInterfaz();
+        
+        // ========== FUNCIÓN PARA ACTUALIZAR META TAGS (OPTIMIZADA PARA WHATSAPP) ==========
+        function actualizarMetaTags(producto, precioActual) {
+            const url = `https://cubazon.dpdns.org/producto.html?id=${producto.id}`;
+            const titulo = `${producto.nombre} | CUBAZON`;
+            const descripcion = `💰 $${parseFloat(precioActual).toFixed(2)} CUP | 📦 Stock: ${producto.stock} unidades | Envío en Sagua de Tánamo`;
+            
+            let imagenUrl = producto.imagen_url || 'https://cubazon.dpdns.org/android-chrome-512x512.png';
+            
+            // Usar proxy para optimizar imagen para WhatsApp (1200x630)
+            if (imagenUrl.includes('supabase.co')) {
+                imagenUrl = `https://images.weserv.nl/?url=${encodeURIComponent(imagenUrl)}&w=1200&h=630&fit=cover&output=jpg&q=85`;
+            }
+            
+            document.title = titulo;
+            document.getElementById('metaTitle').setAttribute('content', titulo);
+            document.getElementById('metaDescription').setAttribute('content', descripcion);
+            document.getElementById('ogTitle').setAttribute('content', titulo);
+            document.getElementById('ogDescription').setAttribute('content', descripcion);
+            document.getElementById('ogImage').setAttribute('content', imagenUrl);
+            document.getElementById('ogUrl').setAttribute('content', url);
+            document.getElementById('twitterTitle').setAttribute('content', titulo);
+            document.getElementById('twitterDescription').setAttribute('content', descripcion);
+            document.getElementById('twitterImage').setAttribute('content', imagenUrl);
+        }
+        
+        // ========== FUNCIÓN PARA CARGAR SALDO EN HEADER ==========
+        async function cargarSaldoHeader() {
+            const saldoCard = document.getElementById('saldoHeaderCard');
+            const saldoAmount = document.getElementById('saldoHeaderAmount');
+            
+            if (!auth.isAuthenticated()) {
+                saldoCard.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const usuario = auth.getUsuario();
+                const { data, error } = await supabase
+                    .from('saldo_usuarios')
+                    .select('saldo_actual')
+                    .eq('user_id', usuario.id)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') throw error;
+                
+                const saldo = data?.saldo_actual || 0;
+                saldoAmount.textContent = `$${saldo.toFixed(2)}`;
+                saldoCard.style.display = 'flex';
+            } catch (error) {
+                console.error('Error cargando saldo:', error);
+            }
+        }
+        
+        // ========== ACTUALIZAR MENÚ DE USUARIO ==========
+        function actualizarMenuUsuario() {
+            const loginBtn = document.getElementById('loginBtnHeader');
+            if (!loginBtn) return;
+            
+            if (auth.isAuthenticated()) {
+                const usuario = auth.getUsuario();
+                const inicial = usuario?.nombre_completo?.charAt(0).toUpperCase() || usuario?.email?.charAt(0).toUpperCase() || 'U';
+                loginBtn.innerHTML = `<i class="fa fa-user"></i><span>${inicial}</span>`;
+                loginBtn.href = '/mi-cuenta.html';
+                cargarSaldoHeader();
+            } else {
+                loginBtn.innerHTML = '<i class="fa fa-sign-in"></i><span>Iniciar sesión</span>';
+                loginBtn.href = '/login.html';
+                document.getElementById('saldoHeaderCard').style.display = 'none';
+            }
+        }
+        
+        // ========== OBTENER SLUG O ID DE LA URL ==========
+        function getSlugOrIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id') || urlParams.get('p') || urlParams.get('slug');
+        }
+        
+        // ========== FUNCIÓN GLOBAL PARA COMPARTIR ==========
+        window.compartirEnWhatsAppWindow = function(id, slug) {
+            const producto = window.currentProducto;
+            if (!producto) return;
+            const url = `${window.location.origin}/producto.html?id=${id}`;
+            const mensaje = `¡Mira este producto en CUBAZON!\n\n*${producto.nombre}*\n💰 Precio: $${producto.precio_actual} CUP\n📦 Stock: ${producto.stock || 'Disponible'} unidades\n🔗 ${url}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank');
+        };
+        
+        // ========== CARGAR PRODUCTO ==========
+        async function cargarProducto() {
+            const slugOrId = getSlugOrIdFromUrl();
+            
+            if (!slugOrId) {
+                document.getElementById('loadingContainer').style.display = 'none';
+                document.getElementById('errorContainer').style.display = 'block';
+                return;
+            }
+            
+            try {
+                let { data, error } = await supabase
+                    .from('productos')
+                    .select('*')
+                    .eq('slug', slugOrId)
+                    .single();
+                
+                if (error || !data) {
+                    const { data: dataById, error: errorById } = await supabase
+                        .from('productos')
+                        .select('*')
+                        .eq('id', slugOrId)
+                        .single();
+                    
+                    if (errorById || !dataById) throw new Error('Producto no encontrado');
+                    data = dataById;
+                }
+                
+                document.getElementById('loadingContainer').style.display = 'none';
+                document.getElementById('productContainer').style.display = 'block';
+                renderizarProducto(data);
+                
+            } catch (error) {
+                console.error('Error cargando producto:', error);
+                document.getElementById('loadingContainer').style.display = 'none';
+                document.getElementById('errorContainer').style.display = 'block';
+            }
+        }
+        
+        // ========== RENDERIZAR PRODUCTO ==========
+        function renderizarProducto(p) {
+            let stockClass = 'stock-available';
+            let stockText = `✅ Stock disponible: ${p.stock} unidades`;
+            
+            if (p.stock <= 0) {
+                stockClass = 'stock-out';
+                stockText = '❌ AGOTADO';
+            } else if (p.stock <= 5) {
+                stockClass = 'stock-low';
+                stockText = `⚠️ Stock bajo: ${p.stock} unidades`;
+            }
+            
+            const tieneOferta = p.oferta_del_dia === true &&
+                               p.precio_oferta && 
+                               parseFloat(p.precio_oferta) > 0 && 
+                               parseFloat(p.precio_oferta) < parseFloat(p.precio);
+            
+            const precioOriginal = parseFloat(p.precio) || 0;
+            const precioOferta = tieneOferta ? parseFloat(p.precio_oferta) : null;
+            const precioActual = tieneOferta ? precioOferta : precioOriginal;
+            
+            // ACTUALIZAR META TAGS INMEDIATAMENTE
+            actualizarMetaTags(p, precioActual);
+            
+            let descuento = 0;
+            let ahorro = 0;
+            
+            if (tieneOferta && precioOriginal > 0) {
+                descuento = Math.round(((precioOriginal - precioOferta) / precioOriginal) * 100);
+                ahorro = (precioOriginal - precioOferta).toFixed(2);
+            }
+            
+            let accionesHtml = '';
+            if (p.stock <= 0) {
+                accionesHtml = `<div class="product-agotado-large"><i class="fa fa-ban"></i> PRODUCTO AGOTADO</div>`;
+            } else {
+                accionesHtml = `
+                    <div class="product-actions">
+                        <button class="btn btn-primary" onclick="agregarAlCarrito('${p.id}')">
+                            <i class="fa fa-shopping-cart"></i> Añadir al carrito
+                        </button>
+                        <button class="btn btn-buy-now" onclick="comprarAhora('${p.id}')">
+                            <i class="fa fa-bolt"></i> Comprar ahora
+                        </button>
+                        <button class="btn btn-share" onclick="compartirEnWhatsAppWindow('${p.id}', '${p.slug}')">
+                            <i class="fab fa-whatsapp"></i> Compartir
+                        </button>
+                    </div>
+                `;
+            }
+            
+            let precioHtml = '';
+            if (tieneOferta) {
+                precioHtml = `
+                    <div class="price-section">
+                        <div class="price-label">Precio especial:</div>
+                        <div class="price-container">
+                            <span class="current-price">$${precioActual.toFixed(2)} <small>CUP</small></span>
+                            <span class="original-price">$${precioOriginal.toFixed(2)}</span>
+                            <span class="discount-badge">-${descuento}%</span>
+                        </div>
+                        <div class="savings-badge">
+                            <i class="fa fa-tag"></i> Ahorras $${ahorro} CUP (${descuento}%)
+                        </div>
+                        <div class="price-breakdown">
+                            <i class="fa fa-check-circle" style="color: #16a34a;"></i> 
+                            Precio recomendado: <span>$${precioOriginal.toFixed(2)} CUP</span> | 
+                            Tu precio: <span>$${precioActual.toFixed(2)} CUP</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                precioHtml = `
+                    <div class="price-section">
+                        <div class="price-label">Precio:</div>
+                        <div class="price-container">
+                            <span class="current-price">$${precioOriginal.toFixed(2)} <small>CUP</small></span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            window.currentProducto = {
+                id: p.id,
+                slug: p.slug,
+                nombre: p.nombre,
+                precio_actual: precioActual,
+                precio: precioOriginal,
+                stock: p.stock
+            };
+            
+            const container = document.getElementById('productContainer');
+            container.innerHTML = `
+                <div class="official-badge">
+                    <i class="fas fa-store"></i>
+                    VENDIDO Y ENVIADO POR CUBAZON
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                
+                <div class="product-detail-grid">
+                    <div class="product-gallery">
+                        <div class="main-image">
+                            <img src="${p.imagen_url || '/assets/images/no-image.jpg'}" alt="${p.nombre}" onerror="this.src='/assets/images/no-image.jpg'">
+                        </div>
+                    </div>
+                    
+                    <div class="product-info">
+                        <h1 class="product-title">${p.nombre}</h1>
+                        
+                        <div class="product-price-card">
+                            ${precioHtml}
+                            <div>
+                                <span class="product-stock ${stockClass}">
+                                    <i class="fa ${p.stock <= 0 ? 'fa-ban' : (p.stock <= 5 ? 'fa-exclamation-triangle' : 'fa-check-circle')}"></i> 
+                                    ${stockText}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        ${accionesHtml}
+                        
+                        <div class="shipping-card">
+                            <h3><i class="fas fa-truck"></i> Información de envío</h3>
+                            <div class="shipping-info">
+                                <div class="shipping-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span><strong>Zona de entrega:</strong> Municipio Sagua de Tánamo, Holguín, Cuba</span>
+                                </div>
+                                <div class="shipping-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span><strong>Tiempo de entrega:</strong> 24-48 horas hábiles</span>
+                                </div>
+                                <div class="shipping-item">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span><strong>Método de pago:</strong> Contra entrega (pago al recibir)</span>
+                                </div>
+                                <div class="shipping-item">
+                                    <i class="fas fa-box"></i>
+                                    <span><strong>Envío:</strong> A cargo de CUBAZON</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="guarantee-card">
+                            <h3><i class="fas fa-shield-alt"></i> Compra segura con CUBAZON</h3>
+                            <div class="guarantee-list">
+                                <div class="guarantee-item"><i class="fas fa-check-circle"></i> Producto original garantizado</div>
+                                <div class="guarantee-item"><i class="fas fa-check-circle"></i> Pago contra entrega</div>
+                                <div class="guarantee-item"><i class="fas fa-check-circle"></i> Atención al cliente 24/7</div>
+                                <div class="guarantee-item"><i class="fas fa-check-circle"></i> Devoluciones hasta 7 días</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-description">
+                    <h2><i class="fas fa-align-left"></i> Descripción del producto</h2>
+                    <p>${p.descripcion || 'No hay descripción disponible.'}</p>
+                    ${p.etiquetas?.length ? `
+                        <div class="product-tags">
+                            ${p.etiquetas.map(e => `<span class="product-tag">${e}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // ========== FUNCIONES GLOBALES ==========
+        window.agregarAlCarrito = async function(id) {
+            await carrito.agregar(id, 1);
+        };
+        
+        window.comprarAhora = async function(id) {
+            const exito = await carrito.agregar(id, 1);
+            if (exito) window.location.href = '/p/checkout.html';
+        };
+        
+        // ========== INICIALIZAR ==========
+        actualizarMenuUsuario();
+        auth.onCambio(actualizarMenuUsuario);
+        cargarProducto();
+        
+        window.addEventListener('scroll', function() {
+            const backTop = document.querySelector('.back-top');
+            if (backTop) backTop.style.display = window.scrollY > 300 ? 'flex' : 'none';
+        });
+        
+        document.querySelector('.back-top')?.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

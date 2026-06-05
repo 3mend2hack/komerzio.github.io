@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preguntas Frecuentes · CUBAZON</title>
+    
+    <!-- SEO -->
+    <meta name="description" content="Resuelve tus dudas sobre compras, envíos, pagos y cómo vender en CUBAZON. Encuentra respuestas rápidas y contacta con soporte.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://cubazon.dpdns.org/preguntas-frecuentes.html">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Preguntas Frecuentes · CUBAZON">
+    <meta property="og:description" content="Resuelve tus dudas sobre compras, envíos, pagos y cómo vender en CUBAZON.">
+    <meta property="og:url" content="https://cubazon.dpdns.org/preguntas-frecuentes.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Fonts y Estilos -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #f97316;
+            --primary-dark: #ea580c;
+            --dark: #0f172a;
+            --darker: #1e293b;
+            --light: #f3f6f9;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --radius-sm: 12px;
+            --radius-md: 20px;
+            --radius-lg: 30px;
+            --radius-xl: 40px;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--light);
+            color: var(--text-dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        a {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        a:hover {
+            color: var(--primary-dark);
+        }
+        
+        /* ===== HEADER ===== */
+        .header {
+            background: var(--dark);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .logo:hover { opacity: 0.9; }
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.08);
+            border-radius: var(--radius-xl);
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* ===== CONTENEDOR PRINCIPAL ===== */
+        .faq-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .faq-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .faq-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        .faq-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+        
+        /* ===== BREADCRUMB ===== */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        .breadcrumb a {
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .breadcrumb i { font-size: 0.8rem; }
+        
+        /* ===== SECCIONES FAQ ===== */
+        .faq-section {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            padding: 30px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+        }
+        .faq-section:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        .faq-section h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--light);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .faq-section h2 i {
+            color: var(--primary);
+            font-size: 1.3rem;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .faq-item {
+            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 8px;
+        }
+        .faq-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .faq-question {
+            width: 100%;
+            padding: 18px 5px;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.2s;
+            gap: 15px;
+        }
+        .faq-question:hover {
+            color: var(--primary);
+        }
+        .faq-question i {
+            transition: transform 0.3s ease;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .faq-question.active i {
+            transform: rotate(180deg);
+            color: var(--primary);
+        }
+        
+        .faq-answer {
+            padding: 0 5px 20px 5px;
+            color: var(--text-light);
+            line-height: 1.8;
+            display: none;
+            font-size: 0.95rem;
+        }
+        .faq-answer.show {
+            display: block;
+        }
+        .faq-answer a {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .faq-answer ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 10px 0;
+        }
+        .faq-answer ul li {
+            padding: 6px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .faq-answer ul li i {
+            color: var(--primary);
+            margin-top: 3px;
+        }
+        
+        /* ===== BOX DE CONTACTO ===== */
+        .contact-box {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            padding: 40px;
+            text-align: center;
+            border: 2px dashed var(--border);
+            margin-top: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        .contact-box h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+        .contact-box p {
+            color: var(--text-light);
+            margin-bottom: 25px;
+            font-size: 1rem;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 35px;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            border-radius: var(--radius-xl);
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(249,115,22,0.3);
+            color: white;
+        }
+        .btn-whatsapp {
+            background: #25D366;
+        }
+        .btn-whatsapp:hover {
+            background: #20bd5a;
+            box-shadow: 0 8px 20px rgba(37,211,102,0.3);
+        }
+        
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--dark);
+            color: white;
+            padding: 2.5rem 1.5rem;
+            margin-top: 3rem;
+            text-align: center;
+        }
+        .footer p {
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+        .footer a {
+            color: var(--primary);
+        }
+        .footer a:hover {
+            color: #fbbf24;
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .faq-container {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+            .faq-header h1 {
+                font-size: 1.8rem;
+            }
+            .faq-section {
+                padding: 20px;
+            }
+            .faq-question {
+                font-size: 0.95rem;
+                padding: 15px 5px;
+            }
+            .faq-answer {
+                font-size: 0.9rem;
+            }
+            .contact-box {
+                padding: 25px;
+            }
+            .btn {
+                padding: 12px 25px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.75rem 1rem;
+            }
+            .logo-text {
+                font-size: 1.4rem;
+            }
+            .back-btn {
+                padding: 8px 14px;
+                font-size: 0.85rem;
+            }
+            .faq-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <div class="logo" onclick="window.location.href='/'">
+            <span class="logo-text">CUBAZON</span>
+        </div>
+        <a href="/" class="back-btn">
+            <i class="fa fa-arrow-left"></i>
+            <span>Volver a la tienda</span>
+        </a>
+    </header>
+
+    <!-- ===== CONTENIDO PRINCIPAL ===== -->
+    <div class="faq-container">
+        <div class="faq-header">
+            <h1>❓ Preguntas Frecuentes</h1>
+            <p>Encuentra respuestas rápidas a las dudas más comunes sobre CUBAZON</p>
+        </div>
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="/"><i class="fa fa-home"></i> Inicio</a>
+            <i class="fa fa-angle-right"></i>
+            <span>Preguntas Frecuentes</span>
+        </div>
+
+        <!-- SECCIÓN: COMPRADORES -->
+        <div class="faq-section">
+            <h2><i class="fa fa-shopping-cart"></i> Para Compradores</h2>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    ¿Cómo puedo realizar un pedido?
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Es muy sencillo. Solo tienes que navegar por nuestros productos, seleccionar los que desees y agregarlos al carrito. Cuando termines, ve al carrito y haz clic en "Proceder al pago". Completa tus datos de envío y selecciona el método de pago. ¡Así de fácil!</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    ¿Cómo contacto con un vendedor antes de comprar?
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>En los productos de <strong>vendedores locales</strong> (no oficiales), encontrarás un <strong>botón verde de WhatsApp</strong> con el texto "Contactar". Al hacer clic, serás redirigido directamente al WhatsApp del vendedor para que puedas:</p>
+                    <ul>
+                        <li><i class="fa fa-check-circle"></i> Preguntar detalles del producto (estado, color, talla, etc.)</li>
+                        <li><i class="fa fa-check-circle"></i> Negociar el precio directamente con el vendedor</li>
+                        <li><i class="fa fa-check-circle"></i> Coordinar la forma de pago y entrega</li>
+                        <li><i class="fa fa-check-circle"></i> Solicitar fotos o videos adicionales del producto</li>
+                    </ul>
+                    <p><strong>CUBAZON actúa como intermediario</strong>, conectando compradores con vendedores. La transacción final la acuerdas directamente con el vendedor a través de WhatsApp.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    ¿Cuánto tarda en llegar mi pedido?
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Los tiempos de entrega varían según el vendedor y tu ubicación. Generalmente, los vendedores locales suelen entregar en un plazo de 1 a 5 días hábiles dependiendo de la distancia. Te recomendamos <strong>preguntar directamente al vendedor por WhatsApp</strong> para conocer su tiempo estimado de entrega.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    ¿Hacen envíos a toda Cuba?
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Cada vendedor establece sus propias zonas de envío. Al contactar al vendedor por WhatsApp, podrás consultarle si hace envíos a tu localidad y cuál sería el costo. La información de provincia y municipio del vendedor aparece en la ficha del producto para que puedas filtrar por cercanía.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: VENDEDORES (NUEVA) -->
+        <div class="faq-section">
+            <h2><i class="fa fa-store"></i> Para Vendedores</h2>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    ¿Cómo funciona el botón de WhatsApp en mis productos?
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Cuando publicas un producto en CUBAZON, tus anuncios incluyen automáticamente un <strong>botón verde de "Contactar"</strong> que redirige a tu número de WhatsApp personal. Esto permite que:</p>
+                    <ul>
+                        <li><i class="fa fa-users"></i> Los compradores interesados te escriban <strong>directamente a ti</strong></li>
+                        <li><i class="fa fa-comments"></i> Puedas responder dudas, negociar precios y cerrar ventas sin intermediarios</li>
+                        <li><i class="fa fa-truck"></i> Coordines la entrega y el pago como prefieras</li>
+                    </ul>
+                    <p><strong>Importante:</strong> CUBAZON no interfiere en la negociación ni cobra comisión por venta. Tú eres el dueño de tu negocio y manejas la relación con tus clientes como desees.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    ¿CUBAZON vende productos directamente?
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p><strong>Sí, pero solo en la Tienda Oficial.</strong> CUBAZON tiene dos modalidades:</p>
+                    <ul>
+                        <li><i class="fa fa-store-alt"></i> <strong>Tienda Oficial de Sagua de Tánamo:</strong> Productos vendidos y gestionados directamente por CUBAZON. Estos productos no tienen botón de WhatsApp, se compran por carrito y los procesa nuestro equipo.</li>
+                        <li><i class="fa fa-users"></i> <strong>Marketplace de Vendedores:</strong> Productos publicados por vendedores independientes de toda Cuba. Estos productos <strong>sí tienen botón de WhatsApp</strong> para contactar directamente al vendedor.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    ¿Tiene algún costo publicar mis productos?
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Publicar productos en CUBAZON es <strong>completamente gratis</strong>. Además, al crear tu cuenta, recibes <strong>500 CUP de regalo</strong> para que puedas promocionar tus productos y aumentar su visibilidad. La promoción de pago es opcional, pero publicar no tiene costo alguno.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    ¿Cómo aumento las visitas a mis productos?
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Puedes promocionar tus productos desde tu panel de vendedor. Al activar una promoción con tu saldo CUBAZON, tus productos aparecerán en las secciones de <strong>Ofertas, Carrusel principal y Destacados</strong>, recibiendo más visitas de compradores potenciales.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: PAGOS -->
+        <div class="faq-section">
+            <h2><i class="fa fa-credit-card"></i> Pagos y Saldo CUBAZON</h2>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    ¿Cómo funciona el saldo CUBAZON?
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>El saldo CUBAZON es una forma de pago para <strong>promocionar tus productos</strong> dentro de la plataforma. Puedes solicitar una recarga desde tu <a href="/mi-cuenta.html">panel de Mi Cuenta</a>. Un administrador aprobará la solicitud y se añadirá el saldo para que destaques tus anuncios.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    ¿CUBAZON cobra comisión por las ventas?
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p><strong>No.</strong> CUBAZON no cobra ninguna comisión por las ventas que realices a través de la plataforma. Las transacciones se acuerdan directamente entre comprador y vendedor. Nuestro modelo de negocio se basa únicamente en los <strong>servicios de promoción opcionales</strong> que los vendedores pueden contratar para dar mayor visibilidad a sus productos.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: DEVOLUCIONES -->
+        <div class="faq-section">
+            <h2><i class="fa fa-undo"></i> Devoluciones y Problemas</h2>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    ¿Qué hago si tengo un problema con un vendedor?
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Si tienes algún inconveniente con un vendedor (producto no entregado, estado diferente al anunciado, etc.), por favor <strong>repórtalo de inmediato</strong> a nuestro equipo de soporte. Envía un correo a <strong>cubazon.oficial@gmail.com</strong> con:</p>
+                    <ul>
+                        <li><i class="fa fa-hashtag"></i> El enlace o nombre del producto</li>
+                        <li><i class="fa fa-user"></i> El nombre del vendedor</li>
+                        <li><i class="fa fa-camera"></i> Fotos o capturas de la conversación de WhatsApp</li>
+                        <li><i class="fa fa-file-text"></i> Una descripción detallada del problema</li>
+                    </ul>
+                    <p>Investigaremos el caso y tomaremos las medidas necesarias, incluyendo la posible suspensión del vendedor si corresponde.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    ¿Ofrecen garantía en los productos?
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>La garantía depende de cada vendedor. Te recomendamos <strong>preguntar directamente al vendedor por WhatsApp</strong> antes de realizar la compra si el producto tiene algún tipo de garantía o política de devolución. En el caso de la <strong>Tienda Oficial de CUBAZON</strong>, sí ofrecemos garantía en nuestros productos.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAJA DE CONTACTO -->
+        <div class="contact-box">
+            <h3>📬 ¿No encontraste lo que buscabas?</h3>
+            <p>Si tu pregunta no está en la lista, contáctanos directamente y te responderemos a la mayor brevedad.</p>
+            <a href="/contacto.html" class="btn"><i class="fa fa-envelope"></i> Contactar a Soporte</a>
+            <a href="https://wa.me/5356591892" target="_blank" rel="noopener" class="btn btn-whatsapp" style="margin-left: 10px;">
+                <i class="fa fa-whatsapp"></i> Escribir por WhatsApp
+            </a>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <p>&copy; 2026 <strong style="color: var(--primary);">CUBAZON</strong> · Marketplace Cubano</p>
+        <p style="font-size: 0.9rem;">Conectando compradores y vendedores en toda Cuba 🇨🇺</p>
+        <p style="font-size: 0.85rem; margin-top: 10px;">
+            <a href="/">Inicio</a> · 
+            <a href="/terminos.html">Términos</a> · 
+            <a href="/contacto.html">Contacto</a>
+        </p>
+    </footer>
+
+    <!-- Script para el acordeón FAQ -->
+    <script>
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.nextElementSibling;
+                const icon = button.querySelector('i');
+                
+                // Cerrar otras preguntas (para mejor UX)
+                document.querySelectorAll('.faq-answer').forEach(ans => {
+                    if (ans !== answer) {
+                        ans.classList.remove('show');
+                        ans.previousElementSibling.classList.remove('active');
+                        const otherIcon = ans.previousElementSibling.querySelector('i');
+                        if (otherIcon) {
+                            otherIcon.classList.remove('fa-chevron-up');
+                            otherIcon.classList.add('fa-chevron-down');
+                        }
+                    }
+                });
+                
+                // Toggle la respuesta actual
+                answer.classList.toggle('show');
+                button.classList.toggle('active');
+                
+                if (answer.classList.contains('show')) {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

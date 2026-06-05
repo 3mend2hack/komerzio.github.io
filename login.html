@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#667eea">
+    <title>Iniciar sesión · CUBAZON</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.05)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x bottom;
+            background-size: cover;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .login-container {
+            max-width: 420px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            padding: 32px 24px;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        
+        .header img {
+            height: 56px;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+        }
+        
+        .header h1 {
+            font-size: clamp(22px, 5vw, 28px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+        
+        .header p {
+            color: #6c757d;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px 18px;
+            border: none;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.25s ease;
+            margin-bottom: 12px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .btn:active { transform: scale(0.97); }
+        
+        .btn-google {
+            background: white;
+            color: #3c4043;
+            border: 1px solid #dadce0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        .btn-google:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        .btn-google:disabled { opacity: 0.7; cursor: not-allowed; }
+        .btn-google img { width: 20px; height: 20px; flex-shrink: 0; }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35);
+        }
+        .btn-primary:hover { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5); }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 22px 0;
+            color: #a0aec0;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .divider span {
+            padding: 0 16px;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 13px;
+            letter-spacing: -0.2px;
+        }
+        .form-group label i { color: #667eea; margin-right: 6px; width: 16px; }
+        
+        .form-control {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: white;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-appearance: none;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .form-control::placeholder { color: #cbd5e0; font-size: 13px; }
+        
+        .footer-links {
+            text-align: center;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .footer-links a {
+            color: #718096;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: #667eea; }
+        
+        .fa-spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        @media (max-width: 480px) {
+            body { padding: 12px; align-items: flex-start; padding-top: 24px; }
+            .login-container { border-radius: 24px; padding: 24px 18px; }
+            .header img { height: 48px; margin-bottom: 12px; }
+            .btn { padding: 13px 16px; font-size: 14px; border-radius: 14px; }
+            .form-control { padding: 12px 14px; font-size: 13px; }
+        }
+        @media (max-width: 360px) {
+            .login-container { padding: 20px 14px; border-radius: 20px; }
+            .header h1 { font-size: 20px; }
+            .btn { padding: 12px 14px; font-size: 13px; gap: 8px; }
+        }
+        @media (min-width: 768px) {
+            body { padding: 24px; }
+            .login-container { padding: 40px 32px; border-radius: 32px; }
+            .header img { height: 64px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="header">
+            <img src="https://i.postimg.cc/rmXF0b65/1000277404-removebg-preview.png" alt="CUBAZON">
+            <h1>Bienvenido a CUBAZON</h1>
+            <p>Elige cómo quieres acceder</p>
+        </div>
+        
+        <!-- BOTÓN DE GOOGLE -->
+        <button class="btn btn-google" id="googleLoginBtn">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+            Continuar con Google
+        </button>
+        
+        <div class="divider" id="googleDivider">
+            <span>o con email</span>
+        </div>
+        
+        <!-- ACCESO CON EMAIL -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label><i class="fa fa-envelope"></i> Email</label>
+                <input type="email" id="email" class="form-control" placeholder="tu@email.com" autocomplete="email" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fa fa-lock"></i> Contraseña</label>
+                <input type="password" id="password" class="form-control" placeholder="••••••" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-sign-in"></i> Iniciar sesión
+            </button>
+        </form>
+        
+        <div class="footer-links">
+            <a href="/registro.html">Crear cuenta nueva</a>
+            <a href="/recuperar-password.html">¿Olvidaste tu contraseña?</a>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script type="module">
+        import { supabase } from '/js/supabase-client.js'
+        import { auth } from '/js/auth.js'
+        
+        // ========== DETECTAR SI VIENE DE LA APP ==========
+        const esApp = navigator.userAgent.includes('wv') || 
+                      navigator.userAgent.includes('WebView') ||
+                      !!(window.cordova || window.phonegap || window.PhoneGap) ||
+                      (document.referrer === '' && window.location.search.includes('app=true')) ||
+                      localStorage.getItem('cubazon_app') === 'true';
+        
+        // Guardar para futuras navegaciones
+        if (esApp) { localStorage.setItem('cubazon_app', 'true'); }
+        
+        // Ocultar botón Google si es la app
+        if (esApp) {
+            document.getElementById('googleLoginBtn').style.display = 'none';
+            document.getElementById('googleDivider').style.display = 'none';
+        }
+        
+        console.log('🚀 login.html - App detectada:', esApp, '| UserAgent:', navigator.userAgent.substring(0, 50));
+        
+        // ========== GOOGLE LOGIN ==========
+        document.getElementById('googleLoginBtn').addEventListener('click', async function() {
+            const btn = this; btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Conectando con Google...';
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin + '/index.html' }
+            });
+            if (error) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo conectar con Google.', confirmButtonColor: '#667eea' });
+                btn.disabled = false;
+                btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continuar con Google';
+            }
+        });
+        
+        // ========== LOGIN CON EMAIL ==========
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = this.querySelector('button[type="submit"]');
+            if (!email || !password) { Swal.fire('Error', 'Completa todos los campos', 'error'); return; }
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Iniciando sesión...';
+            const resultado = await auth.login(email, password);
+            if (resultado.success) { window.location.href = '/index.html'; }
+            else { Swal.fire({ icon: 'error', title: 'Error', text: resultado.error || 'Email o contraseña incorrectos', confirmButtonColor: '#667eea' }); btn.disabled = false; btn.innerHTML = '<i class="fa fa-sign-in"></i> Iniciar sesión'; }
+        });
+    </script>
+</body>
+</html>

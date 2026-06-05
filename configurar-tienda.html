@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Configurar mi tienda · CUBAZON</title>
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- Browser Image Compression -->
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            color: #0f1111;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        
+        /* ===== HEADER COMPLETO ===== */
+        #header-wrap {
+            background: #0f172a;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .header-header {
+            padding: 10px 20px;
+            width: 100%;
+        }
+
+        .container.row {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .header-logo img {
+            height: 50px;
+            width: auto;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .saldo-mini-card {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .saldo-mini-card i { font-size: 16px; }
+
+        .login-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 30px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .login-btn:hover {
+            background: #f97316;
+            border-color: #f97316;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+        }
+
+        .sora-cart {
+            position: relative;
+        }
+
+        .sora-cart-details {
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sora-cart-details:hover {
+            background: #f97316;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+        }
+
+        .sora-cart-details:after {
+            content: '\f290';
+            font-family: 'FontAwesome';
+            font-size: 20px;
+        }
+
+        .simpleCart_quantity {
+            background: #f97316;
+            color: white;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-size: 11px;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .sora-cart-description {
+            position: absolute;
+            right: 0;
+            top: 50px;
+            width: 350px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            padding: 15px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .sora-cart:hover .sora-cart-description { display: block; }
+
+        .simpleCart_items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .cart-preview-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-preview-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+
+        .cart-preview-item-details { flex: 1; }
+        .cart-preview-item-name { font-size: 13px; font-weight: 500; color: #0f1111; margin-bottom: 4px; }
+        .cart-preview-item-price { font-size: 14px; font-weight: 700; color: #b12704; }
+        .cart-preview-item-quantity { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+        .cart-preview-quantity-btn {
+            width: 24px; height: 24px; background: #f0f2f5; border: 1px solid #ddd; border-radius: 4px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .cart-preview-quantity-number {
+            font-weight: 600; min-width: 35px; text-align: center; font-size: 16px;
+            color: #0f1111; background: #ffffff; padding: 4px 0; border-radius: 4px;
+            border: 1px solid #d0d0d0;
+        }
+        .cart-preview-item-remove { color: #565959; cursor: pointer; }
+        .cart-preview-item-remove:hover { color: #dc3545; }
+        .cart-preview-footer { border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px; background: white; }
+        .cart-preview-total { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 10px; }
+        .cart-preview-buttons { display: flex; gap: 10px; }
+        .cart-preview-btn {
+            flex: 1; padding: 10px; border: none; border-radius: 20px; font-weight: 600;
+            font-size: 13px; cursor: pointer; text-align: center; text-decoration: none;
+        }
+        .cart-preview-btn-primary { background: #ffd814; color: #0f1111; }
+        .cart-preview-btn-primary:hover { background: #f7ca00; }
+        .cart-preview-btn-secondary { background: #f0f2f5; color: #0f1111; }
+
+        .header-menu {
+            background: #1e293b;
+            padding: 0 20px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header-menu::-webkit-scrollbar { display: none; }
+
+        #main-menu ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+            padding: 10px 0;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        #main-menu ul li a {
+            color: #e2e8f0;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 5px 0;
+            display: block;
+            transition: color 0.2s;
+            text-decoration: none;
+        }
+
+        #main-menu ul li a:hover { color: #f97316; }
+        
+        /* Contenedor principal */
+        .config-container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #0f1111;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .subtitle {
+            color: #6c757d;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #0f1111;
+        }
+        
+        .form-group label i {
+            width: 20px;
+            color: #f97316;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #f97316;
+            outline: none;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #0f1111;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .info-box {
+            background: #e8f5e9;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 25px 0;
+            font-size: 14px;
+        }
+        
+        .info-box i {
+            color: #28a745;
+            margin-right: 8px;
+        }
+        
+        /* ===== MODAL DE POLÍTICAS ===== */
+        .modal-politicas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .modal-politicas-content {
+            background: white;
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            border-radius: 24px;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .modal-politicas-header {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+        }
+        
+        .modal-politicas-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .modal-politicas-body {
+            padding: 25px;
+        }
+        
+        .politica-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .politica-item i {
+            font-size: 24px;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .politica-item i.fa-ban { color: #dc2626; }
+        .politica-item i.fa-exclamation-triangle { color: #f59e0b; }
+        .politica-item i.fa-image { color: #3b82f6; }
+        .politica-item i.fa-dollar-sign { color: #10b981; }
+        .politica-item i.fa-wine-bottle { color: #8b5cf6; }
+        .politica-item i.fa-heart-broken { color: #ec4899; }
+        
+        .politica-item-content h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #0f172a;
+        }
+        
+        .politica-item-content p {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+        
+        .politica-consecuencias {
+            background: #fef3c7;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .politica-consecuencias h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .politica-consecuencias ul {
+            margin-left: 25px;
+            color: #78350f;
+        }
+        
+        .politica-consecuencias li {
+            margin-bottom: 5px;
+        }
+        
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 0 0 24px 24px;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .checkbox-container input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .checkbox-container label {
+            color: #475569;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn-aceptar {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-aceptar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+        }
+        
+        /* Estado de tienda */
+        .estado-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .estado-pendiente {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+        
+        .estado-aprobado {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+        
+        .estado-rechazado {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+        
+        .estado-icono {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .estado-titulo {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .estado-mensaje {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .verificacion-box {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .verificacion-box h3 {
+            margin-bottom: 20px;
+            color: #0f1111;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .verificacion-box h3 i {
+            color: #f97316;
+        }
+        
+        .domicilio-box {
+            margin: 30px 0;
+            padding: 20px;
+            background: #e7f3ff;
+            border-radius: 12px;
+            border: 2px solid #17a2b8;
+        }
+        
+        .domicilio-box h3 {
+            margin-bottom: 20px;
+            color: #0f1111;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .domicilio-box h3 i {
+            color: #17a2b8;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .radio-option:hover {
+            background: #f8f9fa;
+            border-color: #17a2b8;
+        }
+        
+        .radio-option input[type="radio"] {
+            margin-top: 3px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .radio-option label {
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .radio-option strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #0f1111;
+        }
+        
+        .radio-option small {
+            color: #6c757d;
+            font-size: 12px;
+        }
+        
+        .preview-documento {
+            margin-top: 15px;
+            max-width: 300px;
+            display: none;
+        }
+        
+        .preview-documento img {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 5px;
+        }
+        
+        .aviso-verificacion {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 3rem;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #f97316;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            background: #0f172a;
+            color: white;
+            padding: 3rem 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+        }
+
+        .footer h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #f97316, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer h4 {
+            color: #e2e8f0;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .footer ul {
+            list-style: none;
+        }
+
+        .footer ul li {
+            margin-bottom: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .footer ul li i {
+            width: 20px;
+            color: #f97316;
+        }
+
+        .footer ul li a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer ul li a:hover {
+            color: #f97316;
+        }
+
+        #sub-footer-wrapper {
+            background: #1e293b;
+            padding: 20px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .header-logo img { height: 35px; }
+            .login-btn span { display: none; }
+            .login-btn { padding: 8px; border-radius: 50%; }
+            .saldo-mini-card span { display: none; }
+            .saldo-mini-card { padding: 5px 10px; }
+            .config-container { margin: 20px; padding: 25px; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="outer-wrapper">
+        <!-- HEADER COMPLETO -->
+        <div id="header-wrap">
+            <div class="header-header">
+                <div class="container row">
+                    <div class="header-logo">
+                        <a href="/">
+                            <img src="https://i.postimg.cc/MZRbKh98/Cubazon.png" alt="CUBAZON">
+                        </a>
+                    </div>
+                    
+                    <div class="header-right">
+                        <div id="saldoHeaderCard" class="saldo-mini-card" style="display: none;">
+                            <i class="fa fa-credit-card"></i>
+                            <span id="saldoHeaderAmount">$0.00</span>
+                        </div>
+
+                        <a href="/login.html" class="login-btn" id="loginBtnHeader">
+                            <i class="fa fa-user"></i>
+                            <span>Iniciar sesión</span>
+                        </a>
+                        
+                        <div class="sora-cart">
+                            <div class="sora-cart-details">
+                                <span class="simpleCart_quantity" id="cart-counter">0</span>
+                            </div>
+                            <div class="sora-cart-description" id="cart-preview">
+                                <div class="simpleCart_items"></div>
+                                <div class="cart-preview-footer">
+                                    <div class="cart-preview-total">
+                                        <span>Total:</span>
+                                        <span id="cart-preview-total-amount">$0.00 CUP</span>
+                                    </div>
+                                    <div class="cart-preview-buttons">
+                                        <a href="/p/cart.html" class="cart-preview-btn cart-preview-btn-primary">Ver Carrito</a>
+                                        <button onclick="window.vaciarCarrito()" class="cart-preview-btn cart-preview-btn-secondary">Vaciar</button>
+                                        <a href="/p/checkout.html" class="cart-preview-btn cart-preview-btn-primary">Pagar</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-menu">
+                <div class="container row">
+                    <div id="main-menu">
+                        <ul>
+                            <li><a href="/">Inicio</a></li>
+                            <li><a href="/categoria.html?cat=ofertas">Ofertas</a></li>
+                            <li><a href="/categoria.html?cat=Electrónica">Electrónica</a></li>
+                            <li><a href="/categoria.html?cat=Ropa">Ropa</a></li>
+                            <li><a href="/categoria.html?cat=Hogar">Hogar</a></li>
+                            <li><a href="/buscar.html"><i class="fa fa-search"></i> Buscar</a></li>
+                            <li><a href="/lista-deseos.html"><i class="fa fa-heart"></i> Mi Lista</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="config-container">
+            <h1><i class="fa fa-store"></i> Configurar mi tienda</h1>
+            <p class="subtitle">Completa estos datos para comenzar a vender en CUBAZON</p>
+            
+            <div id="loadingIndicator" class="loading-spinner" style="display: block;">
+                <div class="spinner"></div>
+                <p>Cargando tus datos...</p>
+            </div>
+            
+            <div id="estadoContainer" style="display: none;"></div>
+            
+            <form id="tiendaForm" style="display: none;">
+                <div class="form-group">
+                    <label><i class="fa fa-store"></i> Nombre de tu tienda *</label>
+                    <input type="text" id="nombreTienda" class="form-control" placeholder="Ej: Tienda de María" required>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fa fa-align-left"></i> Descripción de tu tienda</label>
+                    <textarea id="descripcionTienda" class="form-control" rows="3" placeholder="Cuéntales a los clientes sobre tu negocio..."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fa fa-phone"></i> Teléfono de contacto</label>
+                        <input type="tel" id="telefonoContacto" class="form-control" placeholder="56591892">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fab fa-whatsapp"></i> WhatsApp *</label>
+                        <input type="tel" id="whatsappContacto" class="form-control" placeholder="56591892" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fa fa-map-marker"></i> Provincia *</label>
+                        <select id="provincia" class="form-control" required>
+                            <option value="">Selecciona una provincia</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fa fa-map-pin"></i> Municipio *</label>
+                        <select id="municipio" class="form-control" required disabled>
+                            <option value="">Primero selecciona una provincia</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fa fa-home"></i> Dirección del negocio</label>
+                    <input type="text" id="direccion" class="form-control" placeholder="Calle, número, localidad...">
+                </div>
+                
+                <!-- SECCIÓN DE DOMICILIO -->
+                <div class="domicilio-box">
+                    <h3><i class="fa fa-truck"></i> Opciones de domicilio</h3>
+                    
+                    <div class="form-group">
+                        <label><i class="fa fa-check-circle"></i> ¿Ofreces servicio a domicilio? *</label>
+                        <div style="display: flex; gap: 20px; margin-top: 10px;">
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="radio" name="ofreceDomicilio" value="si" required> Sí
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="radio" name="ofreceDomicilio" value="no" required> No (solo recogida en tienda)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="tipoDomicilioContainer" style="display: none;">
+                        <label><i class="fa fa-globe"></i> Tipo de cobertura *</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" name="tipoDomicilio" id="domicilioTodoCuba" value="todo_cuba">
+                                <label for="domicilioTodoCuba">
+                                    <strong>🌍 Todo el país (Cuba)</strong>
+                                    <small>Llevamos productos a cualquier provincia de Cuba</small>
+                                </label>
+                            </div>
+                            
+                            <div class="radio-option">
+                                <input type="radio" name="tipoDomicilio" id="domicilioProvincia" value="provincia">
+                                <label for="domicilioProvincia">
+                                    <strong>📍 Solo en una provincia específica</strong>
+                                    <small>Selecciona la provincia donde hacemos domicilio</small>
+                                </label>
+                            </div>
+                            
+                            <div class="radio-option">
+                                <input type="radio" name="tipoDomicilio" id="domicilioMunicipio" value="municipio">
+                                <label for="domicilioMunicipio">
+                                    <strong>🏘️ Solo en un municipio específico</strong>
+                                    <small>Selecciona la provincia y luego el municipio donde hacemos domicilio</small>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="domicilioProvinciaSelect" style="display: none; margin-top: 20px;">
+                            <label>Provincia donde ofrecemos domicilio *</label>
+                            <select id="provinciaDomicilio" class="form-control">
+                                <option value="">Selecciona una provincia</option>
+                            </select>
+                        </div>
+                        
+                        <div id="domicilioMunicipioSelect" style="display: none; margin-top: 20px;">
+                            <label>Municipio donde ofrecemos domicilio *</label>
+                            <select id="municipioDomicilio" class="form-control" disabled>
+                                <option value="">Primero selecciona una provincia</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SECCIÓN DE VERIFICACIÓN -->
+                <div id="verificacionSection">
+                    <div class="verificacion-box">
+                        <h3><i class="fa fa-shield-alt"></i> Verificación de identidad (requerido)</h3>
+                        
+                        <!-- NOMBRE Y APELLIDOS -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><i class="fa fa-user"></i> Nombre(s) *</label>
+                                <input type="text" id="nombreVendedor" class="form-control" placeholder="Ej: Juan Carlos" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label><i class="fa fa-user"></i> Apellidos *</label>
+                                <input type="text" id="apellidosVendedor" class="form-control" placeholder="Ej: Pérez González" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label><i class="fa fa-id-card"></i> Tipo de documento *</label>
+                            <select id="tipoDocumento" class="form-control" required>
+                                <option value="">Selecciona un tipo</option>
+                                <option value="carnet">Carnet de identidad</option>
+                                <option value="pasaporte">Pasaporte</option>
+                                <option value="licencia">Licencia comercial / Registro de negocio</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label><i class="fa fa-hashtag"></i> Número de documento *</label>
+                            <input type="text" id="numeroDocumento" class="form-control" placeholder="Ej: 123456789" required>
+                        </div>
+                        
+                        <!-- IMAGEN DEL CARNET - DELANTERA -->
+                        <div class="form-group">
+                            <label><i class="fa fa-address-card"></i> Foto del carnet (DELANTERA) *</label>
+                            <input type="file" id="archivoCarnetDelantero" class="form-control" accept="image/*" required>
+                            <small style="color: #6c757d;">Foto clara de la parte delantera de tu carnet. Máximo 5MB.</small>
+                            <div class="preview-documento" id="previewCarnetDelantero">
+                                <img id="imagenPreviewDelantera" src="">
+                            </div>
+                        </div>
+                        
+                        <!-- IMAGEN DEL CARNET - TRASERA -->
+                        <div class="form-group">
+                            <label><i class="fa fa-address-card"></i> Foto del carnet (TRASERA) *</label>
+                            <input type="file" id="archivoCarnetTrasero" class="form-control" accept="image/*" required>
+                            <small style="color: #6c757d;">Foto clara de la parte trasera de tu carnet. Máximo 5MB.</small>
+                            <div class="preview-documento" id="previewCarnetTrasero">
+                                <img id="imagenPreviewTrasera" src="">
+                            </div>
+                        </div>
+                        
+                        <!-- IMAGEN DE LA TIENDA/LOCAL (OPCIONAL) -->
+                        <div class="form-group">
+                            <label><i class="fa fa-camera"></i> Foto de tu tienda o local (opcional)</label>
+                            <input type="file" id="archivoTiendaLocal" class="form-control" accept="image/*">
+                            <small style="color: #6c757d;">Una foto de tu negocio físico. Se mostrará en tu perfil. Máximo 5MB.</small>
+                            <div class="preview-documento" id="previewTiendaLocal">
+                                <img id="imagenPreviewTienda" src="">
+                            </div>
+                        </div>
+                        
+                        <div class="aviso-verificacion">
+                            <i class="fa fa-info-circle"></i>
+                            <strong>Importante:</strong> Tus documentos serán verificados por nuestro equipo en un plazo máximo de 24-48 horas. 
+                            No podrás publicar productos hasta que tu cuenta sea verificada.
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <i class="fa fa-info-circle"></i>
+                        <strong>Nota:</strong> El número de WhatsApp será el enlace directo para que los clientes te contacten.
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="guardarBtn">
+                        <i class="fa fa-save"></i> Enviar solicitud de verificación
+                    </button>
+                </div>
+            </form>
+            
+            <div id="resultMessage" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- MODAL DE POLÍTICAS -->
+        <div id="modalPoliticas" class="modal-politicas" style="display: flex;">
+            <div class="modal-politicas-content">
+                <div class="modal-politicas-header">
+                    <h2><i class="fa fa-gavel"></i> Reglas y Políticas de CUBAZON</h2>
+                </div>
+                <div class="modal-politicas-body">
+                    <div class="politica-item">
+                        <i class="fa fa-ban"></i>
+                        <div class="politica-item-content">
+                            <h4>Productos ilegales o prohibidos</h4>
+                            <p>No se permite la publicación de productos ilegales según las leyes cubanas.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="politica-item">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        <div class="politica-item-content">
+                            <h4>Precios abusivos</h4>
+                            <p>No se permiten precios abusivos o especulativos que afecten a los consumidores.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="politica-item">
+                        <i class="fa fa-ban"></i>
+                        <div class="politica-item-content">
+                            <h4>Contenido ofensivo</h4>
+                            <p>No se permite el uso de palabras ofensivas o en contra de las políticas del país en nombres o descripciones de productos.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="politica-item">
+                        <i class="fa fa-image"></i>
+                        <div class="politica-item-content">
+                            <h4>Productos sin imagen</h4>
+                            <p>No se permite subir productos sin imagen. Todos los productos deben tener una foto clara.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="politica-item">
+                        <i class="fa fa-dollar-sign"></i>
+                        <div class="politica-item-content">
+                            <h4>Precios en CUP</h4>
+                            <p>El precio de los productos debe ser en CUP (pesos cubanos), no en moneda extranjera.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="politica-item">
+                        <i class="fa fa-wine-bottle"></i>
+                        <div class="politica-item-content">
+                            <h4>Productos restringidos</h4>
+                            <p>No se permite vender bebidas alcohólicas ni derivados del tabaco.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="politica-item">
+                        <i class="fa fa-heart-broken"></i>
+                        <div class="politica-item-content">
+                            <h4>Productos sexuales</h4>
+                            <p>No se permite la venta de productos de contenido sexual explícito.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="politica-consecuencias">
+                        <h4><i class="fa fa-exclamation-triangle"></i> Consecuencias del incumplimiento</h4>
+                        <ul>
+                            <li>Eliminación automática del producto infractor</li>
+                            <li>Suspensión temporal de la cuenta del vendedor</li>
+                            <li>Eliminación permanente de la plataforma en caso de reincidencia</li>
+                            <li>Reporte a las autoridades competentes si aplica</li>
+                        </ul>
+                        <p style="margin-top: 15px; font-weight: 600;">Nos tomamos el derecho de tomar medidas de forma automática ante cualquier incumplimiento.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="noMostrarPoliticas" checked>
+                        <label for="noMostrarPoliticas">No mostrar más este mensaje</label>
+                    </div>
+                    <button class="btn-aceptar" id="btnAceptarPoliticas">
+                        <i class="fa fa-check-circle"></i> Acepto las políticas
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div>
+                    <h3>CUBAZON</h3>
+                    <p style="color: #94a3b8; margin-bottom: 1rem;">Tu tienda online de confianza en Cuba 🇨🇺</p>
+                    <p style="color: #94a3b8;"><i class="fas fa-map-marker-alt"></i> Sagua de Tánamo, Holguín, Cuba</p>
+                </div>
+                <div>
+                    <h4>Enlaces rápidos</h4>
+                    <ul>
+                        <li><a href="/ofertas-especiales.html"><i class="fas fa-tags"></i> Ofertas</a></li>
+                        <li><a href="/destacados.html"><i class="fas fa-star"></i> Destacados</a></li>
+                        <li><a href="/novedades.html"><i class="fas fa-clock"></i> Novedades</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Contacto</h4>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> +53 56591892</li>
+                        <li><i class="fas fa-envelope"></i> ventas@cubazon.com</li>
+                        <li><i class="fab fa-whatsapp"></i> +53 56591892</li>
+                    </ul>
+                </div>
+            </div>
+        </footer>
+        <div id="sub-footer-wrapper">
+            <p>© 2026 CUBAZON · Diseñado por Des.Joshua_Technology · Todos los derechos reservados</p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { supabase } from '/js/supabase-client.js';
+        import { auth } from '/js/auth.js';
+        import { initCarrito } from '/js/cart.js';
+        
+        // ========== INICIALIZAR CARRITO ==========
+        const carrito = initCarrito();
+        window.carrito = carrito;
+        window.cart = carrito;
+        window.vaciarCarrito = () => carrito.vaciar();
+        
+        carrito.cargarDeLocalStorage();
+        carrito.actualizarInterfaz();
+        
+        // ========== MODAL DE POLÍTICAS (CORREGIDO) ==========
+        function mostrarModalPoliticas() {
+            // Si ya dijo que no quiere verlo más, no mostrar
+            if (localStorage.getItem('cubazon_no_mostrar_politicas') === 'true') {
+                return;
+            }
+            
+            const modal = document.getElementById('modalPoliticas');
+            if (!modal) return;
+            
+            modal.style.display = 'flex';
+            
+            // Asegurar que el checkbox esté marcado por defecto
+            const checkbox = document.getElementById('noMostrarPoliticas');
+            if (checkbox) checkbox.checked = true;
+        }
+
+        // Evento para el botón Aceptar (se ejecuta una sola vez al cargar)
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnAceptar = document.getElementById('btnAceptarPoliticas');
+            const modal = document.getElementById('modalPoliticas');
+            const checkbox = document.getElementById('noMostrarPoliticas');
+            
+            if (btnAceptar) {
+                btnAceptar.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Guardar preferencia si el checkbox está marcado
+                    if (checkbox && checkbox.checked) {
+                        localStorage.setItem('cubazon_no_mostrar_politicas', 'true');
+                    }
+                    
+                    // Cerrar modal inmediatamente
+                    if (modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Cerrar al hacer clic fuera del modal
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.style.display = 'none';
+                    }
+                });
+            }
+        });
+        
+        // ========== FUNCIÓN PARA CARGAR SALDO EN HEADER ==========
+        async function cargarSaldoHeader() {
+            const saldoCard = document.getElementById('saldoHeaderCard');
+            const saldoAmount = document.getElementById('saldoHeaderAmount');
+            
+            if (!auth.isAuthenticated()) {
+                saldoCard.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const usuario = auth.getUsuario();
+                const { data, error } = await supabase
+                    .from('saldo_usuarios')
+                    .select('saldo_actual')
+                    .eq('user_id', usuario.id)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') throw error;
+                
+                const saldo = data?.saldo_actual || 0;
+                saldoAmount.textContent = `$${saldo.toFixed(2)}`;
+                saldoCard.style.display = 'flex';
+            } catch (error) {
+                console.error('Error cargando saldo:', error);
+            }
+        }
+        
+        // ========== ACTUALIZAR MENÚ DE USUARIO ==========
+        function actualizarMenuUsuario() {
+            const loginBtn = document.getElementById('loginBtnHeader');
+            if (!loginBtn) return;
+            
+            if (auth.isAuthenticated()) {
+                const usuario = auth.getUsuario();
+                const inicial = usuario?.nombre_completo?.charAt(0).toUpperCase() || usuario?.email?.charAt(0).toUpperCase() || 'U';
+                loginBtn.innerHTML = `<i class="fa fa-user"></i><span>${inicial}</span>`;
+                loginBtn.href = '/mi-cuenta.html';
+                cargarSaldoHeader();
+            } else {
+                loginBtn.innerHTML = '<i class="fa fa-sign-in"></i><span>Iniciar sesión</span>';
+                loginBtn.href = '/login.html';
+                document.getElementById('saldoHeaderCard').style.display = 'none';
+            }
+        }
+        
+        // Elementos DOM
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const tiendaForm = document.getElementById('tiendaForm');
+        const estadoContainer = document.getElementById('estadoContainer');
+        
+        // ========== CARGAR PROVINCIAS ==========
+        async function cargarProvincias() {
+            const { data, error } = await supabase
+                .from('provincias_cuba')
+                .select('id, nombre')
+                .order('nombre');
+            
+            if (error) {
+                console.error('Error cargando provincias:', error);
+                return;
+            }
+            
+            const selectProvincia = document.getElementById('provincia');
+            selectProvincia.innerHTML = '<option value="">Selecciona una provincia</option>';
+            data.forEach(p => {
+                selectProvincia.innerHTML += `<option value="${p.nombre}">${p.nombre}</option>`;
+            });
+            
+            const selectProvinciaDomicilio = document.getElementById('provinciaDomicilio');
+            selectProvinciaDomicilio.innerHTML = '<option value="">Selecciona una provincia</option>';
+            data.forEach(p => {
+                selectProvinciaDomicilio.innerHTML += `<option value="${p.nombre}">${p.nombre}</option>`;
+            });
+        }
+        
+        // ========== CARGAR MUNICIPIOS POR PROVINCIA ==========
+        async function cargarMunicipios(provinciaNombre, targetSelectId) {
+            const select = document.getElementById(targetSelectId);
+            
+            if (!provinciaNombre) {
+                select.innerHTML = '<option value="">Selecciona un municipio</option>';
+                select.disabled = true;
+                return;
+            }
+            
+            select.disabled = true;
+            select.innerHTML = '<option value="">Cargando municipios...</option>';
+            
+            try {
+                const { data: provincia, error: errorProvincia } = await supabase
+                    .from('provincias_cuba')
+                    .select('id')
+                    .eq('nombre', provinciaNombre)
+                    .single();
+                
+                if (errorProvincia || !provincia) {
+                    throw new Error('Provincia no encontrada');
+                }
+                
+                const { data: municipios, error: errorMunicipios } = await supabase
+                    .from('municipios_cuba')
+                    .select('nombre')
+                    .eq('provincia_id', provincia.id)
+                    .order('nombre');
+                
+                if (errorMunicipios) throw errorMunicipios;
+                
+                select.innerHTML = '<option value="">Selecciona un municipio</option>';
+                municipios.forEach(m => {
+                    select.innerHTML += `<option value="${m.nombre}">${m.nombre}</option>`;
+                });
+                select.disabled = false;
+                
+            } catch (error) {
+                console.error('Error cargando municipios:', error);
+                select.innerHTML = '<option value="">Error al cargar municipios</option>';
+            }
+        }
+        
+        // ========== VERIFICAR SI YA TIENE UNA TIENDA ==========
+        async function verificarTiendaExistente() {
+            const usuario = auth.getUsuario();
+            if (!usuario) return null;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('vendedores')
+                    .select('id, estado_verificacion, activo, baneado, motivo_rechazo, motivo_baneo, nombre_tienda')
+                    .eq('id', usuario.id)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') throw error;
+                
+                return data;
+            } catch (error) {
+                console.error('Error verificando tienda:', error);
+                return null;
+            }
+        }
+        
+        // ========== MOSTRAR ESTADO DE LA TIENDA ==========
+        function mostrarEstadoTienda(vendedor) {
+            if (!vendedor) {
+                estadoContainer.style.display = 'none';
+                tiendaForm.style.display = 'block';
+                return;
+            }
+            
+            estadoContainer.style.display = 'block';
+            
+            // Si está baneado
+            if (vendedor.baneado) {
+                estadoContainer.innerHTML = `
+                    <div class="estado-card estado-rechazado">
+                        <div class="estado-icono">
+                            <i class="fa fa-ban" style="color: #dc2626;"></i>
+                        </div>
+                        <div class="estado-titulo">🚫 Cuenta suspendida</div>
+                        <div class="estado-mensaje">
+                            Tu cuenta de vendedor ha sido suspendida.<br>
+                            Motivo: ${vendedor.motivo_baneo || 'No especificado'}<br>
+                            Contacta a soporte para más información.
+                        </div>
+                    </div>
+                `;
+                tiendaForm.style.display = 'none';
+                return;
+            }
+            
+            // Si está verificada y activa
+            if (vendedor.estado_verificacion === 'verificado' && vendedor.activo) {
+                estadoContainer.innerHTML = `
+                    <div class="estado-card estado-aprobado">
+                        <div class="estado-icono">
+                            <i class="fa fa-check-circle" style="color: #10b981;"></i>
+                        </div>
+                        <div class="estado-titulo">✅ ¡Tu tienda está en funcionamiento!</div>
+                        <div class="estado-mensaje">
+                            Tu tienda "${vendedor.nombre_tienda || ''}" ha sido verificada y ya está activa.<br>
+                            Ya puedes <a href="/publicar-producto.html" style="color: #f97316;">publicar productos</a> y comenzar a vender.
+                        </div>
+                    </div>
+                `;
+                tiendaForm.style.display = 'none';
+                return;
+            }
+            
+            // Si está pendiente
+            if (vendedor.estado_verificacion === 'pendiente') {
+                estadoContainer.innerHTML = `
+                    <div class="estado-card estado-pendiente">
+                        <div class="estado-icono">
+                            <i class="fa fa-clock-o" style="color: #f59e0b;"></i>
+                        </div>
+                        <div class="estado-titulo">⏳ Solicitud enviada - Pendiente de verificación</div>
+                        <div class="estado-mensaje">
+                            Tu solicitud de verificación está siendo revisada.<br>
+                            Nuestro equipo la revisará en un plazo de 24-48 horas.<br>
+                            Recibirás una notificación cuando sea aprobada.<br><br>
+                            <strong>No puedes enviar otra solicitud mientras esta esté pendiente.</strong>
+                        </div>
+                    </div>
+                `;
+                tiendaForm.style.display = 'none';
+                return;
+            }
+            
+            // Si está rechazada - PERMITIR que vuelva a enviar
+            if (vendedor.estado_verificacion === 'rechazado') {
+                estadoContainer.innerHTML = `
+                    <div class="estado-card estado-rechazado">
+                        <div class="estado-icono">
+                            <i class="fa fa-times-circle" style="color: #dc2626;"></i>
+                        </div>
+                        <div class="estado-titulo">❌ Solicitud anterior rechazada</div>
+                        <div class="estado-mensaje">
+                            Motivo: ${vendedor.motivo_rechazo || 'No especificado'}<br><br>
+                            <strong>Puedes corregir los problemas y enviar una nueva solicitud.</strong>
+                        </div>
+                    </div>
+                `;
+                estadoContainer.style.display = 'block';
+                tiendaForm.style.display = 'block';
+                return;
+            }
+            
+            estadoContainer.style.display = 'none';
+            tiendaForm.style.display = 'block';
+        }
+        
+        // ========== VERIFICAR AUTENTICACIÓN Y CARGAR DATOS ==========
+        async function verificarAuth() {
+            loadingIndicator.style.display = 'block';
+            
+            for (let i = 0; i < 10; i++) {
+                if (auth.isAuthenticated()) {
+                    const usuario = auth.getUsuario();
+                    console.log('✅ Usuario autenticado:', usuario?.email);
+                    
+                    // Verificar si ya tiene una tienda
+                    const tiendaExistente = await verificarTiendaExistente();
+                    
+                    if (tiendaExistente) {
+                        loadingIndicator.style.display = 'none';
+                        mostrarEstadoTienda(tiendaExistente);
+                        
+                        // Si está rechazada, cargar datos existentes para que pueda editarlos
+                        if (tiendaExistente.estado_verificacion === 'rechazado') {
+                            await cargarProvincias();
+                            await cargarDatosTienda(tiendaExistente);
+                        }
+                        
+                        actualizarMenuUsuario();
+                        return true;
+                    }
+                    
+                    // Si no tiene tienda, continuar normalmente
+                    const { data: perfil, error: perfilError } = await supabase
+                        .from('perfiles')
+                        .select('id, nombre, apellidos')
+                        .eq('id', usuario.id)
+                        .single();
+                    
+                    if (!perfil) {
+                        await supabase.from('perfiles').insert({
+                            id: usuario.id,
+                            email: usuario.email,
+                            nombre_completo: usuario.user_metadata?.nombre || usuario.email?.split('@')[0] || 'Usuario',
+                            telefono: usuario.user_metadata?.telefono || ''
+                        });
+                    } else {
+                        if (perfil.nombre) {
+                            document.getElementById('nombreVendedor').value = perfil.nombre;
+                        }
+                        if (perfil.apellidos) {
+                            document.getElementById('apellidosVendedor').value = perfil.apellidos;
+                        }
+                    }
+                    
+                    await cargarProvincias();
+                    
+                    mostrarEstadoTienda(null);
+                    mostrarModalPoliticas();
+                    
+                    loadingIndicator.style.display = 'none';
+                    actualizarMenuUsuario();
+                    return true;
+                }
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+            
+            loadingIndicator.style.display = 'none';
+            window.location.href = '/login.html?redirect=/configurar-tienda.html';
+            return false;
+        }
+        
+        // ========== CARGAR DATOS DE LA TIENDA SI YA EXISTE ==========
+        async function cargarDatosTienda(vendedor) {
+            if (!vendedor) return;
+            
+            document.getElementById('nombreTienda').value = vendedor.nombre_tienda || '';
+            document.getElementById('descripcionTienda').value = vendedor.descripcion_tienda || '';
+            document.getElementById('telefonoContacto').value = vendedor.telefono_contacto || '';
+            document.getElementById('whatsappContacto').value = vendedor.whatsapp_contacto || '';
+            document.getElementById('provincia').value = vendedor.provincia || '';
+            document.getElementById('direccion').value = vendedor.direccion || '';
+            
+            if (vendedor.provincia) {
+                await cargarMunicipios(vendedor.provincia, 'municipio');
+                document.getElementById('municipio').value = vendedor.municipio || '';
+            }
+            
+            if (vendedor.ofrece_domicilio) {
+                document.querySelector('input[name="ofreceDomicilio"][value="si"]').checked = true;
+                document.getElementById('tipoDomicilioContainer').style.display = 'block';
+                
+                if (vendedor.tipo_domicilio) {
+                    document.querySelector(`input[name="tipoDomicilio"][value="${vendedor.tipo_domicilio}"]`).checked = true;
+                    
+                    if (vendedor.tipo_domicilio === 'provincia' || vendedor.tipo_domicilio === 'municipio') {
+                        document.getElementById('domicilioProvinciaSelect').style.display = 'block';
+                        document.getElementById('provinciaDomicilio').value = vendedor.provincia_domicilio || '';
+                        
+                        if (vendedor.tipo_domicilio === 'municipio' && vendedor.provincia_domicilio) {
+                            document.getElementById('domicilioMunicipioSelect').style.display = 'block';
+                            setTimeout(async () => {
+                                await cargarMunicipios(vendedor.provincia_domicilio, 'municipioDomicilio');
+                                document.getElementById('municipioDomicilio').value = vendedor.municipio_domicilio || '';
+                            }, 500);
+                        }
+                    }
+                }
+            } else {
+                document.querySelector('input[name="ofreceDomicilio"][value="no"]').checked = true;
+            }
+        }
+        
+        // ========== EVENTOS DINÁMICOS ==========
+        document.getElementById('provincia').addEventListener('change', async function() {
+            await cargarMunicipios(this.value, 'municipio');
+        });
+        
+        document.querySelectorAll('input[name="ofreceDomicilio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'si') {
+                    document.getElementById('tipoDomicilioContainer').style.display = 'block';
+                } else {
+                    document.getElementById('tipoDomicilioContainer').style.display = 'none';
+                    document.getElementById('domicilioProvinciaSelect').style.display = 'none';
+                    document.getElementById('domicilioMunicipioSelect').style.display = 'none';
+                }
+            });
+        });
+        
+        document.querySelectorAll('input[name="tipoDomicilio"]').forEach(radio => {
+            radio.addEventListener('change', async function() {
+                document.getElementById('domicilioProvinciaSelect').style.display = 'none';
+                document.getElementById('domicilioMunicipioSelect').style.display = 'none';
+                
+                if (this.value === 'provincia') {
+                    document.getElementById('domicilioProvinciaSelect').style.display = 'block';
+                } else if (this.value === 'municipio') {
+                    document.getElementById('domicilioProvinciaSelect').style.display = 'block';
+                }
+            });
+        });
+        
+        document.getElementById('provinciaDomicilio').addEventListener('change', async function() {
+            const tipoSeleccionado = document.querySelector('input[name="tipoDomicilio"]:checked')?.value;
+            if (tipoSeleccionado === 'municipio') {
+                await cargarMunicipios(this.value, 'municipioDomicilio');
+                document.getElementById('domicilioMunicipioSelect').style.display = 'block';
+            } else {
+                document.getElementById('domicilioMunicipioSelect').style.display = 'none';
+            }
+        });
+        
+        // ========== FUNCIÓN PARA COMPRIMIR Y SUBIR IMAGEN ==========
+        async function comprimirYSubirImagen(file, nombreBase) {
+            const opciones = {
+                maxSizeMB: 0.3,
+                maxWidthOrHeight: 1200,
+                useWebWorker: true,
+                fileType: 'image/webp'
+            };
+            
+            try {
+                console.log(`🔄 Comprimiendo ${nombreBase}...`);
+                const archivoComprimido = await imageCompression(file, opciones);
+                
+                const extension = 'webp';
+                const nombreArchivo = `${nombreBase}_${Date.now()}.${extension}`;
+                
+                console.log(`📤 Subiendo a documentos-vendedor/${nombreArchivo}...`);
+                const { data, error } = await supabase.storage
+                    .from('documentos-vendedor')
+                    .upload(nombreArchivo, archivoComprimido, {
+                        cacheControl: '3600',
+                        upsert: false,
+                        contentType: 'image/webp'
+                    });
+                
+                if (error) {
+                    console.error('❌ Error al subir:', error);
+                    throw error;
+                }
+                
+                const { data: urlData } = supabase.storage
+                    .from('documentos-vendedor')
+                    .getPublicUrl(nombreArchivo);
+                
+                console.log('✅ URL pública:', urlData.publicUrl);
+                return urlData.publicUrl;
+                
+            } catch (error) {
+                console.error('❌ Error en comprimirYSubirImagen:', error);
+                throw error;
+            }
+        }
+
+        // ========== PREVISUALIZAR IMÁGENES ==========
+        function setupImagePreview(inputId, previewId, imgId) {
+            document.getElementById(inputId).addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById(imgId).src = e.target.result;
+                        document.getElementById(previewId).style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    document.getElementById(previewId).style.display = 'none';
+                }
+            });
+        }
+
+        // Configurar previsualizaciones
+        setupImagePreview('archivoCarnetDelantero', 'previewCarnetDelantero', 'imagenPreviewDelantera');
+        setupImagePreview('archivoCarnetTrasero', 'previewCarnetTrasero', 'imagenPreviewTrasera');
+        setupImagePreview('archivoTiendaLocal', 'previewTiendaLocal', 'imagenPreviewTienda');
+        
+        // ========== GUARDAR TIENDA ==========
+        document.getElementById('tiendaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const usuario = auth.getUsuario();
+            const btn = document.getElementById('guardarBtn');
+            
+            const nombreVendedor = document.getElementById('nombreVendedor').value.trim();
+            const apellidosVendedor = document.getElementById('apellidosVendedor').value.trim();
+            const tipoDocumento = document.getElementById('tipoDocumento').value;
+            const numeroDocumento = document.getElementById('numeroDocumento').value.trim();
+            const archivoDelantero = document.getElementById('archivoCarnetDelantero').files[0];
+            const archivoTrasero = document.getElementById('archivoCarnetTrasero').files[0];
+            const archivoTienda = document.getElementById('archivoTiendaLocal').files[0];
+            
+            if (!nombreVendedor || !apellidosVendedor) {
+                Swal.fire('Error', 'Debes ingresar tu nombre y apellidos', 'error');
+                return;
+            }
+            
+            if (!tipoDocumento || !numeroDocumento) {
+                Swal.fire('Error', 'Debes completar todos los datos de verificación', 'error');
+                return;
+            }
+            
+            if (!archivoDelantero || !archivoTrasero) {
+                Swal.fire('Error', 'Debes subir ambas caras de tu carnet de identidad', 'error');
+                return;
+            }
+            
+            const provincia = document.getElementById('provincia').value;
+            const municipio = document.getElementById('municipio').value;
+            
+            if (!provincia || !municipio) {
+                Swal.fire('Error', 'Debes seleccionar provincia y municipio de tu negocio', 'error');
+                return;
+            }
+            // ========== VERIFICACIÓN DE TELÉFONO DUPLICADO ==========
+const whatsapp = document.getElementById('whatsappContacto').value.trim();
+
+const { data: telefonoExiste } = await supabase
+    .from('vendedores')
+    .select('id')
+    .eq('whatsapp_contacto', whatsapp)
+    .maybeSingle();
+
+if (telefonoExiste && telefonoExiste.id !== usuario.id) {
+    Swal.fire('Error', 'Este número de WhatsApp ya está registrado en otra tienda', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-save"></i> Enviar solicitud de verificación';
+    return;
+}
+// ========== FIN DE LA VERIFICACIÓN ==========
+            const ofreceDomicilio = document.querySelector('input[name="ofreceDomicilio"]:checked')?.value === 'si';
+            let tipoDomicilio = null;
+            let provinciaDomicilio = null;
+            let municipioDomicilio = null;
+            
+            if (ofreceDomicilio) {
+                tipoDomicilio = document.querySelector('input[name="tipoDomicilio"]:checked')?.value;
+                if (!tipoDomicilio) {
+                    Swal.fire('Error', 'Debes seleccionar el tipo de cobertura de domicilio', 'error');
+                    return;
+                }
+                
+                if (tipoDomicilio === 'provincia') {
+                    provinciaDomicilio = document.getElementById('provinciaDomicilio').value;
+                    if (!provinciaDomicilio) {
+                        Swal.fire('Error', 'Debes seleccionar la provincia donde ofreces domicilio', 'error');
+                        return;
+                    }
+                }
+                
+                if (tipoDomicilio === 'municipio') {
+                    provinciaDomicilio = document.getElementById('provinciaDomicilio').value;
+                    municipioDomicilio = document.getElementById('municipioDomicilio').value;
+                    if (!provinciaDomicilio || !municipioDomicilio) {
+                        Swal.fire('Error', 'Debes seleccionar provincia y municipio donde ofreces domicilio', 'error');
+                        return;
+                    }
+                }
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Procesando imágenes y enviando solicitud...';
+            
+            try {
+                Swal.fire({
+                    title: 'Procesando documentos...',
+                    text: 'Comprimiendo y subiendo imágenes. Esto puede tomar unos segundos.',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+                
+                // Subir imágenes con compresión
+                console.log('📤 Subiendo imagen DELANTERA...');
+                const urlDelantera = await comprimirYSubirImagen(archivoDelantero, `${usuario.id}_delantera`);
+                console.log('✅ Delantera subida:', urlDelantera);
+                
+                console.log('📤 Subiendo imagen TRASERA...');
+                const urlTrasera = await comprimirYSubirImagen(archivoTrasero, `${usuario.id}_trasera`);
+                console.log('✅ Trasera subida:', urlTrasera);
+                
+                let urlTienda = null;
+                if (archivoTienda) {
+                    urlTienda = await comprimirYSubirImagen(archivoTienda, `${usuario.id}_tienda`);
+                }
+                
+                // Guardar datos de la tienda (usar upsert para actualizar si ya existe)
+                const datosTienda = {
+                    id: usuario.id,
+                    nombre_tienda: document.getElementById('nombreTienda').value,
+                    descripcion_tienda: document.getElementById('descripcionTienda').value,
+                    telefono_contacto: document.getElementById('telefonoContacto').value || document.getElementById('whatsappContacto').value,
+                    whatsapp_contacto: document.getElementById('whatsappContacto').value,
+                    provincia,
+                    municipio,
+                    direccion: document.getElementById('direccion').value,
+                    logo_url: urlTienda || null,
+                    ofrece_domicilio: ofreceDomicilio,
+                    tipo_domicilio: tipoDomicilio,
+                    provincia_domicilio: provinciaDomicilio,
+                    municipio_domicilio: municipioDomicilio,
+                    activo: false,
+                    estado_verificacion: 'pendiente',
+                    fecha_solicitud: new Date().toISOString(),
+                    motivo_rechazo: null
+                };
+                
+                console.log('💾 Guardando datos de la tienda...');
+                const { error: errorTienda } = await supabase
+                    .from('vendedores')
+                    .upsert(datosTienda, { onConflict: 'id' });
+                
+                if (errorTienda) {
+                    console.error('❌ Error guardando tienda:', errorTienda);
+                    throw errorTienda;
+                }
+                console.log('✅ Tienda guardada');
+                
+                // Eliminar documentos anteriores para evitar duplicados
+                console.log('🗑️ Eliminando documentos anteriores...');
+                const { error: deleteError } = await supabase
+                    .from('documentos_vendedor')
+                    .delete()
+                    .eq('vendedor_id', usuario.id);
+                console.log('✅ Documentos anteriores eliminados:', deleteError || 'OK');
+                
+                // Guardar documento DELANTERO
+                console.log('💾 Guardando documento DELANTERO...');
+                const { data: docDelantero, error: errorDelantero } = await supabase
+                    .from('documentos_vendedor')
+                    .insert({
+                        vendedor_id: usuario.id,
+                        tipo_documento: tipoDocumento,
+                        numero_documento: numeroDocumento,
+                        archivo_url: urlDelantera,
+                        lado: 'delantero',
+                        verificado: false,
+                        fecha_subida: new Date().toISOString()
+                    })
+                    .select();
+                
+                console.log('📄 Doc Delantero guardado:', docDelantero, errorDelantero);
+                
+                if (errorDelantero) {
+                    console.error('❌ Error guardando documento delantero:', errorDelantero);
+                    throw errorDelantero;
+                }
+                
+                // Guardar documento TRASERO
+                console.log('💾 Guardando documento TRASERO...');
+                const { data: docTrasero, error: errorTrasero } = await supabase
+                    .from('documentos_vendedor')
+                    .insert({
+                        vendedor_id: usuario.id,
+                        tipo_documento: tipoDocumento,
+                        numero_documento: numeroDocumento,
+                        archivo_url: urlTrasera,
+                        lado: 'trasero',
+                        verificado: false,
+                        fecha_subida: new Date().toISOString()
+                    })
+                    .select();
+                
+                console.log('📄 Doc Trasero guardado:', docTrasero, errorTrasero);
+                
+                if (errorTrasero) {
+                    console.error('❌ Error guardando documento trasero:', errorTrasero);
+                    throw errorTrasero;
+                }
+                
+                console.log('✅ Ambos documentos guardados correctamente');
+                
+                Swal.close();
+                
+                // Guardar datos personales del vendedor
+                await supabase.from('perfiles').upsert({
+                    id: usuario.id,
+                    nombre: nombreVendedor,
+                    apellidos: apellidosVendedor,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'id' });
+                
+                // Guardar historial
+                await supabase.from('historial_verificacion').insert({
+                    vendedor_id: usuario.id,
+                    accion: 'solicitud',
+                    comentario: `Solicitud de verificación enviada. Nombre: ${nombreVendedor} ${apellidosVendedor}`
+                });
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Solicitud enviada!',
+                    html: `
+                        <p>Tu tienda ha sido registrada y está pendiente de verificación.</p>
+                        <p style="margin-top: 15px; background: #fff3cd; padding: 15px; border-radius: 8px;">
+                            <i class="fa fa-clock-o"></i> 
+                            <strong>Plazo estimado: 24-48 horas</strong><br>
+                            Recibirás una notificación cuando sea aprobada.
+                        </p>
+                    `,
+                    confirmButtonText: 'Entendido'
+                }).then(() => {
+                    window.location.href = '/mi-cuenta.html';
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.close();
+                Swal.fire('Error', 'No se pudo completar la solicitud: ' + error.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa fa-save"></i> Enviar solicitud de verificación';
+            }
+        });
+        
+        // ========== INICIALIZAR ==========
+        actualizarMenuUsuario();
+        auth.onCambio(actualizarMenuUsuario);
+        verificarAuth();
+    </script>
+</body>
+</html>
