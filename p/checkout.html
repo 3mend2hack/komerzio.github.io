@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Compra · CUBAZON</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            color: #0f1111;
+            line-height: 1.5;
+        }
+        
+        .checkout-container {
+            max-width: 1500px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .checkout-header {
+            background: #131921;
+            color: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .checkout-header h1 {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+        }
+        
+        .checkout-form {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .checkout-sidebar {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+        
+        .saldo-header-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .saldo-header-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .saldo-header-info h3 {
+            font-size: 14px;
+            font-weight: 400;
+            opacity: 0.9;
+            margin-bottom: 3px;
+        }
+        
+        .saldo-header-amount {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .saldo-header-amount small {
+            font-size: 14px;
+            font-weight: 400;
+            opacity: 0.8;
+            margin-left: 5px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #0f1111;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+        
+        .form-control:focus {
+            border-color: #f08804;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(240,136,4,0.1);
+        }
+        
+        .form-control:disabled {
+            background: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .form-control[readonly] {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+        
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .shipping-selector {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        #ciudad {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 15px;
+        }
+        
+        .payment-methods {
+            margin: 30px 0;
+        }
+        
+        .payment-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .payment-option:hover {
+            border-color: #f08804;
+            background: #fff6e5;
+        }
+        
+        .payment-option.selected {
+            border-color: #f08804;
+            background: #fff6e5;
+        }
+        
+        .payment-option input[type="radio"] {
+            margin-right: 15px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .payment-option img {
+            height: 30px;
+            margin-left: auto;
+        }
+        
+        .payment-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .saldo-info {
+            background: #e8f5e9;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .saldo-info span {
+            font-weight: 600;
+            color: #155724;
+        }
+        
+        .saldo-info strong {
+            font-size: 18px;
+            color: #009644;
+        }
+        
+        .coupon-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+        
+        .coupon-section.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            background: #e9ecef;
+        }
+        
+        .coupon-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #ffd814;
+            color: #0f1111;
+            width: 100%;
+            font-size: 16px;
+            padding: 15px;
+        }
+        
+        .btn-primary:hover {
+            background: #f7ca00;
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #f0f2f5;
+            color: #0f1111;
+        }
+        
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            background: #f0f2f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-icon:hover {
+            background: #ffd814;
+            border-color: #f08804;
+        }
+        
+        .btn-icon i {
+            font-size: 12px;
+            color: #0f1111;
+        }
+        
+        .cart-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        
+        .cart-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .cart-item-details {
+            flex: 1;
+        }
+        
+        .cart-item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+        
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .cart-item-quantity {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .cart-item-remove {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+        
+        .cart-item-subtotal {
+            font-weight: 700;
+            color: #b12704;
+            min-width: 100px;
+            text-align: right;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+        
+        .grand-total {
+            font-size: 24px;
+            font-weight: 700;
+            color: #b12704;
+            border-top: 2px solid #ddd;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .empty-cart i {
+            font-size: 64px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .empty-cart h2 {
+            margin-bottom: 20px;
+            color: #666;
+        }
+        
+        .cart-items-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .qvapay-info-box {
+            background: #e3f2fd;
+            border: 2px solid #0088cc;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .qvapay-info-box h3 {
+            color: #0088cc;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .qvapay-info-box .dato-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .qvapay-info-box .dato-row span:first-child {
+            color: #6c757d;
+        }
+        
+        .qvapay-info-box .dato-row strong {
+            font-size: 18px;
+        }
+        
+        .qvapay-info-box .total-qusd {
+            font-size: 24px;
+            color: #0088cc;
+        }
+        
+        .mensaje-importante {
+            margin-top: 15px;
+            color: #155724;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,255,255,0.7);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
+            }
+            .row-2 {
+                grid-template-columns: 1fr;
+            }
+            .coupon-input {
+                flex-direction: column;
+            }
+            .cart-item {
+                flex-wrap: wrap;
+            }
+            .cart-item-subtotal {
+                text-align: left;
+                margin-left: 95px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <div class="checkout-header">
+            <h1>
+                <i class="fa fa-lock"></i> Finalizar Compra
+            </h1>
+            <a href="/index.html" style="color: white; text-decoration: none;">
+                <i class="fa fa-arrow-left"></i> Seguir comprando
+            </a>
+        </div>
+        
+        <div id="checkout-content">
+            <div style="text-align: center; padding: 60px;">
+                <i class="fa fa-spinner fa-pulse fa-3x"></i>
+                <p style="margin-top: 20px;">Cargando tu pedido...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script type="module">
+        import { supabase } from '/js/supabase-client.js'
+        import { initCarrito } from '/js/cart.js'
+        import { auth } from '/js/auth.js'
+        
+        const carrito = initCarrito()
+        window.cart = carrito
+        carrito.cargarDeLocalStorage()
+        carrito.actualizarInterfaz()
+        
+        let costoEnvio = 0
+        let descuentoAplicado = 0
+        let cuponActivo = null
+        let usuarioAutenticado = null
+        let saldoUsuario = 0
+        let metodoPagoSeleccionado = 'efectivo'
+        let tasaCambioActual = 600
+        
+        window.copiarTexto = function(texto) {
+            navigator.clipboard.writeText(texto).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Copiado!',
+                    text: 'Texto copiado al portapapeles',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }).catch(() => {
+                alert('Texto: ' + texto);
+            });
+        }
+        
+        async function obtenerTasaCambio() {
+            try {
+                const response = await fetch('https://sxxntcaobektiltyppwz.supabase.co/functions/v1/get-exchange-rate')
+                const data = await response.json()
+                if (data.success && data.usdToCup) {
+                    tasaCambioActual = data.usdToCup
+                    console.log('💰 Tasa actualizada:', tasaCambioActual, 'CUP por USD')
+                    return tasaCambioActual
+                }
+            } catch (error) {
+                console.error('Error obteniendo tasa:', error)
+            }
+            return tasaCambioActual
+        }
+        
+        async function actualizarInfoQvaPay() {
+            if (metodoPagoSeleccionado !== 'qvapay') return
+            
+            const tasa = await obtenerTasaCambio()
+            const subtotal = carrito.subtotal()
+            const totalCUP = subtotal + costoEnvio - descuentoAplicado
+            const totalQUSD = totalCUP / tasa
+            
+            const tasaInfo = document.getElementById('tasaValor')
+            const totalQUSDElement = document.getElementById('totalQUSD')
+            
+            if (tasaInfo) tasaInfo.textContent = `1 USD = ${tasa} CUP`
+            if (totalQUSDElement) totalQUSDElement.textContent = `${totalQUSD.toFixed(2)} QUSD`
+        }
+        
+        function actualizarEstadoCupon() {
+            const couponSection = document.querySelector('.coupon-section')
+            if (!couponSection) return
+            
+            if (metodoPagoSeleccionado === 'qvapay') {
+                couponSection.classList.add('disabled')
+                if (cuponActivo) {
+                    removerCupon()
+                }
+            } else {
+                couponSection.classList.remove('disabled')
+            }
+        }
+        
+        async function cargarDatosUsuario() {
+            console.log('🔍 EJECUTANDO cargarDatosUsuario...')
+            console.log('📌 auth.isAuthenticated():', auth.isAuthenticated())
+            
+            if (auth.isAuthenticated()) {
+                const usuario = auth.getUsuario()
+                console.log('👤 usuario desde auth.getUsuario():', usuario)
+                
+                if (!usuario) {
+                    console.log('❌ No se pudo obtener usuario de auth')
+                    return
+                }
+                
+                console.log('🔍 Consultando perfil en Supabase...')
+                const { data: perfil, error } = await supabase
+                    .from('perfiles')
+                    .select('*')
+                    .eq('id', usuario.id)
+                    .single()
+                
+                console.log('📋 Resultado de perfiles:', { perfil, error })
+                
+                if (!error && perfil) {
+                    usuarioAutenticado = {
+                        ...usuario,
+                        ...perfil,
+                        nombre: perfil.nombre || usuario.nombre_completo || usuario.user_metadata?.nombre || usuario.email?.split('@')[0] || ''
+                    }
+                    console.log('✅ usuarioAutenticado combinado:', usuarioAutenticado)
+                } else {
+                    usuarioAutenticado = {
+                        ...usuario,
+                        nombre: usuario.nombre_completo || usuario.user_metadata?.nombre || usuario.email?.split('@')[0] || '',
+                        telefono: usuario.telefono || '',
+                        direccion: usuario.direccion || '',
+                        localidad: usuario.localidad || '',
+                        referencia: usuario.referencia || '',
+                        carnet: usuario.carnet || ''
+                    }
+                    console.log('⚠️ Solo usuario de auth (sin perfil):', usuarioAutenticado)
+                }
+                
+                console.log('🔍 Consultando saldo...')
+                const { data: saldoData, error: saldoError } = await supabase
+                    .from('saldo_usuarios')
+                    .select('saldo_actual')
+                    .eq('user_id', usuarioAutenticado.id)
+                    .single()
+                
+                console.log('💰 Resultado de saldo:', { saldoData, saldoError })
+                
+                if (!saldoError && saldoData) {
+                    saldoUsuario = saldoData.saldo_actual || 0
+                    console.log('💰 saldoUsuario asignado:', saldoUsuario)
+                } else {
+                    saldoUsuario = 0
+                    console.log('💰 saldoUsuario por defecto: 0')
+                }
+                
+                console.log('✅ FINAL - usuarioAutenticado:', usuarioAutenticado)
+                console.log('✅ FINAL - saldoUsuario:', saldoUsuario)
+            } else {
+                console.log('🔴 Usuario NO autenticado')
+            }
+        }
+        
+        function autocompletarFormulario() {
+            if (!usuarioAutenticado) return
+            
+            const nombreInput = document.getElementById('nombre')
+            const emailInput = document.getElementById('email')
+            const telefonoInput = document.getElementById('telefono')
+            
+            if (nombreInput) {
+                nombreInput.value = usuarioAutenticado.nombre || usuarioAutenticado.nombre_completo || ''
+                nombreInput.readOnly = true
+            }
+            if (emailInput) {
+                emailInput.value = usuarioAutenticado.email || ''
+                emailInput.readOnly = true
+            }
+            if (telefonoInput) {
+                telefonoInput.value = usuarioAutenticado.telefono || ''
+                telefonoInput.readOnly = true
+            }
+            
+            const direccionInput = document.getElementById('direccion')
+            const localidadInput = document.getElementById('localidad')
+            const referenciaInput = document.getElementById('referencia')
+            const carnetInput = document.getElementById('carnet')
+            
+            if (direccionInput && usuarioAutenticado.direccion) {
+                direccionInput.value = usuarioAutenticado.direccion
+                direccionInput.readOnly = false
+            }
+            if (localidadInput && usuarioAutenticado.localidad) {
+                localidadInput.value = usuarioAutenticado.localidad
+                localidadInput.readOnly = false
+            }
+            if (referenciaInput && usuarioAutenticado.referencia) {
+                referenciaInput.value = usuarioAutenticado.referencia
+                referenciaInput.readOnly = false
+            }
+            if (carnetInput && usuarioAutenticado.carnet) {
+                carnetInput.value = usuarioAutenticado.carnet
+                carnetInput.readOnly = false
+            }
+        }
+        
+        function renderizarCheckout() {
+            const container = document.getElementById('checkout-content')
+            if (!container) return
+            
+            if (!carrito.items || carrito.items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fa fa-shopping-cart"></i>
+                        <h2>Tu carrito está vacío</h2>
+                        <p style="margin-bottom: 30px; color: #666;">No hay productos para finalizar la compra.</p>
+                        <a href="/index.html" style="display: inline-block; background: #ffd814; padding: 12px 40px; border-radius: 20px; color: #0f1111; font-weight: 600; text-decoration: none;">
+                            <i class="fa fa-arrow-left"></i> Ir a comprar
+                        </a>
+                    </div>
+                `
+                return
+            }
+            
+            let itemsHtml = ''
+            carrito.items.forEach(item => {
+                itemsHtml += `
+                    <div class="cart-item" data-item-id="${item.id}">
+                        <img src="${item.imagen_url || '/assets/images/no-image.jpg'}" alt="${item.nombre}" onerror="this.src='/assets/images/no-image.jpg'">
+                        
+                        <div class="cart-item-details">
+                            <div class="cart-item-title">${item.nombre}</div>
+                            
+                            <div class="cart-item-controls">
+                                <button class="btn-icon" onclick="window.cart.actualizarCantidad('${item.id}', ${item.cantidad - 1})">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                                
+                                <span class="cart-item-quantity">${item.cantidad}</span>
+                                
+                                <button class="btn-icon" onclick="window.cart.actualizarCantidad('${item.id}', ${item.cantidad + 1})">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                                
+                                <button class="cart-item-remove" onclick="window.cart.eliminar('${item.id}')" title="Eliminar">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="cart-item-subtotal">
+                            $${(item.precio * item.cantidad).toFixed(2)}
+                        </div>
+                    </div>
+                `
+            })
+            
+            const subtotal = carrito.subtotal()
+            const cantidad = carrito.cantidadTotal()
+            const totalCUP = subtotal + costoEnvio - descuentoAplicado
+            
+            // ========== MÉTODOS DE PAGO MODIFICADOS ==========
+            // QVAPAY Y TRANSFERENCIA AHORA APARECEN COMO "disabled" (INHABILITADOS)
+            // PERO LA LÓGICA SE MANTIENE INTACTA EN EL CÓDIGO
+            let metodosPago = `
+                <label class="payment-option ${metodoPagoSeleccionado === 'efectivo' ? 'selected' : ''}">
+                    <input type="radio" name="payment_method" value="efectivo" ${metodoPagoSeleccionado === 'efectivo' ? 'checked' : ''} onchange="window.metodoPagoCambio('efectivo')">
+                    <span style="font-weight: 600;">Efectivo</span>
+                    <img src="https://res.cloudinary.com/dyyzp1khy/image/upload/v1743374144/billetes500_e4zo3m.png" alt="Efectivo">
+                </label>
+            `
+            
+            if (usuarioAutenticado) {
+                metodosPago += `
+                    <label class="payment-option ${metodoPagoSeleccionado === 'saldo' ? 'selected' : ''}">
+                        <input type="radio" name="payment_method" value="saldo" ${metodoPagoSeleccionado === 'saldo' ? 'checked' : ''} onchange="window.metodoPagoCambio('saldo')">
+                        <span style="font-weight: 600;">💰 Saldo CUBAZON</span>
+                        <span style="margin-left: auto; background: #009644; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px;">
+                            Disponible: $${saldoUsuario.toFixed(2)}
+                        </span>
+                    </label>
+                    
+                    <!-- QVAPAY: INHABILITADO (disabled) - Lógica intacta -->
+                    <label class="payment-option disabled">
+                        <input type="radio" name="payment_method" value="qvapay" disabled>
+                        <span style="font-weight: 600;">⚡ Pago con QvaPay</span>
+                        <span style="margin-left: auto; background: #f0f2f5; padding: 5px 10px; border-radius: 4px; font-size: 12px;">No disponible</span>
+                    </label>
+                    
+                    <!-- TRANSFERENCIA: INHABILITADO (disabled) - Lógica intacta -->
+                    <label class="payment-option disabled">
+                        <input type="radio" name="payment_method" value="transferencia" disabled>
+                        <span style="font-weight: 600;">🏦 Transferencia bancaria</span>
+                        <span style="margin-left: auto; background: #f0f2f5; padding: 5px 10px; border-radius: 4px; font-size: 12px;">No disponible</span>
+                    </label>
+                `
+            } else {
+                metodosPago += `
+                    <label class="payment-option disabled">
+                        <input type="radio" name="payment_method" value="saldo" disabled>
+                        <span style="font-weight: 600;">💰 Saldo CUBAZON</span>
+                        <span style="background: #f0f2f5; padding: 5px 10px; border-radius: 4px; font-size: 12px;">Inicia sesión</span>
+                    </label>
+                    <!-- QVAPAY INHABILITADO -->
+                    <label class="payment-option disabled">
+                        <input type="radio" name="payment_method" value="qvapay" disabled>
+                        <span style="font-weight: 600;">⚡ Pago con QvaPay</span>
+                        <span style="background: #f0f2f5; padding: 5px 10px; border-radius: 4px; font-size: 12px;">No disponible</span>
+                    </label>
+                    <!-- TRANSFERENCIA INHABILITADA -->
+                    <label class="payment-option disabled">
+                        <input type="radio" name="payment_method" value="transferencia" disabled>
+                        <span style="font-weight: 600;">🏦 Transferencia bancaria</span>
+                        <span style="background: #f0f2f5; padding: 5px 10px; border-radius: 4px; font-size: 12px;">No disponible</span>
+                    </label>
+                `
+            }
+            // ========== FIN DE MODIFICACIÓN ==========
+            
+            let qvapayInfoHtml = ''
+            // El panel de info de QvaPay solo se muestra si está seleccionado (lo cual ya no será posible porque está disabled)
+            if (metodoPagoSeleccionado === 'qvapay') {
+                const totalQUSD = totalCUP / tasaCambioActual
+                qvapayInfoHtml = `
+                    <div class="qvapay-info-box">
+                        <h3><i class="fa fa-bolt"></i> Pago con QvaPay</h3>
+                        <div class="dato-row"><span>Total en CUP:</span><strong>$${totalCUP.toFixed(2)} CUP</strong></div>
+                        <div class="dato-row" id="tasaInfo"><span>Tasa de cambio:</span><strong id="tasaValor">1 USD = ${tasaCambioActual} CUP</strong></div>
+                        <div class="dato-row"><span>Total a pagar (QUSD):</span><strong class="total-qusd" id="totalQUSD">${totalQUSD.toFixed(2)} QUSD</strong></div>
+                        <div class="mensaje-importante" style="background: #fff3e0; color: #856404;"><i class="fa fa-info-circle"></i> Al hacer clic en "Pagar con QvaPay" serás redirigido para completar el pago.</div>
+                    </div>
+                `
+            }
+            
+            let saldoHeaderHtml = ''
+            if (usuarioAutenticado) {
+                saldoHeaderHtml = `
+                    <div class="saldo-header-card">
+                        <div class="saldo-header-icon"><i class="fa fa-credit-card"></i></div>
+                        <div class="saldo-header-info"><h3>Tu saldo disponible</h3><div class="saldo-header-amount">$${saldoUsuario.toFixed(2)} <small>CUP</small></div></div>
+                    </div>
+                `
+            }
+            
+            container.innerHTML = `
+                <div class="checkout-grid">
+                    <div class="checkout-form">
+                        ${saldoHeaderHtml}
+                        <h2 style="margin-bottom: 25px;">📦 Información de envío</h2>
+                        <div class="row-2">
+                            <div class="form-group"><label>Nombre y apellidos *</label><input type="text" class="form-control" id="nombre" placeholder="Ej: Juan Pérez" required></div>
+                            <div class="form-group"><label>Email *</label><input type="email" class="form-control" id="email" placeholder="correo@ejemplo.com" required></div>
+                        </div>
+                        <div class="row-2">
+                            <div class="form-group"><label>Teléfono *</label><input type="tel" class="form-control" id="telefono" placeholder="56940021" required></div>
+                            <div class="form-group"><label>Carnet/Pasaporte *</label><input type="text" class="form-control" id="carnet" placeholder="Número de identificación" required></div>
+                        </div>
+                        <div class="form-group"><label>Dirección completa *</label><input type="text" class="form-control" id="direccion" placeholder="Calle, número, entre calles" required></div>
+                        <div class="row-2">
+                            <div class="form-group"><label>Localidad/Barrio *</label><input type="text" class="form-control" id="localidad" placeholder="Ej: Sagua, Jobo, Plazuela" required></div>
+                            <div class="form-group"><label>Referencia</label><input type="text" class="form-control" id="referencia" placeholder="Cerca de la escuela, etc"></div>
+                        </div>
+                        <div class="form-group"><label>Notas del pedido</label><textarea class="form-control" id="notas" rows="3" placeholder="¿Alguna instrucción especial? (color, talla, etc)"></textarea></div>
+                        <div class="shipping-selector">
+                            <label style="font-weight: 600; margin-bottom: 10px; display: block;">🚚 Método de envío</label>
+                            <select id="ciudad" class="form-control">
+                                <option value="">-- Selecciona tu zona --</option>
+                                <option value="no-deseo" data-costo="0">Recoger en tienda (Gratis)</option>
+                                <option value="sagua" data-costo="150">Sagua de Tánamo - $150 CUP</option>
+                                <option value="jobo" data-costo="250">Jobo - $250 CUP</option>
+                                <option value="plazuela" data-costo="300">Plazuela - $300 CUP</option>
+                                <option value="bazan" data-costo="350">Bazán - $350 CUP</option>
+                                <option value="sabala" data-costo="200">Sabála - $200 CUP</option>
+                                <option value="carpintero" data-costo="400">Carpintero - $400 CUP</option>
+                                <option value="el-miguel" data-costo="500">El Miguel - $500 CUP</option>
+                                <option value="el-caro" data-costo="650">El Caró - $650 CUP</option>
+                            </select>
+                            <div id="mensajeBusqueda" style="margin-top: 10px; font-size: 14px; color: #666;"></div>
+                        </div>
+                        <h2 style="margin: 30px 0 20px;">💳 Método de pago</h2>
+                        <div class="payment-methods">${metodosPago}</div>
+                        ${qvapayInfoHtml}
+                        <div class="coupon-section">
+                            <label style="font-weight: 600;">🎫 ¿Tienes un cupón de descuento?</label>
+                            <div class="coupon-input">
+                                <input type="text" id="coupon-code" class="form-control" placeholder="Ingresa tu código" maxlength="20">
+                                <button type="button" class="btn btn-secondary" id="apply-coupon">Aplicar</button>
+                                <button type="button" class="btn btn-secondary" id="remove-coupon" style="display: none;">Remover</button>
+                            </div>
+                            <div id="coupon-message" style="margin-top: 10px;"></div>
+                        </div>
+                    </div>
+                    <div class="checkout-sidebar">
+                        <h2 style="margin-bottom: 20px;">🛒 Tu pedido</h2>
+                        <div class="cart-items-container">${itemsHtml}</div>
+                        ${usuarioAutenticado && saldoUsuario > 0 ? `<div class="saldo-info"><span>💰 Tu saldo disponible:</span><strong>$${saldoUsuario.toFixed(2)} CUP</strong></div>` : ''}
+                        <div style="margin-top: 30px;">
+                            <div class="total-row"><span>Subtotal (${cantidad} productos):</span><span style="font-weight: 600;" id="checkout-subtotal">$${subtotal.toFixed(2)}</span></div>
+                            <div class="total-row"><span>Envío:</span><span style="font-weight: 600;" id="checkout-shipping">$0.00</span></div>
+                            <div class="total-row" id="discount-row" style="display: none;"><span>Descuento:</span><span style="font-weight: 600; color: #059669;" id="checkout-discount">-$0.00</span></div>
+                            <div class="grand-total total-row"><span>Total:</span><span id="checkout-total">$${subtotal.toFixed(2)}</span></div>
+                        </div>
+                        <button class="btn btn-primary" id="confirm-order-btn" style="margin-top: 30px;"><i class="fa fa-check"></i> Confirmar pedido</button>
+                        <p style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;"><i class="fa fa-lock"></i> Tus datos están seguros</p>
+                    </div>
+                </div>
+            `
+            
+            document.getElementById('ciudad')?.addEventListener('change', actualizarCostoEnvio)
+            document.getElementById('apply-coupon')?.addEventListener('click', aplicarCupon)
+            document.getElementById('remove-coupon')?.addEventListener('click', removerCupon)
+            document.getElementById('confirm-order-btn')?.addEventListener('click', procesarPedido)
+            
+            if (usuarioAutenticado) autocompletarFormulario()
+            actualizarTotales()
+            actualizarEstadoCupon()
+            if (metodoPagoSeleccionado === 'qvapay') actualizarInfoQvaPay()
+        }
+        
+        window.metodoPagoCambio = async function(metodo) {
+            metodoPagoSeleccionado = metodo
+            if (metodo === 'qvapay') await actualizarInfoQvaPay()
+            actualizarEstadoCupon()
+            renderizarCheckout()
+        }
+        
+        function actualizarCostoEnvio() {
+            const select = document.getElementById('ciudad')
+            const mensaje = document.getElementById('mensajeBusqueda')
+            if (!select) return
+            const selectedOption = select.options[select.selectedIndex]
+            costoEnvio = selectedOption?.getAttribute('data-costo') ? parseFloat(selectedOption.getAttribute('data-costo')) : 0
+            if (select.value === 'no-deseo') {
+                mensaje.innerHTML = '📍 Recogerás el pedido en nuestra tienda'
+                mensaje.style.display = 'block'
+            } else if (select.value) {
+                mensaje.innerHTML = `🚚 Envío a ${selectedOption.textContent}`
+                mensaje.style.display = 'block'
+            } else {
+                mensaje.style.display = 'none'
+            }
+            actualizarTotales()
+            if (metodoPagoSeleccionado === 'qvapay') actualizarInfoQvaPay()
+        }
+        
+        function actualizarTotales() {
+            const subtotal = carrito.subtotal()
+            const total = subtotal + costoEnvio - descuentoAplicado
+            document.getElementById('checkout-subtotal').textContent = `$${subtotal.toFixed(2)}`
+            document.getElementById('checkout-shipping').textContent = `$${costoEnvio.toFixed(2)}`
+            document.getElementById('checkout-total').textContent = `$${total.toFixed(2)}`
+            if (descuentoAplicado > 0) {
+                document.getElementById('discount-row').style.display = 'flex'
+                document.getElementById('checkout-discount').textContent = `-$${descuentoAplicado.toFixed(2)}`
+            } else {
+                document.getElementById('discount-row').style.display = 'none'
+            }
+        }
+        
+        async function aplicarCupon() {
+            if (metodoPagoSeleccionado === 'qvapay') {
+                Swal.fire('Error', 'Los cupones no están disponibles para pagos con QvaPay', 'error')
+                return
+            }
+            const codigo = document.getElementById('coupon-code').value.trim()
+            if (!codigo) {
+                Swal.fire('Error', 'Ingresa un código', 'error')
+                return
+            }
+            try {
+                const { data, error } = await supabase.from('cupones').select('*').eq('codigo', codigo.toUpperCase()).eq('activo', true).single()
+                if (error || !data) {
+                    Swal.fire('Error', 'Cupón inválido o inactivo', 'error')
+                    return
+                }
+                if (data.expiracion) {
+                    const hoy = new Date()
+                    const exp = new Date(data.expiracion)
+                    if (hoy > exp) {
+                        Swal.fire('Error', 'Este cupón ha expirado', 'error')
+                        return
+                    }
+                }
+                if (data.usos_actuales >= data.max_usos) {
+                    Swal.fire('Error', 'Este cupón ya no tiene usos disponibles', 'error')
+                    return
+                }
+                const subtotal = carrito.subtotal()
+                let descuento = 0
+                if (data.tipo === 'porcentaje') {
+                    descuento = subtotal * (data.descuento / 100)
+                } else {
+                    descuento = data.descuento
+                }
+                descuento = Math.min(descuento, subtotal)
+                descuentoAplicado = descuento
+                cuponActivo = data
+                document.getElementById('apply-coupon').style.display = 'none'
+                document.getElementById('remove-coupon').style.display = 'inline-block'
+                document.getElementById('coupon-code').disabled = true
+                document.getElementById('coupon-message').innerHTML = `<div style="color: #059669; font-weight: 600; padding: 10px; background: #e8f5e9; border-radius: 8px;">✅ Cupón aplicado: ${data.codigo}<br>Descuento: ${data.tipo === 'porcentaje' ? `${data.descuento}%` : `$${data.descuento.toFixed(2)} CUP`}</div>`
+                actualizarTotales()
+                if (metodoPagoSeleccionado === 'qvapay') actualizarInfoQvaPay()
+            } catch (error) {
+                console.error('Error al aplicar cupón:', error)
+                Swal.fire('Error', 'Error al validar el cupón', 'error')
+            }
+        }
+        
+        function removerCupon() {
+            descuentoAplicado = 0
+            cuponActivo = null
+            document.getElementById('apply-coupon').style.display = 'inline-block'
+            document.getElementById('remove-coupon').style.display = 'none'
+            document.getElementById('coupon-code').disabled = false
+            document.getElementById('coupon-code').value = ''
+            document.getElementById('coupon-message').innerHTML = ''
+            actualizarTotales()
+            if (metodoPagoSeleccionado === 'qvapay') actualizarInfoQvaPay()
+        }
+        
+        async function procesarPedido() {
+            if (!auth.isAuthenticated()) {
+                const result = await Swal.fire({
+                    icon: 'info',
+                    title: 'Inicia sesión o regístrate',
+                    html: `<p>Para realizar una compra necesitas tener una cuenta en CUBAZON.</p><div style="text-align: left; margin-top: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px;"><p><i class="fa fa-check-circle" style="color: #28a745;"></i> <strong>Beneficios:</strong></p><ul style="list-style: none; padding-left: 0;"><li style="margin-bottom: 8px;">✅ Seguimiento de tus pedidos</li><li style="margin-bottom: 8px;">✅ Pago con saldo CUBAZON</li><li style="margin-bottom: 8px;">✅ Datos de envío guardados</li><li style="margin-bottom: 8px;">✅ Historial de compras</li></ul></div>`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Iniciar sesión',
+                    cancelButtonText: 'Registrarme',
+                    reverseButtons: true
+                });
+                if (result.isConfirmed) {
+                    window.location.href = '/login.html';
+                } else {
+                    window.location.href = '/registro.html';
+                }
+                return;
+            }
+            
+            const metodoPago = document.querySelector('input[name="payment_method"]:checked')?.value
+            if (!metodoPago) {
+                Swal.fire('Error', 'Selecciona un método de pago', 'error')
+                return
+            }
+            
+            const nombre = document.getElementById('nombre')?.value
+            if (!nombre) { Swal.fire('Error', 'Ingresa tu nombre', 'error'); return }
+            const email = document.getElementById('email')?.value
+            if (!email || !email.includes('@')) { Swal.fire('Error', 'Ingresa un email válido', 'error'); return }
+            const telefono = document.getElementById('telefono')?.value
+            if (!telefono) { Swal.fire('Error', 'Ingresa tu teléfono', 'error'); return }
+            const ciudad = document.getElementById('ciudad')?.value
+            if (!ciudad) { Swal.fire('Error', 'Selecciona un método de envío', 'error'); return }
+            const direccion = document.getElementById('direccion')?.value
+            if (!direccion) { Swal.fire('Error', 'Ingresa tu dirección', 'error'); return }
+            const localidad = document.getElementById('localidad')?.value
+            if (!localidad) { Swal.fire('Error', 'Ingresa tu localidad', 'error'); return }
+            
+            const btn = document.getElementById('confirm-order-btn')
+            btn.disabled = true
+            btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Procesando...'
+            
+            try {
+                const totalCUP = carrito.subtotal() + costoEnvio - descuentoAplicado
+                
+                // PAGO CON QVAPAY (LÓGICA INTACTA)
+                if (metodoPago === 'qvapay') {
+                    const tasa = await obtenerTasaCambio()
+                    const totalQUSD = totalCUP / tasa
+                    const { data: sessionData } = await supabase.auth.getSession()
+                    const accessToken = sessionData?.session?.access_token
+                    const response = await fetch('https://sxxntcaobektiltyppwz.supabase.co/functions/v1/qvapay-create-invoice', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+                        body: JSON.stringify({
+                            usuarioId: usuarioAutenticado.id,
+                            montoUSD: totalQUSD,
+                            montoCUP: totalCUP,
+                            descripcion: `Pago de pedido CUBAZON - Total: $${totalQUSD.toFixed(2)} QUSD`,
+                            esPedido: true,
+                            pedidoData: {
+                                items: carrito.items.map(item => ({
+                                    id: String(item.producto_id),
+                                    nombre: item.nombre,
+                                    precio: item.precio,
+                                    cantidad: item.cantidad,
+                                    subtotal: item.precio * item.cantidad,
+                                    imagen_url: item.imagen_url,
+                                    opciones: item.opciones || {}
+                                })),
+                                subtotal: carrito.subtotal(),
+                                envio: costoEnvio,
+                                descuento: descuentoAplicado,
+                                total: totalCUP,
+                                cliente: {
+                                    nombre, email, telefono, direccion, localidad,
+                                    referencia: document.getElementById('referencia')?.value || '',
+                                    carnet: document.getElementById('carnet')?.value || '',
+                                    notas: document.getElementById('notas')?.value || ''
+                                },
+                                metodo_pago: 'qvapay',
+                                cupon_aplicado: cuponActivo?.codigo || null,
+                                tasa_aplicada: tasa
+                            }
+                        })
+                    })
+                    const data = await response.json()
+                    if (!response.ok) throw new Error(data.error || 'Error al crear factura')
+                    localStorage.setItem('pedido_pendiente_qvapay', JSON.stringify({ transaccionId: data.transaccion_id, totalQUSD: totalQUSD, totalCUP: totalCUP, tasa: tasa }))
+                    window.location.href = data.url
+                    return
+                }
+                
+                // PAGO CON SALDO CUBAZON (LÓGICA INTACTA)
+                if (metodoPago === 'saldo') {
+                    if (saldoUsuario < totalCUP) throw new Error('Saldo insuficiente')
+                    
+                    // Descontar saldo
+                    const { error: saldoError } = await supabase
+                        .from('saldo_usuarios')
+                        .update({ saldo_actual: saldoUsuario - totalCUP })
+                        .eq('user_id', usuarioAutenticado.id)
+                    if (saldoError) throw saldoError
+                    
+                    await supabase.from('historial_saldo').insert({
+                        user_id: usuarioAutenticado.id,
+                        tipo: 'compra',
+                        monto: totalCUP,
+                        saldo_anterior: saldoUsuario,
+                        saldo_nuevo: saldoUsuario - totalCUP,
+                        descripcion: 'Compra en tienda'
+                    })
+                    
+                    // Construir pedido
+                    const pedido = {
+                        items: carrito.items.map(item => ({
+                            id: String(item.producto_id),
+                            nombre: item.nombre,
+                            precio: item.precio,
+                            cantidad: item.cantidad,
+                            subtotal: item.precio * item.cantidad,
+                            imagen_url: item.imagen_url || '/assets/images/no-image.jpg',
+                            opciones: item.opciones || {}
+                        })),
+                        subtotal: carrito.subtotal(),
+                        envio: costoEnvio,
+                        descuento: descuentoAplicado,
+                        total: totalCUP,
+                        cliente: {
+                            nombre, email, telefono, direccion, localidad,
+                            referencia: document.getElementById('referencia')?.value || '',
+                            carnet: document.getElementById('carnet')?.value || '',
+                            notas: document.getElementById('notas')?.value || ''
+                        },
+                        metodo_pago: 'saldo_cubazon',
+                        cupon_aplicado: cuponActivo?.codigo || null,
+                        estado: 'pagado',
+                        created_at: new Date().toISOString()
+                    }
+                    
+                    const { data, error } = await supabase.from('pedidos').insert([pedido]).select().single()
+                    if (error) throw error
+                    
+                    carrito.vaciar()
+                    
+                    // Redirigir a saldo-cubazon.html con el ID del pedido
+                    window.location.href = `/saldo-cubazon.html?id=${data.id}`
+                    return
+                }
+                
+                // PAGO EN EFECTIVO (LÓGICA INTACTA)
+                if (metodoPago === 'efectivo') {
+                    const pedido = {
+                        items: carrito.items.map(item => ({
+                            id: String(item.producto_id),
+                            nombre: item.nombre,
+                            precio: item.precio,
+                            cantidad: item.cantidad,
+                            subtotal: item.precio * item.cantidad,
+                            imagen_url: item.imagen_url || '/assets/images/no-image.jpg',
+                            opciones: item.opciones || {}
+                        })),
+                        subtotal: carrito.subtotal(),
+                        envio: costoEnvio,
+                        descuento: descuentoAplicado,
+                        total: totalCUP,
+                        cliente: {
+                            nombre, email, telefono, direccion, localidad,
+                            referencia: document.getElementById('referencia')?.value || '',
+                            carnet: document.getElementById('carnet')?.value || '',
+                            notas: document.getElementById('notas')?.value || ''
+                        },
+                        metodo_pago: 'efectivo',
+                        cupon_aplicado: cuponActivo?.codigo || null,
+                        estado: 'pendiente',
+                        created_at: new Date().toISOString()
+                    }
+                    
+                    const { data, error } = await supabase.from('pedidos').insert([pedido]).select().single()
+                    if (error) throw error
+                    
+                    carrito.vaciar()
+                    window.location.href = `/pago-efectivo.html?id=${data.id}`
+                    return
+                }
+                
+                // TRANSFERENCIA BANCARIA (LÓGICA INTACTA - aunque no se usará porque está disabled)
+                if (metodoPago === 'transferencia') {
+                    // La lógica original de transferencia se mantiene aquí sin cambios
+                    const pedido = {
+                        items: carrito.items.map(item => ({
+                            id: String(item.producto_id),
+                            nombre: item.nombre,
+                            precio: item.precio,
+                            cantidad: item.cantidad,
+                            subtotal: item.precio * item.cantidad,
+                            imagen_url: item.imagen_url || '/assets/images/no-image.jpg',
+                            opciones: item.opciones || {}
+                        })),
+                        subtotal: carrito.subtotal(),
+                        envio: costoEnvio,
+                        descuento: descuentoAplicado,
+                        total: totalCUP,
+                        cliente: {
+                            nombre, email, telefono, direccion, localidad,
+                            referencia: document.getElementById('referencia')?.value || '',
+                            carnet: document.getElementById('carnet')?.value || '',
+                            notas: document.getElementById('notas')?.value || ''
+                        },
+                        metodo_pago: 'transferencia',
+                        cupon_aplicado: cuponActivo?.codigo || null,
+                        estado: 'pendiente',
+                        created_at: new Date().toISOString()
+                    }
+                    
+                    const { data, error } = await supabase.from('pedidos').insert([pedido]).select().single()
+                    if (error) throw error
+                    
+                    carrito.vaciar()
+                    window.location.href = `/pago-transferencia.html?id=${data.id}`
+                    return
+                }
+                
+            } catch (error) {
+                console.error('Error:', error)
+                Swal.fire('Error', error.message || 'No se pudo procesar el pedido', 'error')
+                btn.disabled = false
+                btn.innerHTML = '<i class="fa fa-check"></i> Confirmar pedido'
+            }
+        }
+        
+        async function inicializar() {
+            console.log('🚀 Inicializando checkout...')
+            for (let i = 0; i < 10; i++) {
+                if (auth.isAuthenticated()) {
+                    console.log('✅ Usuario autenticado detectado')
+                    await cargarDatosUsuario()
+                    await obtenerTasaCambio()
+                    break
+                }
+                console.log('⏳ Esperando auth...', i + 1)
+                await new Promise(resolve => setTimeout(resolve, 200))
+            }
+            renderizarCheckout()
+        }
+        
+        inicializar()
+        window.addEventListener('carrito-actualizado', renderizarCheckout)
+    </script>
+</body>
+</html>

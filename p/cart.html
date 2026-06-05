@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Mi Carrito · CUBAZON</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            color: #0f1111;
+            line-height: 1.5;
+        }
+        
+        /* Header responsive */
+        .header {
+            background: #131921;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-logo img {
+            height: 40px;
+            width: auto;
+        }
+        
+        .cart-icon {
+            display: flex;
+            align-items: center;
+            color: white;
+            position: relative;
+        }
+        
+        .cart-icon i {
+            font-size: 24px;
+        }
+        
+        #cart-counter {
+            background: #f08804;
+            color: #0f1111;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 8px;
+            font-size: 14px;
+        }
+        
+        /* Contenedor principal */
+        .cart-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        
+        /* Header del carrito */
+        .cart-header {
+            background: #131921;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .cart-header h1 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .cart-header a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            transition: background 0.2s;
+        }
+        
+        .cart-header a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        /* Grid responsive */
+        .cart-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+        }
+        
+        /* Items del carrito */
+        .cart-items {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .cart-items h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+        
+        /* Item individual */
+        .cart-item {
+            display: flex;
+            gap: 15px;
+            padding: 20px 0;
+            border-bottom: 1px solid #f0f2f5;
+            align-items: center;
+        }
+        
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        
+        .cart-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            padding: 5px;
+        }
+        
+        .cart-item-details {
+            flex: 1;
+            min-width: 0; /* Evita desbordamiento */
+        }
+        
+        .cart-item-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+        
+        .cart-item-price {
+            color: #b12704;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 30px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .quantity-btn {
+            width: 28px;
+            height: 28px;
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+            color: #0f1111;
+        }
+        
+        .quantity-btn:hover {
+            background: #ffd814;
+            border-color: #f08804;
+            transform: scale(1.05);
+        }
+        
+        .quantity-input {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 15px;
+            color: #0f1111;
+            background: white;
+            padding: 4px 0;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .remove-btn {
+            color: #999;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.2s;
+        }
+        
+        .remove-btn:hover {
+            color: #dc3545;
+        }
+        
+        .cart-item-subtotal {
+            font-weight: 700;
+            color: #b12704;
+            font-size: 16px;
+            min-width: 80px;
+            text-align: right;
+        }
+        
+        /* Sidebar */
+        .cart-sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+        
+        .cart-sidebar h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0;
+            font-size: 15px;
+        }
+        
+        .grand-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: #b12704;
+            border-top: 2px solid #e0e0e0;
+            margin-top: 15px;
+            padding-top: 15px;
+        }
+        
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: #ffd814;
+            color: #0f1111;
+            margin-top: 20px;
+        }
+        
+        .btn-primary:hover {
+            background: #f7ca00;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #0f1111;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background: #e4e6e9;
+        }
+        
+        /* Empty cart */
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .empty-cart i {
+            font-size: 64px;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+        
+        .empty-cart h2 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #0f1111;
+        }
+        
+        .empty-cart p {
+            color: #6c757d;
+            margin-bottom: 25px;
+        }
+        
+        .empty-cart .btn {
+            display: inline-block;
+            width: auto;
+            padding: 12px 40px;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #232f3e;
+            color: white;
+            padding: 30px 20px;
+            margin-top: 60px;
+            text-align: center;
+        }
+        
+        .footer p {
+            font-size: 14px;
+            color: #ddd;
+        }
+        
+        /* ===== RESPONSIVE PARA MÓVIL ===== */
+        @media screen and (max-width: 768px) {
+            .cart-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .cart-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .cart-header h1 {
+                font-size: 18px;
+            }
+            
+            .cart-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 15px 0;
+            }
+            
+            .cart-item img {
+                width: 100px;
+                height: 100px;
+                align-self: center;
+            }
+            
+            .cart-item-details {
+                width: 100%;
+            }
+            
+            .cart-item-title {
+                font-size: 15px;
+                padding-right: 10px;
+            }
+            
+            .cart-item-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .quantity-control {
+                flex: 1;
+                justify-content: space-between;
+                max-width: 140px;
+            }
+            
+            .cart-item-subtotal {
+                text-align: left;
+                width: 100%;
+                margin-top: 5px;
+                padding-top: 8px;
+                border-top: 1px dashed #eee;
+            }
+            
+            .cart-sidebar {
+                margin-top: 10px;
+            }
+            
+            .btn {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            .cart-container {
+                padding: 0 10px;
+            }
+            
+            .cart-header {
+                padding: 12px 15px;
+            }
+            
+            .cart-items {
+                padding: 15px;
+            }
+            
+            .cart-item img {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .cart-item-title {
+                font-size: 14px;
+            }
+            
+            .cart-item-price {
+                font-size: 15px;
+            }
+            
+            .quantity-control {
+                max-width: 120px;
+            }
+            
+            .quantity-btn {
+                width: 26px;
+                height: 26px;
+            }
+            
+            .remove-btn span {
+                display: none;
+            }
+            
+            .remove-btn i {
+                font-size: 18px;
+            }
+            
+            .cart-sidebar {
+                padding: 15px;
+            }
+            
+            .grand-total {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-content">
+            <a href="../index.html" class="header-logo">
+                <img src="https://imgfz.com/i/oXOfVlT.png" alt="CUBAZON" onerror="this.src='https://via.placeholder.com/120x40?text=CUBAZON'">
+            </a>
+            <div class="cart-icon">
+                <i class="fa fa-shopping-cart"></i>
+                <span id="cart-counter">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="cart-container">
+        <div class="cart-header">
+            <h1>
+                <i class="fa fa-shopping-cart"></i> 
+                Tu Carrito de Compras
+            </h1>
+            <a href="../index.html">
+                <i class="fa fa-arrow-left"></i> 
+                Seguir comprando
+            </a>
+        </div>
+
+        <div id="cart-content">
+            <div class="empty-cart">
+                <i class="fa fa-spinner fa-pulse fa-3x"></i>
+                <h2>Cargando tu carrito...</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <p>@Copyright 2026 · Diseñado por Des.Joshua_Technology</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="module">
+        import { supabase } from '../js/supabase-client.js'
+        import { carrito } from '../js/cart.js'
+        
+        // Exponer globalmente
+        window.cart = carrito
+
+        // 🔥 FUNCIÓN PARA OBTENER PRECIO ACTUALIZADO DESDE LA BD
+        async function obtenerPrecioActualizado(item) {
+            try {
+                const { data, error } = await supabase
+                    .from('productos')
+                    .select('precio, precio_oferta, oferta_del_dia')
+                    .eq('id', item.producto_id)
+                    .single()
+                
+                if (error || !data) {
+                    return item.precio // Si hay error, mantener el precio guardado
+                }
+                
+                // Si está en oferta, devolver precio_oferta
+                if (data.oferta_del_dia === true && data.precio_oferta && data.precio_oferta > 0) {
+                    return parseFloat(data.precio_oferta)
+                }
+                
+                // Si no está en oferta, devolver precio normal
+                return parseFloat(data.precio)
+                
+            } catch (error) {
+                console.error('Error obteniendo precio:', error)
+                return item.precio
+            }
+        }
+
+        // 🔥 FUNCIÓN PARA ACTUALIZAR PRECIOS DEL CARRITO
+        async function actualizarPreciosCarrito() {
+            if (!carrito.items || carrito.items.length === 0) return
+            
+            let cambios = false
+            
+            for (const item of carrito.items) {
+                const precioCorrecto = await obtenerPrecioActualizado(item)
+                
+                // Si el precio cambió, actualizar
+                if (item.precio !== precioCorrecto) {
+                    console.log(`🔄 Actualizando precio de ${item.nombre}: ${item.precio} → ${precioCorrecto}`)
+                    item.precio = precioCorrecto
+                    cambios = true
+                }
+            }
+            
+            // Si hubo cambios, guardar y actualizar interfaz
+            if (cambios) {
+                carrito.guardarEnLocalStorage()
+                console.log('✅ Precios actualizados en el carrito')
+            }
+        }
+
+        // Función para renderizar el carrito
+        async function renderCart() {
+            const container = document.getElementById('cart-content')
+            if (!container) return
+
+            // Asegurar que el carrito está cargado
+            carrito.cargarDeLocalStorage()
+            
+            console.log('🛒 Items en carrito:', carrito.items)
+
+            // 🔥 ACTUALIZAR PRECIOS ANTES DE RENDERIZAR
+            await actualizarPreciosCarrito()
+
+            if (!carrito.items || carrito.items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fa fa-shopping-cart"></i>
+                        <h2>Tu carrito está vacío</h2>
+                        <p>Agrega productos desde nuestra tienda</p>
+                        <a href="../index.html" class="btn btn-primary">
+                            <i class="fa fa-arrow-left"></i> Ir a comprar
+                        </a>
+                    </div>
+                `
+                document.getElementById('cart-counter').textContent = '0'
+                return
+            }
+
+            let itemsHtml = ''
+            carrito.items.forEach(item => {
+                const imagenSrc = item.imagen_url || item.imagen || '/assets/images/no-image.png'
+                
+                itemsHtml += `
+                    <div class="cart-item">
+                        <img src="${imagenSrc}" 
+                             alt="${item.nombre}" 
+                             onerror="this.src='/assets/images/no-image.png'">
+                        <div class="cart-item-details">
+                            <div class="cart-item-title">${item.nombre}</div>
+                            <div class="cart-item-price">$${item.precio.toFixed(2)} CUP</div>
+                            <div class="cart-item-actions">
+                                <div class="quantity-control">
+                                    <button class="quantity-btn" onclick="event.stopPropagation(); window.cart.actualizarCantidad('${item.id}', ${item.cantidad - 1})">
+                                        <i class="fa fa-minus"></i>
+                                    </button>
+                                    <span class="quantity-input">${item.cantidad}</span>
+                                    <button class="quantity-btn" onclick="event.stopPropagation(); window.cart.actualizarCantidad('${item.id}', ${item.cantidad + 1})">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                </div>
+                                <button class="remove-btn" onclick="event.stopPropagation(); window.cart.eliminar('${item.id}')">
+                                    <i class="fa fa-trash"></i> <span>Eliminar</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="cart-item-subtotal">
+                            $${(item.precio * item.cantidad).toFixed(2)}
+                        </div>
+                    </div>
+                `
+            })
+
+            const subtotal = carrito.subtotal()
+            const cantidad = carrito.cantidadTotal()
+
+            container.innerHTML = `
+                <div class="cart-grid">
+                    <div class="cart-items">
+                        <h2>${cantidad} producto(s)</h2>
+                        ${itemsHtml}
+                    </div>
+                    <div class="cart-sidebar">
+                        <h3>Resumen del pedido</h3>
+                        <div class="total-row">
+                            <span>Subtotal (${cantidad} productos):</span>
+                            <span style="font-weight: 600;">$${subtotal.toFixed(2)} CUP</span>
+                        </div>
+                        <div class="total-row" style="color: #059669;">
+                            <span>Envío:</span>
+                            <span>Calculado al pagar</span>
+                        </div>
+                        <div class="grand-total total-row">
+                            <span>Total:</span>
+                            <span>$${subtotal.toFixed(2)} CUP</span>
+                        </div>
+                        <a href="checkout.html" class="btn btn-primary">
+                            <i class="fa fa-lock"></i> Proceder al pago
+                        </a>
+                        <button class="btn btn-secondary" onclick="event.stopPropagation(); window.cart.vaciar()">
+                            <i class="fa fa-trash"></i> Vaciar carrito
+                        </button>
+                    </div>
+                </div>
+            `
+
+            // Actualizar contador del header
+            const counter = document.getElementById('cart-counter')
+            if (counter) counter.textContent = cantidad
+        }
+
+        // Renderizar al cargar
+        setTimeout(() => {
+            renderCart()
+        }, 100)
+        
+        // Actualizar cuando cambie el carrito
+        window.addEventListener('carrito-actualizado', renderCart)
+        
+        console.log('✅ Página de carrito lista con actualización de precios')
+    </script>
+</body>
+</html>
