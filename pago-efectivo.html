@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Confirmar pago en efectivo · CUBAZON</title>
+    <title>Confirmar pago en efectivo · KOMERZIO</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -328,14 +328,17 @@
         <div id="mainContent" style="display: none;"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
-        import { supabase } from '/js/supabase-client.js';
+        import '../js/supabase-client.js';
         import { auth } from '/js/auth.js';
         
-        // Número fijo de CUBAZON
-        const NUMERO_CUBAZON = '5356591892';
+        const supabase = window.supabaseClient;
+        
+        // Número fijo de KOMERZIO
+        const NUMERO_KOMERZIO = '5356591892';
         
         // Obtener ID de la URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -381,7 +384,7 @@
             }
         }
         
-        // Enviar mensaje al número de CUBAZON
+        // Enviar mensaje al número de KOMERZIO
         window.enviarWhatsApp = function() {
             if (!pedidoData) return;
             
@@ -403,38 +406,23 @@
                 `Por favor, coordinar la entrega.`;
             
             const mensajeCodificado = encodeURIComponent(mensaje);
-            window.open(`https://wa.me/${NUMERO_CUBAZON}?text=${mensajeCodificado}`, '_blank');
+            window.open(`https://wa.me/${NUMERO_KOMERZIO}?text=${mensajeCodificado}`, '_blank');
         };
         
-        // Confirmar pedido (solo actualiza estado, NO redirige a WhatsApp)
+        // Confirmar pedido (solo actualiza estado)
         window.confirmarPedido = async function() {
             const btn = document.getElementById('confirmBtn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Procesando...';
             
             try {
-                // Verificar si la columna fecha_confirmacion existe, si no, no la usamos
-                let updateData = { estado: 'confirmado' };
-                
-                // Intentar agregar fecha_confirmacion solo si la columna existe
-                try {
-                    const { data: columns } = await supabase
-                        .from('pedidos')
-                        .select('fecha_confirmacion')
-                        .limit(1);
-                    updateData.fecha_confirmacion = new Date().toISOString();
-                } catch (e) {
-                    console.log('Columna fecha_confirmacion no existe, omitiendo');
-                }
-                
                 const { error } = await supabase
                     .from('pedidos')
-                    .update(updateData)
+                    .update({ estado: 'confirmado' })
                     .eq('id', pedidoId);
                 
                 if (error) throw error;
                 
-                // Mostrar mensaje de éxito
                 Swal.fire({
                     icon: 'success',
                     title: '¡Pedido confirmado!',
@@ -616,12 +604,12 @@
                         <div class="whatsapp-info">
                             <i class="fa fa-whatsapp"></i>
                             <div>
-                                <span>Notificar a CUBAZON sobre tu pedido</span>
+                                <span>Notificar a KOMERZIO sobre tu pedido</span>
                                 <p style="font-size: 12px; color: #166534;">Envía un mensaje para coordinar la entrega</p>
                             </div>
                         </div>
                         <button class="btn-whatsapp" onclick="enviarWhatsApp()">
-                            <i class="fa fa-whatsapp"></i> Notificar a CUBAZON
+                            <i class="fa fa-whatsapp"></i> Notificar a KOMERZIO
                         </button>
                     </div>
                     

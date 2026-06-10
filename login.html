@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#667eea">
-    <title>Iniciar sesión · CUBAZON</title>
+    <title>Iniciar sesión · KOMERZIO</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -66,19 +69,14 @@
             margin-bottom: 28px;
         }
         
-        .header img {
-            height: 56px;
-            margin-bottom: 16px;
-            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
-        }
-        
         .header h1 {
             font-size: clamp(22px, 5vw, 28px);
             font-weight: 800;
             background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text;
             background-clip: text;
+            color: transparent;
             margin-bottom: 6px;
             letter-spacing: -0.3px;
         }
@@ -206,7 +204,6 @@
         @media (max-width: 480px) {
             body { padding: 12px; align-items: flex-start; padding-top: 24px; }
             .login-container { border-radius: 24px; padding: 24px 18px; }
-            .header img { height: 48px; margin-bottom: 12px; }
             .btn { padding: 13px 16px; font-size: 14px; border-radius: 14px; }
             .form-control { padding: 12px 14px; font-size: 13px; }
         }
@@ -218,15 +215,25 @@
         @media (min-width: 768px) {
             body { padding: 24px; }
             .login-container { padding: 40px 32px; border-radius: 32px; }
-            .header img { height: 64px; }
+        }
+        
+        .logo-text {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+            display: inline-block;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="header">
-            <img src="https://i.postimg.cc/rmXF0b65/1000277404-removebg-preview.png" alt="CUBAZON">
-            <h1>Bienvenido a CUBAZON</h1>
+            <div class="logo-text">KOMERZIO</div>
+            <h1>Bienvenido</h1>
             <p>Elige cómo quieres acceder</p>
         </div>
         
@@ -264,18 +271,22 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script type="module">
-        import { supabase } from '/js/supabase-client.js'
-        import { auth } from '/js/auth.js'
+        // Configuración de Supabase
+        const SUPABASE_URL = 'https://houfrgnlctliwkzzelmi.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdWZyZ25sY3RsaXdrenplbG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MTQ2OTMsImV4cCI6MjA5NjE5MDY5M30.zUfcA755LEjBbn-N05LrmwFqsOFITRP4qLzxjgPIy54';
+        
+        // Inicializar Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         // ========== DETECTAR SI VIENE DE LA APP ==========
         const esApp = navigator.userAgent.includes('wv') || 
                       navigator.userAgent.includes('WebView') ||
                       !!(window.cordova || window.phonegap || window.PhoneGap) ||
                       (document.referrer === '' && window.location.search.includes('app=true')) ||
-                      localStorage.getItem('cubazon_app') === 'true';
+                      localStorage.getItem('komerzio_app') === 'true';
         
         // Guardar para futuras navegaciones
-        if (esApp) { localStorage.setItem('cubazon_app', 'true'); }
+        if (esApp) { localStorage.setItem('komerzio_app', 'true'); }
         
         // Ocultar botón Google si es la app
         if (esApp) {
@@ -283,18 +294,20 @@
             document.getElementById('googleDivider').style.display = 'none';
         }
         
-        console.log('🚀 login.html - App detectada:', esApp, '| UserAgent:', navigator.userAgent.substring(0, 50));
+        console.log('🚀 login.html - App detectada:', esApp);
         
         // ========== GOOGLE LOGIN ==========
         document.getElementById('googleLoginBtn').addEventListener('click', async function() {
             const btn = this; btn.disabled = true;
             btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Conectando con Google...';
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: window.location.origin + '/index.html' }
-            });
-            if (error) {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo conectar con Google.', confirmButtonColor: '#667eea' });
+            try {
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: window.location.origin + '/index.html' }
+                });
+                if (error) throw error;
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'No se pudo conectar con Google.', confirmButtonColor: '#667eea' });
                 btn.disabled = false;
                 btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continuar con Google';
             }
@@ -306,12 +319,45 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const btn = this.querySelector('button[type="submit"]');
-            if (!email || !password) { Swal.fire('Error', 'Completa todos los campos', 'error'); return; }
+            
+            if (!email || !password) { 
+                Swal.fire('Error', 'Completa todos los campos', 'error'); 
+                return; 
+            }
+            
             btn.disabled = true;
             btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Iniciando sesión...';
-            const resultado = await auth.login(email, password);
-            if (resultado.success) { window.location.href = '/index.html'; }
-            else { Swal.fire({ icon: 'error', title: 'Error', text: resultado.error || 'Email o contraseña incorrectos', confirmButtonColor: '#667eea' }); btn.disabled = false; btn.innerHTML = '<i class="fa fa-sign-in"></i> Iniciar sesión'; }
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) throw error;
+                
+                if (data.user) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Bienvenido!',
+                        text: 'Inicio de sesión exitoso',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 1500);
+                }
+            } catch (error) {
+                Swal.fire({ 
+                    icon: 'error', 
+                    title: 'Error', 
+                    text: error.message || 'Email o contraseña incorrectos', 
+                    confirmButtonColor: '#667eea' 
+                });
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa fa-sign-in"></i> Iniciar sesión';
+            }
         });
     </script>
 </body>

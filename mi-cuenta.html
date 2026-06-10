@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Mi cuenta · CUBAZON</title>
+    <title>Mi cuenta · KOMERZIO</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -806,11 +806,13 @@
             .catch(error => console.log('Error cargando notificaciones:', error));
     </script>
     
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script type="module">
-        import { supabase } from '/js/supabase-client.js'
+        import '/js/supabase-client.js'
+        const supabase = window.supabaseClient;
         import { auth } from '/js/auth.js'
         import { initCarrito } from '/js/cart.js'
         
@@ -892,20 +894,6 @@
             return html;
         }
         
-        async function verificarAutenticacion() {
-            for (let i = 0; i < 15; i++) {
-                const usuario = auth.getUsuario()
-                const autenticado = auth.isAuthenticated()
-                if (autenticado && usuario) {
-                    return true
-                }
-                await new Promise(resolve => setTimeout(resolve, 200))
-            }
-            window.location.href = '/login.html'
-            return false
-        }
-        
-        // NUEVO: Cargar total de referidos
         async function cargarTotalReferidos() {
             const usuario = auth.getUsuario();
             if (!usuario) return;
@@ -921,15 +909,6 @@
             } catch (error) {
                 console.error('Error cargando referidos:', error);
             }
-        }
-        
-        try {
-            await verificarAutenticacion()
-            await cargarProvinciasYMunicipios()
-            await cargarTotalReferidos()
-            await cargarDatos()
-        } catch (error) {
-            window.location.href = '/login.html'
         }
         
         window.recargarSaldo = async function() {
@@ -1583,8 +1562,18 @@
             } catch (error) {
                 usuarioCompleto = { ...usuarioAuth, nombre_completo: usuarioAuth.nombre_completo || usuarioAuth.email?.split('@')[0] || '', telefono: usuarioAuth.telefono || '', carnet: '', direccion: '', localidad: '', referencia: '', provincia: '', municipio: '', created_at: usuarioAuth.created_at }
             }
-            pedidos = await auth.obtenerPedidos()
-            direcciones = await auth.obtenerDirecciones()
+            
+            // Obtener pedidos y direcciones (funciones simuladas si no existen)
+            try {
+                const { data: pedidosData } = await supabase.from('pedidos').select('*').eq('user_id', usuarioAuth.id).order('created_at', { ascending: false });
+                pedidos = pedidosData || [];
+            } catch (e) { pedidos = []; }
+            
+            try {
+                const { data: direccionesData } = await supabase.from('direcciones').select('*').eq('usuario_id', usuarioAuth.id);
+                direcciones = direccionesData || [];
+            } catch (e) { direcciones = []; }
+            
             await verificarVendedor()
             await cargarProductosVendedor()
             await verificarEstado2FA()
@@ -1634,21 +1623,19 @@
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;"><a href="/index.html" class="btn btn-secondary"><i class="fa fa-home"></i> Inicio</a><button class="btn btn-secondary" onclick="window.cerrarSesion()"><i class="fa fa-sign-out"></i> Cerrar sesión</button></div>
                 </div>
                 <div class="quick-actions">
-                    ${esVendedor ? `
-                        <a href="/configurar-tienda.html" class="quick-action-card"><div class="quick-action-icon store"><i class="fa fa-store"></i></div><div class="quick-action-content"><h3>Mi tienda</h3><p>Editar configuración de tu tienda</p></div></a>
-                        <a href="/publicar-producto.html" class="quick-action-card"><div class="quick-action-icon publish"><i class="fa fa-cloud-upload"></i></div><div class="quick-action-content"><h3>Publicar producto</h3><p>Agrega un nuevo producto a tu tienda</p></div></a>
-                    ` : `
-                        <a href="/configurar-tienda.html" class="quick-action-card"><div class="quick-action-icon store"><i class="fa fa-store"></i></div><div class="quick-action-content"><h3>Crear mi tienda</h3><p>Conviértete en vendedor en CUBAZON</p></div></a>
-                    `}
-                    <a href="/referidos.html" class="quick-action-card"><div class="quick-action-icon referidos"><i class="fa fa-users"></i></div><div class="quick-action-content"><h3>Referidos ${totalReferidos > 0 ? `(${totalReferidos})` : ''}</h3><p>Invita amigos y gana 20 CUP</p></div></a>
-                    <a href="/transferir.html" class="quick-action-card"><div class="quick-action-icon transfer"><i class="fa fa-exchange"></i></div><div class="quick-action-content"><h3>Transferir saldo</h3><p>Envía dinero a otros usuarios</p></div></a>
-                    <a href="/recibir.html" class="quick-action-card"><div class="quick-action-icon receive"><i class="fa fa-qrcode"></i></div><div class="quick-action-content"><h3>Recibir dinero</h3><p>Genera un código QR para recibir pagos</p></div></a>
-                    <a href="/pagar-qr.html" class="quick-action-card"><div class="quick-action-icon pay"><i class="fa fa-camera"></i></div><div class="quick-action-content"><h3>Pagar con QR</h3><p>Escanea y paga al instante</p></div></a>
-                    <a href="/recarga.html" class="quick-action-card"><div class="quick-action-icon usdt"><i class="fa fa-bolt"></i></div><div class="quick-action-content"><h3>Recargar con USDT</h3><p>Recarga tu saldo con criptomonedas</p></div></a>
-                </div>
+    ${esVendedor ? `
+        <a href="/configurar-tienda.html" class="quick-action-card"><div class="quick-action-icon store"><i class="fa fa-store"></i></div><div class="quick-action-content"><h3>Mi tienda</h3><p>Editar configuración de tu tienda</p></div></a>
+        <a href="/publicar-producto.html" class="quick-action-card"><div class="quick-action-icon publish"><i class="fa fa-cloud-upload"></i></div><div class="quick-action-content"><h3>Publicar producto</h3><p>Agrega un nuevo producto a tu tienda</p></div></a>
+    ` : ``}
+    <a href="/referidos.html" class="quick-action-card"><div class="quick-action-icon referidos"><i class="fa fa-users"></i></div><div class="quick-action-content"><h3>Referidos ${totalReferidos > 0 ? `(${totalReferidos})` : ''}</h3><p>Invita amigos y gana 20 CUP</p></div></a>
+    <a href="/transferir.html" class="quick-action-card"><div class="quick-action-icon transfer"><i class="fa fa-exchange"></i></div><div class="quick-action-content"><h3>Transferir saldo</h3><p>Envía dinero a otros usuarios</p></div></a>
+    <a href="/recibir.html" class="quick-action-card"><div class="quick-action-icon receive"><i class="fa fa-qrcode"></i></div><div class="quick-action-content"><h3>Recibir dinero</h3><p>Genera un código QR para recibir pagos</p></div></a>
+    <a href="/pagar-qr.html" class="quick-action-card"><div class="quick-action-icon pay"><i class="fa fa-camera"></i></div><div class="quick-action-content"><h3>Pagar con QR</h3><p>Escanea y paga al instante</p></div></a>
+    <a href="/recarga.html" class="quick-action-card"><div class="quick-action-icon usdt"><i class="fa fa-bolt"></i></div><div class="quick-action-content"><h3>Recargar con USDT</h3><p>Recarga tu saldo con criptomonedas</p></div></a>
+</div>
                 <div class="balance-card">
                     <div class="balance-icon"><i class="fa fa-credit-card"></i></div>
-                    <div class="balance-info"><h3>Tu saldo CUBAZON</h3><div class="balance-amount">$${saldo.toFixed(2)} <small>CUP</small></div></div>
+                    <div class="balance-info"><h3>Tu saldo KOMERZIO</h3><div class="balance-amount">$${saldo.toFixed(2)} <small>CUP</small></div></div>
                     <div class="balance-actions"><a href="#" class="btn-balance" onclick="window.recargarSaldo()"><i class="fa fa-plus-circle"></i> Recargar</a><a href="#" class="btn-balance" onclick="window.historialSaldo()"><i class="fa fa-history"></i> Historial</a></div>
                 </div>
                 <div class="account-grid">
@@ -1941,8 +1928,6 @@
             }
         };
         
-        // ... (el resto del código existente se mantiene igual: editarPerfil, agregarDireccion, etc.)
-        
         window.editarPerfil = async function() {
             const usuario = auth.getUsuario()
             const { data: perfil } = await supabase.from('perfiles').select('*').eq('id', usuario.id).single()
@@ -2058,7 +2043,7 @@
                     const { error } = await supabase.from('direcciones').insert([{ usuario_id: auth.getUsuario().id, ...formValues }]);
                     if (error) throw error;
                     Swal.fire('¡Agregada!', 'Dirección guardada correctamente', 'success');
-                    direcciones = await auth.obtenerDirecciones();
+                    direcciones = await supabase.from('direcciones').select('*').eq('usuario_id', auth.getUsuario().id);
                     renderizarCuenta(auth.getUsuario());
                 } catch (error) { Swal.fire('Error', 'No se pudo guardar la dirección', 'error'); }
             }
@@ -2083,7 +2068,7 @@
                     const { error } = await supabase.from('direcciones').update({ nombre: formValues.nombre, direccion: formValues.direccion, localidad: formValues.localidad, referencia: formValues.referencia, telefono: formValues.telefono, es_principal: formValues.es_principal, updated_at: new Date().toISOString() }).eq('id', id);
                     if (error) throw error;
                     Swal.fire('¡Actualizada!', 'Dirección actualizada correctamente', 'success');
-                    direcciones = await auth.obtenerDirecciones();
+                    direcciones = await supabase.from('direcciones').select('*').eq('usuario_id', auth.getUsuario().id);
                     renderizarCuenta(auth.getUsuario());
                 } catch (error) { Swal.fire('Error', 'No se pudo actualizar la dirección', 'error'); }
             }
@@ -2097,7 +2082,7 @@
                     const { error } = await supabase.from('direcciones').update({ es_principal: true }).eq('id', id);
                     if (error) throw error;
                     Swal.fire({ icon: 'success', title: '¡Actualizado!', text: 'Dirección principal actualizada', timer: 2000, showConfirmButton: false });
-                    direcciones = await auth.obtenerDirecciones();
+                    direcciones = await supabase.from('direcciones').select('*').eq('usuario_id', auth.getUsuario().id);
                     renderizarCuenta(auth.getUsuario());
                 } catch (error) { Swal.fire('Error', 'No se pudo actualizar la dirección principal', 'error'); }
             }
@@ -2124,9 +2109,9 @@
         window.eliminarDireccion = async function(id) {
             const result = await Swal.fire({ title: '¿Eliminar dirección?', text: 'Esta acción no se puede deshacer', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
             if (result.isConfirmed) {
-                const resultado = await auth.eliminarDireccion(id);
-                if (resultado.success) { Swal.fire('¡Eliminada!', 'Dirección eliminada correctamente', 'success'); direcciones = await auth.obtenerDirecciones(); renderizarCuenta(auth.getUsuario()); }
-                else { Swal.fire('Error', resultado.error, 'error'); }
+                const { error } = await supabase.from('direcciones').delete().eq('id', id).eq('usuario_id', auth.getUsuario().id);
+                if (error) { Swal.fire('Error', 'No se pudo eliminar la dirección', 'error'); }
+                else { Swal.fire('¡Eliminada!', 'Dirección eliminada correctamente', 'success'); direcciones = await supabase.from('direcciones').select('*').eq('usuario_id', auth.getUsuario().id); renderizarCuenta(auth.getUsuario()); }
             }
         };
         
@@ -2153,6 +2138,36 @@
         };
         
         window.addEventListener('click', (e) => { const modal = document.getElementById('orderModal'); if (e.target === modal) modal.style.display = 'none'; });
+        
+        // INICIAR - Esperar a que auth tenga usuario antes de continuar
+        async function iniciar() {
+            for (let i = 0; i < 25; i++) {
+                const usuario = auth.getUsuario();
+                if (usuario) {
+                    console.log('✅ Usuario encontrado:', usuario.email);
+                    break;
+                }
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            
+            const usuario = auth.getUsuario();
+            if (!usuario) {
+                console.log('❌ No hay usuario, redirigiendo a login');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            try {
+                await cargarProvinciasYMunicipios();
+                await cargarTotalReferidos();
+                await cargarDatos();
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                window.location.href = '/login.html';
+            }
+        }
+        
+        iniciar();
     </script>
 </body>
 </html>

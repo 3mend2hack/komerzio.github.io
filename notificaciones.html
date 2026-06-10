@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis notificaciones · CUBAZON</title>
+    <title>Mis notificaciones · KOMERZIO</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -45,8 +48,20 @@
         }
         .header-header { padding: 15px 20px; }
         .container.row { max-width: 1500px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .header-logo img { height: 50px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); transition: transform 0.3s ease; }
-        .header-logo img:hover { transform: scale(1.05); }
+        .header-logo .logo-text {
+            background: linear-gradient(135deg, #f97316 0%, #f59e0b 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 10px rgba(249,115,22,0.3);
+            text-decoration: none;
+        }
+        @media (max-width: 768px) {
+            .header-logo .logo-text { font-size: 22px; }
+        }
         .header-right { display: flex; align-items: center; gap: 25px; }
         .right-menu ul { display: flex; gap: 20px; list-style: none; align-items: center; }
         .right-menu ul li a { color: white; font-size: 14px; display: flex; align-items: center; gap: 8px; text-decoration: none; padding: 8px 15px; border-radius: 30px; transition: all 0.3s ease; background: rgba(255,255,255,0.1); }
@@ -145,9 +160,7 @@
         <div class="header-header">
             <div class="container row">
                 <div class="header-logo">
-                    <a href="/">
-                        <img src="https://i.postimg.cc/MZRbKh98/Cubazon.png" alt="CUBAZON">
-                    </a>
+                    <a href="/" class="logo-text">KOMERZIO</a>
                 </div>
                 <div class="header-right">
                     <div class="right-menu">
@@ -216,21 +229,24 @@
 
     <div id="footer-wrapper">
         <div class="footer-widgets-wrap">
-            <div class="footer"><h3>CUBAZON</h3><p>Tu tienda online de confianza en Sagua de Tánamo.</p></div>
+            <div class="footer"><h3>KOMERZIO</h3><p>Tu tienda online de confianza.</p></div>
             <div class="footer"><h3>Enlaces</h3><p><a href="/terminos.html" style="color: #a0aec0;">Términos</a> · <a href="/faq.html" style="color: #a0aec0;">FAQ</a></p></div>
             <div class="footer"><h3>Contacto</h3><p><i class="fa fa-phone"></i> +53 56591892</p></div>
         </div>
     </div>
     <div id="sub-footer-wrapper">
-        <p>© 2026 CUBAZON · Todos los derechos reservados</p>
+        <p>© 2026 KOMERZIO · Todos los derechos reservados</p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
-        import { supabase } from '/js/supabase-client.js';
+        // Importar configuración de Supabase
+        import '../js/supabase-client.js';
         import { auth } from '/js/auth.js';
         import { initCarrito } from '/js/cart.js';
         import { notificaciones } from '/js/notificaciones.js';
+        
+        const supabase = window.supabaseClient;
         
         const carrito = initCarrito();
         window.cart = carrito;

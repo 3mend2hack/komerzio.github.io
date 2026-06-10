@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Pago exitoso con saldo · CUBAZON</title>
+    <title>Pago exitoso con saldo · KOMERZIO</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -274,11 +274,14 @@
         <div id="mainContent" style="display: none;"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
-        import { supabase } from '/js/supabase-client.js';
+        import '../js/supabase-client.js';
         import { auth } from '/js/auth.js';
+        
+        const supabase = window.supabaseClient;
         
         const urlParams = new URLSearchParams(window.location.search);
         const pedidoId = urlParams.get('id');
@@ -351,7 +354,7 @@
             container.innerHTML = `
                 <div class="success-header">
                     <h1><i class="fa fa-check-circle"></i> ¡Pago exitoso!</h1>
-                    <p>Tu compra ha sido confirmada con saldo CUBAZON</p>
+                    <p>Tu compra ha sido confirmada con saldo KOMERZIO</p>
                     <div class="order-id">Pedido #${pedidoId.slice(0, 8)}</div>
                 </div>
                 
@@ -364,7 +367,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-label">Método de pago:</span>
-                            <span class="info-value"><i class="fa fa-wallet"></i> Saldo CUBAZON</span>
+                            <span class="info-value"><i class="fa fa-wallet"></i> Saldo KOMERZIO</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">Estado del pedido:</span>
@@ -378,8 +381,8 @@
                             <i class="fa fa-clock-o"></i>
                             <div>
                                 <strong>¡Tu pedido está en camino!</strong><br>
-                                <span>El pago fue automático, tu producto pasará a <strong>"En proceso"</strong> y llegará en menos de <strong>24 horas</strong>.<br>
-                                Generalmente el tiempo de entrega es de <strong>2 a 12 horas</strong> después de la compra.</span>
+                                <span>El pago fue automático, tu producto pasará a <strong>"En proceso"</strong> y llegará en menos de <strong>72 horas</strong>.<br>
+                                Generalmente el tiempo de entrega es de <strong>2 a 48 horas</strong> después de la compra.</span>
                             </div>
                         </div>
                         <div style="margin-top: 15px;">

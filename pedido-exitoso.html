@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pedido Confirmado · CUBAZON</title>
+    <title>Pedido Confirmado · KOMERZIO</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -139,19 +139,6 @@
         .total-row.total .value {
             font-size: 24px;
         }
-        .qvapay-info {
-            background: #e3f2fd;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 20px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .qvapay-info span:first-child {
-            color: #0088cc;
-            font-weight: 600;
-        }
         .btn-group {
             display: flex;
             gap: 15px;
@@ -208,8 +195,8 @@
             <div class="success-icon">
                 <i class="fa fa-check"></i>
             </div>
-            <h1>¡Pago Exitoso!</h1>
-            <p>Tu pedido ha sido confirmado</p>
+            <h1>¡Pedido Confirmado!</h1>
+            <p>Tu pedido ha sido registrado exitosamente</p>
             <div class="order-id" id="orderId">Cargando...</div>
         </div>
         
@@ -221,21 +208,23 @@
         </div>
     </div>
 
-    <script>
-        let pedidoData = null
+    <script type="module">
+        import '../js/supabase-client.js';
+        import { auth } from '/js/auth.js';
+        
+        const supabase = window.supabaseClient;
+        
+        let pedidoData = null;
         
         // Obtener ID del pedido desde la URL
-        const urlParams = new URLSearchParams(window.location.search)
-        const montoParam = urlParams.get('monto')
+        const urlParams = new URLSearchParams(window.location.search);
+        const pedidoId = urlParams.get('id');
         
         async function cargarPedido() {
             try {
-                // Buscar el último pedido del usuario
-                const { data: sessionData } = await supabase.auth.getSession()
-                const accessToken = sessionData?.session?.access_token
-                const user = sessionData?.session?.user
+                const usuario = auth.getUsuario();
                 
-                if (!user) {
+                if (!usuario) {
                     document.getElementById('receiptBody').innerHTML = `
                         <div style="text-align: center; padding: 40px;">
                             <i class="fa fa-exclamation-triangle" style="font-size: 48px; color: #dc3545;"></i>
@@ -243,44 +232,48 @@
                             <p>Inicia sesión para ver tus pedidos</p>
                             <a href="/login.html" class="btn btn-primary" style="margin-top: 20px;">Iniciar sesión</a>
                         </div>
-                    `
-                    return
+                    `;
+                    return;
                 }
                 
-                // Buscar pedido reciente con método qvapay
-                const { data: pedidos, error } = await supabase
-                    .from('pedidos')
-                    .select('*')
-                    .eq('cliente->>email', user.email)
-                    .eq('metodo_pago', 'qvapay')
-                    .order('created_at', { ascending: false })
-                    .limit(1)
+                // Buscar pedido por ID si viene en URL, o el último pedido del usuario
+                let pedido = null;
                 
-                if (error) throw error
-                
-                if (!pedidos || pedidos.length === 0) {
-                    // Buscar en localStorage (fallback)
-                    const pendiente = localStorage.getItem('pedido_pendiente_qvapay')
-                    if (pendiente) {
-                        const data = JSON.parse(pendiente)
-                        pedidoData = {
-                            id: 'PENDIENTE',
-                            ...data.pedidoData,
-                            total_qusd: data.totalQUSD,
-                            tasa_aplicada: data.tasa
-                        }
-                        localStorage.removeItem('pedido_pendiente_qvapay')
-                    } else {
-                        throw new Error('No se encontró el pedido')
+                if (pedidoId) {
+                    const { data, error } = await supabase
+                        .from('pedidos')
+                        .select('*')
+                        .eq('id', pedidoId)
+                        .single();
+                    
+                    if (!error && data) {
+                        pedido = data;
                     }
-                } else {
-                    pedidoData = pedidos[0]
                 }
                 
-                renderizarRecibo()
+                if (!pedido) {
+                    // Buscar último pedido del usuario
+                    const { data: pedidos, error } = await supabase
+                        .from('pedidos')
+                        .select('*')
+                        .eq('user_id', usuario.id)
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+                    
+                    if (error) throw error;
+                    
+                    if (!pedidos || pedidos.length === 0) {
+                        throw new Error('No se encontró el pedido');
+                    }
+                    
+                    pedido = pedidos[0];
+                }
+                
+                pedidoData = pedido;
+                renderizarRecibo();
                 
             } catch (error) {
-                console.error('Error cargando pedido:', error)
+                console.error('Error cargando pedido:', error);
                 document.getElementById('receiptBody').innerHTML = `
                     <div style="text-align: center; padding: 40px;">
                         <i class="fa fa-exclamation-triangle" style="font-size: 48px; color: #dc3545;"></i>
@@ -288,7 +281,7 @@
                         <p>No pudimos encontrar la información de tu pedido.</p>
                         <a href="/mi-cuenta.html" class="btn btn-primary" style="margin-top: 20px;">Ver mis pedidos</a>
                     </div>
-                `
+                `;
             }
         }
         
@@ -305,90 +298,101 @@
                     </thead>
                     <tbody>
             `
-            pedidoData.items.forEach(item => {
-                productosHtml += `
-                    <tr>
-                        <td><strong>${item.nombre}</strong></td>
-                        <td>${item.cantidad}</td>
-                        <td>$${item.precio.toFixed(2)}</td>
-                        <td>$${(item.precio * item.cantidad).toFixed(2)}</td>
-                    </tr>
-                `
-            })
+            if (pedidoData.items && pedidoData.items.length > 0) {
+                pedidoData.items.forEach(item => {
+                    productosHtml += `
+                        <tr>
+                            <td><strong>${item.nombre || 'Producto'}</strong></td>
+                            <td>${item.cantidad || 0}</td>
+                            <td>$${(item.precio || 0).toFixed(2)}</td>
+                            <td>$${((item.precio || 0) * (item.cantidad || 0)).toFixed(2)}</td>
+                        </tr>
+                    `
+                })
+            }
             productosHtml += '</tbody></table>'
             
             // Resumen HTML
             let resumenHtml = `
                 <div class="total-row">
                     <span>Subtotal</span>
-                    <span class="value">$${pedidoData.subtotal.toFixed(2)} CUP</span>
+                    <span class="value">$${(pedidoData.subtotal || 0).toFixed(2)} CUP</span>
                 </div>
                 <div class="total-row">
                     <span>Envío</span>
-                    <span class="value">$${pedidoData.envio.toFixed(2)} CUP</span>
+                    <span class="value">$${(pedidoData.envio || 0).toFixed(2)} CUP</span>
                 </div>
             `
             if (pedidoData.descuento > 0) {
                 resumenHtml += `
                     <div class="total-row">
                         <span>Descuento</span>
-                        <span class="value" style="color: #059669;">-$${pedidoData.descuento.toFixed(2)} CUP</span>
+                        <span class="value" style="color: #059669;">-$${(pedidoData.descuento || 0).toFixed(2)} CUP</span>
                     </div>
                 `
             }
+            
+            let estadoTexto = 'PENDIENTE';
+            let estadoColor = '#856404';
+            let estadoBg = '#fff3cd';
+            
+            if (pedidoData.estado === 'pagado' || pedidoData.estado === 'confirmado') {
+                estadoTexto = 'CONFIRMADO';
+                estadoColor = '#155724';
+                estadoBg = '#d4edda';
+            } else if (pedidoData.estado === 'entregado') {
+                estadoTexto = 'ENTREGADO';
+                estadoColor = '#155724';
+                estadoBg = '#d4edda';
+            } else if (pedidoData.estado === 'cancelado') {
+                estadoTexto = 'CANCELADO';
+                estadoColor = '#721c24';
+                estadoBg = '#f8d7da';
+            }
+            
             resumenHtml += `
                 <div class="total-row total">
                     <span>Total</span>
-                    <span class="value">$${pedidoData.total.toFixed(2)} CUP</span>
+                    <span class="value">$${(pedidoData.total || 0).toFixed(2)} CUP</span>
                 </div>
             `
             
-            // Información QvaPay
-            let qvapayHtml = ''
-            if (pedidoData.total_qusd || pedidoData.tasa_aplicada) {
-                qvapayHtml = `
-                    <div class="qvapay-info">
-                        <span><i class="fa fa-bolt"></i> Pagado con QvaPay</span>
-                        <span><strong>${(pedidoData.total_qusd || pedidoData.total / (pedidoData.tasa_aplicada || 600)).toFixed(2)} QUSD</strong></span>
-                    </div>
-                    <div style="font-size: 12px; color: #6c757d; text-align: right; margin-top: -10px; margin-bottom: 15px;">
-                        Tasa aplicada: 1 USD = ${pedidoData.tasa_aplicada || 600} CUP
-                    </div>
-                `
-            }
+            const cliente = pedidoData.cliente || {};
             
             document.getElementById('orderId').textContent = `#${pedidoData.id.slice(0, 8)}`
             
             document.getElementById('receiptBody').innerHTML = `
                 <div>
-                    <span class="status-badge"><i class="fa fa-check-circle"></i> PAGADO</span>
+                    <span class="status-badge" style="background: ${estadoBg}; color: ${estadoColor};">
+                        <i class="fa ${pedidoData.estado === 'pagado' || pedidoData.estado === 'confirmado' ? 'fa-check-circle' : 'fa-clock-o'}"></i> ${estadoTexto}
+                    </span>
                     <span style="float: right; color: #6c757d; font-size: 14px;">${fecha}</span>
                 </div>
                 
                 <div class="info-grid">
                     <div class="info-item">
                         <span class="info-label">Cliente</span>
-                        <span class="info-value">${pedidoData.cliente?.nombre || '-'}</span>
+                        <span class="info-value">${cliente.nombre || '-'}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Email</span>
-                        <span class="info-value">${pedidoData.cliente?.email || '-'}</span>
+                        <span class="info-value">${cliente.email || '-'}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Teléfono</span>
-                        <span class="info-value">${pedidoData.cliente?.telefono || '-'}</span>
+                        <span class="info-value">${cliente.telefono || '-'}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Dirección</span>
-                        <span class="info-value">${pedidoData.cliente?.direccion || '-'}</span>
+                        <span class="info-value">${cliente.direccion || '-'}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Localidad</span>
-                        <span class="info-value">${pedidoData.cliente?.localidad || '-'}</span>
+                        <span class="info-value">${cliente.localidad || '-'}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Referencia</span>
-                        <span class="info-value">${pedidoData.cliente?.referencia || '-'}</span>
+                        <span class="info-value">${cliente.referencia || '-'}</span>
                     </div>
                 </div>
                 
@@ -397,7 +401,6 @@
                 
                 <h3 style="margin: 25px 0 10px;">💰 Resumen de pago</h3>
                 ${resumenHtml}
-                ${qvapayHtml}
                 
                 <div class="btn-group">
                     <button class="btn btn-success" id="downloadPdfBtn">
@@ -417,7 +420,7 @@
                 const element = document.getElementById('receiptContainer')
                 const opt = {
                     margin: 0.5,
-                    filename: `recibo_cubazon_${pedidoData.id.slice(0, 8)}.pdf`,
+                    filename: `recibo_komerzio_${pedidoData.id.slice(0, 8)}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2 },
                     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
@@ -430,9 +433,6 @@
         cargarPedido()
     </script>
     
-    <script type="module">
-        import { supabase } from '/js/supabase-client.js'
-        window.supabase = supabase
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>
