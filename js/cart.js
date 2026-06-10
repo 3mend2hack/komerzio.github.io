@@ -1,8 +1,7 @@
 // ============================================
 // cart.js - VERSIÓN CORREGIDA
 // Con soporte para oferta_del_dia
-// Imágenes corregidas y carrito que no se cierra
-// Preview con productos en scroll y botones fijos
+// Preview del carrito con estilos corregidos
 // ============================================
 
 import { supabase } from './supabase-client.js'
@@ -16,10 +15,12 @@ export class Carrito {
     
     cargarDeLocalStorage() {
         try {
-            const guardado = localStorage.getItem('cubazon_carrito')
+            const guardado = localStorage.getItem('komerzio_carrito')
             if (guardado) {
                 this.items = JSON.parse(guardado)
                 console.log(`✅ Carrito cargado: ${this.cantidadTotal()} productos`)
+            } else {
+                this.items = []
             }
         } catch (e) {
             console.error('Error cargando carrito:', e)
@@ -29,7 +30,7 @@ export class Carrito {
     }
     
     guardarEnLocalStorage() {
-        localStorage.setItem('cubazon_carrito', JSON.stringify(this.items))
+        localStorage.setItem('komerzio_carrito', JSON.stringify(this.items))
     }
     
     // ========== OPERACIONES ==========
@@ -55,7 +56,6 @@ export class Carrito {
                 return false
             }
             
-            // 🔥 CORREGIDO: Usar oferta_del_dia en lugar de oferta
             const precioFinal = (producto.oferta_del_dia === true && producto.precio_oferta && producto.precio_oferta > 0) 
                 ? parseFloat(producto.precio_oferta)
                 : parseFloat(producto.precio)
@@ -69,7 +69,7 @@ export class Carrito {
             
             if (itemExistente) {
                 itemExistente.cantidad += cantidad
-                itemExistente.precio = precioFinal // Actualizar por si cambió la oferta
+                itemExistente.precio = precioFinal
             } else {
                 this.items.push({
                     id: `${productoId}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
@@ -183,6 +183,14 @@ export class Carrito {
         return this.items.reduce((sum, item) => sum + item.cantidad, 0)
     }
     
+    obtenerTotal() {
+        return this.subtotal()
+    }
+    
+    obtenerCantidadItems() {
+        return this.cantidadTotal()
+    }
+    
     // ========== RENDERIZADO ==========
     
     actualizarInterfaz() {
@@ -208,14 +216,14 @@ export class Carrito {
         }))
     }
     
-    // ========== PREVIEW CARRITO ==========
+    // ========== PREVIEW CARRITO (CORREGIDO) ==========
     renderizarPreviewCarrito() {
         const container = document.querySelector('.simpleCart_items');
         const totalContainer = document.getElementById('cart-preview-total-amount');
         if (!container) return
         
         if (this.items.length === 0) {
-            container.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Tu carrito está vacío</p>'
+            container.innerHTML = '<div style="padding: 15px; text-align: center; color: #718096;">Carrito vacío</div>'
             if (totalContainer) totalContainer.textContent = '$0.00 CUP'
             return
         }
@@ -231,29 +239,23 @@ export class Carrito {
             const imagenSrc = item.imagen_url || item.imagen || '/assets/images/no-image.png'
             
             html += `
-                <div class="cart-preview-item" data-id="${item.id}">
+                <div class="cart-item">
                     <img src="${imagenSrc}" 
-                         alt="${item.nombre}"
-                         onerror="this.src='/assets/images/no-image.png'">
-                    <div class="cart-preview-item-details">
-                        <div class="cart-preview-item-name">${item.nombre}</div>
-                        <div class="cart-preview-item-price">$${item.precio} CUP</div>
-                        <div class="cart-preview-item-quantity">
-                            <button class="cart-preview-quantity-btn" onclick="event.stopPropagation(); window.cart.disminuirCantidad('${item.id}')">
-                                <i class="fa fa-minus"></i>
-                            </button>
-                            <span class="cart-preview-quantity-number">${cantidad}</span>
-                            <button class="cart-preview-quantity-btn" onclick="event.stopPropagation(); window.cart.aumentarCantidad('${item.id}')">
-                                <i class="fa fa-plus"></i>
-                            </button>
+                         class="cart-item-image" 
+                         onerror="this.src='/assets/images/no-image.png'"
+                         style="width: 50px; height: 50px; object-fit: contain; border-radius: 8px;">
+                    <div class="cart-item-info" style="flex: 1;">
+                        <div class="cart-item-title" style="font-weight: 600; font-size: 13px; margin-bottom: 3px;">${item.nombre}</div>
+                        <div class="cart-item-price" style="font-size: 12px; color: #dc2626; font-weight: 700;">$${item.precio.toFixed(2)} CUP</div>
+                        <div class="cart-item-quantity" style="display: flex; align-items: center; gap: 8px; margin-top: 5px;">
+                            <button onclick="event.stopPropagation(); window.cart.disminuirCantidad('${item.id}')" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid #cbd5e1; background: white; cursor: pointer; font-size: 12px;">-</button>
+                            <span style="font-size: 13px; min-width: 30px; text-align: center;">${cantidad}</span>
+                            <button onclick="event.stopPropagation(); window.cart.aumentarCantidad('${item.id}')" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid #cbd5e1; background: white; cursor: pointer; font-size: 12px;">+</button>
                         </div>
                     </div>
-                    <div class="cart-preview-item-remove" onclick="event.stopPropagation(); window.cart.eliminar('${item.id}')" title="Eliminar producto">
-                        <i class="fa fa-trash"></i>
+                    <div class="cart-item-subtotal" style="font-weight: 700; font-size: 13px; color: #dc2626; white-space: nowrap;">
+                        $${subtotal.toFixed(2)}
                     </div>
-                </div>
-                <div class="cart-preview-subtotal">
-                    Subtotal: <strong style="color: #b12704;">$${subtotal.toFixed(2)} CUP</strong>
                 </div>
             `
         })
