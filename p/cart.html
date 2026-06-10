@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Mi Carrito · CUBAZON</title>
+    <title>Mi Carrito · KOMERZIO</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -40,9 +40,11 @@
             align-items: center;
         }
         
-        .header-logo img {
-            height: 40px;
-            width: auto;
+        .header-logo {
+            color: white;
+            text-decoration: none;
+            font-size: 22px;
+            font-weight: 800;
         }
         
         .cart-icon {
@@ -158,7 +160,7 @@
         
         .cart-item-details {
             flex: 1;
-            min-width: 0; /* Evita desbordamiento */
+            min-width: 0;
         }
         
         .cart-item-title {
@@ -492,9 +494,7 @@
     <!-- HEADER -->
     <div class="header">
         <div class="header-content">
-            <a href="../index.html" class="header-logo">
-                <img src="https://imgfz.com/i/oXOfVlT.png" alt="CUBAZON" onerror="this.src='https://via.placeholder.com/120x40?text=CUBAZON'">
-            </a>
+            <a href="../index.html" class="header-logo">KOMERZIO</a>
             <div class="cart-icon">
                 <i class="fa fa-shopping-cart"></i>
                 <span id="cart-counter">0</span>
@@ -524,13 +524,17 @@
 
     <!-- FOOTER -->
     <div class="footer">
-        <p>@Copyright 2026 · Diseñado por Des.Joshua_Technology</p>
+        <p>© 2026 KOMERZIO · Diseñado por Des.Joshua_Technology · Todos los derechos reservados</p>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="module">
-        import { supabase } from '../js/supabase-client.js'
+        // Importar configuración de Supabase
+        import '../js/supabase-client.js'
         import { carrito } from '../js/cart.js'
+        
+        const supabase = window.supabaseClient;
         
         // Exponer globalmente
         window.cart = carrito
@@ -545,15 +549,13 @@
                     .single()
                 
                 if (error || !data) {
-                    return item.precio // Si hay error, mantener el precio guardado
+                    return item.precio
                 }
                 
-                // Si está en oferta, devolver precio_oferta
                 if (data.oferta_del_dia === true && data.precio_oferta && data.precio_oferta > 0) {
                     return parseFloat(data.precio_oferta)
                 }
                 
-                // Si no está en oferta, devolver precio normal
                 return parseFloat(data.precio)
                 
             } catch (error) {
@@ -571,7 +573,6 @@
             for (const item of carrito.items) {
                 const precioCorrecto = await obtenerPrecioActualizado(item)
                 
-                // Si el precio cambió, actualizar
                 if (item.precio !== precioCorrecto) {
                     console.log(`🔄 Actualizando precio de ${item.nombre}: ${item.precio} → ${precioCorrecto}`)
                     item.precio = precioCorrecto
@@ -579,7 +580,6 @@
                 }
             }
             
-            // Si hubo cambios, guardar y actualizar interfaz
             if (cambios) {
                 carrito.guardarEnLocalStorage()
                 console.log('✅ Precios actualizados en el carrito')
@@ -591,12 +591,10 @@
             const container = document.getElementById('cart-content')
             if (!container) return
 
-            // Asegurar que el carrito está cargado
             carrito.cargarDeLocalStorage()
             
             console.log('🛒 Items en carrito:', carrito.items)
 
-            // 🔥 ACTUALIZAR PRECIOS ANTES DE RENDERIZAR
             await actualizarPreciosCarrito()
 
             if (!carrito.items || carrito.items.length === 0) {
@@ -681,7 +679,6 @@
                 </div>
             `
 
-            // Actualizar contador del header
             const counter = document.getElementById('cart-counter')
             if (counter) counter.textContent = cantidad
         }
@@ -691,7 +688,6 @@
             renderCart()
         }, 100)
         
-        // Actualizar cuando cambie el carrito
         window.addEventListener('carrito-actualizado', renderCart)
         
         console.log('✅ Página de carrito lista con actualización de precios')
