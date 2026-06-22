@@ -14,6 +14,9 @@
     <!-- Turnstile -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
@@ -299,10 +302,66 @@
     
     <script type="module">
         // ============================================
-        // REGISTRO - CORREGIDO PARA KOMERZIO
+        // REGISTRO - VERSIÓN CORREGIDA
+        // CON SUPABASE DESDE CDN
         // ============================================
-        import { supabase } from '/js/supabase-client.js'
-        import { auth } from '/js/auth.js'
+        
+        // Configuración de Supabase
+        const SUPABASE_URL = 'https://houfrgnlctliwkzzelmi.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdWZyZ25sY3RsaXdrenplbG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MTQ2OTMsImV4cCI6MjA5NjE5MDY5M30.zUfcA755LEjBbn-N05LrmwFqsOFITRP4qLzxjgPIy54';
+        
+        // Crear cliente de Supabase desde la variable global
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // ========== AUTH WRAPPER SIMPLE ==========
+        const auth = {
+            async registrar(email, password, datos) {
+                try {
+                    const { data: userData, error: signUpError } = await supabase.auth.signUp({
+                        email: email,
+                        password: password,
+                        options: {
+                            data: {
+                                nombre: datos.nombre,
+                                telefono: datos.telefono,
+                                provincia: datos.provincia
+                            }
+                        }
+                    });
+                    
+                    if (signUpError) throw new Error(signUpError.message);
+                    
+                    if (userData.user) {
+                        // Crear perfil en la tabla perfiles
+                        const { error: perfilError } = await supabase
+                            .from('perfiles')
+                            .insert({
+                                id: userData.user.id,
+                                nombre: datos.nombre,
+                                email: email,
+                                telefono: datos.telefono,
+                                provincia: datos.provincia,
+                                codigo_referido: datos.codigo_referido || null,
+                                referido_por: datos.referido_por || null
+                            });
+                        
+                        if (perfilError) {
+                            console.error('Error creando perfil:', perfilError);
+                            // Intentar eliminar el usuario si falla el perfil
+                            await supabase.auth.admin.deleteUser(userData.user.id);
+                            throw new Error('Error al crear el perfil');
+                        }
+                        
+                        return { success: true, user: userData.user };
+                    }
+                    
+                    return { success: false, error: 'No se pudo crear el usuario' };
+                } catch (error) {
+                    console.error('Error en registro:', error);
+                    return { success: false, error: error.message };
+                }
+            }
+        };
         
         const esApp = navigator.userAgent.includes('wv') || 
                       navigator.userAgent.includes('WebView') ||
@@ -312,18 +371,43 @@
         
         if (esApp) { localStorage.setItem('komerzio_app', 'true'); }
         if (esApp) {
-            document.getElementById('googleRegisterBtn').style.display = 'none';
-            document.getElementById('googleDividerRegistro').style.display = 'none';
+            const googleBtn = document.getElementById('googleRegisterBtn');
+            const googleDivider = document.getElementById('googleDividerRegistro');
+            if (googleBtn) googleBtn.style.display = 'none';
+            if (googleDivider) googleDivider.style.display = 'none';
         }
         
         console.log('🚀 registro.html - App detectada:', esApp);
+        console.log('🚀 Supabase inicializado');
         
         let turnstileToken = null, turnstileReady = false, codigoReferidoActual = '', codigoReferidoValido = false, referidoPorId = null;
         
-        window.onTurnstileSuccess = function(token) { turnstileToken = token; turnstileReady = true; const s = document.getElementById('turnstileStatus'); if (s) { s.style.display = 'block'; setTimeout(() => s.style.display = 'none', 3000); } };
-        window.onTurnstileExpired = function() { turnstileToken = null; turnstileReady = false; };
-        window.onTurnstileError = function() { turnstileToken = null; turnstileReady = false; };
-        window.addEventListener('load', () => setTimeout(() => { if (typeof turnstile !== 'undefined') { const t = turnstile.getResponse(); if (t) { turnstileToken = t; turnstileReady = true; } } }, 1000));
+        window.onTurnstileSuccess = function(token) { 
+            turnstileToken = token; 
+            turnstileReady = true; 
+            const s = document.getElementById('turnstileStatus'); 
+            if (s) { 
+                s.style.display = 'block'; 
+                setTimeout(() => s.style.display = 'none', 3000); 
+            } 
+        };
+        window.onTurnstileExpired = function() { 
+            turnstileToken = null; 
+            turnstileReady = false; 
+        };
+        window.onTurnstileError = function() { 
+            turnstileToken = null; 
+            turnstileReady = false; 
+        };
+        window.addEventListener('load', () => setTimeout(() => { 
+            if (typeof turnstile !== 'undefined') { 
+                const t = turnstile.getResponse(); 
+                if (t) { 
+                    turnstileToken = t; 
+                    turnstileReady = true; 
+                } 
+            } 
+        }, 1000));
         
         // Limitar teléfono a solo números
         document.getElementById('telefonoEmail')?.addEventListener('input', function() {
@@ -332,109 +416,212 @@
         
         function detectarCodigoReferido() {
             const p = new URLSearchParams(window.location.search), c = p.get('ref');
-            if (c) { const cl = c.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7); if (cl.length >= 3) { codigoReferidoActual = cl; validarYMostrarBanner(cl); } }
+            if (c) { 
+                const cl = c.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7); 
+                if (cl.length >= 3) { 
+                    codigoReferidoActual = cl; 
+                    validarYMostrarBanner(cl); 
+                } 
+            }
         }
         async function validarYMostrarBanner(c) {
             const { data, error } = await supabase.from('perfiles').select('id').eq('codigo_referido', c).maybeSingle();
-            if (!error && data) { codigoReferidoValido = true; referidoPorId = data.id; document.getElementById('codigoReferido').value = c; document.getElementById('codigoBannerBadge').textContent = c; document.getElementById('referidoBanner').style.display = 'flex'; }
+            if (!error && data) { 
+                codigoReferidoValido = true; 
+                referidoPorId = data.id; 
+                document.getElementById('codigoReferido').value = c; 
+                document.getElementById('codigoBannerBadge').textContent = c; 
+                document.getElementById('referidoBanner').style.display = 'flex'; 
+            }
         }
-        window.quitarReferido = function() { codigoReferidoActual = ''; codigoReferidoValido = false; referidoPorId = null; document.getElementById('codigoReferido').value = ''; document.getElementById('referidoBanner').style.display = 'none'; const u = new URL(window.location); u.searchParams.delete('ref'); window.history.replaceState({}, '', u); };
+        window.quitarReferido = function() { 
+            codigoReferidoActual = ''; 
+            codigoReferidoValido = false; 
+            referidoPorId = null; 
+            document.getElementById('codigoReferido').value = ''; 
+            document.getElementById('referidoBanner').style.display = 'none'; 
+            const u = new URL(window.location); 
+            u.searchParams.delete('ref'); 
+            window.history.replaceState({}, '', u); 
+        };
         window.aplicarCodigoManual = async function() {
-            const i = document.getElementById('codigoManual'), c = i.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7), f = document.getElementById('referidoFeedback');
-            if (!c || c.length < 3) { f.className = 'referido-feedback error'; f.textContent = 'El código debe tener al menos 3 caracteres'; return; }
+            const i = document.getElementById('codigoManual'), 
+                  c = i.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7), 
+                  f = document.getElementById('referidoFeedback');
+            if (!c || c.length < 3) { 
+                f.className = 'referido-feedback error'; 
+                f.textContent = 'El código debe tener al menos 3 caracteres'; 
+                return; 
+            }
             const { data, error } = await supabase.from('perfiles').select('id').eq('codigo_referido', c).maybeSingle();
-            if (!error && data) { codigoReferidoActual = c; codigoReferidoValido = true; referidoPorId = data.id; document.getElementById('codigoReferido').value = c; document.getElementById('codigoBannerBadge').textContent = c; document.getElementById('referidoBanner').style.display = 'flex'; f.className = 'referido-feedback exito'; f.textContent = '✅ Código aplicado correctamente'; i.value = c; }
-            else { f.className = 'referido-feedback error'; f.textContent = '❌ Código no encontrado'; }
+            if (!error && data) { 
+                codigoReferidoActual = c; 
+                codigoReferidoValido = true; 
+                referidoPorId = data.id; 
+                document.getElementById('codigoReferido').value = c; 
+                document.getElementById('codigoBannerBadge').textContent = c; 
+                document.getElementById('referidoBanner').style.display = 'flex'; 
+                f.className = 'referido-feedback exito'; 
+                f.textContent = '✅ Código aplicado correctamente'; 
+                i.value = c; 
+            } else { 
+                f.className = 'referido-feedback error'; 
+                f.textContent = '❌ Código no encontrado'; 
+            }
             setTimeout(() => f.className = 'referido-feedback', 3000);
         };
-        document.getElementById('codigoManual')?.addEventListener('input', function() { this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7); });
-        
-        const fe = document.getElementById('formularioEmail'), eb = document.getElementById('emailRegisterBtn');
-        if (eb) eb.addEventListener('click', () => { if (fe.style.display === 'none' || fe.style.display === '') { fe.style.display = 'block'; setTimeout(() => fe.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100); } else fe.style.display = 'none'; });
-        
-        const gb = document.getElementById('googleRegisterBtn');
-        if (gb) gb.addEventListener('click', async function() { const b = this; b.disabled = true; b.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Conectando con Google...'; await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/index.html' } }); });
-        
-        const rf = document.getElementById('emailRegistroForm');
-        if (rf) rf.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const n = document.getElementById('nombreEmail')?.value.trim();
-            const tel = document.getElementById('telefonoEmail')?.value.trim();
-            const p = document.getElementById('provinciaEmail')?.value;
-            const em = document.getElementById('email')?.value.trim();
-            const pw = document.getElementById('password')?.value;
-            const cp = document.getElementById('confirmPassword')?.value;
-            const te = document.getElementById('terminosEmail')?.checked;
-            
-            if (!n || !p || !em || !pw) { Swal.fire('Error', 'Completa todos los campos obligatorios', 'error'); return; }
-            if (!tel || tel.length < 8) { Swal.fire('Error', 'Ingresa un número de teléfono válido (8 dígitos)', 'error'); return; }
-            if (pw.length < 6) { Swal.fire('Error', 'La contraseña debe tener al menos 6 caracteres', 'error'); return; }
-            if (pw !== cp) { Swal.fire('Error', 'Las contraseñas no coinciden', 'error'); return; }
-            if (!te) { Swal.fire('Error', 'Debes aceptar los términos y condiciones', 'error'); return; }
-            if (!turnstileReady || !turnstileToken) { 
-                if (typeof turnstile !== 'undefined') { const ct = turnstile.getResponse(); if (ct) { turnstileToken = ct; turnstileReady = true; } } 
-                if (!turnstileReady || !turnstileToken) { Swal.fire({ icon: 'info', title: 'Completa la verificación', timer: 2000, showConfirmButton: false }); return; } 
-            }
-            
-            const btn = document.getElementById('submitBtn'); 
-            btn.disabled = true; 
-            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verificando...';
-            
-            try {
-                const { data: vd, error: ve } = await supabase.functions.invoke('verify-turnstile', { body: { token: turnstileToken } });
-                if (ve || !vd?.success) throw new Error('Verificación de seguridad fallida. Recarga la página e intenta de nuevo.');
-                
-                const telefonoCompleto = '+53' + tel;
-                
-                // ✅ VERIFICAR SI EL TELÉFONO YA EXISTE ANTES DE CREAR LA CUENTA
-                btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verificando teléfono...';
-                const { data: telefonoExiste } = await supabase
-                    .from('perfiles')
-                    .select('id')
-                    .eq('telefono', telefonoCompleto)
-                    .maybeSingle();
-                
-                if (telefonoExiste) {
-                    throw new Error('⚠️ Este número de teléfono ya está registrado. Usa otro número o inicia sesión con tu cuenta existente.');
-                }
-                
-                btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Creando cuenta...';
-                
-                const datos = { 
-                    nombre: n, 
-                    telefono: telefonoCompleto,
-                    provincia: p, 
-                    codigo_referido: codigoReferidoValido ? codigoReferidoActual : null, 
-                    referido_por: referidoPorId 
-                };
-                
-                const r = await auth.registrar(em, pw, datos);
-                
-                if (r.success) { 
-                    document.getElementById('emailConfirmado').textContent = em; 
-                    document.getElementById('confirmacionEmail').style.display = 'block'; 
-                    rf.style.display = 'none'; 
-                    Swal.fire({ 
-                        icon: 'success', 
-                        title: '¡Registro exitoso!', 
-                        html: `Revisa <strong>${em}</strong><br>📧 Revisa también tu carpeta de SPAM`, 
-                        confirmButtonText: 'Ir al inicio de sesión',
-                        confirmButtonColor: '#667eea'
-                    }).then(() => {
-                        window.location.href = '/login.html';
-                    });
-                } else {
-                    throw new Error(r.error || 'Error al crear la cuenta');
-                }
-            } catch (err) { 
-                console.error('Error en registro:', err);
-                Swal.fire('Error', err.message, 'error'); 
-                btn.disabled = false; 
-                btn.innerHTML = '<i class="fas fa-user-plus"></i> Crear cuenta'; 
-            }
+        document.getElementById('codigoManual')?.addEventListener('input', function() { 
+            this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7); 
         });
         
-        document.getElementById('terminosLink')?.addEventListener('click', function(e) { e.preventDefault(); Swal.fire({ title: 'Términos y Condiciones', html: '<p>Al registrarte en KOMERZIO aceptas nuestras normas de uso y política de privacidad.</p>', confirmButtonText: 'Entendido', confirmButtonColor: '#667eea' }); });
+        const fe = document.getElementById('formularioEmail'), 
+              eb = document.getElementById('emailRegisterBtn');
+        if (eb) {
+            eb.addEventListener('click', function() {
+                console.log('📧 Botón Registrarme con email clickeado');
+                if (fe.style.display === 'none' || fe.style.display === '') {
+                    fe.style.display = 'block';
+                    setTimeout(() => fe.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                } else {
+                    fe.style.display = 'none';
+                }
+            });
+        }
+        
+        const gb = document.getElementById('googleRegisterBtn');
+        if (gb) {
+            gb.addEventListener('click', async function() { 
+                const b = this; 
+                b.disabled = true; 
+                b.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Conectando con Google...'; 
+                await supabase.auth.signInWithOAuth({ 
+                    provider: 'google', 
+                    options: { 
+                        redirectTo: window.location.origin + '/index.html' 
+                    } 
+                }); 
+            });
+        }
+        
+        const rf = document.getElementById('emailRegistroForm');
+        if (rf) {
+            rf.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                console.log('📝 Formulario de registro enviado');
+                
+                const n = document.getElementById('nombreEmail')?.value.trim();
+                const tel = document.getElementById('telefonoEmail')?.value.trim();
+                const p = document.getElementById('provinciaEmail')?.value;
+                const em = document.getElementById('email')?.value.trim();
+                const pw = document.getElementById('password')?.value;
+                const cp = document.getElementById('confirmPassword')?.value;
+                const te = document.getElementById('terminosEmail')?.checked;
+                
+                if (!n || !p || !em || !pw) { 
+                    Swal.fire('Error', 'Completa todos los campos obligatorios', 'error'); 
+                    return; 
+                }
+                if (!tel || tel.length < 8) { 
+                    Swal.fire('Error', 'Ingresa un número de teléfono válido (8 dígitos)', 'error'); 
+                    return; 
+                }
+                if (pw.length < 6) { 
+                    Swal.fire('Error', 'La contraseña debe tener al menos 6 caracteres', 'error'); 
+                    return; 
+                }
+                if (pw !== cp) { 
+                    Swal.fire('Error', 'Las contraseñas no coinciden', 'error'); 
+                    return; 
+                }
+                if (!te) { 
+                    Swal.fire('Error', 'Debes aceptar los términos y condiciones', 'error'); 
+                    return; 
+                }
+                if (!turnstileReady || !turnstileToken) { 
+                    if (typeof turnstile !== 'undefined') { 
+                        const ct = turnstile.getResponse(); 
+                        if (ct) { 
+                            turnstileToken = ct; 
+                            turnstileReady = true; 
+                        } 
+                    } 
+                    if (!turnstileReady || !turnstileToken) { 
+                        Swal.fire({ icon: 'info', title: 'Completa la verificación', timer: 2000, showConfirmButton: false }); 
+                        return; 
+                    } 
+                }
+                
+                const btn = document.getElementById('submitBtn'); 
+                btn.disabled = true; 
+                btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verificando...';
+                
+                try {
+                    const { data: vd, error: ve } = await supabase.functions.invoke('verify-turnstile', { 
+                        body: { token: turnstileToken } 
+                    });
+                    if (ve || !vd?.success) {
+                        throw new Error('Verificación de seguridad fallida. Recarga la página e intenta de nuevo.');
+                    }
+                    
+                    const telefonoCompleto = '+53' + tel;
+                    
+                    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verificando teléfono...';
+                    const { data: telefonoExiste } = await supabase
+                        .from('perfiles')
+                        .select('id')
+                        .eq('telefono', telefonoCompleto)
+                        .maybeSingle();
+                    
+                    if (telefonoExiste) {
+                        throw new Error('⚠️ Este número de teléfono ya está registrado. Usa otro número o inicia sesión con tu cuenta existente.');
+                    }
+                    
+                    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Creando cuenta...';
+                    
+                    const datos = { 
+                        nombre: n, 
+                        telefono: telefonoCompleto,
+                        provincia: p, 
+                        codigo_referido: codigoReferidoValido ? codigoReferidoActual : null, 
+                        referido_por: referidoPorId 
+                    };
+                    
+                    const r = await auth.registrar(em, pw, datos);
+                    
+                    if (r.success) { 
+                        document.getElementById('emailConfirmado').textContent = em; 
+                        document.getElementById('confirmacionEmail').style.display = 'block'; 
+                        rf.style.display = 'none'; 
+                        Swal.fire({ 
+                            icon: 'success', 
+                            title: '¡Registro exitoso!', 
+                            html: `Revisa <strong>${em}</strong><br>📧 Revisa también tu carpeta de SPAM`, 
+                            confirmButtonText: 'Ir al inicio de sesión',
+                            confirmButtonColor: '#667eea'
+                        }).then(() => {
+                            window.location.href = '/login.html';
+                        });
+                    } else {
+                        throw new Error(r.error || 'Error al crear la cuenta');
+                    }
+                } catch (err) { 
+                    console.error('❌ Error en registro:', err);
+                    Swal.fire('Error', err.message, 'error'); 
+                    btn.disabled = false; 
+                    btn.innerHTML = '<i class="fas fa-user-plus"></i> Crear cuenta'; 
+                }
+            });
+        }
+        
+        document.getElementById('terminosLink')?.addEventListener('click', function(e) { 
+            e.preventDefault(); 
+            Swal.fire({ 
+                title: 'Términos y Condiciones', 
+                html: '<p>Al registrarte en KOMERZIO aceptas nuestras normas de uso y política de privacidad.</p>', 
+                confirmButtonText: 'Entendido', 
+                confirmButtonColor: '#667eea' 
+            }); 
+        });
         detectarCodigoReferido();
     </script>
 </body>
