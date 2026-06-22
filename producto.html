@@ -699,7 +699,7 @@
                                 <div class="cart-preview-footer">
                                     <div class="cart-preview-total">
                                         <span>Total:</span>
-                                        <span id="cart-preview-total-amount">$0.00 CUP</span>
+                                        <span id="cart-preview-total-amount">$0.00 USD</span>
                                     </div>
                                     <div class="cart-preview-buttons">
                                         <a href="/p/cart.html" class="cart-preview-btn cart-preview-btn-primary">Ver Carrito</a>
@@ -785,8 +785,6 @@
 
     <!-- ========== SCRIPTS ========== -->
     <!-- Librería Supabase UMD (debe cargarse antes del módulo) -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    
     <!-- jQuery y SweetAlert2 -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -810,7 +808,7 @@
         function actualizarMetaTags(producto, precioActual) {
             const url = `https://komerzio.dpdns.org/producto.html?id=${producto.id}`;
             const titulo = `${producto.nombre} | KOMERZIO`;
-            const descripcion = `💰 $${parseFloat(precioActual).toFixed(2)} CUP | 📦 Stock: ${producto.stock} unidades | Envío en Sagua de Tánamo`;
+            const descripcion = `💰 $${parseFloat(precioActual).toFixed(2)} USD | 📦 Stock: ${producto.stock} unidades | Envío en Sagua de Tánamo`;
             
             let imagenUrl = producto.imagen_url || 'https://komerzio.dpdns.org/android-chrome-512x512.png';
             
@@ -888,7 +886,7 @@
             const producto = window.currentProducto;
             if (!producto) return;
             const url = `${window.location.origin}/producto.html?id=${id}`;
-            const mensaje = `¡Mira este producto en KOMERZIO!\n\n*${producto.nombre}*\n💰 Precio: $${producto.precio_actual} CUP\n📦 Stock: ${producto.stock || 'Disponible'} unidades\n🔗 ${url}`;
+            const mensaje = `¡Mira este producto en KOMERZIO!\n\n*${producto.nombre}*\n💰 Precio: $${producto.precio_actual} USD\n📦 Stock: ${producto.stock || 'Disponible'} unidades\n🔗 ${url}`;
             window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank');
         };
         
@@ -989,17 +987,17 @@
                     <div class="price-section">
                         <div class="price-label">Precio especial:</div>
                         <div class="price-container">
-                            <span class="current-price">$${precioActual.toFixed(2)} <small>CUP</small></span>
+                            <span class="current-price">$${precioActual.toFixed(2)} <small>USD</small></span>
                             <span class="original-price">$${precioOriginal.toFixed(2)}</span>
                             <span class="discount-badge">-${descuento}%</span>
                         </div>
                         <div class="savings-badge">
-                            <i class="fa fa-tag"></i> Ahorras $${ahorro} CUP (${descuento}%)
+                            <i class="fa fa-tag"></i> Ahorras $${ahorro} USD (${descuento}%)
                         </div>
                         <div class="price-breakdown">
                             <i class="fa fa-check-circle" style="color: #16a34a;"></i> 
-                            Precio recomendado: <span>$${precioOriginal.toFixed(2)} CUP</span> | 
-                            Tu precio: <span>$${precioActual.toFixed(2)} CUP</span>
+                            Precio recomendado: <span>$${precioOriginal.toFixed(2)} USD</span> | 
+                            Tu precio: <span>$${precioActual.toFixed(2)} USD</span>
                         </div>
                     </div>
                 `;
@@ -1008,7 +1006,7 @@
                     <div class="price-section">
                         <div class="price-label">Precio:</div>
                         <div class="price-container">
-                            <span class="current-price">$${precioOriginal.toFixed(2)} <small>CUP</small></span>
+                            <span class="current-price">$${precioOriginal.toFixed(2)} <small>USD</small></span>
                         </div>
                     </div>
                 `;

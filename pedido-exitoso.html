@@ -208,11 +208,13 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module">
-        import '../js/supabase-client.js';
+        // ============================================
+        // CORRECCIÓN: Importar Supabase correctamente
+        // ============================================
+        import { supabase } from '/js/supabase-client.js';
         import { auth } from '/js/auth.js';
-        
-        const supabase = window.supabaseClient;
         
         let pedidoData = null;
         
@@ -220,12 +222,22 @@
         const urlParams = new URLSearchParams(window.location.search);
         const pedidoId = urlParams.get('id');
         
+        // Función para obtener la moneda según el método de pago
+        function obtenerMoneda(metodoPago) {
+            if (metodoPago === 'efectivo_cup' || metodoPago === 'saldo_cup') {
+                return 'CUP';
+            }
+            return 'USD';
+        }
+        
         async function cargarPedido() {
+            const receiptBody = document.getElementById('receiptBody');
+            
             try {
                 const usuario = auth.getUsuario();
                 
                 if (!usuario) {
-                    document.getElementById('receiptBody').innerHTML = `
+                    receiptBody.innerHTML = `
                         <div style="text-align: center; padding: 40px;">
                             <i class="fa fa-exclamation-triangle" style="font-size: 48px; color: #dc3545;"></i>
                             <h3 style="margin-top: 15px;">No se pudo cargar el pedido</h3>
@@ -236,10 +248,13 @@
                     return;
                 }
                 
+                console.log('👤 Usuario autenticado:', usuario.email);
+                
                 // Buscar pedido por ID si viene en URL, o el último pedido del usuario
                 let pedido = null;
                 
                 if (pedidoId) {
+                    console.log('🔍 Buscando pedido por ID:', pedidoId);
                     const { data, error } = await supabase
                         .from('pedidos')
                         .select('*')
@@ -248,11 +263,13 @@
                     
                     if (!error && data) {
                         pedido = data;
+                        console.log('✅ Pedido encontrado por ID');
                     }
                 }
                 
                 if (!pedido) {
                     // Buscar último pedido del usuario
+                    console.log('🔍 Buscando último pedido del usuario');
                     const { data: pedidos, error } = await supabase
                         .from('pedidos')
                         .select('*')
@@ -267,18 +284,19 @@
                     }
                     
                     pedido = pedidos[0];
+                    console.log('✅ Último pedido encontrado:', pedido.id);
                 }
                 
                 pedidoData = pedido;
                 renderizarRecibo();
                 
             } catch (error) {
-                console.error('Error cargando pedido:', error);
-                document.getElementById('receiptBody').innerHTML = `
+                console.error('❌ Error cargando pedido:', error);
+                receiptBody.innerHTML = `
                     <div style="text-align: center; padding: 40px;">
                         <i class="fa fa-exclamation-triangle" style="font-size: 48px; color: #dc3545;"></i>
                         <h3 style="margin-top: 15px;">Pedido no encontrado</h3>
-                        <p>No pudimos encontrar la información de tu pedido.</p>
+                        <p>${error.message || 'No pudimos encontrar la información de tu pedido.'}</p>
                         <a href="/mi-cuenta.html" class="btn btn-primary" style="margin-top: 20px;">Ver mis pedidos</a>
                     </div>
                 `;
@@ -289,6 +307,10 @@
             if (!pedidoData) return
             
             const fecha = pedidoData.created_at ? new Date(pedidoData.created_at).toLocaleString('es-ES') : new Date().toLocaleString('es-ES')
+            
+            // Determinar moneda
+            const moneda = obtenerMoneda(pedidoData.metodo_pago);
+            const simbolo = '$';
             
             // Productos HTML
             let productosHtml = `
@@ -304,8 +326,8 @@
                         <tr>
                             <td><strong>${item.nombre || 'Producto'}</strong></td>
                             <td>${item.cantidad || 0}</td>
-                            <td>$${(item.precio || 0).toFixed(2)}</td>
-                            <td>$${((item.precio || 0) * (item.cantidad || 0)).toFixed(2)}</td>
+                            <td>${simbolo}${(item.precio || 0).toFixed(2)}</td>
+                            <td>${simbolo}${((item.precio || 0) * (item.cantidad || 0)).toFixed(2)}</td>
                         </tr>
                     `
                 })
@@ -316,18 +338,18 @@
             let resumenHtml = `
                 <div class="total-row">
                     <span>Subtotal</span>
-                    <span class="value">$${(pedidoData.subtotal || 0).toFixed(2)} CUP</span>
+                    <span class="value">${simbolo}${(pedidoData.subtotal || 0).toFixed(2)}</span>
                 </div>
                 <div class="total-row">
                     <span>Envío</span>
-                    <span class="value">$${(pedidoData.envio || 0).toFixed(2)} CUP</span>
+                    <span class="value">${simbolo}${(pedidoData.envio || 0).toFixed(2)}</span>
                 </div>
             `
             if (pedidoData.descuento > 0) {
                 resumenHtml += `
                     <div class="total-row">
                         <span>Descuento</span>
-                        <span class="value" style="color: #059669;">-$${(pedidoData.descuento || 0).toFixed(2)} CUP</span>
+                        <span class="value" style="color: #059669;">-${simbolo}${(pedidoData.descuento || 0).toFixed(2)}</span>
                     </div>
                 `
             }
@@ -353,9 +375,19 @@
             resumenHtml += `
                 <div class="total-row total">
                     <span>Total</span>
-                    <span class="value">$${(pedidoData.total || 0).toFixed(2)} CUP</span>
+                    <span class="value">${simbolo}${(pedidoData.total || 0).toFixed(2)} ${moneda}</span>
                 </div>
             `
+            
+            // Mostrar tasa aplicada si es CUP
+            if (moneda === 'CUP' && pedidoData.tasa_aplicada) {
+                resumenHtml += `
+                    <div class="total-row" style="font-size: 13px; color: #64748b; border-top: 1px dashed #e2e8f0; margin-top: 10px; padding-top: 10px;">
+                        <span>Tasa aplicada:</span>
+                        <span>1 USD = ${pedidoData.tasa_aplicada} CUP</span>
+                    </div>
+                `
+            }
             
             const cliente = pedidoData.cliente || {};
             
@@ -393,6 +425,14 @@
                     <div class="info-item">
                         <span class="info-label">Referencia</span>
                         <span class="info-value">${cliente.referencia || '-'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Método de pago</span>
+                        <span class="info-value">${pedidoData.metodo_pago || 'No especificado'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Moneda</span>
+                        <span class="info-value"><strong>${moneda}</strong></span>
                     </div>
                 </div>
                 
@@ -432,7 +472,5 @@
         // Inicializar
         cargarPedido()
     </script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>

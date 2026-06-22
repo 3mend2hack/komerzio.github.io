@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Productos Destacados · CUBAZON</title>
+    <title>Productos Destacados · KOMERZIO</title>
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -24,7 +24,7 @@
             min-height: 100vh;
         }
 
-        /* ===== HEADER COMPLETO (IGUAL QUE INDEX.HTML) ===== */
+        /* ===== HEADER COMPLETO ===== */
         #header-wrap {
             background: #0f172a;
             color: white;
@@ -759,7 +759,7 @@
                 <div class="container row">
                     <div class="header-logo">
                         <a href="/">
-                            <img src="http://imgfz.com/i/oXOfVlT.png" alt="CUBAZON">
+                            <img src="https://i.postimg.cc/MZRbKh98/Cubazon.png" alt="KOMERZIO">
                         </a>
                     </div>
                     
@@ -783,7 +783,7 @@
                                 <div class="cart-preview-footer">
                                     <div class="cart-preview-total">
                                         <span>Total:</span>
-                                        <span id="cart-preview-total-amount">$0.00 CUP</span>
+                                        <span id="cart-preview-total-amount">$0.00 USD</span>
                                     </div>
                                     <div class="cart-preview-buttons">
                                         <a href="/p/cart.html" class="cart-preview-btn cart-preview-btn-primary">Ver Carrito</a>
@@ -860,13 +860,14 @@
 
         <footer class="footer">
             <div class="footer-content">
-                <div><h3>CUBAZON</h3><p style="color: #94a3b8; margin-bottom: 1rem;">Tu tienda online de confianza en Cuba 🇨🇺</p></div>
+                <div><h3>KOMERZIO</h3><p style="color: #94a3b8; margin-bottom: 1rem;">Tu tienda online de confianza en Sagua de Tánamo.</p></div>
                 <div><h4>Enlaces rápidos</h4><ul><li><a href="/ofertas-especiales.html">Ofertas</a></li><li><a href="/destacados.html">Destacados</a></li><li><a href="/novedades.html">Novedades</a></li></ul></div>
-                <div><h4>Contacto</h4><ul><li><i class="fas fa-phone"></i> +53 56591892</li><li><i class="fas fa-envelope"></i> ventas@cubazon.com</li></ul></div>
+                <div><h4>Contacto</h4><ul><li><i class="fas fa-phone"></i> +53 56591892</li><li><i class="fas fa-envelope"></i> komerzio.oficial@gmail.com</li></ul></div>
             </div>
         </footer>
     </div>
 
+    <!-- ========== SCRIPTS ========== -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
@@ -920,28 +921,27 @@
         let categoriaActual = 'todas';
 
         function crearWhatsAppLink(producto) {
-            const mensaje = encodeURIComponent(`Hola, me interesa tu producto destacado *${producto.nombre}*.\nPrecio: $${producto.precio?.toFixed(2)} CUP\n¿Podemos coordinar la compra?`);
+            const mensaje = encodeURIComponent(`Hola, me interesa tu producto destacado *${producto.nombre}*.\nPrecio: $${producto.precio?.toFixed(2)} USD\n¿Podemos coordinar la compra?`);
             return producto.vendedor?.whatsapp_contacto ? `https://wa.me/${producto.vendedor.whatsapp_contacto}?text=${mensaje}` : '#';
         }
 
         function generarValoracion() { return { estrellas: (Math.random() * 2 + 3).toFixed(1), votos: Math.floor(Math.random() * 50) + 10 }; }
-        function generarDescripcion(p) { const d = ["Producto de alta calidad", "Excelente relación calidad-precio", "Producto destacado por nuestros vendedores", "Garantía de satisfacción", "Lo más vendido"]; return d[Math.floor(Math.random() * d.length)]; }
+        function generarDescripcion() { const d = ["Producto de alta calidad", "Excelente relación calidad-precio", "Producto destacado por nuestros vendedores", "Garantía de satisfacción", "Lo más vendido"]; return d[Math.floor(Math.random() * d.length)]; }
 
         async function cargarProductos() {
             const spinner = document.getElementById('loadingSpinner');
             spinner.style.display = 'block';
 
             try {
+                // Obtener productos promocionados activos
                 const { data: promocionesActivas } = await supabase
-                    .from('promociones_activas')
-                    .select(`producto_id, plan_id, planes_promocion!inner (id, nombre, posicion)`)
+                    .from('productos_promocionados')
+                    .select('producto_id')
                     .eq('activo', true);
                 
-                const posicionesPermitidas = ['home', 'destacados', 'todas'];
-                const productosIdsPermitidos = (promocionesActivas || [])
-                    .filter(promo => posicionesPermitidas.includes(promo.planes_promocion?.posicion))
-                    .map(promo => promo.producto_id);
+                const productosIdsPermitidos = promocionesActivas?.map(p => p.producto_id) || [];
                 
+                // Cargar productos de vendedores promocionados
                 let productosVendedores = [];
                 if (productosIdsPermitidos.length > 0) {
                     const { data: vendedores } = await supabase
@@ -952,10 +952,11 @@
                     productosVendedores = vendedores || [];
                 }
                 
+                // Cargar productos de admin destacados
                 const { data: admin } = await supabase.from('productos').select('*').eq('destacado', true);
                 
-                const adminConTipo = (admin || []).map(p => ({ ...p, tipo: 'admin', vendedor: { nombre_tienda: 'CUBAZON', whatsapp_contacto: null }, valoracion: generarValoracion(), descripcion: generarDescripcion(p) }));
-                const vendedoresConTipo = productosVendedores.map(p => ({ ...p, tipo: 'vendedor', valoracion: generarValoracion(), descripcion: generarDescripcion(p) }));
+                const adminConTipo = (admin || []).map(p => ({ ...p, tipo: 'admin', vendedor: { nombre_tienda: 'KOMERZIO', whatsapp_contacto: null }, valoracion: generarValoracion(), descripcion: generarDescripcion() }));
+                const vendedoresConTipo = productosVendedores.map(p => ({ ...p, tipo: 'vendedor', valoracion: generarValoracion(), descripcion: generarDescripcion() }));
                 
                 todosProductos = [...adminConTipo, ...vendedoresConTipo];
                 
@@ -1025,7 +1026,7 @@
                     ${featuredBadge}
                     ${sponsoredBadge}
                     <div class="rating-badge"><i class="fas fa-star"></i> ${p.valoracion.estrellas} (${p.valoracion.votos})</div>
-                    <img src="${p.imagen_url || 'https://via.placeholder.com/300x200'}" class="product-image" onclick="window.location.href='${esAdmin ? '/producto.html' : '/producto-vendedor.html'}?id=${p.id}'" onerror="this.src='https://via.placeholder.com/300x200'">
+                    <img src="${p.imagen_url || '/assets/images/no-image.jpg'}" class="product-image" onclick="window.location.href='${esAdmin ? '/producto.html' : '/producto-vendedor.html'}?id=${p.id}'" onerror="this.src='/assets/images/no-image.jpg'">
                     <div class="product-info">
                         <h3>${p.nombre}</h3>
                         <p class="price">$${p.precio?.toFixed(2)}</p>
@@ -1061,8 +1062,6 @@
 
         document.getElementById('sortSelect').addEventListener('change', e => { ordenActual = e.target.value; paginaActual = 1; aplicarFiltrosYOrden(); });
         document.getElementById('categoryFilter').addEventListener('change', e => { categoriaActual = e.target.value; paginaActual = 1; aplicarFiltrosYOrden(); });
-        document.getElementById('searchButton')?.addEventListener('click', () => { const t = document.getElementById('searchInput')?.value.trim(); if (t) window.location.href = `/buscar.html?q=${encodeURIComponent(t)}`; });
-        document.getElementById('searchInput')?.addEventListener('keypress', e => { if (e.key === 'Enter') { const t = e.target.value.trim(); if (t) window.location.href = `/buscar.html?q=${encodeURIComponent(t)}`; } });
 
         actualizarMenuUsuario();
         auth.onCambio(actualizarMenuUsuario);

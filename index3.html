@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>CUBAZON · En Mantenimiento</title>
+    <title>KOMERZIO · En Mantenimiento</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -26,21 +26,6 @@
             padding: 20px;
             position: relative;
             overflow-x: hidden;
-        }
-        
-        /* Fondo decorativo con el mapa de Cuba */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" opacity="0.05"><path d="M60,20 L120,15 L160,25 L170,45 L155,65 L120,75 L80,70 L50,55 L45,35 Z" fill="white"/><text x="100" y="55" font-size="20" fill="white" text-anchor="middle" font-family="Inter">🇨🇺</text></svg>');
-            background-size: 300px 150px;
-            background-position: center;
-            background-repeat: no-repeat;
-            pointer-events: none;
         }
         
         /* Partículas decorativas */
@@ -315,7 +300,7 @@
     
     <div class="maintenance-card">
         <div class="logo-container">
-            <span class="logo">CUBAZON</span>
+            <span class="logo">KOMERZIO</span>
         </div>
         
         <div class="icon-container">
@@ -381,11 +366,10 @@
     </div>
     
     <script>
-        // Cuenta regresiva (ejemplo: 3 días a partir de ahora)
-        // Puedes cambiar esta fecha por la fecha real de lanzamiento
+        // Cuenta regresiva: 3 días desde hoy a las 9:00 AM
         const launchDate = new Date();
-        launchDate.setDate(launchDate.getDate() + 3); // 3 días desde hoy
-        launchDate.setHours(9, 0, 0, 0); // 9:00 AM
+        launchDate.setDate(launchDate.getDate() + 3);
+        launchDate.setHours(9, 0, 0, 0);
         
         function updateCountdown() {
             const now = new Date().getTime();

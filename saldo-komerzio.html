@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Pago exitoso con saldo · KOMERZIO</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .success-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .success-header {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 35px;
+            text-align: center;
+        }
+        
+        .success-header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .success-header .order-id {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-family: monospace;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .success-body {
+            padding: 35px;
+        }
+        
+        .info-card {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .info-card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #065f46;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        
+        .total-row {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+        
+        .total-row .info-label {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .total-row .info-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #dc2626;
+        }
+        
+        .delivery-card {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .delivery-card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #1e40af;
+        }
+        
+        .delivery-timer {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+        
+        .delivery-timer i {
+            font-size: 32px;
+            color: #f97316;
+        }
+        
+        .delivery-timer strong {
+            font-size: 24px;
+            color: #dc2626;
+        }
+        
+        .products-list {
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .product-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .product-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+        
+        .product-details {
+            flex: 1;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .product-meta {
+            font-size: 13px;
+            color: #64748b;
+        }
+        
+        .product-price {
+            font-weight: 700;
+            color: #dc2626;
+            text-align: right;
+            min-width: 100px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(249,115,22,0.4);
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 60px;
+            color: #dc2626;
+        }
+        
+        @media (max-width: 640px) {
+            .success-body { padding: 20px; }
+            .product-item { flex-wrap: wrap; }
+            .product-price { text-align: left; margin-left: 75px; }
+            .btn-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div id="loadingContent" class="loading">
+            <i class="fa fa-spinner fa-pulse fa-3x"></i>
+            <p style="margin-top: 15px;">Cargando información de tu compra...</p>
+        </div>
+        <div id="mainContent" style="display: none;"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script type="module">
+        // ============================================
+        // CORRECCIÓN: Importar Supabase correctamente
+        // ============================================
+        import { supabase } from '/js/supabase-client.js';
+        import { auth } from '/js/auth.js';
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const pedidoId = urlParams.get('id');
+        
+        let pedidoData = null;
+        let usuario = null;
+        
+        async function cargarPedido() {
+            const loadingContent = document.getElementById('loadingContent');
+            
+            if (!pedidoId) {
+                loadingContent.innerHTML = `
+                    <div class="error">
+                        <i class="fa fa-exclamation-triangle fa-3x"></i>
+                        <h2>Pedido no encontrado</h2>
+                        <a href="/" class="btn btn-primary" style="display: inline-block; margin-top: 20px;">Ir al inicio</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                if (auth.isAuthenticated()) {
+                    usuario = auth.getUsuario();
+                    console.log('👤 Usuario autenticado:', usuario?.email);
+                } else {
+                    console.log('⚠️ Usuario no autenticado');
+                }
+                
+                console.log('🔍 Buscando pedido:', pedidoId);
+                
+                const { data, error } = await supabase
+                    .from('pedidos')
+                    .select('*')
+                    .eq('id', pedidoId)
+                    .single();
+                
+                if (error) {
+                    console.error('❌ Error en consulta:', error);
+                    throw new Error('Pedido no encontrado');
+                }
+                
+                if (!data) {
+                    throw new Error('Pedido no encontrado');
+                }
+                
+                pedidoData = data;
+                console.log('✅ Pedido cargado:', pedidoData.id);
+                console.log('📦 Método de pago:', pedidoData.metodo_pago);
+                
+                renderizarContenido();
+                
+            } catch (error) {
+                console.error('❌ Error cargando pedido:', error);
+                loadingContent.innerHTML = `
+                    <div class="error">
+                        <i class="fa fa-exclamation-triangle fa-3x"></i>
+                        <h2>Error al cargar el pedido</h2>
+                        <p>${error.message || 'No se pudo cargar la información del pedido.'}</p>
+                        <a href="/" class="btn btn-primary" style="display: inline-block; margin-top: 20px;">Ir al inicio</a>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderizarContenido() {
+            document.getElementById('loadingContent').style.display = 'none';
+            const container = document.getElementById('mainContent');
+            container.style.display = 'block';
+            
+            const items = pedidoData.items || [];
+            const saldoDescontado = pedidoData.total;
+            
+            // ============================================
+            // CORRECCIÓN: Saldo siempre en USD
+            // ============================================
+            // El saldo KOMERZIO siempre se maneja en USD
+            // Si en el futuro se implementa saldo en CUP, se usa 'saldo_cup'
+            const moneda = 'USD';
+            const simbolo = '$';
+            
+            let productosHtml = '';
+            items.forEach(item => {
+                productosHtml += `
+                    <div class="product-item">
+                        <img src="${item.imagen_url || '/assets/images/no-image.jpg'}" onerror="this.src='/assets/images/no-image.jpg'">
+                        <div class="product-details">
+                            <div class="product-name">${item.nombre}</div>
+                            <div class="product-meta">Cantidad: ${item.cantidad}</div>
+                        </div>
+                        <div class="product-price">${simbolo}${(item.precio * item.cantidad).toFixed(2)}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = `
+                <div class="success-header">
+                    <h1><i class="fa fa-check-circle"></i> ¡Pago exitoso!</h1>
+                    <p>Tu compra ha sido confirmada con saldo KOMERZIO</p>
+                    <div class="order-id">Pedido #${pedidoId.slice(0, 8)}</div>
+                </div>
+                
+                <div class="success-body">
+                    <div class="info-card">
+                        <h2><i class="fa fa-credit-card"></i> Detalle del pago</h2>
+                        <div class="info-row">
+                            <span class="info-label">Monto descontado de tu saldo:</span>
+                            <span class="info-value" style="color: #059669;">-${simbolo}${saldoDescontado.toFixed(2)} ${moneda}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Método de pago:</span>
+                            <span class="info-value"><i class="fa fa-wallet"></i> Saldo KOMERZIO</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Estado del pedido:</span>
+                            <span class="info-value" style="color: #10b981;"><i class="fa fa-check-circle"></i> Pagado - En proceso</span>
+                        </div>
+                    </div>
+                    
+                    <div class="delivery-card">
+                        <h2><i class="fa fa-truck"></i> Información de entrega</h2>
+                        <div class="delivery-timer">
+                            <i class="fa fa-clock-o"></i>
+                            <div>
+                                <strong>¡Tu pedido está en camino!</strong><br>
+                                <span>El pago fue automático, tu producto pasará a <strong>"En proceso"</strong> y llegará en menos de <strong>72 horas</strong>.<br>
+                                Generalmente el tiempo de entrega es de <strong>2 a 48 horas</strong> después de la compra.</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <p><i class="fa fa-map-marker-alt"></i> <strong>Dirección de envío:</strong> ${pedidoData.cliente?.direccion || 'No especificada'}</p>
+                            <p><i class="fa fa-phone"></i> <strong>Teléfono de contacto:</strong> ${pedidoData.cliente?.telefono || 'No especificado'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h2><i class="fa fa-shopping-cart"></i> Resumen del pedido</h2>
+                        <div class="products-list">${productosHtml}</div>
+                        <div class="info-row"><span class="info-label">Subtotal:</span><span class="info-value">${simbolo}${pedidoData.subtotal?.toFixed(2)}</span></div>
+                        <div class="info-row"><span class="info-label">Envío:</span><span class="info-value">${simbolo}${pedidoData.envio?.toFixed(2)}</span></div>
+                        ${pedidoData.descuento > 0 ? `<div class="info-row"><span class="info-label">Descuento:</span><span class="info-value" style="color: #059669;">-${simbolo}${pedidoData.descuento?.toFixed(2)}</span></div>` : ''}
+                        <div class="total-row"><span class="info-label">Total pagado:</span><span class="info-value">${simbolo}${pedidoData.total?.toFixed(2)} ${moneda}</span></div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <a href="/mi-cuenta.html" class="btn btn-primary"><i class="fa fa-user"></i> Mis pedidos</a>
+                        <a href="/index.html" class="btn btn-secondary"><i class="fa fa-shopping-cart"></i> Seguir comprando</a>
+                    </div>
+                    
+                    <p style="text-align: center; margin-top: 25px; font-size: 12px; color: #94a3b8;">
+                        <i class="fa fa-shield"></i> Recibirás una notificación cuando tu pedido esté listo para la entrega
+                    </p>
+                </div>
+            `;
+        }
+        
+        cargarPedido();
+    </script>
+</body>
+</html>

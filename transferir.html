@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Transferir Saldo · CUBAZON</title>
+    <title>Transferir Saldo · KOMERZIO</title>
     
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -469,7 +469,7 @@
                 <div class="container row">
                     <div class="header-logo">
                         <a href="/">
-                            <img src="http://imgfz.com/i/oXOfVlT.png" alt="CUBAZON">
+                            <img src="https://i.postimg.cc/MZRbKh98/Cubazon.png" alt="KOMERZIO">
                         </a>
                     </div>
                     
@@ -493,7 +493,7 @@
                                 <div class="cart-preview-footer">
                                     <div class="cart-preview-total">
                                         <span>Total:</span>
-                                        <span id="cart-preview-total-amount">$0.00 CUP</span>
+                                        <span id="cart-preview-total-amount">$0.00 USD</span>
                                     </div>
                                     <div class="cart-preview-buttons">
                                         <a href="/p/cart.html" class="cart-preview-btn cart-preview-btn-primary">Ver Carrito</a>
@@ -528,7 +528,7 @@
 
         <div class="transfer-container">
             <h1>💰 Transferir Saldo</h1>
-            <p class="subtitle">Envía saldo a otro usuario de CUBAZON</p>
+            <p class="subtitle">Envía saldo a otro usuario de KOMERZIO</p>
             
             <div id="loadingIndicator" class="loading-spinner" style="display: none;">
                 <div class="spinner"></div>
@@ -558,7 +558,7 @@
                 
                 <div class="security-box">
                     <i class="fa fa-shield-alt"></i>
-                    <strong>Límite diario: $5,000 CUP</strong> · Esta transferencia es inmediata e irreversible.
+                    <strong>Límite diario: $5,000 USD</strong> · Esta transferencia es inmediata e irreversible.
                 </div>
                 
                 <div id="methodSelector" class="method-selector" style="display: none;">
@@ -581,7 +581,7 @@
         <footer class="footer">
             <div class="footer-content">
                 <div>
-                    <h3>CUBAZON</h3>
+                    <h3>KOMERZIO</h3>
                     <p style="color: #94a3b8; margin-bottom: 1rem;">Tu tienda online de confianza en Cuba 🇨🇺</p>
                     <p style="color: #94a3b8;"><i class="fas fa-map-marker-alt"></i> Sagua de Tánamo, Holguín, Cuba</p>
                 </div>
@@ -597,14 +597,14 @@
                     <h4>Contacto</h4>
                     <ul>
                         <li><i class="fas fa-phone"></i> +53 56591892</li>
-                        <li><i class="fas fa-envelope"></i> ventas@cubazon.com</li>
+                        <li><i class="fas fa-envelope"></i> komerzio.oficial@gmail.com</li>
                         <li><i class="fab fa-whatsapp"></i> +53 56591892</li>
                     </ul>
                 </div>
             </div>
         </footer>
         <div id="sub-footer-wrapper">
-            <p>© 2026 CUBAZON · Diseñado por Des.Joshua_Technology · Todos los derechos reservados</p>
+            <p>© 2026 KOMERZIO · Diseñado por Des.Joshua_Technology · Todos los derechos reservados</p>
         </div>
     </div>
 
@@ -879,7 +879,7 @@
             const usuario = auth.getUsuario();
             
             if (!receptorIdentificador || !monto || monto < 10) {
-                Swal.fire('Error', 'Monto mínimo: $10.00', 'error');
+                Swal.fire('Error', 'Monto mínimo: $10.00 USD', 'error');
                 return;
             }
             
@@ -900,7 +900,6 @@
             try {
                 let receptorEmail = receptorIdentificador;
                 if (esTelefono) {
-                    // ✅ CORREGIDO: Usar función RPC segura en lugar de consulta directa
                     const { data: userData, error: rpcError } = await supabase
                         .rpc('buscar_email_por_telefono', { p_telefono: receptorIdentificador });
                     
@@ -916,7 +915,7 @@
                     const { value: password } = await Swal.fire({
                         title: 'Confirmar transferencia',
                         html: `
-                            <p>Transferirás <strong>$${monto.toFixed(2)}</strong> a:</p>
+                            <p>Transferirás <strong>$${monto.toFixed(2)} USD</strong> a:</p>
                             <p style="font-size: 18px; color: #009644;">${receptorEmail}</p>
                             <p style="margin-top: 20px;">Confirma tu contraseña:</p>
                         `,
@@ -949,7 +948,7 @@
                     const { value: codigo2fa } = await Swal.fire({
                         title: 'Confirmar transferencia',
                         html: `
-                            <p>Transferirás <strong>$${monto.toFixed(2)}</strong> a:</p>
+                            <p>Transferirás <strong>$${monto.toFixed(2)} USD</strong> a:</p>
                             <p style="font-size: 18px; color: #009644;">${receptorEmail}</p>
                             <p style="margin-top: 20px;">Ingresa el código de <strong>6 dígitos</strong> de Google Authenticator:</p>
                         `,
@@ -1009,8 +1008,8 @@
                     resultDiv.innerHTML = `
                         <i class="fa fa-check-circle"></i>
                         <strong>¡Transferencia exitosa!</strong><br>
-                        Se transfirieron $${data.monto.toFixed(2)} a ${data.receptor}<br>
-                        Tu nuevo saldo: $${data.nuevo_saldo.toFixed(2)}
+                        Se transfirieron $${data.monto.toFixed(2)} USD a ${data.receptor}<br>
+                        Tu nuevo saldo: $${data.nuevo_saldo.toFixed(2)} USD
                     `;
                     resultDiv.style.display = 'block';
                     

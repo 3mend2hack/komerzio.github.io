@@ -811,8 +811,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script type="module">
-        import '/js/supabase-client.js'
-        const supabase = window.supabaseClient;
+        import { supabase } from '/js/supabase-client.js'
         import { auth } from '/js/auth.js'
         import { initCarrito } from '/js/cart.js'
         
@@ -1202,7 +1201,7 @@
             <div class="table-responsive">
                 <table class="tabla-historial">
                     <thead>
-                        <tr><th>Fecha</th><th>Monto USDT</th><th>Recibido (CUP)</th><th>Tasa</th><th>Estado</th><th>Hash</th></tr>
+                        <tr><th>Fecha</th><th>Monto USDT</th><th>Recibido (USD)</th><th>Tasa</th><th>Estado</th><th>Hash</th></tr>
                     </thead>
                     <tbody>`;
             
@@ -1221,7 +1220,7 @@
                     : '<span style="background: #fff3cd; color: #856404; padding: 4px 12px; border-radius: 20px; font-size: 12px;"><i class="fa fa-clock-o"></i> Pendiente</span>';
                 
                 const montoUSDT = parseFloat(r.monto_usdt).toFixed(2);
-                const montoCUP = (r.monto_cup_estimado || 0).toLocaleString();
+                const montoUSD = (r.monto_usd_estimado || 0).toFixed(2);
                 const tasa = (r.tasa_aplicada || 0).toFixed(2);
                 const hash = r.transaction_hash || '';
                 const hashDisplay = hash ? hash.slice(0, 12) + '...' : '—';
@@ -1229,8 +1228,8 @@
                 html += `<tr>
                     <td style="font-size: 13px;">${fecha}</td>
                     <td><strong>${montoUSDT} USDT</strong></td>
-                    <td style="color: #28a745; font-weight: 600;">+$${montoCUP}</td>
-                    <td>1 USDT = ${tasa} CUP</td>
+                    <td style="color: #28a745; font-weight: 600;">+$${montoUSD}</td>
+                    <td>1 USDT = ${tasa} USD</td>
                     <td>${estadoHtml}</td>
                     <td style="font-family: monospace; font-size: 11px;">${hashDisplay}</td>
                 </tr>`;
@@ -1627,7 +1626,7 @@
         <a href="/configurar-tienda.html" class="quick-action-card"><div class="quick-action-icon store"><i class="fa fa-store"></i></div><div class="quick-action-content"><h3>Mi tienda</h3><p>Editar configuración de tu tienda</p></div></a>
         <a href="/publicar-producto.html" class="quick-action-card"><div class="quick-action-icon publish"><i class="fa fa-cloud-upload"></i></div><div class="quick-action-content"><h3>Publicar producto</h3><p>Agrega un nuevo producto a tu tienda</p></div></a>
     ` : ``}
-    <a href="/referidos.html" class="quick-action-card"><div class="quick-action-icon referidos"><i class="fa fa-users"></i></div><div class="quick-action-content"><h3>Referidos ${totalReferidos > 0 ? `(${totalReferidos})` : ''}</h3><p>Invita amigos y gana 20 CUP</p></div></a>
+    <a href="/referidos.html" class="quick-action-card"><div class="quick-action-icon referidos"><i class="fa fa-users"></i></div><div class="quick-action-content"><h3>Referidos ${totalReferidos > 0 ? `(${totalReferidos})` : ''}</h3><p>Invita amigos y gana saldo</p></div></a>
     <a href="/transferir.html" class="quick-action-card"><div class="quick-action-icon transfer"><i class="fa fa-exchange"></i></div><div class="quick-action-content"><h3>Transferir saldo</h3><p>Envía dinero a otros usuarios</p></div></a>
     <a href="/recibir.html" class="quick-action-card"><div class="quick-action-icon receive"><i class="fa fa-qrcode"></i></div><div class="quick-action-content"><h3>Recibir dinero</h3><p>Genera un código QR para recibir pagos</p></div></a>
     <a href="/pagar-qr.html" class="quick-action-card"><div class="quick-action-icon pay"><i class="fa fa-camera"></i></div><div class="quick-action-content"><h3>Pagar con QR</h3><p>Escanea y paga al instante</p></div></a>
@@ -1635,7 +1634,7 @@
 </div>
                 <div class="balance-card">
                     <div class="balance-icon"><i class="fa fa-credit-card"></i></div>
-                    <div class="balance-info"><h3>Tu saldo KOMERZIO</h3><div class="balance-amount">$${saldo.toFixed(2)} <small>CUP</small></div></div>
+                    <div class="balance-info"><h3>Tu saldo KOMERZIO</h3><div class="balance-amount">$${saldo.toFixed(2)} <small>USD</small></div></div>
                     <div class="balance-actions"><a href="#" class="btn-balance" onclick="window.recargarSaldo()"><i class="fa fa-plus-circle"></i> Recargar</a><a href="#" class="btn-balance" onclick="window.historialSaldo()"><i class="fa fa-history"></i> Historial</a></div>
                 </div>
                 <div class="account-grid">
@@ -1720,7 +1719,7 @@
             productosVendedor.forEach(p => {
                 const estado = p.activo ? 'Activo' : 'Inactivo';
                 const estadoColor = p.activo ? '#28a745' : '#dc3545';
-                html += `<div class="producto-vendedor-card"><img src="${p.imagen_url || '/assets/images/no-image.jpg'}" class="producto-vendedor-image" onerror="this.src='/assets/images/no-image.jpg'"><div class="producto-vendedor-info"><h4>${p.nombre.replace(/"/g, '&quot;')}</h4><div class="producto-vendedor-precio">$${p.precio.toFixed(2)} CUP</div><div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span style="font-size: 12px;">Stock: ${p.stock}</span><span style="font-size: 12px; color: ${estadoColor};">${estado}</span></div><div class="producto-vendedor-acciones"><button class="btn btn-secondary" onclick="window.editarProductoVendedor(${p.id})"><i class="fa fa-edit"></i></button><button class="btn btn-secondary" onclick="window.toggleEstadoProducto(${p.id}, ${!p.activo})"><i class="fa ${p.activo ? 'fa-eye-slash' : 'fa-eye'}"></i></button><button class="btn btn-danger" onclick="window.eliminarProductoVendedor(${p.id})"><i class="fa fa-trash"></i></button></div></div></div>`
+                html += `<div class="producto-vendedor-card"><img src="${p.imagen_url || '/assets/images/no-image.jpg'}" class="producto-vendedor-image" onerror="this.src='/assets/images/no-image.jpg'"><div class="producto-vendedor-info"><h4>${p.nombre.replace(/"/g, '&quot;')}</h4><div class="producto-vendedor-precio">$${p.precio.toFixed(2)} USD</div><div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span style="font-size: 12px;">Stock: ${p.stock}</span><span style="font-size: 12px; color: ${estadoColor};">${estado}</span></div><div class="producto-vendedor-acciones"><button class="btn btn-secondary" onclick="window.editarProductoVendedor(${p.id})"><i class="fa fa-edit"></i></button><button class="btn btn-secondary" onclick="window.toggleEstadoProducto(${p.id}, ${!p.activo})"><i class="fa ${p.activo ? 'fa-eye-slash' : 'fa-eye'}"></i></button><button class="btn btn-danger" onclick="window.eliminarProductoVendedor(${p.id})"><i class="fa fa-trash"></i></button></div></div></div>`
             })
             html += `</div>`
             return html
@@ -1759,7 +1758,7 @@
                             <div class="progress-step"><div class="step-icon ${progreso >= 100 ? 'completed' : progreso >= 75 ? 'active' : ''}"><i class="fa fa-home"></i></div><span class="step-label ${progreso >= 100 ? 'completed' : progreso >= 75 ? 'active' : ''}">Entregado</span></div></div>
                         </div>
                         <div class="order-products">
-                            ${p.items.slice(0, 2).map(item => `<div class="order-product-item"><img src="${item.imagen_url || '/assets/images/no-image.jpg'}" class="order-product-image" onerror="this.src='/assets/images/no-image.jpg'"><div class="order-product-details"><div class="order-product-name">${item.nombre.replace(/"/g, '&quot;')}</div><div class="order-product-price">$${item.precio.toFixed(2)} CUP</div><div class="order-product-specs">Cantidad: ${item.cantidad}</div></div><div class="order-product-subtotal">$${(item.precio * item.cantidad).toFixed(2)}</div></div>`).join('')}
+                            ${p.items.slice(0, 2).map(item => `<div class="order-product-item"><img src="${item.imagen_url || '/assets/images/no-image.jpg'}" class="order-product-image" onerror="this.src='/assets/images/no-image.jpg'"><div class="order-product-details"><div class="order-product-name">${item.nombre.replace(/"/g, '&quot;')}</div><div class="order-product-price">$${item.precio.toFixed(2)} USD</div><div class="order-product-specs">Cantidad: ${item.cantidad}</div></div><div class="order-product-subtotal">$${(item.precio * item.cantidad).toFixed(2)}</div></div>`).join('')}
                             ${p.items.length > 2 ? `<div style="text-align: center; padding: 10px; color: #007185;">Y ${p.items.length - 2} producto(s) más...</div>` : ''}
                         </div>
                         <div class="order-summary">
@@ -1793,7 +1792,7 @@
             }
             let productosHtml = ''
             pedido.items.forEach(item => {
-                productosHtml += `<div class="order-product-item"><img src="${item.imagen_url || '/assets/images/no-image.jpg'}" class="order-product-image" onerror="this.src='/assets/images/no-image.jpg'"><div class="order-product-details"><div class="order-product-name">${item.nombre.replace(/"/g, '&quot;')}</div><div class="order-product-price">$${item.precio.toFixed(2)} CUP c/u</div><div class="order-product-specs">Cantidad: ${item.cantidad}</div></div><div class="order-product-subtotal">$${(item.precio * item.cantidad).toFixed(2)}</div></div>`
+                productosHtml += `<div class="order-product-item"><img src="${item.imagen_url || '/assets/images/no-image.jpg'}" class="order-product-image" onerror="this.src='/assets/images/no-image.jpg'"><div class="order-product-details"><div class="order-product-name">${item.nombre.replace(/"/g, '&quot;')}</div><div class="order-product-price">$${item.precio.toFixed(2)} USD c/u</div><div class="order-product-specs">Cantidad: ${item.cantidad}</div></div><div class="order-product-subtotal">$${(item.precio * item.cantidad).toFixed(2)}</div></div>`
             })
             document.getElementById('orderModalBody').innerHTML = `
                 <div style="margin-bottom: 20px;"><span class="order-id">Pedido #${pedido.id.slice(0, 8)}</span><span class="order-status ${statusClass}" style="margin-left: 15px;">${statusText}</span><p style="margin-top: 10px; color: #6c757d;">${fecha}</p></div>

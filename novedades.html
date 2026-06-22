@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Novedades · CUBAZON</title>
+    <title>Novedades · KOMERZIO</title>
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -24,7 +24,6 @@
             min-height: 100vh;
         }
 
-        /* ===== HEADER COMPLETO (IGUAL QUE INDEX.HTML) ===== */
         #header-wrap {
             background: #0f172a;
             color: white;
@@ -60,7 +59,6 @@
             gap: 15px;
         }
 
-        /* TARJETA DE SALDO */
         .saldo-mini-card {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
@@ -76,7 +74,6 @@
         }
         .saldo-mini-card i { font-size: 16px; }
 
-        /* BOTÓN INICIAR SESIÓN */
         .login-btn {
             color: white;
             text-decoration: none;
@@ -100,7 +97,6 @@
             box-shadow: 0 4px 12px rgba(249,115,22,0.3);
         }
 
-        /* CARRITO */
         .sora-cart {
             position: relative;
         }
@@ -159,7 +155,6 @@
 
         .sora-cart:hover .sora-cart-description { display: block; }
 
-        /* Preview carrito */
         .simpleCart_items {
             max-height: 300px;
             overflow-y: auto;
@@ -209,7 +204,6 @@
         .cart-preview-btn-primary:hover { background: #f7ca00; }
         .cart-preview-btn-secondary { background: #f0f2f5; color: #0f1111; }
 
-        /* MENÚ PRINCIPAL */
         .header-menu {
             background: #1e293b;
             padding: 0 20px;
@@ -242,7 +236,6 @@
 
         #main-menu ul li a:hover { color: #f97316; }
 
-        /* ===== BREADCRUMB ===== */
         .breadcrumb {
             max-width: 1400px;
             margin: 2rem auto 0;
@@ -277,14 +270,12 @@
             font-weight: 600;
         }
 
-        /* ===== MAIN CONTENT ===== */
         .main-content {
             max-width: 1400px;
             margin: 2rem auto;
             padding: 0 2rem;
         }
 
-        /* ===== PAGE HEADER ===== */
         .page-header {
             background: white;
             border-radius: 30px;
@@ -323,7 +314,6 @@
             gap: 8px;
         }
 
-        /* ===== FILTROS ===== */
         .filters-bar {
             background: white;
             border-radius: 30px;
@@ -374,7 +364,6 @@
             font-size: 1.1rem;
         }
 
-        /* ===== PRODUCTOS GRID ===== */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -526,7 +515,6 @@
             margin-top: 15px;
         }
 
-        /* ===== PAGINACIÓN ===== */
         .pagination {
             display: flex;
             justify-content: center;
@@ -566,7 +554,6 @@
             cursor: not-allowed;
         }
 
-        /* ===== EMPTY STATE ===== */
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
@@ -615,7 +602,6 @@
             box-shadow: 0 4px 15px rgba(249,115,22,0.3);
         }
 
-        /* ===== FOOTER ===== */
         .footer {
             background: #0f172a;
             color: white;
@@ -669,7 +655,6 @@
             color: #f97316;
         }
 
-        /* ===== LOADING ===== */
         .loading-spinner {
             text-align: center;
             padding: 3rem;
@@ -690,7 +675,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .header-logo img { height: 35px; }
             .login-btn span { display: none; }
@@ -713,30 +697,26 @@
 </head>
 <body>
     <div id="outer-wrapper">
-        <!-- HEADER COMPLETO -->
         <div id="header-wrap">
             <div class="header-header">
                 <div class="container row">
                     <div class="header-logo">
                         <a href="/">
-                            <img src="http://imgfz.com/i/oXOfVlT.png" alt="CUBAZON">
+                            <img src="https://i.postimg.cc/MZRbKh98/Cubazon.png" alt="KOMERZIO">
                         </a>
                     </div>
                     
                     <div class="header-right">
-                        <!-- TARJETA DE SALDO -->
                         <div id="saldoHeaderCard" class="saldo-mini-card" style="display: none;">
                             <i class="fa fa-credit-card"></i>
                             <span id="saldoHeaderAmount">$0.00</span>
                         </div>
 
-                        <!-- BOTÓN INICIAR SESIÓN -->
                         <a href="/login.html" class="login-btn" id="loginBtnHeader">
                             <i class="fa fa-user"></i>
                             <span>Iniciar sesión</span>
                         </a>
                         
-                        <!-- CARRITO -->
                         <div class="sora-cart">
                             <div class="sora-cart-details">
                                 <span class="simpleCart_quantity" id="cart-counter">0</span>
@@ -746,7 +726,7 @@
                                 <div class="cart-preview-footer">
                                     <div class="cart-preview-total">
                                         <span>Total:</span>
-                                        <span id="cart-preview-total-amount">$0.00 CUP</span>
+                                        <span id="cart-preview-total-amount">$0.00 USD</span>
                                     </div>
                                     <div class="cart-preview-buttons">
                                         <a href="/p/cart.html" class="cart-preview-btn cart-preview-btn-primary">Ver Carrito</a>
@@ -777,7 +757,6 @@
             </div>
         </div>
 
-        <!-- Breadcrumb -->
         <div class="breadcrumb">
             <div class="breadcrumb-container">
                 <a href="/">Inicio</a>
@@ -787,7 +766,6 @@
         </div>
 
         <main class="main-content">
-            <!-- Page Header -->
             <div class="page-header">
                 <h1><i class="fas fa-clock"></i> Novedades</h1>
                 <div class="badge"><i class="fas fa-box"></i> <span id="productCount">0</span> productos nuevos</div>
@@ -824,13 +802,15 @@
 
         <footer class="footer">
             <div class="footer-content">
-                <div><h3>CUBAZON</h3><p style="color: #94a3b8; margin-bottom: 1rem;">Tu tienda online de confianza en Cuba 🇨🇺</p><p style="color: #94a3b8;"><i class="fas fa-map-marker-alt"></i> Sagua de Tánamo, Holguín, Cuba</p></div>
+                <div><h3>KOMERZIO</h3><p style="color: #94a3b8; margin-bottom: 1rem;">Tu tienda online de confianza en Sagua de Tánamo.</p><p style="color: #94a3b8;"><i class="fas fa-map-marker-alt"></i> Sagua de Tánamo, Holguín, Cuba</p></div>
                 <div><h4>Enlaces rápidos</h4><ul><li><a href="/ofertas-especiales.html"><i class="fas fa-tags"></i> Ofertas</a></li><li><a href="/destacados.html"><i class="fas fa-star"></i> Destacados</a></li><li><a href="/novedades.html"><i class="fas fa-clock"></i> Novedades</a></li></ul></div>
-                <div><h4>Contacto</h4><ul><li><i class="fas fa-phone"></i> +53 56591892</li><li><i class="fas fa-envelope"></i> ventas@cubazon.com</li><li><i class="fab fa-whatsapp"></i> +53 56591892</li></ul></div>
+                <div><h4>Contacto</h4><ul><li><i class="fas fa-phone"></i> +53 56591892</li><li><i class="fas fa-envelope"></i> komerzio.oficial@gmail.com</li><li><i class="fab fa-whatsapp"></i> +53 56591892</li></ul></div>
             </div>
         </footer>
     </div>
 
+    <!-- ========== SCRIPTS ========== -->
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
@@ -838,7 +818,6 @@
         import { auth } from '/js/auth.js';
         import { initCarrito } from '/js/cart.js';
 
-        // ========== INICIALIZAR CARRITO ==========
         const carrito = initCarrito();
         window.carrito = carrito;
         window.cart = carrito;
@@ -847,7 +826,6 @@
         carrito.cargarDeLocalStorage();
         carrito.actualizarInterfaz();
 
-        // ========== FUNCIÓN PARA CARGAR SALDO EN HEADER ==========
         async function cargarSaldoHeader() {
             const saldoCard = document.getElementById('saldoHeaderCard');
             const saldoAmount = document.getElementById('saldoHeaderAmount');
@@ -875,7 +853,6 @@
             }
         }
 
-        // ========== ACTUALIZAR MENÚ DE USUARIO ==========
         function actualizarMenuUsuario() {
             const loginBtn = document.getElementById('loginBtnHeader');
             if (!loginBtn) return;
@@ -893,7 +870,6 @@
             }
         }
 
-        // Variables globales
         let todosProductos = [];
         let productosFiltrados = [];
         let paginaActual = 1;
@@ -901,17 +877,15 @@
         let ordenActual = 'recent';
         let categoriaActual = 'todas';
 
-        // ===== FUNCIÓN PARA CREAR LINK DE WHATSAPP (SOLO VENDEDORES) =====
         function crearWhatsAppLink(producto) {
             const mensaje = encodeURIComponent(
                 `Hola, me interesa tu producto *${producto.nombre}*.\n` +
-                `Precio: $${producto.precio?.toFixed(2)} CUP\n` +
+                `Precio: $${producto.precio?.toFixed(2)} USD\n` +
                 `¿Podemos coordinar la compra?`
             );
             return producto.vendedor?.whatsapp_contacto ? `https://wa.me/${producto.vendedor.whatsapp_contacto}?text=${mensaje}` : '#';
         }
 
-        // ===== FORMATO DE FECHA =====
         function formatearFecha(fechaISO) {
             const fecha = new Date(fechaISO);
             const ahora = new Date();
@@ -921,28 +895,20 @@
             return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
 
-        // ===== CARGAR PRODUCTOS (SOLO CON POSICIÓN PARA NOVEDADES) =====
         async function cargarProductos() {
             const spinner = document.getElementById('loadingSpinner');
             spinner.style.display = 'block';
 
             try {
-                // 1. Obtener promociones activas con la posición del plan
-                const { data: promocionesActivas, error: promosError } = await supabase
-                    .from('promociones_activas')
-                    .select(`producto_id, plan_id, planes_promocion!inner (id, nombre, posicion)`)
+                // Obtener productos promocionados activos
+                const { data: promocionesActivas } = await supabase
+                    .from('productos_promocionados')
+                    .select('producto_id')
                     .eq('activo', true);
                 
-                if (promosError) throw promosError;
+                const productosIdsPermitidos = promocionesActivas?.map(p => p.producto_id) || [];
                 
-                // 2. Posiciones permitidas para NOVEDADES: categoria, busqueda, todas, nuevos
-                const posicionesPermitidas = ['categoria', 'busqueda', 'todas', 'nuevos'];
-                
-                const productosIdsPermitidos = (promocionesActivas || [])
-                    .filter(promo => posicionesPermitidas.includes(promo.planes_promocion?.posicion))
-                    .map(promo => promo.producto_id);
-                
-                // 3. Cargar productos de vendedores (solo los permitidos)
+                // Cargar productos de vendedores (solo los promocionados)
                 let productosVendedores = [];
                 if (productosIdsPermitidos.length > 0) {
                     const { data: vendedores, error: vendedoresError } = await supabase
@@ -955,14 +921,14 @@
                     productosVendedores = vendedores || [];
                 }
                 
-                // 4. Cargar productos de admin (SIEMPRE se muestran como novedades)
+                // Cargar productos de admin (SIEMPRE se muestran como novedades)
                 const { data: admin, error: adminError } = await supabase
                     .from('productos')
                     .select('*')
                     .order('created_at', { ascending: false });
                 if (adminError) throw adminError;
                 
-                const adminConTipo = (admin || []).map(p => ({ ...p, tipo: 'admin', vendedor: { nombre_tienda: 'CUBAZON', whatsapp_contacto: null } }));
+                const adminConTipo = (admin || []).map(p => ({ ...p, tipo: 'admin', vendedor: { nombre_tienda: 'KOMERZIO', whatsapp_contacto: null } }));
                 const vendedoresConTipo = productosVendedores.map(p => ({ ...p, tipo: 'vendedor' }));
                 
                 todosProductos = [...adminConTipo, ...vendedoresConTipo];
@@ -981,7 +947,6 @@
             }
         }
 
-        // ===== APLICAR FILTROS Y ORDEN =====
         function aplicarFiltrosYOrden() {
             let productos = [...todosProductos];
             if (categoriaActual !== 'todas') {
@@ -997,7 +962,6 @@
             actualizarInterfaz();
         }
 
-        // ===== ACTUALIZAR INTERFAZ =====
         function actualizarInterfaz() {
             const total = productosFiltrados.length;
             document.getElementById('productCount').textContent = total;
@@ -1017,7 +981,6 @@
             renderizarPaginacion(total);
         }
 
-        // ===== RENDERIZAR PRODUCTOS =====
         function renderizarProductos(productos) {
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '';
@@ -1025,7 +988,6 @@
             productos.forEach(producto => {
                 const fechaFormateada = formatearFecha(producto.created_at);
                 const esAdmin = producto.tipo === 'admin';
-                const esPatrocinado = producto.tipo === 'vendedor';
                 
                 const badge = esAdmin ? `<div class="product-badge"><i class="fas fa-clock"></i> NUEVO</div>` : `<div class="product-badge"><i class="fas fa-star"></i> NUEVO PATROCINADO</div>`;
                 
@@ -1047,7 +1009,7 @@
                 card.className = 'product-card';
                 card.innerHTML = `
                     ${badge}
-                    <img src="${producto.imagen_url || 'https://via.placeholder.com/300x200?text=Sin+Imagen'}" class="product-image" onclick="window.location.href='${esAdmin ? '/producto.html' : '/producto-vendedor.html'}?id=${producto.id}'" onerror="this.src='https://via.placeholder.com/300x200?text=Sin+Imagen'">
+                    <img src="${producto.imagen_url || '/assets/images/no-image.jpg'}" class="product-image" onclick="window.location.href='${esAdmin ? '/producto.html' : '/producto-vendedor.html'}?id=${producto.id}'" onerror="this.src='/assets/images/no-image.jpg'">
                     <div class="product-info">
                         <h3>${producto.nombre}</h3>
                         <p class="price">$${producto.precio?.toFixed(2)}</p>
@@ -1061,7 +1023,6 @@
             });
         }
 
-        // ===== RENDERIZAR PAGINACIÓN =====
         function renderizarPaginacion(total) {
             const totalPaginas = Math.ceil(total / productosPorPagina);
             const pagination = document.getElementById('pagination');
@@ -1079,16 +1040,11 @@
             pagination.innerHTML = html;
         }
 
-        // ===== CAMBIAR PÁGINA =====
         window.cambiarPagina = function(pagina) { paginaActual = pagina; actualizarInterfaz(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
-        // ===== EVENTOS =====
         document.getElementById('sortSelect').addEventListener('change', e => { ordenActual = e.target.value; paginaActual = 1; aplicarFiltrosYOrden(); });
         document.getElementById('categoryFilter').addEventListener('change', e => { categoriaActual = e.target.value; paginaActual = 1; aplicarFiltrosYOrden(); });
-        document.getElementById('searchButton')?.addEventListener('click', () => { const t = document.getElementById('searchInput')?.value.trim(); if (t) window.location.href = `/buscar.html?q=${encodeURIComponent(t)}`; });
-        document.getElementById('searchInput')?.addEventListener('keypress', e => { if (e.key === 'Enter') { const t = e.target.value.trim(); if (t) window.location.href = `/buscar.html?q=${encodeURIComponent(t)}`; } });
 
-        // ===== INICIALIZAR =====
         actualizarMenuUsuario();
         auth.onCambio(actualizarMenuUsuario);
         cargarProductos();

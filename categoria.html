@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Categoría · CUBAZON</title>
+    <title>Categoría · KOMERZIO</title>
     
     <!-- Open Graph / WhatsApp -->
-    <meta property="og:title" content="Categoría · CUBAZON">
-    <meta property="og:description" content="Explora productos por categoría en CUBAZON">
-    <meta property="og:image" content="https://cubazon.dpdns.org/android-chrome-512x512.png">
-    <meta property="og:url" content="https://cubazon.dpdns.org">
+    <meta property="og:title" content="Categoría · KOMERZIO">
+    <meta property="og:description" content="Explora productos por categoría en KOMERZIO">
+    <meta property="og:image" content="https://komerzio.dpdns.org/assets/images/komerzio.png">
+    <meta property="og:url" content="https://komerzio.dpdns.org">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="CUBAZON">
+    <meta property="og:site_name" content="KOMERZIO">
     
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Categoría · CUBAZON">
-    <meta name="twitter:description" content="Explora productos por categoría en CUBAZON">
-    <meta name="twitter:image" content="https://cubazon.dpdns.org/android-chrome-512x512.png">
+    <meta name="twitter:title" content="Categoría · KOMERZIO">
+    <meta name="twitter:description" content="Explora productos por categoría en KOMERZIO">
+    <meta name="twitter:image" content="https://komerzio.dpdns.org/assets/images/komerzio.png">
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -859,7 +859,7 @@
                 <div class="container row">
                     <div class="header-logo">
                         <a href="/">
-                            <img src="https://i.postimg.cc/MZRbKh98/Cubazon.png" alt="CUBAZON">
+                            <img src="https://i.postimg.cc/MZRbKh98/Cubazon.png" alt="KOMERZIO">
                         </a>
                     </div>
                     
@@ -883,7 +883,7 @@
                                 <div class="cart-preview-footer">
                                     <div class="cart-preview-total">
                                         <span>Total:</span>
-                                        <span id="cart-preview-total-amount">$0.00 CUP</span>
+                                        <span id="cart-preview-total-amount">$0.00 USD</span>
                                     </div>
                                     <div class="cart-preview-buttons">
                                         <a href="/p/cart.html" class="cart-preview-btn cart-preview-btn-primary">Ver Carrito</a>
@@ -936,7 +936,7 @@
         <div id="footer-wrapper">
             <div class="footer-widgets-wrap">
                 <div class="footer">
-                    <h3 style="color: white; margin-bottom: 20px;">CUBAZON</h3>
+                    <h3 style="color: white; margin-bottom: 20px;">KOMERZIO</h3>
                     <p style="color: #cbd5e1; margin-bottom: 15px;">Tu tienda online de confianza en Sagua de Tánamo.</p>
                     <p style="color: #cbd5e1;"><i class="fa fa-map-marker"></i> Sagua de Tánamo, Holguín, Cuba</p>
                 </div>
@@ -952,13 +952,13 @@
                 <div class="footer">
                     <h3 style="color: white; margin-bottom: 20px;">Atención al cliente</h3>
                     <p style="color: #cbd5e1; margin-bottom: 10px;"><i class="fa fa-phone"></i> +53 56591892</p>
-                    <p style="color: #cbd5e1; margin-bottom: 10px;"><i class="fa fa-envelope"></i> cubazon.oficial@gmail.com</p>
+                    <p style="color: #cbd5e1; margin-bottom: 10px;"><i class="fa fa-envelope"></i> komerzio.oficial@gmail.com</p>
                     <p style="color: #cbd5e1;"><i class="fa fa-whatsapp"></i> +53 56591892</p>
                 </div>
             </div>
         </div>
         <div id="sub-footer-wrapper">
-            <p>© 2026 CUBAZON · Diseñado por Des.Joshua_Technology</p>
+            <p>© 2026 KOMERZIO · Diseñado por Des.Joshua_Technology</p>
         </div>
 
         <div class="back-top" title="Volver arriba">
@@ -966,6 +966,9 @@
         </div>
     </div>
 
+    <!-- ========== SCRIPTS ========== -->
+    <!-- Librería Supabase UMD (debe cargarse antes del módulo) -->
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
@@ -1094,14 +1097,18 @@
                 
                 await cargarPatrocinadosIds()
                 
-                // 1. Cargar productos de admin
+                // ============================================================
+                // 1. Cargar TODOS los productos de admin
+                // ============================================================
                 const { data: admin, error: adminError } = await supabase
                     .from('productos')
                     .select('*')
                 
                 if (adminError) throw adminError
                 
+                // ============================================================
                 // 2. Cargar productos de vendedores SOLO si tienen promoción activa
+                // ============================================================
                 let vendedoresFiltrados = []
                 if (productosPatrocinadosIds.length > 0) {
                     const { data: vendedores, error: vendedoresError } = await supabase
@@ -1119,20 +1126,44 @@
                     ...(vendedoresFiltrados || []).map(p => ({ ...p, tipo: 'vendedor' }))
                 ]
                 
-                // Filtrar por categoría
+                console.log('📦 Total productos cargados:', todos.length)
+                
+                // ============================================================
+                // 3. FILTRAR POR CATEGORÍA - CORREGIDO
+                // ============================================================
                 let productosFiltradosPorCat = []
                 
                 if (cat.toLowerCase() === 'ofertas') {
                     productosFiltradosPorCat = todos.filter(p => p.oferta_del_dia === true)
+                    console.log('🔥 Filtro Ofertas:', productosFiltradosPorCat.length)
                 } else {
+                    // Buscar productos que coincidan con la categoría
                     productosFiltradosPorCat = todos.filter(p => {
+                        // Verificar en categoria
+                        const enCategoria = p.categoria && p.categoria.toLowerCase() === cat.toLowerCase()
+                        
+                        // Verificar en etiquetas
+                        const enEtiquetas = p.etiquetas && p.etiquetas.some(et => 
+                            et.toLowerCase() === cat.toLowerCase()
+                        )
+                        
+                        // Para productos admin, también verificar que tengan la categoría o etiqueta
+                        // Para productos vendedor, verificar categoria
                         if (p.tipo === 'admin') {
-                            return p.etiquetas && p.etiquetas.some(et => 
-                                et.toLowerCase() === cat.toLowerCase()
-                            )
+                            return enCategoria || enEtiquetas
+                        } else {
+                            return enCategoria
                         }
-                        return p.categoria && p.categoria.toLowerCase() === cat.toLowerCase()
                     })
+                    
+                    console.log(`🔍 Categoría: ${cat}, Productos encontrados: ${productosFiltradosPorCat.length}`)
+                    
+                    // Si no hay productos en la categoría, intentar buscar por nombre de categoría en las etiquetas de todos los productos
+                    if (productosFiltradosPorCat.length === 0) {
+                        console.log('⚠️ No hay productos en esta categoría, mostrando todos los productos de admin...')
+                        // Mostrar todos los productos de admin como fallback
+                        productosFiltradosPorCat = admin || []
+                    }
                 }
                 
                 productosOriginales = productosFiltradosPorCat || []
@@ -1299,7 +1330,6 @@
                 productosPagina.forEach(p => {
                     const esPatrocinado = p.tipo === 'vendedor' && productosPatrocinadosIds.includes(p.id)
                     
-                    // CORRECCIÓN PRINCIPAL: URLs correctas según tipo de producto
                     const urlProducto = p.tipo === 'admin' 
                         ? `/producto.html?id=${p.id}` 
                         : `/producto-vendedor.html?id=${p.id}`
@@ -1349,18 +1379,18 @@
                                 <div class="product-rating">
                                     <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-o"></i>
                                 </div>
-                                <div class="product-price">$${precioActual.toFixed(2)} <small>CUP</small></div>
+                                <div class="product-price">$${precioActual.toFixed(2)} <small>USD</small></div>
                                 <div class="product-agotado">
                                     <i class="fa fa-ban"></i> AGOTADO
                                 </div>
                             </div>
                         `
                     } else {
-                        let precioHtml = `$${precioActual.toFixed(2)} <small>CUP</small>`
+                        let precioHtml = `$${precioActual.toFixed(2)} <small>USD</small>`
                         
                         if (tieneOferta) {
                             precioHtml = `
-                                $${precioActual.toFixed(2)} <small>CUP</small>
+                                $${precioActual.toFixed(2)} <small>USD</small>
                                 <span class="product-original-price">$${precioOriginal.toFixed(2)}</span>
                                 <span class="product-discount">-${descuento}%</span>
                             `

@@ -331,11 +331,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script type="module">
-        import '../js/supabase-client.js';
+        // ============================================
+        // CORRECCIÓN: Importar Supabase correctamente
+        // ============================================
+        import { supabase } from '/js/supabase-client.js';
         import { auth } from '/js/auth.js';
-        
-        const supabase = window.supabaseClient;
         
         // Número fijo de KOMERZIO
         const NUMERO_KOMERZIO = '5356591892';
@@ -368,19 +370,23 @@
         
         async function anularPedido() {
             if (!pedidoData) return;
-            const { error } = await supabase
-                .from('pedidos')
-                .update({ estado: 'anulado' })
-                .eq('id', pedidoId);
-            if (!error) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Pedido anulado',
-                    text: 'El tiempo para confirmar ha expirado. Tu pedido ha sido cancelado.',
-                    confirmButtonText: 'Entendido'
-                }).then(() => {
-                    window.location.href = '/mi-cuenta.html';
-                });
+            try {
+                const { error } = await supabase
+                    .from('pedidos')
+                    .update({ estado: 'anulado' })
+                    .eq('id', pedidoId);
+                if (!error) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Pedido anulado',
+                        text: 'El tiempo para confirmar ha expirado. Tu pedido ha sido cancelado.',
+                        confirmButtonText: 'Entendido'
+                    }).then(() => {
+                        window.location.href = '/mi-cuenta.html';
+                    });
+                }
+            } catch (error) {
+                console.error('Error anulando pedido:', error);
             }
         }
         
@@ -388,10 +394,15 @@
         window.enviarWhatsApp = function() {
             if (!pedidoData) return;
             
+            // Determinar la moneda según el método de pago
+            const esCUP = pedidoData.metodo_pago === 'efectivo_cup';
+            const moneda = esCUP ? 'CUP' : 'USD';
+            const totalMostrar = esCUP ? pedidoData.total_cup : pedidoData.total;
+            
             const items = pedidoData.items || [];
             let productosTexto = '';
             items.forEach(item => {
-                productosTexto += `• ${item.nombre} x${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)} CUP\n`;
+                productosTexto += `• ${item.nombre} x${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)} USD\n`;
             });
             
             const mensaje = `📦 *NUEVO PEDIDO - CONFIRMAR*\n\n` +
@@ -401,8 +412,9 @@
                 `*Dirección:* ${pedidoData.cliente?.direccion || 'No especificada'}\n` +
                 `*Localidad:* ${pedidoData.cliente?.localidad || 'No especificada'}\n\n` +
                 `*Productos:*\n${productosTexto}\n` +
-                `*Total a pagar:* $${pedidoData.total?.toFixed(2)} CUP\n\n` +
-                `✅ *El cliente ha confirmado su pedido y acepta los términos.*\n\n` +
+                `*Total a pagar:* $${(totalMostrar || pedidoData.total)?.toFixed(2)} ${moneda}\n` +
+                (esCUP ? `*Tasa aplicada:* 1 USD = ${pedidoData.tasa_aplicada} CUP\n` : '') +
+                `\n✅ *El cliente ha confirmado su pedido y acepta los términos.*\n\n` +
                 `Por favor, coordinar la entrega.`;
             
             const mensajeCodificado = encodeURIComponent(mensaje);
@@ -441,8 +453,10 @@
         };
         
         async function cargarPedido() {
+            const loadingContent = document.getElementById('loadingContent');
+            
             if (!pedidoId) {
-                document.getElementById('loadingContent').innerHTML = `
+                loadingContent.innerHTML = `
                     <div class="error">
                         <i class="fa fa-exclamation-triangle fa-3x"></i>
                         <h2>Pedido no encontrado</h2>
@@ -454,9 +468,15 @@
             }
             
             try {
+                // Verificar autenticación
                 if (auth.isAuthenticated()) {
                     usuario = auth.getUsuario();
+                    console.log('👤 Usuario autenticado:', usuario?.email);
+                } else {
+                    console.log('⚠️ Usuario no autenticado');
                 }
+                
+                console.log('🔍 Buscando pedido:', pedidoId);
                 
                 const { data, error } = await supabase
                     .from('pedidos')
@@ -464,16 +484,36 @@
                     .eq('id', pedidoId)
                     .single();
                 
-                if (error || !data) throw new Error('Pedido no encontrado');
+                if (error) {
+                    console.error('❌ Error en consulta:', error);
+                    throw new Error('Pedido no encontrado');
+                }
+                
+                if (!data) {
+                    throw new Error('Pedido no encontrado');
+                }
                 
                 pedidoData = data;
+                console.log('✅ Pedido cargado:', pedidoData.id);
+                console.log('📦 Método de pago:', pedidoData.metodo_pago);
+                console.log('💰 total_cup:', pedidoData.total_cup);
+                console.log('💰 tasa_aplicada:', pedidoData.tasa_aplicada);
                 
-                const fechaCreacion = new Date(data.created_at);
-                const ahora = new Date();
-                const diffHoras = (ahora - fechaCreacion) / (1000 * 60 * 60);
+                // Verificar si el pedido ya está confirmado o anulado
+                if (data.estado === 'confirmado') {
+                    loadingContent.innerHTML = `
+                        <div class="error" style="color: #059669;">
+                            <i class="fa fa-check-circle fa-3x" style="color: #059669;"></i>
+                            <h2>¡Pedido ya confirmado!</h2>
+                            <p>Este pedido ya ha sido confirmado anteriormente.</p>
+                            <a href="/mi-cuenta.html" class="btn" style="display: inline-block; margin-top: 20px; background: #f97316; color: white; padding: 12px 30px; border-radius: 40px; text-decoration: none;">Ver mis pedidos</a>
+                        </div>
+                    `;
+                    return;
+                }
                 
-                if (diffHoras > 48 || data.estado === 'anulado') {
-                    document.getElementById('loadingContent').innerHTML = `
+                if (data.estado === 'anulado') {
+                    loadingContent.innerHTML = `
                         <div class="error">
                             <i class="fa fa-clock-o fa-3x"></i>
                             <h2>Pedido expirado</h2>
@@ -481,6 +521,15 @@
                             <a href="/" class="btn" style="display: inline-block; margin-top: 20px; background: #f97316; color: white; padding: 12px 30px; border-radius: 40px; text-decoration: none;">Ir al inicio</a>
                         </div>
                     `;
+                    return;
+                }
+                
+                const fechaCreacion = new Date(data.created_at);
+                const ahora = new Date();
+                const diffHoras = (ahora - fechaCreacion) / (1000 * 60 * 60);
+                
+                if (diffHoras > 48) {
+                    await anularPedido();
                     return;
                 }
                 
@@ -494,12 +543,12 @@
                 }
                 
             } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('loadingContent').innerHTML = `
+                console.error('❌ Error cargando pedido:', error);
+                loadingContent.innerHTML = `
                     <div class="error">
                         <i class="fa fa-exclamation-triangle fa-3x"></i>
-                        <h2>Error</h2>
-                        <p>No se pudo cargar la información del pedido.</p>
+                        <h2>Error al cargar el pedido</h2>
+                        <p>${error.message || 'No se pudo cargar la información del pedido.'}</p>
                         <a href="/" class="btn" style="display: inline-block; margin-top: 20px; background: #f97316; color: white; padding: 12px 30px; border-radius: 40px; text-decoration: none;">Ir al inicio</a>
                     </div>
                 `;
@@ -513,6 +562,12 @@
             
             const items = pedidoData.items || [];
             
+            // Determinar la moneda según el método de pago
+            const esCUP = pedidoData.metodo_pago === 'efectivo_cup';
+            const moneda = esCUP ? 'CUP' : 'USD';
+            const simbolo = '$';
+            const totalMostrar = esCUP ? pedidoData.total_cup : pedidoData.total;
+            
             let productosHtml = '';
             items.forEach(item => {
                 productosHtml += `
@@ -522,7 +577,7 @@
                             <div class="product-name">${item.nombre}</div>
                             <div class="product-meta">Cantidad: ${item.cantidad}</div>
                         </div>
-                        <div class="product-price">$${(item.precio * item.cantidad).toFixed(2)}</div>
+                        <div class="product-price">${simbolo}${(item.precio * item.cantidad).toFixed(2)}</div>
                     </div>
                 `;
             });
@@ -562,22 +617,28 @@
                         
                         <div class="info-row">
                             <span class="info-label">Subtotal:</span>
-                            <span class="info-value">$${pedidoData.subtotal?.toFixed(2) || '0.00'}</span>
+                            <span class="info-value">${simbolo}${pedidoData.subtotal?.toFixed(2) || '0.00'}</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">Envío:</span>
-                            <span class="info-value">$${pedidoData.envio?.toFixed(2) || '0.00'}</span>
+                            <span class="info-value">${simbolo}${pedidoData.envio?.toFixed(2) || '0.00'}</span>
                         </div>
                         ${pedidoData.descuento > 0 ? `
                             <div class="info-row">
                                 <span class="info-label">Descuento:</span>
-                                <span class="info-value" style="color: #059669;">-$${pedidoData.descuento?.toFixed(2)}</span>
+                                <span class="info-value" style="color: #059669;">-${simbolo}${pedidoData.descuento?.toFixed(2)}</span>
                             </div>
                         ` : ''}
                         <div class="total-row">
                             <span class="info-label">Total a pagar:</span>
-                            <span class="info-value">$${pedidoData.total?.toFixed(2)} CUP</span>
+                            <span class="info-value">${simbolo}${(totalMostrar || pedidoData.total)?.toFixed(2)} ${moneda}</span>
                         </div>
+                        ${esCUP && pedidoData.tasa_aplicada ? `
+                            <div class="info-row" style="font-size: 13px; color: #64748b; border-top: 1px dashed #e2e8f0; margin-top: 10px; padding-top: 10px;">
+                                <span>Tasa aplicada:</span>
+                                <span>1 USD = ${pedidoData.tasa_aplicada} CUP</span>
+                            </div>
+                        ` : ''}
                     </div>
                     
                     <div class="info-card">
@@ -623,9 +684,11 @@
                 </div>
             `;
             
+            // Inicializar timer después de renderizar
             actualizarTimer();
         }
         
+        // Ejecutar
         cargarPedido();
     </script>
 </body>
