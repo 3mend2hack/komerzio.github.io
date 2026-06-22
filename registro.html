@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#667eea">
-    <title>Crear cuenta · CUBAZON</title>
+    <title>Crear cuenta · KOMERZIO</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -193,8 +193,8 @@
 <body>
     <div class="register-container">
         <div class="header">
-            <img src="https://i.postimg.cc/rmXF0b65/cubazonweb.png" alt="CUBAZON">
-            <h1>¡Bienvenido a CUBAZON!</h1>
+            <img src="https://i.postimg.cc/MZRbKh98/Cubazon.png" alt="KOMERZIO">
+            <h1>¡Bienvenido a KOMERZIO!</h1>
             <p>Crea tu cuenta y comienza a disfrutar</p>
         </div>
         
@@ -298,6 +298,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script type="module">
+        // ============================================
+        // REGISTRO - CORREGIDO PARA KOMERZIO
+        // ============================================
         import { supabase } from '/js/supabase-client.js'
         import { auth } from '/js/auth.js'
         
@@ -305,9 +308,9 @@
                       navigator.userAgent.includes('WebView') ||
                       !!(window.cordova || window.phonegap || window.PhoneGap) ||
                       (document.referrer === '' && window.location.search.includes('app=true')) ||
-                      localStorage.getItem('cubazon_app') === 'true';
+                      localStorage.getItem('komerzio_app') === 'true';
         
-        if (esApp) { localStorage.setItem('cubazon_app', 'true'); }
+        if (esApp) { localStorage.setItem('komerzio_app', 'true'); }
         if (esApp) {
             document.getElementById('googleRegisterBtn').style.display = 'none';
             document.getElementById('googleDividerRegistro').style.display = 'none';
@@ -431,7 +434,7 @@
             }
         });
         
-        document.getElementById('terminosLink')?.addEventListener('click', function(e) { e.preventDefault(); Swal.fire({ title: 'Términos y Condiciones', html: '<p>Al registrarte en CUBAZON aceptas nuestras normas de uso y política de privacidad.</p>', confirmButtonText: 'Entendido', confirmButtonColor: '#667eea' }); });
+        document.getElementById('terminosLink')?.addEventListener('click', function(e) { e.preventDefault(); Swal.fire({ title: 'Términos y Condiciones', html: '<p>Al registrarte en KOMERZIO aceptas nuestras normas de uso y política de privacidad.</p>', confirmButtonText: 'Entendido', confirmButtonColor: '#667eea' }); });
         detectarCodigoReferido();
     </script>
 </body>
