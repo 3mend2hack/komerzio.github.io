@@ -14,6 +14,9 @@
     <!-- Turnstile -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
@@ -135,7 +138,6 @@
         .form-control::placeholder { color: #cbd5e0; font-size: 13px; }
         select.form-control { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; }
         
-        /* Campo de teléfono */
         .phone-input-wrapper {
             display: flex; align-items: center; gap: 0;
             border: 1px solid #e2e8f0; border-radius: 16px;
@@ -211,7 +213,6 @@
                 </button>
             </div>
             
-            <!-- BOTÓN DE GOOGLE -->
             <button class="btn btn-google" id="googleRegisterBtn">
                 <i class="fab fa-google"></i>
                 Continuar con Google
@@ -300,14 +301,68 @@
     
     <script type="module">
         // ============================================
-        // REGISTRO - KOMERZIO (VERSIÓN SIMPLIFICADA)
-        // BASADO EN EL CÓDIGO FUNCIONAL DE CUBAZON
+        // REGISTRO - KOMERZIO (VERSIÓN INDEPENDIENTE)
+        // TODO EL CÓDIGO DE AUTENTICACIÓN INCORPORADO
         // ============================================
         
-        import { supabase } from '/js/supabase-client.js'
-        import { auth } from '/js/auth.js'
+        // ========== CONFIGURACIÓN DE SUPABASE ==========
+        const SUPABASE_URL = 'https://houfrgnlctliwkzzelmi.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdWZyZ25sY3RsaXdrenplbG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MTQ2OTMsImV4cCI6MjA5NjE5MDY5M30.zUfcA755LEjBbn-N05LrmwFqsOFITRP4qLzxjgPIy54';
         
-        // ========== DETECTAR SI VIENE DE LA APP ==========
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // ========== FUNCIÓN DE REGISTRO ==========
+        const auth = {
+            async registrar(email, password, datos) {
+                try {
+                    // 1. Registrar usuario en Supabase Auth
+                    const { data: userData, error: signUpError } = await supabase.auth.signUp({
+                        email: email,
+                        password: password,
+                        options: {
+                            data: {
+                                nombre: datos.nombre,
+                                telefono: datos.telefono,
+                                provincia: datos.provincia
+                            }
+                        }
+                    });
+                    
+                    if (signUpError) throw new Error(signUpError.message);
+                    
+                    if (userData.user) {
+                        // 2. Crear perfil en la tabla perfiles
+                        const { error: perfilError } = await supabase
+                            .from('perfiles')
+                            .insert({
+                                id: userData.user.id,
+                                nombre: datos.nombre,
+                                email: email,
+                                telefono: datos.telefono,
+                                provincia: datos.provincia,
+                                codigo_referido: datos.codigo_referido || null,
+                                referido_por: datos.referido_por || null
+                            });
+                        
+                        if (perfilError) {
+                            console.error('Error creando perfil:', perfilError);
+                            // Intentar eliminar el usuario si falla el perfil
+                            await supabase.auth.admin.deleteUser(userData.user.id);
+                            throw new Error('Error al crear el perfil');
+                        }
+                        
+                        return { success: true, user: userData.user };
+                    }
+                    
+                    return { success: false, error: 'No se pudo crear el usuario' };
+                } catch (error) {
+                    console.error('Error en registro:', error);
+                    return { success: false, error: error.message };
+                }
+            }
+        };
+        
+        // ========== DETECTAR APP ==========
         const esApp = navigator.userAgent.includes('wv') || 
                       navigator.userAgent.includes('WebView') ||
                       !!(window.cordova || window.phonegap || window.PhoneGap) ||
@@ -317,16 +372,19 @@
         if (esApp) { localStorage.setItem('komerzio_app', 'true'); }
         
         if (esApp) {
-            document.getElementById('googleRegisterBtn').style.display = 'none';
-            document.getElementById('googleDividerRegistro').style.display = 'none';
+            const googleBtn = document.getElementById('googleRegisterBtn');
+            const googleDivider = document.getElementById('googleDividerRegistro');
+            if (googleBtn) googleBtn.style.display = 'none';
+            if (googleDivider) googleDivider.style.display = 'none';
         }
         
-        console.log('🚀 registro.html - App detectada:', esApp);
+        console.log('🚀 registro.html - Iniciado correctamente');
+        console.log('🚀 App detectada:', esApp);
         
-        // ========== VARIABLES GLOBALES ==========
+        // ========== VARIABLES ==========
         let turnstileToken = null, turnstileReady = false, codigoReferidoActual = '', codigoReferidoValido = false, referidoPorId = null;
         
-        // ========== TURNSTILE CALLBACKS ==========
+        // ========== TURNSTILE ==========
         window.onTurnstileSuccess = function(token) { 
             turnstileToken = token; 
             turnstileReady = true; 
@@ -336,31 +394,23 @@
                 setTimeout(() => s.style.display = 'none', 3000); 
             } 
         };
+        
         window.onTurnstileExpired = function() { 
             turnstileToken = null; 
             turnstileReady = false; 
         };
+        
         window.onTurnstileError = function() { 
             turnstileToken = null; 
             turnstileReady = false; 
         };
         
-        // ========== CÓDIGO DE REFERIDO ==========
-        window.addEventListener('load', () => setTimeout(() => { 
-            if (typeof turnstile !== 'undefined') { 
-                const t = turnstile.getResponse(); 
-                if (t) { 
-                    turnstileToken = t; 
-                    turnstileReady = true; 
-                } 
-            } 
-        }, 1000));
-        
-        // Limitar teléfono a solo números
+        // ========== TELÉFONO ==========
         document.getElementById('telefonoEmail')?.addEventListener('input', function() {
             this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
         });
         
+        // ========== CÓDIGO REFERIDO ==========
         function detectarCodigoReferido() {
             const p = new URLSearchParams(window.location.search), c = p.get('ref');
             if (c) { 
@@ -398,12 +448,15 @@
             const i = document.getElementById('codigoManual'), 
                   c = i.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7), 
                   f = document.getElementById('referidoFeedback');
+            
             if (!c || c.length < 3) { 
                 f.className = 'referido-feedback error'; 
                 f.textContent = 'El código debe tener al menos 3 caracteres'; 
                 return; 
             }
+            
             const { data, error } = await supabase.from('perfiles').select('id').eq('codigo_referido', c).maybeSingle();
+            
             if (!error && data) { 
                 codigoReferidoActual = c; 
                 codigoReferidoValido = true; 
@@ -457,7 +510,7 @@
             });
         }
         
-        // ========== FORMULARIO DE REGISTRO ==========
+        // ========== FORMULARIO ==========
         const rf = document.getElementById('emailRegistroForm');
         if (rf) {
             rf.addEventListener('submit', async function(e) {
@@ -472,7 +525,7 @@
                 const cp = document.getElementById('confirmPassword')?.value;
                 const te = document.getElementById('terminosEmail')?.checked;
                 
-                // ========== VALIDACIONES ==========
+                // Validaciones
                 if (!n || !p || !em || !pw) { 
                     Swal.fire('Error', 'Completa todos los campos obligatorios', 'error'); 
                     return; 
@@ -494,7 +547,7 @@
                     return; 
                 }
                 
-                // ========== TURNSTILE ==========
+                // Turnstile
                 if (!turnstileReady || !turnstileToken) { 
                     if (typeof turnstile !== 'undefined') { 
                         const ct = turnstile.getResponse(); 
@@ -514,7 +567,7 @@
                 btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verificando...';
                 
                 try {
-                    // ========== VERIFICAR TURNSTILE ==========
+                    // Verificar Turnstile
                     const { data: vd, error: ve } = await supabase.functions.invoke('verify-turnstile', { 
                         body: { token: turnstileToken } 
                     });
@@ -525,7 +578,7 @@
                     
                     const telefonoCompleto = '+53' + tel;
                     
-                    // ========== VERIFICAR TELÉFONO ==========
+                    // Verificar teléfono
                     btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verificando teléfono...';
                     const { data: telefonoExiste } = await supabase
                         .from('perfiles')
@@ -537,7 +590,7 @@
                         throw new Error('⚠️ Este número de teléfono ya está registrado. Usa otro número o inicia sesión con tu cuenta existente.');
                     }
                     
-                    // ========== CREAR CUENTA ==========
+                    // Crear cuenta
                     btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Creando cuenta...';
                     
                     const datos = { 
@@ -586,7 +639,9 @@
             }); 
         });
         
+        // ========== INICIAR ==========
         detectarCodigoReferido();
+        console.log('✅ registro.html - Todo listo');
     </script>
 </body>
 </html>
