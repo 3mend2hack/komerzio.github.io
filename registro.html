@@ -257,7 +257,22 @@
                             <label><i class="fas fa-map-marker-alt"></i> Provincia <span class="required">*</span></label>
                             <select id="provinciaEmail" class="form-control" required>
                                 <option value="">Selecciona tu provincia</option>
-                                <option value="Pinar del Río">Pinar del Río</option><option value="Artemisa">Artemisa</option><option value="La Habana">La Habana</option><option value="Mayabeque">Mayabeque</option><option value="Matanzas">Matanzas</option><option value="Cienfuegos">Cienfuegos</option><option value="Villa Clara">Villa Clara</option><option value="Sancti Spíritus">Sancti Spíritus</option><option value="Ciego de Ávila">Ciego de Ávila</option><option value="Camagüey">Camagüey</option><option value="Las Tunas">Las Tunas</option><option value="Granma">Granma</option><option value="Holguín">Holguín</option><option value="Santiago de Cuba">Santiago de Cuba</option><option value="Guantánamo">Guantánamo</option><option value="Isla de la Juventud">Isla de la Juventud</option>
+                                <option value="Pinar del Río">Pinar del Río</option>
+                                <option value="Artemisa">Artemisa</option>
+                                <option value="La Habana">La Habana</option>
+                                <option value="Mayabeque">Mayabeque</option>
+                                <option value="Matanzas">Matanzas</option>
+                                <option value="Cienfuegos">Cienfuegos</option>
+                                <option value="Villa Clara">Villa Clara</option>
+                                <option value="Sancti Spíritus">Sancti Spíritus</option>
+                                <option value="Ciego de Ávila">Ciego de Ávila</option>
+                                <option value="Camagüey">Camagüey</option>
+                                <option value="Las Tunas">Las Tunas</option>
+                                <option value="Granma">Granma</option>
+                                <option value="Holguín">Holguín</option>
+                                <option value="Santiago de Cuba">Santiago de Cuba</option>
+                                <option value="Guantánamo">Guantánamo</option>
+                                <option value="Isla de la Juventud">Isla de la Juventud</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -278,10 +293,22 @@
                             <label>Acepto los <a href="#" id="terminosLink">términos y condiciones</a></label>
                         </div>
                         <div class="turnstile-container">
-                            <div class="cf-turnstile" data-sitekey="0x4AAAAAAC2QGEGAaZ5X3Abb" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired" data-error-callback="onTurnstileError" data-theme="light" data-size="normal"></div>
-                            <div id="turnstileStatus" style="display: none;" class="turnstile-success"><i class="fas fa-check-circle"></i> Verificación completada</div>
+                            <!-- ✅ NUEVA SITE KEY ACTUALIZADA -->
+                            <div class="cf-turnstile" 
+                                 data-sitekey="0x4AAAAAADpSQzYx-x5LH-9F" 
+                                 data-callback="onTurnstileSuccess" 
+                                 data-expired-callback="onTurnstileExpired" 
+                                 data-error-callback="onTurnstileError" 
+                                 data-theme="light" 
+                                 data-size="normal">
+                            </div>
+                            <div id="turnstileStatus" style="display: none;" class="turnstile-success">
+                                <i class="fas fa-check-circle"></i> Verificación completada
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="submitBtn"><i class="fas fa-user-plus"></i> Crear cuenta</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-user-plus"></i> Crear cuenta
+                        </button>
                     </form>
                     <div class="alert-info" id="confirmacionEmail" style="display: none;">
                         <p><i class="fas fa-envelope"></i> <strong>¡Registro exitoso!</strong></p>
@@ -303,7 +330,7 @@
     <script type="module">
         // ============================================
         // REGISTRO - VERSIÓN CORREGIDA
-        // CON SUPABASE DESDE CDN
+        // CON NUEVA SITE KEY DE CLOUDFLARE
         // ============================================
         
         // Configuración de Supabase
@@ -390,14 +417,17 @@
                 s.style.display = 'block'; 
                 setTimeout(() => s.style.display = 'none', 3000); 
             } 
+            console.log('✅ Turnstile verificado correctamente');
         };
         window.onTurnstileExpired = function() { 
             turnstileToken = null; 
             turnstileReady = false; 
+            console.log('⚠️ Turnstile expirado');
         };
         window.onTurnstileError = function() { 
             turnstileToken = null; 
             turnstileReady = false; 
+            console.log('❌ Turnstile error');
         };
         window.addEventListener('load', () => setTimeout(() => { 
             if (typeof turnstile !== 'undefined') { 
@@ -556,9 +586,13 @@
                 btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verificando...';
                 
                 try {
+                    // Verificar Turnstile con la Edge Function
                     const { data: vd, error: ve } = await supabase.functions.invoke('verify-turnstile', { 
                         body: { token: turnstileToken } 
                     });
+                    
+                    console.log('🔍 Respuesta de verify-turnstile:', vd);
+                    
                     if (ve || !vd?.success) {
                         throw new Error('Verificación de seguridad fallida. Recarga la página e intenta de nuevo.');
                     }
