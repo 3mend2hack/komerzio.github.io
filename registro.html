@@ -14,9 +14,6 @@
     <!-- Turnstile -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     
-    <!-- Supabase CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
@@ -214,6 +211,7 @@
                 </button>
             </div>
             
+            <!-- BOTÓN DE GOOGLE -->
             <button class="btn btn-google" id="googleRegisterBtn">
                 <i class="fab fa-google"></i>
                 Continuar con Google
@@ -257,22 +255,7 @@
                             <label><i class="fas fa-map-marker-alt"></i> Provincia <span class="required">*</span></label>
                             <select id="provinciaEmail" class="form-control" required>
                                 <option value="">Selecciona tu provincia</option>
-                                <option value="Pinar del Río">Pinar del Río</option>
-                                <option value="Artemisa">Artemisa</option>
-                                <option value="La Habana">La Habana</option>
-                                <option value="Mayabeque">Mayabeque</option>
-                                <option value="Matanzas">Matanzas</option>
-                                <option value="Cienfuegos">Cienfuegos</option>
-                                <option value="Villa Clara">Villa Clara</option>
-                                <option value="Sancti Spíritus">Sancti Spíritus</option>
-                                <option value="Ciego de Ávila">Ciego de Ávila</option>
-                                <option value="Camagüey">Camagüey</option>
-                                <option value="Las Tunas">Las Tunas</option>
-                                <option value="Granma">Granma</option>
-                                <option value="Holguín">Holguín</option>
-                                <option value="Santiago de Cuba">Santiago de Cuba</option>
-                                <option value="Guantánamo">Guantánamo</option>
-                                <option value="Isla de la Juventud">Isla de la Juventud</option>
+                                <option value="Pinar del Río">Pinar del Río</option><option value="Artemisa">Artemisa</option><option value="La Habana">La Habana</option><option value="Mayabeque">Mayabeque</option><option value="Matanzas">Matanzas</option><option value="Cienfuegos">Cienfuegos</option><option value="Villa Clara">Villa Clara</option><option value="Sancti Spíritus">Sancti Spíritus</option><option value="Ciego de Ávila">Ciego de Ávila</option><option value="Camagüey">Camagüey</option><option value="Las Tunas">Las Tunas</option><option value="Granma">Granma</option><option value="Holguín">Holguín</option><option value="Santiago de Cuba">Santiago de Cuba</option><option value="Guantánamo">Guantánamo</option><option value="Isla de la Juventud">Isla de la Juventud</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -293,22 +276,10 @@
                             <label>Acepto los <a href="#" id="terminosLink">términos y condiciones</a></label>
                         </div>
                         <div class="turnstile-container">
-                            <!-- ✅ NUEVA SITE KEY ACTUALIZADA -->
-                            <div class="cf-turnstile" 
-                                 data-sitekey="0x4AAAAAADpSQzYx-x5LH-9F" 
-                                 data-callback="onTurnstileSuccess" 
-                                 data-expired-callback="onTurnstileExpired" 
-                                 data-error-callback="onTurnstileError" 
-                                 data-theme="light" 
-                                 data-size="normal">
-                            </div>
-                            <div id="turnstileStatus" style="display: none;" class="turnstile-success">
-                                <i class="fas fa-check-circle"></i> Verificación completada
-                            </div>
+                            <div class="cf-turnstile" data-sitekey="0x4AAAAAADpSQzYx-x5LH-9F" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired" data-error-callback="onTurnstileError" data-theme="light" data-size="normal"></div>
+                            <div id="turnstileStatus" style="display: none;" class="turnstile-success"><i class="fas fa-check-circle"></i> Verificación completada</div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="fas fa-user-plus"></i> Crear cuenta
-                        </button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn"><i class="fas fa-user-plus"></i> Crear cuenta</button>
                     </form>
                     <div class="alert-info" id="confirmacionEmail" style="display: none;">
                         <p><i class="fas fa-envelope"></i> <strong>¡Registro exitoso!</strong></p>
@@ -329,67 +300,14 @@
     
     <script type="module">
         // ============================================
-        // REGISTRO - VERSIÓN CORREGIDA
-        // CON NUEVA SITE KEY DE CLOUDFLARE
+        // REGISTRO - KOMERZIO (VERSIÓN SIMPLIFICADA)
+        // BASADO EN EL CÓDIGO FUNCIONAL DE CUBAZON
         // ============================================
         
-        // Configuración de Supabase
-        const SUPABASE_URL = 'https://houfrgnlctliwkzzelmi.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdWZyZ25sY3RsaXdrenplbG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MTQ2OTMsImV4cCI6MjA5NjE5MDY5M30.zUfcA755LEjBbn-N05LrmwFqsOFITRP4qLzxjgPIy54';
+        import { supabase } from '/js/supabase-client.js'
+        import { auth } from '/js/auth.js'
         
-        // Crear cliente de Supabase desde la variable global
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        // ========== AUTH WRAPPER SIMPLE ==========
-        const auth = {
-            async registrar(email, password, datos) {
-                try {
-                    const { data: userData, error: signUpError } = await supabase.auth.signUp({
-                        email: email,
-                        password: password,
-                        options: {
-                            data: {
-                                nombre: datos.nombre,
-                                telefono: datos.telefono,
-                                provincia: datos.provincia
-                            }
-                        }
-                    });
-                    
-                    if (signUpError) throw new Error(signUpError.message);
-                    
-                    if (userData.user) {
-                        // Crear perfil en la tabla perfiles
-                        const { error: perfilError } = await supabase
-                            .from('perfiles')
-                            .insert({
-                                id: userData.user.id,
-                                nombre: datos.nombre,
-                                email: email,
-                                telefono: datos.telefono,
-                                provincia: datos.provincia,
-                                codigo_referido: datos.codigo_referido || null,
-                                referido_por: datos.referido_por || null
-                            });
-                        
-                        if (perfilError) {
-                            console.error('Error creando perfil:', perfilError);
-                            // Intentar eliminar el usuario si falla el perfil
-                            await supabase.auth.admin.deleteUser(userData.user.id);
-                            throw new Error('Error al crear el perfil');
-                        }
-                        
-                        return { success: true, user: userData.user };
-                    }
-                    
-                    return { success: false, error: 'No se pudo crear el usuario' };
-                } catch (error) {
-                    console.error('Error en registro:', error);
-                    return { success: false, error: error.message };
-                }
-            }
-        };
-        
+        // ========== DETECTAR SI VIENE DE LA APP ==========
         const esApp = navigator.userAgent.includes('wv') || 
                       navigator.userAgent.includes('WebView') ||
                       !!(window.cordova || window.phonegap || window.PhoneGap) ||
@@ -397,18 +315,18 @@
                       localStorage.getItem('komerzio_app') === 'true';
         
         if (esApp) { localStorage.setItem('komerzio_app', 'true'); }
+        
         if (esApp) {
-            const googleBtn = document.getElementById('googleRegisterBtn');
-            const googleDivider = document.getElementById('googleDividerRegistro');
-            if (googleBtn) googleBtn.style.display = 'none';
-            if (googleDivider) googleDivider.style.display = 'none';
+            document.getElementById('googleRegisterBtn').style.display = 'none';
+            document.getElementById('googleDividerRegistro').style.display = 'none';
         }
         
         console.log('🚀 registro.html - App detectada:', esApp);
-        console.log('🚀 Supabase inicializado');
         
+        // ========== VARIABLES GLOBALES ==========
         let turnstileToken = null, turnstileReady = false, codigoReferidoActual = '', codigoReferidoValido = false, referidoPorId = null;
         
+        // ========== TURNSTILE CALLBACKS ==========
         window.onTurnstileSuccess = function(token) { 
             turnstileToken = token; 
             turnstileReady = true; 
@@ -417,18 +335,17 @@
                 s.style.display = 'block'; 
                 setTimeout(() => s.style.display = 'none', 3000); 
             } 
-            console.log('✅ Turnstile verificado correctamente');
         };
         window.onTurnstileExpired = function() { 
             turnstileToken = null; 
             turnstileReady = false; 
-            console.log('⚠️ Turnstile expirado');
         };
         window.onTurnstileError = function() { 
             turnstileToken = null; 
             turnstileReady = false; 
-            console.log('❌ Turnstile error');
         };
+        
+        // ========== CÓDIGO DE REFERIDO ==========
         window.addEventListener('load', () => setTimeout(() => { 
             if (typeof turnstile !== 'undefined') { 
                 const t = turnstile.getResponse(); 
@@ -454,6 +371,7 @@
                 } 
             }
         }
+        
         async function validarYMostrarBanner(c) {
             const { data, error } = await supabase.from('perfiles').select('id').eq('codigo_referido', c).maybeSingle();
             if (!error && data) { 
@@ -464,6 +382,7 @@
                 document.getElementById('referidoBanner').style.display = 'flex'; 
             }
         }
+        
         window.quitarReferido = function() { 
             codigoReferidoActual = ''; 
             codigoReferidoValido = false; 
@@ -474,6 +393,7 @@
             u.searchParams.delete('ref'); 
             window.history.replaceState({}, '', u); 
         };
+        
         window.aplicarCodigoManual = async function() {
             const i = document.getElementById('codigoManual'), 
                   c = i.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7), 
@@ -500,12 +420,15 @@
             }
             setTimeout(() => f.className = 'referido-feedback', 3000);
         };
+        
         document.getElementById('codigoManual')?.addEventListener('input', function() { 
             this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7); 
         });
         
+        // ========== BOTÓN REGISTRAR CON EMAIL ==========
         const fe = document.getElementById('formularioEmail'), 
               eb = document.getElementById('emailRegisterBtn');
+        
         if (eb) {
             eb.addEventListener('click', function() {
                 console.log('📧 Botón Registrarme con email clickeado');
@@ -518,6 +441,7 @@
             });
         }
         
+        // ========== BOTÓN GOOGLE ==========
         const gb = document.getElementById('googleRegisterBtn');
         if (gb) {
             gb.addEventListener('click', async function() { 
@@ -533,6 +457,7 @@
             });
         }
         
+        // ========== FORMULARIO DE REGISTRO ==========
         const rf = document.getElementById('emailRegistroForm');
         if (rf) {
             rf.addEventListener('submit', async function(e) {
@@ -547,6 +472,7 @@
                 const cp = document.getElementById('confirmPassword')?.value;
                 const te = document.getElementById('terminosEmail')?.checked;
                 
+                // ========== VALIDACIONES ==========
                 if (!n || !p || !em || !pw) { 
                     Swal.fire('Error', 'Completa todos los campos obligatorios', 'error'); 
                     return; 
@@ -567,6 +493,8 @@
                     Swal.fire('Error', 'Debes aceptar los términos y condiciones', 'error'); 
                     return; 
                 }
+                
+                // ========== TURNSTILE ==========
                 if (!turnstileReady || !turnstileToken) { 
                     if (typeof turnstile !== 'undefined') { 
                         const ct = turnstile.getResponse(); 
@@ -586,12 +514,10 @@
                 btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verificando...';
                 
                 try {
-                    // Verificar Turnstile con la Edge Function
+                    // ========== VERIFICAR TURNSTILE ==========
                     const { data: vd, error: ve } = await supabase.functions.invoke('verify-turnstile', { 
                         body: { token: turnstileToken } 
                     });
-                    
-                    console.log('🔍 Respuesta de verify-turnstile:', vd);
                     
                     if (ve || !vd?.success) {
                         throw new Error('Verificación de seguridad fallida. Recarga la página e intenta de nuevo.');
@@ -599,6 +525,7 @@
                     
                     const telefonoCompleto = '+53' + tel;
                     
+                    // ========== VERIFICAR TELÉFONO ==========
                     btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verificando teléfono...';
                     const { data: telefonoExiste } = await supabase
                         .from('perfiles')
@@ -610,6 +537,7 @@
                         throw new Error('⚠️ Este número de teléfono ya está registrado. Usa otro número o inicia sesión con tu cuenta existente.');
                     }
                     
+                    // ========== CREAR CUENTA ==========
                     btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Creando cuenta...';
                     
                     const datos = { 
@@ -647,6 +575,7 @@
             });
         }
         
+        // ========== TÉRMINOS ==========
         document.getElementById('terminosLink')?.addEventListener('click', function(e) { 
             e.preventDefault(); 
             Swal.fire({ 
@@ -656,6 +585,7 @@
                 confirmButtonColor: '#667eea' 
             }); 
         });
+        
         detectarCodigoReferido();
     </script>
 </body>
