@@ -4,18 +4,18 @@
 
 export const metaConfig = {
   default: {
-    title: 'CUBAZON · Tienda online Para Cuba',
+    title: 'KOMERZIO · Tienda online Para Cuba',
     description: 'Compra productos en Sagua de Tánamo y toda Cuba. Ropa, electrónica, hogar y más. Vendedores locales verificados.',
-    keywords: 'CUBAZON, tienda online, Sagua de Tánamo, comprar en Cuba, productos Cuba, vendedores locales',
-    image: 'https://cubazon.com/assets/images/og-image.jpg'
+    keywords: 'KOMERZIO, tienda online, Sagua de Tánamo, comprar en Cuba, productos Cuba, vendedores locales',
+    image: 'https://komerzio.dpdns.org/assets/images/komerzio.png'
   },
   '/producto-vendedor.html': {
-    title: ' producto en CUBAZON',
+    title: ' producto en KOMERZIO',
     description: 'Compra este producto de un vendedor local en Sagua de Tánamo. Pago contra entrega.',
   },
   '/mi-cuenta.html': {
-    title: 'Mi cuenta · CUBAZON',
-    description: 'Gestiona tu perfil, pedidos y tienda en CUBAZON.',
+    title: 'Mi cuenta · KOMERZIO',
+    description: 'Gestiona tu perfil, pedidos y tienda en KOMERZIO.',
     noindex: true
   },
   '/admin/': {
@@ -26,7 +26,6 @@ export const metaConfig = {
 export function generarMetaTags(path, data = {}) {
   let config = metaConfig.default;
   
-  // Buscar configuración específica para esta ruta
   for (const [ruta, conf] of Object.entries(metaConfig)) {
     if (path.includes(ruta)) {
       config = { ...config, ...conf };
@@ -34,7 +33,6 @@ export function generarMetaTags(path, data = {}) {
     }
   }
   
-  // Reemplazar variables
   let titulo = config.title;
   let descripcion = config.description;
   

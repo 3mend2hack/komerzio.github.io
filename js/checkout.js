@@ -402,14 +402,14 @@ async function actualizarEmailConResumen(pedido, pedidoId) {
             resumen += ` - ${item.cantidad} x $${item.precio.toFixed(2)} = $${item.subtotal.toFixed(2)}\n`
         })
         
-        resumen += `\nSubtotal: $${pedido.subtotal.toFixed(2)} CUP\n`
-        resumen += `Envío: $${pedido.envio.toFixed(2)} CUP\n`
+        resumen += `\nSubtotal: $${pedido.subtotal.toFixed(2)} USD\n`
+        resumen += `Envío: $${pedido.envio.toFixed(2)} USD\n`
         
         if (pedido.descuento > 0) {
-            resumen += `Descuento (${pedido.cupon_aplicado}): -$${pedido.descuento.toFixed(2)} CUP\n`
+            resumen += `Descuento (${pedido.cupon_aplicado}): -$${pedido.descuento.toFixed(2)} USD\n`
         }
         
-        resumen += `TOTAL: $${pedido.total.toFixed(2)} CUP\n`
+        resumen += `TOTAL: $${pedido.total.toFixed(2)} USD\n`
         resumen += `Método de pago: ${pedido.metodo_pago}\n`
         resumen += `========================`
         
@@ -444,8 +444,8 @@ function mostrarConfirmacionPedido(pedidoData, pedido) {
         'success-payment-method': pedido.metodo_pago === 'efectivo' ? 'Efectivo' : pedido.metodo_pago,
         'success-order-id': pedidoData.id,
         'success-order-date': new Date().toLocaleString('es-ES'),
-        'resumen-domicilio': `$${pedido.envio.toFixed(2)} CUP`,
-        'success-total': `$${pedido.total.toFixed(2)} CUP`,
+        'resumen-domicilio': `$${pedido.envio.toFixed(2)} USD`,
+        'success-total': `$${pedido.total.toFixed(2)} USD`,
         'success-fullname': pedido.cliente.nombre,
         'success-email': pedido.cliente.email,
         'success-phone': pedido.cliente.telefono,

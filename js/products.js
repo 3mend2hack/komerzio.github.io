@@ -146,7 +146,7 @@ export class ProductManager {
                     <div class="product-rating">
                         <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-o"></i>
                     </div>
-                    <div class="product-price">$${p.precio.toFixed(2)} <small>CUP</small></div>
+                    <div class="product-price">$${p.precio.toFixed(2)} <small>USD</small></div>
                     <div class="product-stock">
                         <i class="fa fa-check-circle" style="color: #007600;"></i> Stock: ${p.stock} unidades
                     </div>
@@ -198,7 +198,7 @@ export class ProductManager {
                         <h3 class="product-title">${p.nombre}</h3>
                     </a>
                     <div class="product-price">
-                        $${(p.precio_oferta || p.precio).toFixed(2)} <small>CUP</small>
+                        $${(p.precio_oferta || p.precio).toFixed(2)} <small>USD</small>
                         ${p.precio_oferta ? `<span style="text-decoration: line-through; color: #999; font-size: 14px; margin-left: 8px;">$${p.precio.toFixed(2)}</span>` : ''}
                     </div>
                     <button class="btn-add-cart" onclick="window.cart.agregar(${p.id}, 1)">
@@ -248,7 +248,7 @@ export class ProductManager {
                         <a href="/producto.html?id=${p.id}" style="text-decoration: none; color: inherit;">
                             <h3 class="product-title" style="height: auto;">${p.nombre}</h3>
                         </a>
-                        <div class="product-price">$${p.precio.toFixed(2)} CUP</div>
+                        <div class="product-price">$${p.precio.toFixed(2)} USD</div>
                         <button class="btn-add-cart" style="width: auto;" onclick="window.cart.agregar(${p.id}, 1)">
                             <i class="fa fa-shopping-cart"></i> Agregar
                         </button>
@@ -297,7 +297,7 @@ export class ProductManager {
                         <a href="/producto.html?id=${p.id}" style="text-decoration: none; color: inherit;">
                             <h3 class="product-title" style="height: auto;">${p.nombre}</h3>
                         </a>
-                        <div class="product-price">$${p.precio.toFixed(2)} CUP</div>
+                        <div class="product-price">$${p.precio.toFixed(2)} USD</div>
                         <button class="btn-add-cart" style="width: auto;" onclick="window.cart.agregar(${p.id}, 1)">
                             <i class="fa fa-shopping-cart"></i> Agregar
                         </button>
@@ -346,7 +346,7 @@ export class ProductManager {
                     <a href="/producto.html?id=${p.id}" style="text-decoration: none; color: inherit;">
                         <h3 class="product-title">${p.nombre}</h3>
                     </a>
-                    <div class="product-price">$${p.precio.toFixed(2)} <small>CUP</small></div>
+                    <div class="product-price">$${p.precio.toFixed(2)} <small>USD</small></div>
                     <button class="btn-add-cart" onclick="window.cart.agregar(${p.id}, 1)">
                         <i class="fa fa-shopping-cart"></i> Agregar
                     </button>

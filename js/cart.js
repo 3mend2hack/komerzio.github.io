@@ -202,7 +202,7 @@ export class Carrito {
         })
         
         document.querySelectorAll('.simpleCart_total, #cart-total').forEach(el => {
-            if (el) el.textContent = `$${subtotal.toFixed(2)} CUP`
+            if (el) el.textContent = `$${subtotal.toFixed(2)} USD`
         })
         
         this.renderizarPreviewCarrito()
@@ -224,7 +224,7 @@ export class Carrito {
         
         if (this.items.length === 0) {
             container.innerHTML = '<div style="padding: 15px; text-align: center; color: #718096;">Carrito vacío</div>'
-            if (totalContainer) totalContainer.textContent = '$0.00 CUP'
+            if (totalContainer) totalContainer.textContent = '$0.00 USD'
             return
         }
         
@@ -246,7 +246,7 @@ export class Carrito {
                          style="width: 50px; height: 50px; object-fit: contain; border-radius: 8px;">
                     <div class="cart-item-info" style="flex: 1;">
                         <div class="cart-item-title" style="font-weight: 600; font-size: 13px; margin-bottom: 3px;">${item.nombre}</div>
-                        <div class="cart-item-price" style="font-size: 12px; color: #dc2626; font-weight: 700;">$${item.precio.toFixed(2)} CUP</div>
+                        <div class="cart-item-price" style="font-size: 12px; color: #dc2626; font-weight: 700;">$${item.precio.toFixed(2)} USD</div>
                         <div class="cart-item-quantity" style="display: flex; align-items: center; gap: 8px; margin-top: 5px;">
                             <button onclick="event.stopPropagation(); window.cart.disminuirCantidad('${item.id}')" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid #cbd5e1; background: white; cursor: pointer; font-size: 12px;">-</button>
                             <span style="font-size: 13px; min-width: 30px; text-align: center;">${cantidad}</span>
@@ -263,11 +263,11 @@ export class Carrito {
         container.innerHTML = html
         
         if (totalContainer) {
-            totalContainer.textContent = `$${totalGeneral.toFixed(2)} CUP`
+            totalContainer.textContent = `$${totalGeneral.toFixed(2)} USD`
         }
         
         const totalElement = document.getElementById('cart-total')
-        if (totalElement) totalElement.textContent = `$${totalGeneral.toFixed(2)} CUP`
+        if (totalElement) totalElement.textContent = `$${totalGeneral.toFixed(2)} USD`
     }
     
     // ========== PÁGINA DE CARRITO COMPLETA ==========
@@ -303,7 +303,7 @@ export class Carrito {
                         <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #0f1111;">${item.nombre}</div>
                         
                         <div style="color: #b12704; font-weight: 700; font-size: 22px; margin-bottom: 15px;">
-                            $${item.precio.toFixed(2)} CUP
+                            $${item.precio.toFixed(2)} USD
                         </div>
                         
                         <div style="display: flex; align-items: center; gap: 15px;">
@@ -357,7 +357,7 @@ export class Carrito {
                     
                     <div style="display: flex; justify-content: space-between; margin: 15px 0;">
                         <span style="color: #6c757d;">Subtotal (${cantidad} productos):</span>
-                        <span style="font-weight: 600;">$${subtotal.toFixed(2)} CUP</span>
+                        <span style="font-weight: 600;">$${subtotal.toFixed(2)} USD</span>
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; margin: 15px 0; color: #059669;">
@@ -367,7 +367,7 @@ export class Carrito {
                     
                     <div style="display: flex; justify-content: space-between; margin: 25px 0; padding-top: 25px; border-top: 2px solid #dee2e6; font-size: 24px; font-weight: 700;">
                         <span>Total:</span>
-                        <span style="color: #b12704;">$${subtotal.toFixed(2)} CUP</span>
+                        <span style="color: #b12704;">$${subtotal.toFixed(2)} USD</span>
                     </div>
                     
                     <a href="/p/checkout.html" style="display: block; background: #ffd814; padding: 18px; border-radius: 30px; color: #0f1111; font-weight: 600; text-decoration: none; text-align: center; font-size: 18px; margin-top: 20px;">
