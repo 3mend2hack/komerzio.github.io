@@ -14,25 +14,14 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
             background: #f0f2f5;
             color: #0f1111;
             line-height: 1.5;
         }
-        
-        .checkout-container {
-            max-width: 1500px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        
+        .checkout-container { max-width: 1500px; margin: 40px auto; padding: 0 20px; }
         .checkout-header {
             background: #131921;
             color: white;
@@ -43,401 +32,126 @@
             justify-content: space-between;
             align-items: center;
         }
-        
-        .checkout-header h1 {
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .checkout-grid {
-            display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 30px;
-        }
-        
-        .checkout-form {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .checkout-sidebar {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            height: fit-content;
-        }
+        .checkout-header h1 { font-size: 24px; display: flex; align-items: center; gap: 10px; }
+        .checkout-grid { display: grid; grid-template-columns: 1fr 380px; gap: 30px; }
+        .checkout-form { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .checkout-sidebar { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); height: fit-content; }
         
         .saldo-header-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 25px;
+            color: white; padding: 15px 25px; border-radius: 12px;
+            display: flex; align-items: center; gap: 20px; margin-bottom: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
+        .saldo-header-icon { width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .saldo-header-info h3 { font-size: 14px; font-weight: 400; opacity: 0.9; margin-bottom: 3px; }
+        .saldo-header-amount { font-size: 28px; font-weight: 700; }
+        .saldo-header-amount small { font-size: 14px; font-weight: 400; opacity: 0.8; margin-left: 5px; }
         
-        .saldo-header-icon {
-            width: 50px;
-            height: 50px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        
-        .saldo-header-info h3 {
-            font-size: 14px;
-            font-weight: 400;
-            opacity: 0.9;
-            margin-bottom: 3px;
-        }
-        
-        .saldo-header-amount {
-            font-size: 28px;
-            font-weight: 700;
-        }
-        
-        .saldo-header-amount small {
-            font-size: 14px;
-            font-weight: 400;
-            opacity: 0.8;
-            margin-left: 5px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #0f1111;
-        }
-        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #0f1111; }
         .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: all 0.2s;
+            width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px;
+            font-size: 15px; transition: all 0.2s;
         }
-        
-        .form-control:focus {
-            border-color: #f08804;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(240,136,4,0.1);
-        }
-        
-        .form-control:disabled {
-            background: #f8f9fa;
-            color: #6c757d;
-            cursor: not-allowed;
-        }
-        
-        .form-control[readonly] {
-            background: #f8f9fa;
-            color: #6c757d;
-        }
-        
-        .row-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
+        .form-control:focus { border-color: #f08804; outline: none; box-shadow: 0 0 0 3px rgba(240,136,4,0.1); }
+        .form-control:disabled { background: #f8f9fa; color: #6c757d; cursor: not-allowed; }
+        .form-control[readonly] { background: #f8f9fa; color: #6c757d; }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         
         .shipping-selector {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            opacity: 0.6;
+            background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;
+            border: 2px solid #e9ecef; transition: all 0.3s;
         }
+        .shipping-selector.active { opacity: 1; border-color: #f08804; background: #fff6e5; }
+        .shipping-selector.disabled { opacity: 0.5; pointer-events: none; background: #f1f3f5; }
+        #ciudad { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin: 10px 0; font-size: 15px; }
         
-        .shipping-selector.disabled {
-            opacity: 0.5;
-            pointer-events: none;
-        }
-        
-        #ciudad {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-size: 15px;
-        }
-        
-        .payment-methods {
-            margin: 30px 0;
-        }
-        
+        .payment-methods { margin: 30px 0; }
         .payment-option {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
+            display: flex; align-items: center; padding: 15px; border: 2px solid #ddd;
+            border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s;
         }
-        
-        .payment-option:hover {
-            border-color: #f08804;
-            background: #fff6e5;
+        .payment-option:hover { border-color: #f08804; background: #fff6e5; }
+        .payment-option.selected { border-color: #f08804; background: #fff6e5; }
+        .payment-option input[type="radio"] { margin-right: 15px; width: 18px; height: 18px; cursor: pointer; }
+        .payment-option .badge-tasa {
+            margin-left: auto; background: #e9ecef; padding: 4px 12px; border-radius: 20px;
+            font-size: 12px; color: #495057; font-weight: 600;
         }
-        
-        .payment-option.selected {
-            border-color: #f08804;
-            background: #fff6e5;
-        }
-        
-        .payment-option input[type="radio"] {
-            margin-right: 15px;
-            width: 18px;
-            height: 18px;
-        }
-        
-        .payment-option img {
-            height: 30px;
-            margin-left: auto;
-        }
-        
-        .payment-option.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
+        .payment-option.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
         
         .saldo-info {
-            background: #e8f5e9;
-            border: 1px solid #c3e6cb;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: #e8f5e9; border: 1px solid #c3e6cb; border-radius: 8px;
+            padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;
         }
-        
-        .saldo-info span {
-            font-weight: 600;
-            color: #155724;
-        }
-        
-        .saldo-info strong {
-            font-size: 18px;
-            color: #009644;
-        }
+        .saldo-info span { font-weight: 600; color: #155724; }
+        .saldo-info strong { font-size: 18px; color: #009644; }
         
         .coupon-section {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
+            background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;
             transition: all 0.3s;
         }
+        .coupon-section.disabled { opacity: 0.5; pointer-events: none; background: #e9ecef; }
+        .coupon-input { display: flex; gap: 10px; margin-top: 10px; }
         
-        .coupon-section.disabled {
-            opacity: 0.5;
-            pointer-events: none;
-            background: #e9ecef;
-        }
-        
-        .coupon-input {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-primary {
-            background: #ffd814;
-            color: #0f1111;
-            width: 100%;
-            font-size: 16px;
-            padding: 15px;
-        }
-        
-        .btn-primary:hover {
-            background: #f7ca00;
-        }
-        
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .btn-secondary {
-            background: #f0f2f5;
-            color: #0f1111;
-        }
+        .btn { padding: 12px 25px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #ffd814; color: #0f1111; width: 100%; font-size: 16px; padding: 15px; }
+        .btn-primary:hover { background: #f7ca00; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: #f0f2f5; color: #0f1111; }
         
         .btn-icon {
-            width: 32px;
-            height: 32px;
-            background: #f0f2f5;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 32px; height: 32px; background: #f0f2f5; border: 1px solid #ddd;
+            border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: all 0.2s;
         }
-        
-        .btn-icon:hover {
-            background: #ffd814;
-            border-color: #f08804;
-        }
-        
-        .btn-icon i {
-            font-size: 12px;
-            color: #0f1111;
-        }
+        .btn-icon:hover { background: #ffd814; border-color: #f08804; }
+        .btn-icon i { font-size: 12px; color: #0f1111; }
         
         .cart-item {
-            display: flex;
-            gap: 15px;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-            align-items: center;
+            display: flex; gap: 15px; padding: 15px 0; border-bottom: 1px solid #eee; align-items: center;
         }
+        .cart-item img { width: 60px; height: 60px; object-fit: contain; border: 1px solid #ddd; border-radius: 8px; background: #f8f9fa; }
+        .cart-item-details { flex: 1; }
+        .cart-item-title { font-weight: 600; margin-bottom: 5px; font-size: 14px; }
+        .cart-item-price { color: #b12704; font-weight: 700; font-size: 14px; }
+        .cart-item-controls { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
+        .cart-item-quantity { min-width: 30px; text-align: center; font-weight: 600; font-size: 14px; }
+        .cart-item-remove { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 14px; margin-left: 5px; }
         
-        .cart-item img {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #f8f9fa;
-        }
-        
-        .cart-item-details {
-            flex: 1;
-        }
-        
-        .cart-item-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .cart-item-price {
-            color: #b12704;
-            font-weight: 700;
-            font-size: 14px;
-        }
-        
-        .cart-item-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 5px;
-        }
-        
-        .cart-item-quantity {
-            min-width: 30px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .cart-item-remove {
-            background: none;
-            border: none;
-            color: #dc3545;
-            cursor: pointer;
-            font-size: 14px;
-            margin-left: 5px;
-        }
-        
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 15px 0;
-        }
-        
+        .total-row { display: flex; justify-content: space-between; margin: 15px 0; }
         .grand-total {
-            font-size: 24px;
-            font-weight: 700;
-            color: #b12704;
-            border-top: 2px solid #ddd;
-            margin-top: 20px;
-            padding-top: 20px;
+            font-size: 24px; font-weight: 700; color: #b12704;
+            border-top: 2px solid #ddd; margin-top: 20px; padding-top: 20px;
         }
         
         .empty-cart {
-            text-align: center;
-            padding: 80px 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-align: center; padding: 80px 20px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
+        .empty-cart i { font-size: 64px; color: #ddd; margin-bottom: 20px; }
+        .empty-cart h2 { margin-bottom: 20px; color: #666; }
+        .cart-items-container { max-height: 500px; overflow-y: auto; padding-right: 10px; margin-bottom: 20px; }
         
-        .empty-cart i {
-            font-size: 64px;
-            color: #ddd;
-            margin-bottom: 20px;
+        .tasa-info {
+            background: #e0f2fe; border: 1px solid #7dd3fc; border-radius: 8px;
+            padding: 10px 15px; margin: 15px 0; text-align: center; font-size: 13px; color: #0369a1;
         }
-        
-        .empty-cart h2 {
-            margin-bottom: 20px;
-            color: #666;
-        }
-        
-        .cart-items-container {
-            max-height: 500px;
-            overflow-y: auto;
-            padding-right: 10px;
-            margin-bottom: 20px;
-        }
+        .tasa-info i { margin-right: 8px; }
         
         @media (max-width: 768px) {
-            .checkout-grid {
-                grid-template-columns: 1fr;
-            }
-            .row-2 {
-                grid-template-columns: 1fr;
-            }
-            .coupon-input {
-                flex-direction: column;
-            }
-            .cart-item {
-                flex-wrap: wrap;
-            }
+            .checkout-grid { grid-template-columns: 1fr; }
+            .row-2 { grid-template-columns: 1fr; }
+            .coupon-input { flex-direction: column; }
+            .cart-item { flex-wrap: wrap; }
         }
     </style>
 </head>
 <body>
     <div class="checkout-container">
         <div class="checkout-header">
-            <h1>
-                <i class="fa fa-lock"></i> Finalizar Compra · KOMERZIO
-            </h1>
-            <a href="/index.html" style="color: white; text-decoration: none;">
-                <i class="fa fa-arrow-left"></i> Seguir comprando
-            </a>
+            <h1><i class="fa fa-lock"></i> Finalizar Compra · KOMERZIO</h1>
+            <a href="/index.html" style="color: white; text-decoration: none;"><i class="fa fa-arrow-left"></i> Seguir comprando</a>
         </div>
         
         <div id="checkout-content">
@@ -452,23 +166,94 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <script type="module">
-        import '../js/supabase-client.js'
+        import { supabase } from '/js/supabase-client.js'
         import { initCarrito } from '/js/cart.js'
         import { auth } from '/js/auth.js'
         
-        const supabase = window.supabaseClient;
         const carrito = initCarrito()
         window.cart = carrito
         carrito.cargarDeLocalStorage()
         carrito.actualizarInterfaz()
+        
+        // ===== CONFIGURACIÓN DE CHECKOUT =====
+        let configuracionCheckout = {
+            checkout_activo: true,
+            envio_habilitado: false,
+            zonas_envio: [],
+            metodos_pago: [
+                { id: 'efectivo_usd', nombre: 'Efectivo USD', activo: true, icono: '💵' },
+                { id: 'efectivo_cup', nombre: 'Efectivo CUP', activo: true, icono: '💵' },
+                { id: 'saldo', nombre: 'Saldo KOMERZIO', activo: true, icono: '💰' }
+            ],
+            tasa_usd_cup: 1.00
+        }
         
         let costoEnvio = 0
         let descuentoAplicado = 0
         let cuponActivo = null
         let usuarioAutenticado = null
         let saldoUsuario = 0
-        let metodoPagoSeleccionado = 'efectivo'
+        let metodoPagoSeleccionado = 'efectivo_usd'
         
+        // ===== CARGAR CONFIGURACIÓN DESDE SUPABASE =====
+        async function cargarConfiguracionCheckout() {
+            try {
+                console.log('🔍 Cargando configuración de checkout...')
+                const { data, error } = await supabase
+                    .from('config_checkout')
+                    .select('*')
+                    .maybeSingle()
+                
+                if (error) {
+                    console.warn('Error cargando configuración:', error.message)
+                    return
+                }
+                
+                if (data) {
+                    console.log('✅ Configuración cargada:', data)
+                    configuracionCheckout.checkout_activo = data.checkout_activo ?? true
+                    configuracionCheckout.envio_habilitado = data.envio_habilitado ?? false
+                    configuracionCheckout.zonas_envio = data.zonas_envio || []
+                    
+                    if (data.metodos_pago) {
+                        try {
+                            const metodos = typeof data.metodos_pago === 'string' 
+                                ? JSON.parse(data.metodos_pago) 
+                                : data.metodos_pago
+                            configuracionCheckout.metodos_pago = metodos
+                            console.log('✅ Métodos de pago cargados:', metodos)
+                        } catch (e) {
+                            console.warn('Error parseando metodos_pago:', e)
+                        }
+                    }
+                    
+                    configuracionCheckout.tasa_usd_cup = data.tasa_usd_cup ?? 1.00
+                }
+                
+                console.log('📋 Configuración final:', configuracionCheckout)
+                
+            } catch (error) {
+                console.error('Error cargando configuración:', error)
+            }
+        }
+        
+        // ===== VERIFICAR SI EL CHECKOUT ESTÁ ACTIVO =====
+        function verificarCheckoutActivo() {
+            if (!configuracionCheckout.checkout_activo) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Checkout desactivado',
+                    text: 'El sistema de compras está actualmente desactivado. Por favor, intenta más tarde.',
+                    confirmButtonText: 'Entendido'
+                }).then(() => {
+                    window.location.href = '/index.html'
+                })
+                return false
+            }
+            return true
+        }
+        
+        // ===== CARGAR DATOS USUARIO =====
         async function cargarDatosUsuario() {
             if (auth.isAuthenticated()) {
                 const usuario = auth.getUsuario()
@@ -481,76 +266,35 @@
                     .single()
                 
                 if (!error && perfil) {
-                    usuarioAutenticado = {
-                        ...usuario,
-                        ...perfil,
-                        nombre: perfil.nombre || usuario.nombre_completo || usuario.user_metadata?.nombre || usuario.email?.split('@')[0] || ''
-                    }
+                    usuarioAutenticado = { ...usuario, ...perfil, nombre: perfil.nombre || usuario.nombre_completo || usuario.user_metadata?.nombre || usuario.email?.split('@')[0] || '' }
                 } else {
-                    usuarioAutenticado = {
-                        ...usuario,
-                        nombre: usuario.nombre_completo || usuario.user_metadata?.nombre || usuario.email?.split('@')[0] || '',
-                        telefono: usuario.telefono || '',
-                        direccion: usuario.direccion || '',
-                        localidad: usuario.localidad || '',
-                        referencia: usuario.referencia || '',
-                        carnet: usuario.carnet || ''
-                    }
+                    usuarioAutenticado = { ...usuario, nombre: usuario.nombre_completo || usuario.user_metadata?.nombre || usuario.email?.split('@')[0] || '' }
                 }
                 
-                const { data: saldoData, error: saldoError } = await supabase
+                const { data: saldoData } = await supabase
                     .from('saldo_usuarios')
                     .select('saldo_actual')
                     .eq('user_id', usuarioAutenticado.id)
                     .single()
                 
-                if (!saldoError && saldoData) {
-                    saldoUsuario = saldoData.saldo_actual || 0
-                } else {
-                    saldoUsuario = 0
-                }
+                saldoUsuario = saldoData?.saldo_actual || 0
+                console.log('💰 Saldo usuario:', saldoUsuario)
             }
         }
         
         function autocompletarFormulario() {
             if (!usuarioAutenticado) return
-            
-            const nombreInput = document.getElementById('nombre')
-            const emailInput = document.getElementById('email')
-            const telefonoInput = document.getElementById('telefono')
-            
-            if (nombreInput) {
-                nombreInput.value = usuarioAutenticado.nombre || ''
-                nombreInput.readOnly = true
-            }
-            if (emailInput) {
-                emailInput.value = usuarioAutenticado.email || ''
-                emailInput.readOnly = true
-            }
-            if (telefonoInput) {
-                telefonoInput.value = usuarioAutenticado.telefono || ''
-                telefonoInput.readOnly = true
-            }
-            
-            const direccionInput = document.getElementById('direccion')
-            const localidadInput = document.getElementById('localidad')
-            const referenciaInput = document.getElementById('referencia')
-            const carnetInput = document.getElementById('carnet')
-            
-            if (direccionInput && usuarioAutenticado.direccion) {
-                direccionInput.value = usuarioAutenticado.direccion
-            }
-            if (localidadInput && usuarioAutenticado.localidad) {
-                localidadInput.value = usuarioAutenticado.localidad
-            }
-            if (referenciaInput && usuarioAutenticado.referencia) {
-                referenciaInput.value = usuarioAutenticado.referencia
-            }
-            if (carnetInput && usuarioAutenticado.carnet) {
-                carnetInput.value = usuarioAutenticado.carnet
-            }
+            const campos = ['nombre', 'email', 'telefono', 'direccion', 'localidad', 'referencia', 'carnet']
+            campos.forEach(id => {
+                const el = document.getElementById(id)
+                if (el && usuarioAutenticado[id]) {
+                    el.value = usuarioAutenticado[id]
+                    el.readOnly = true
+                }
+            })
         }
         
+        // ===== RENDERIZAR CHECKOUT =====
         function renderizarCheckout() {
             const container = document.getElementById('checkout-content')
             if (!container) return
@@ -569,15 +313,17 @@
                 return
             }
             
+            // Verificar si checkout está activo
+            if (!verificarCheckoutActivo()) return
+            
             let itemsHtml = ''
             carrito.items.forEach(item => {
                 itemsHtml += `
                     <div class="cart-item" data-item-id="${item.id}">
                         <img src="${item.imagen_url || '/assets/images/no-image.jpg'}" alt="${item.nombre}" onerror="this.src='/assets/images/no-image.jpg'">
-                        
                         <div class="cart-item-details">
                             <div class="cart-item-title">${item.nombre}</div>
-                            <div class="cart-item-price">$${item.precio.toFixed(2)} CUP</div>
+                            <div class="cart-item-price">$${item.precio.toFixed(2)} USD</div>
                             <div class="cart-item-controls">
                                 <button class="btn-icon" onclick="event.stopPropagation(); window.cart.actualizarCantidad('${item.id}', ${item.cantidad - 1})">
                                     <i class="fa fa-minus"></i>
@@ -597,24 +343,52 @@
             
             const subtotal = carrito.subtotal()
             const cantidad = carrito.cantidadTotal()
-            const totalCUP = subtotal + costoEnvio - descuentoAplicado
+            const totalUSD = subtotal + costoEnvio - descuentoAplicado
+            const totalCUP = totalUSD * configuracionCheckout.tasa_usd_cup
             
-            let metodosPago = `
-                <label class="payment-option ${metodoPagoSeleccionado === 'efectivo' ? 'selected' : ''}">
-                    <input type="radio" name="payment_method" value="efectivo" ${metodoPagoSeleccionado === 'efectivo' ? 'checked' : ''} onchange="window.metodoPagoCambio('efectivo')">
-                    <span style="font-weight: 600;">💵 Efectivo</span>
-                </label>
-            `
+            // ========== MÉTODOS DE PAGO DESDE CONFIGURACIÓN ==========
+            let metodosPagoHtml = ''
+            const metodosActivos = configuracionCheckout.metodos_pago.filter(m => m.activo)
             
-            if (usuarioAutenticado) {
-                metodosPago += `
-                    <label class="payment-option ${metodoPagoSeleccionado === 'saldo' ? 'selected' : ''}">
-                        <input type="radio" name="payment_method" value="saldo" ${metodoPagoSeleccionado === 'saldo' ? 'checked' : ''} onchange="window.metodoPagoCambio('saldo')">
-                        <span style="font-weight: 600;">💰 Saldo KOMERZIO</span>
-                        <span style="margin-left: auto; background: #009644; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px;">
-                            Disponible: $${saldoUsuario.toFixed(2)}
-                        </span>
+            console.log('💰 Métodos de pago activos:', metodosActivos)
+            
+            metodosActivos.forEach(metodo => {
+                let badgeHtml = ''
+                let disabledClass = ''
+                let disabledAttr = ''
+                
+                if (metodo.id === 'saldo') {
+                    if (!usuarioAutenticado) {
+                        disabledClass = 'disabled'
+                        disabledAttr = 'disabled'
+                    }
+                    badgeHtml = `<span class="badge-tasa">Disponible: $${saldoUsuario.toFixed(2)}</span>`
+                }
+                
+                if (metodo.id === 'efectivo_cup') {
+                    badgeHtml = `<span class="badge-tasa">Tasa: 1 USD = ${configuracionCheckout.tasa_usd_cup} CUP</span>`
+                }
+                
+                const isSelected = metodoPagoSeleccionado === metodo.id
+                const selectedClass = isSelected ? 'selected' : ''
+                
+                metodosPagoHtml += `
+                    <label class="payment-option ${selectedClass} ${disabledClass}" onclick="window.seleccionarMetodoPago('${metodo.id}')">
+                        <input type="radio" name="payment_method" value="${metodo.id}" 
+                               ${isSelected ? 'checked' : ''} 
+                               ${disabledAttr}
+                               onchange="window.metodoPagoCambio('${metodo.id}')">
+                        <span style="font-weight: 600;">${metodo.icono} ${metodo.nombre}</span>
+                        ${badgeHtml}
                     </label>
+                `
+            })
+            
+            if (!metodosPagoHtml) {
+                metodosPagoHtml = `
+                    <div style="text-align: center; padding: 20px; color: #dc3545;">
+                        <i class="fa fa-exclamation-triangle"></i> No hay métodos de pago disponibles.
+                    </div>
                 `
             }
             
@@ -623,15 +397,51 @@
                 saldoHeaderHtml = `
                     <div class="saldo-header-card">
                         <div class="saldo-header-icon"><i class="fa fa-credit-card"></i></div>
-                        <div class="saldo-header-info"><h3>Tu saldo disponible</h3><div class="saldo-header-amount">$${saldoUsuario.toFixed(2)} <small>CUP</small></div></div>
+                        <div class="saldo-header-info">
+                            <h3>Tu saldo disponible</h3>
+                            <div class="saldo-header-amount">$${saldoUsuario.toFixed(2)} <small>USD</small></div>
+                        </div>
                     </div>
                 `
             }
+            
+            const hayMetodoCUP = configuracionCheckout.metodos_pago.some(m => m.id === 'efectivo_cup' && m.activo)
+            const tasaHtml = hayMetodoCUP ? `
+                <div class="tasa-info">
+                    <i class="fa fa-exchange"></i>
+                    <strong>1 USD = ${configuracionCheckout.tasa_usd_cup} CUP</strong>
+                    <span style="margin-left: 10px; font-size: 12px;">(Tasa configurada manualmente)</span>
+                </div>
+            ` : ''
+            
+            const shippingHtml = configuracionCheckout.envio_habilitado ? `
+                <div class="shipping-selector active">
+                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">🚚 Selecciona tu zona de envío</label>
+                    <select id="ciudad" class="form-control" onchange="window.actualizarEnvio(this)">
+                        <option value="">Selecciona una zona</option>
+                        ${configuracionCheckout.zonas_envio.filter(z => z.activo !== false).map(z => `
+                            <option value="${z.nombre}" data-costo="${z.costo}">
+                                ${z.nombre} - $${z.costo.toFixed(2)}
+                            </option>
+                        `).join('')}
+                    </select>
+                    <div id="mensajeBusqueda" style="margin-top: 10px; font-size: 14px; color: #666;">📍 Selecciona tu zona de envío</div>
+                </div>
+            ` : `
+                <div class="shipping-selector disabled">
+                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">🚚 Método de envío</label>
+                    <select id="ciudad" class="form-control" disabled>
+                        <option value="no-deseo" selected data-costo="0">Recoger en tienda (Gratis)</option>
+                    </select>
+                    <div id="mensajeBusqueda" style="margin-top: 10px; font-size: 14px; color: #666;">📍 Recogerás el pedido en nuestra tienda</div>
+                </div>
+            `
             
             container.innerHTML = `
                 <div class="checkout-grid">
                     <div class="checkout-form">
                         ${saldoHeaderHtml}
+                        ${tasaHtml}
                         <h2 style="margin-bottom: 25px;">📦 Información de envío</h2>
                         <div class="row-2">
                             <div class="form-group"><label>Nombre y apellidos *</label><input type="text" class="form-control" id="nombre" placeholder="Ej: Juan Pérez" required></div>
@@ -648,16 +458,10 @@
                         </div>
                         <div class="form-group"><label>Notas del pedido</label><textarea class="form-control" id="notas" rows="3" placeholder="¿Alguna instrucción especial? (color, talla, etc)"></textarea></div>
                         
-                        <div class="shipping-selector disabled">
-                            <label style="font-weight: 600; margin-bottom: 10px; display: block;">🚚 Método de envío (Deshabilitado - Solo recogida en tienda)</label>
-                            <select id="ciudad" class="form-control" disabled>
-                                <option value="no-deseo" selected data-costo="0">Recoger en tienda (Gratis)</option>
-                            </select>
-                            <div id="mensajeBusqueda" style="margin-top: 10px; font-size: 14px; color: #666;">📍 Recogerás el pedido en nuestra tienda</div>
-                        </div>
+                        ${shippingHtml}
                         
                         <h2 style="margin: 30px 0 20px;">💳 Método de pago</h2>
-                        <div class="payment-methods">${metodosPago}</div>
+                        <div class="payment-methods">${metodosPagoHtml}</div>
                         
                         <div class="coupon-section">
                             <label style="font-weight: 600;">🎫 ¿Tienes un cupón de descuento?</label>
@@ -672,12 +476,21 @@
                     <div class="checkout-sidebar">
                         <h2 style="margin-bottom: 20px;">🛒 Tu pedido (${cantidad} producto(s))</h2>
                         <div class="cart-items-container">${itemsHtml}</div>
-                        ${usuarioAutenticado && saldoUsuario > 0 ? `<div class="saldo-info"><span>💰 Tu saldo disponible:</span><strong>$${saldoUsuario.toFixed(2)} CUP</strong></div>` : ''}
+                        ${usuarioAutenticado && saldoUsuario > 0 ? `<div class="saldo-info"><span>💰 Tu saldo disponible:</span><strong>$${saldoUsuario.toFixed(2)} USD</strong></div>` : ''}
                         <div style="margin-top: 30px;">
                             <div class="total-row"><span>Subtotal (${cantidad} productos):</span><span style="font-weight: 600;" id="checkout-subtotal">$${subtotal.toFixed(2)}</span></div>
-                            <div class="total-row"><span>Envío:</span><span style="font-weight: 600;" id="checkout-shipping">$0.00</span></div>
-                            <div class="total-row" id="discount-row" style="display: none;"><span>Descuento:</span><span style="font-weight: 600; color: #059669;" id="checkout-discount">-$0.00</span></div>
-                            <div class="grand-total total-row"><span>Total:</span><span id="checkout-total">$${subtotal.toFixed(2)}</span></div>
+                            <div class="total-row"><span>Envío:</span><span style="font-weight: 600;" id="checkout-shipping">$${costoEnvio.toFixed(2)}</span></div>
+                            <div class="total-row" id="discount-row" style="display: none;"><span>Descuento:</span><span style="font-weight: 600; color: #059669;" id="checkout-discount">-$${descuentoAplicado.toFixed(2)}</span></div>
+                            <div class="grand-total total-row">
+                                <span>Total:</span>
+                                <span id="checkout-total">$${totalUSD.toFixed(2)}</span>
+                            </div>
+                            ${metodoPagoSeleccionado === 'efectivo_cup' ? `
+                                <div class="total-row" style="color: #0369a1; font-size: 14px; border-top: 1px dashed #dee2e6; padding-top: 10px; margin-top: 10px;">
+                                    <span>Total en CUP:</span>
+                                    <span id="checkout-total-cup" style="font-weight: 700;">$${totalCUP.toFixed(2)}</span>
+                                </div>
+                            ` : ''}
                         </div>
                         <button class="btn btn-primary" id="confirm-order-btn" style="margin-top: 30px;"><i class="fa fa-check"></i> Confirmar pedido</button>
                         <p style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;"><i class="fa fa-lock"></i> Tus datos están seguros</p>
@@ -685,6 +498,7 @@
                 </div>
             `
             
+            document.getElementById('ciudad')?.addEventListener('change', actualizarCostoEnvio)
             document.getElementById('apply-coupon')?.addEventListener('click', aplicarCupon)
             document.getElementById('remove-coupon')?.addEventListener('click', removerCupon)
             document.getElementById('confirm-order-btn')?.addEventListener('click', procesarPedido)
@@ -693,9 +507,29 @@
             actualizarTotales()
         }
         
-        window.metodoPagoCambio = async function(metodo) {
+        // ===== FUNCIÓN PARA SELECCIONAR MÉTODO DE PAGO =====
+        window.seleccionarMetodoPago = function(metodo) {
             metodoPagoSeleccionado = metodo
             renderizarCheckout()
+        }
+        
+        window.metodoPagoCambio = function(metodo) {
+            metodoPagoSeleccionado = metodo
+            renderizarCheckout()
+        }
+        
+        window.actualizarEnvio = function(select) {
+            const selected = select.options[select.selectedIndex]
+            costoEnvio = parseFloat(selected?.getAttribute('data-costo')) || 0
+            actualizarTotales()
+        }
+        
+        function actualizarCostoEnvio() {
+            const select = document.getElementById('ciudad')
+            if (!select) return
+            const selectedOption = select.options[select.selectedIndex]
+            costoEnvio = selectedOption?.getAttribute('data-costo') ? parseFloat(selectedOption.getAttribute('data-costo')) : 0
+            actualizarTotales()
         }
         
         function actualizarTotales() {
@@ -704,6 +538,13 @@
             document.getElementById('checkout-subtotal').textContent = `$${subtotal.toFixed(2)}`
             document.getElementById('checkout-shipping').textContent = `$${costoEnvio.toFixed(2)}`
             document.getElementById('checkout-total').textContent = `$${total.toFixed(2)}`
+            
+            const totalCUP = total * configuracionCheckout.tasa_usd_cup
+            const totalCupEl = document.getElementById('checkout-total-cup')
+            if (totalCupEl) {
+                totalCupEl.textContent = `$${totalCUP.toFixed(2)}`
+            }
+            
             if (descuentoAplicado > 0) {
                 document.getElementById('discount-row').style.display = 'flex'
                 document.getElementById('checkout-discount').textContent = `-$${descuentoAplicado.toFixed(2)}`
@@ -749,7 +590,7 @@
                 document.getElementById('apply-coupon').style.display = 'none'
                 document.getElementById('remove-coupon').style.display = 'inline-block'
                 document.getElementById('coupon-code').disabled = true
-                document.getElementById('coupon-message').innerHTML = `<div style="color: #059669; font-weight: 600; padding: 10px; background: #e8f5e9; border-radius: 8px;">✅ Cupón aplicado: ${data.codigo}<br>Descuento: ${data.tipo === 'porcentaje' ? `${data.descuento}%` : `$${data.descuento.toFixed(2)} CUP`}</div>`
+                document.getElementById('coupon-message').innerHTML = `<div style="color: #059669; font-weight: 600; padding: 10px; background: #e8f5e9; border-radius: 8px;">✅ Cupón aplicado: ${data.codigo}<br>Descuento: ${data.tipo === 'porcentaje' ? `${data.descuento}%` : `$${data.descuento.toFixed(2)} USD`}</div>`
                 actualizarTotales()
             } catch (error) {
                 console.error('Error al aplicar cupón:', error)
@@ -768,7 +609,13 @@
             actualizarTotales()
         }
         
+        // ============================================
+        // FUNCIÓN PRINCIPAL: PROCESAR PEDIDO
+        // ============================================
         async function procesarPedido() {
+            // Verificar si checkout está activo
+            if (!verificarCheckoutActivo()) return
+            
             if (!auth.isAuthenticated()) {
                 const result = await Swal.fire({
                     icon: 'info',
@@ -787,7 +634,12 @@
                 return;
             }
             
-            const metodoPago = document.querySelector('input[name="payment_method"]:checked')?.value
+            // OBTENER MÉTODO DE PAGO SELECCIONADO
+            const metodoPagoRadio = document.querySelector('input[name="payment_method"]:checked')
+            const metodoPago = metodoPagoRadio ? metodoPagoRadio.value : null
+            
+            console.log('🔍 Método de pago seleccionado:', metodoPago)
+            
             if (!metodoPago) {
                 Swal.fire('Error', 'Selecciona un método de pago', 'error')
                 return
@@ -804,28 +656,40 @@
             const localidad = document.getElementById('localidad')?.value
             if (!localidad) { Swal.fire('Error', 'Ingresa tu localidad', 'error'); return }
             
+            // Validar envío si está habilitado
+            if (configuracionCheckout.envio_habilitado) {
+                const ciudad = document.getElementById('ciudad')?.value
+                if (!ciudad) { Swal.fire('Error', 'Selecciona una zona de envío', 'error'); return }
+            }
+            
             const btn = document.getElementById('confirm-order-btn')
             btn.disabled = true
             btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Procesando...'
             
             try {
-                const totalCUP = carrito.subtotal() + costoEnvio - descuentoAplicado
+                const totalUSD = carrito.subtotal() + costoEnvio - descuentoAplicado
                 
+                // ===== PAGO CON SALDO KOMERZIO =====
                 if (metodoPago === 'saldo') {
-                    if (saldoUsuario < totalCUP) throw new Error('Saldo insuficiente')
+                    if (saldoUsuario < totalUSD) {
+                        Swal.fire('Error', `Saldo insuficiente. Tu saldo es $${saldoUsuario.toFixed(2)} USD`, 'error')
+                        btn.disabled = false
+                        btn.innerHTML = '<i class="fa fa-check"></i> Confirmar pedido'
+                        return
+                    }
                     
                     const { error: saldoError } = await supabase
                         .from('saldo_usuarios')
-                        .update({ saldo_actual: saldoUsuario - totalCUP })
+                        .update({ saldo_actual: saldoUsuario - totalUSD })
                         .eq('user_id', usuarioAutenticado.id)
                     if (saldoError) throw saldoError
                     
                     await supabase.from('historial_saldo').insert({
                         user_id: usuarioAutenticado.id,
                         tipo: 'compra',
-                        monto: totalCUP,
+                        monto: totalUSD,
                         saldo_anterior: saldoUsuario,
-                        saldo_nuevo: saldoUsuario - totalCUP,
+                        saldo_nuevo: saldoUsuario - totalUSD,
                         descripcion: 'Compra en tienda'
                     })
                     
@@ -844,7 +708,7 @@
                         subtotal: carrito.subtotal(),
                         envio: costoEnvio,
                         descuento: descuentoAplicado,
-                        total: totalCUP,
+                        total: totalUSD,
                         cliente: {
                             nombre, email, telefono, direccion, localidad,
                             referencia: document.getElementById('referencia')?.value || '',
@@ -857,15 +721,16 @@
                         created_at: new Date().toISOString()
                     }
                     
-                    const { error } = await supabase.from('pedidos').insert([pedido])
+                    const { data, error } = await supabase.from('pedidos').insert([pedido]).select().single()
                     if (error) throw error
                     
                     carrito.vaciar()
-                    window.location.href = `/saldo-cubazon.html?id=${pedido.id}`
+                    window.location.href = `/saldo-komerzio.html?id=${data.id}`
                     return
                 }
                 
-                if (metodoPago === 'efectivo') {
+                // ===== PAGO EN EFECTIVO USD =====
+                if (metodoPago === 'efectivo_usd') {
                     const pedido = {
                         id: 'pedido_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
                         user_id: usuarioAutenticado?.id || null,
@@ -881,29 +746,85 @@
                         subtotal: carrito.subtotal(),
                         envio: costoEnvio,
                         descuento: descuentoAplicado,
-                        total: totalCUP,
+                        total: totalUSD,
                         cliente: {
                             nombre, email, telefono, direccion, localidad,
                             referencia: document.getElementById('referencia')?.value || '',
                             carnet: document.getElementById('carnet')?.value || '',
                             notas: document.getElementById('notas')?.value || ''
                         },
-                        metodo_pago: 'efectivo',
+                        metodo_pago: 'efectivo_usd',
                         cupon_aplicado: cuponActivo?.codigo || null,
                         estado: 'pendiente',
                         created_at: new Date().toISOString()
                     }
                     
-                    const { error } = await supabase.from('pedidos').insert([pedido])
+                    const { data, error } = await supabase.from('pedidos').insert([pedido]).select().single()
                     if (error) throw error
                     
                     carrito.vaciar()
-                    window.location.href = `/pago-efectivo.html?id=${pedido.id}`
+                    window.location.href = `/pago-efectivo.html?id=${data.id}`
                     return
                 }
                 
+                // ===== PAGO EN EFECTIVO CUP =====
+                if (metodoPago === 'efectivo_cup') {
+                    const totalCUP = totalUSD * configuracionCheckout.tasa_usd_cup
+                    
+                    console.log('💰 Pago en CUP - Total USD:', totalUSD, 'Total CUP:', totalCUP, 'Tasa:', configuracionCheckout.tasa_usd_cup)
+                    
+                    const pedido = {
+                        id: 'pedido_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                        user_id: usuarioAutenticado?.id || null,
+                        items: carrito.items.map(item => ({
+                            id: String(item.producto_id),
+                            nombre: item.nombre,
+                            precio: item.precio,
+                            cantidad: item.cantidad,
+                            subtotal: item.precio * item.cantidad,
+                            imagen_url: item.imagen_url || '/assets/images/no-image.jpg',
+                            opciones: item.opciones || {}
+                        })),
+                        subtotal: carrito.subtotal(),
+                        envio: costoEnvio,
+                        descuento: descuentoAplicado,
+                        total: totalUSD,
+                        total_cup: totalCUP,
+                        tasa_aplicada: configuracionCheckout.tasa_usd_cup,
+                        cliente: {
+                            nombre, email, telefono, direccion, localidad,
+                            referencia: document.getElementById('referencia')?.value || '',
+                            carnet: document.getElementById('carnet')?.value || '',
+                            notas: document.getElementById('notas')?.value || ''
+                        },
+                        metodo_pago: 'efectivo_cup',
+                        cupon_aplicado: cuponActivo?.codigo || null,
+                        estado: 'pendiente',
+                        created_at: new Date().toISOString()
+                    }
+                    
+                    console.log('📦 Pedido a guardar:', pedido)
+                    
+                    const { data, error } = await supabase.from('pedidos').insert([pedido]).select().single()
+                    if (error) {
+                        console.error('❌ Error guardando pedido:', error)
+                        throw error
+                    }
+                    
+                    console.log('✅ Pedido guardado:', data.id)
+                    
+                    carrito.vaciar()
+                    window.location.href = `/pago-efectivo.html?id=${data.id}`
+                    return
+                }
+                
+                // Si llegamos aquí, método no reconocido
+                Swal.fire('Error', 'Método de pago no válido', 'error')
+                btn.disabled = false
+                btn.innerHTML = '<i class="fa fa-check"></i> Confirmar pedido'
+                
             } catch (error) {
-                console.error('Error:', error)
+                console.error('❌ Error en procesarPedido:', error)
                 Swal.fire('Error', error.message || 'No se pudo procesar el pedido', 'error')
                 btn.disabled = false
                 btn.innerHTML = '<i class="fa fa-check"></i> Confirmar pedido'
@@ -911,6 +832,8 @@
         }
         
         async function inicializar() {
+            await cargarConfiguracionCheckout()
+            
             for (let i = 0; i < 10; i++) {
                 if (auth.isAuthenticated()) {
                     await cargarDatosUsuario()

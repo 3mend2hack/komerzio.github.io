@@ -623,7 +623,7 @@
                              onerror="this.src='/assets/images/no-image.png'">
                         <div class="cart-item-details">
                             <div class="cart-item-title">${item.nombre}</div>
-                            <div class="cart-item-price">$${item.precio.toFixed(2)} CUP</div>
+                            <div class="cart-item-price">$${item.precio.toFixed(2)} USD</div>
                             <div class="cart-item-actions">
                                 <div class="quantity-control">
                                     <button class="quantity-btn" onclick="event.stopPropagation(); window.cart.actualizarCantidad('${item.id}', ${item.cantidad - 1})">
@@ -659,7 +659,7 @@
                         <h3>Resumen del pedido</h3>
                         <div class="total-row">
                             <span>Subtotal (${cantidad} productos):</span>
-                            <span style="font-weight: 600;">$${subtotal.toFixed(2)} CUP</span>
+                            <span style="font-weight: 600;">$${subtotal.toFixed(2)} USD</span>
                         </div>
                         <div class="total-row" style="color: #059669;">
                             <span>Envío:</span>
@@ -667,7 +667,7 @@
                         </div>
                         <div class="grand-total total-row">
                             <span>Total:</span>
-                            <span>$${subtotal.toFixed(2)} CUP</span>
+                            <span>$${subtotal.toFixed(2)} USD</span>
                         </div>
                         <a href="checkout.html" class="btn btn-primary">
                             <i class="fa fa-lock"></i> Proceder al pago
