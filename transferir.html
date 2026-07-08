@@ -622,6 +622,14 @@
         carrito.cargarDeLocalStorage();
         carrito.actualizarInterfaz();
         
+        // ========== VARIABLES GLOBALES ==========
+        let telegramIdUsuario = null;
+        let mfaActivo = false;
+        let mfaFactorId = null;
+        let selectedMethod = 'password';
+        let tienePassword = false;
+        let esUsuarioGoogle = false;
+        
         // ========== FUNCIÓN PARA CARGAR SALDO EN HEADER ==========
         async function cargarSaldoHeader() {
             const saldoCard = document.getElementById('saldoHeaderCard');
@@ -668,18 +676,7 @@
             }
         }
         
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const saldoCard = document.getElementById('saldoCard');
-        const transferForm = document.getElementById('transferForm');
-        const methodSelector = document.getElementById('methodSelector');
-        
-        let telegramIdUsuario = null;
-        let mfaActivo = false;
-        let mfaFactorId = null;
-        let selectedMethod = 'password';
-        let tienePassword = false;
-        let esUsuarioGoogle = false;
-        
+        // ========== VERIFICAR 2FA ==========
         async function verificarCodigo2FA(codigo) {
             if (!mfaFactorId) {
                 throw new Error('No se encontró el factor 2FA');
@@ -737,7 +734,12 @@
             return false;
         }
         
+        // ========== VERIFICAR AUTENTICACIÓN ==========
         async function verificarAuth() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const saldoCard = document.getElementById('saldoCard');
+            const transferForm = document.getElementById('transferForm');
+            
             loadingIndicator.style.display = 'block';
             
             for (let i = 0; i < 10; i++) {
@@ -748,9 +750,7 @@
                     transferForm.style.display = 'block';
                     await cargarSaldo();
                     telegramIdUsuario = await obtenerTelegramId();
-                    
                     await verificarEstadoUsuario();
-                    
                     return;
                 }
                 await new Promise(resolve => setTimeout(resolve, 200));
@@ -761,6 +761,7 @@
             window.location.href = '/login.html?redirect=/transferir.html';
         }
         
+        // ========== VERIFICAR ESTADO DEL USUARIO ==========
         async function verificarEstadoUsuario() {
             const usuario = auth.getUsuario();
             if (!usuario) return;
@@ -777,8 +778,9 @@
             }
             
             tienePassword = await usuarioTienePassword();
-            
             await verificarEstado2FA(usuario.id);
+            
+            const methodSelector = document.getElementById('methodSelector');
             
             if (tienePassword && mfaActivo) {
                 methodSelector.style.display = 'flex';
@@ -810,6 +812,7 @@
             return true;
         }
         
+        // ========== OBTENER TELEGRAM ID ==========
         async function obtenerTelegramId() {
             const usuario = auth.getUsuario();
             if (!usuario) return null;
@@ -830,6 +833,7 @@
             }
         }
         
+        // ========== VERIFICAR SI TIENE CONTRASEÑA ==========
         async function usuarioTienePassword() {
             const usuario = auth.getUsuario();
             if (!usuario) return false;
@@ -850,36 +854,66 @@
             }
         }
         
+        // ========== CARGAR SALDO ==========
         async function cargarSaldo() {
             const usuario = auth.getUsuario();
             if (!usuario) return;
             
-            const { data, error } = await supabase
-                .from('saldo_usuarios')
-                .select('saldo_actual')
-                .eq('user_id', usuario.id)
-                .single();
-            
-            if (error && error.code !== 'PGRST116') {
+            try {
+                // Usar la función obtener_saldo_usuario
+                const { data, error } = await supabase
+                    .rpc('obtener_saldo_usuario', {
+                        p_user_id: usuario.id
+                    });
+                
+                if (error) {
+                    // Fallback: consultar directamente la tabla
+                    const { data: saldoData, error: saldoError } = await supabase
+                        .from('saldo_usuarios')
+                        .select('saldo_actual')
+                        .eq('user_id', usuario.id)
+                        .single();
+                    
+                    if (saldoError && saldoError.code !== 'PGRST116') {
+                        console.error('Error cargando saldo:', saldoError);
+                    }
+                    
+                    const saldo = saldoData?.saldo_actual || 0;
+                    document.getElementById('saldoDisplay').textContent = `$${saldo.toFixed(2)}`;
+                } else {
+                    const saldo = data || 0;
+                    document.getElementById('saldoDisplay').textContent = `$${saldo.toFixed(2)}`;
+                }
+            } catch (error) {
                 console.error('Error cargando saldo:', error);
+                document.getElementById('saldoDisplay').textContent = '$0.00';
             }
-            
-            const saldo = data?.saldo_actual || 0;
-            document.getElementById('saldoDisplay').textContent = `$${saldo.toFixed(2)}`;
         }
         
+        // ========== FORMULARIO DE TRANSFERENCIA ==========
         document.getElementById('transferForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const receptorIdentificador = document.getElementById('receptorIdentificador').value.trim();
             const monto = parseFloat(document.getElementById('monto').value);
-            const concepto = document.getElementById('concepto').value;
+            const concepto = document.getElementById('concepto').value.trim();
             const btn = document.getElementById('transferBtn');
             const resultDiv = document.getElementById('resultMessage');
             const usuario = auth.getUsuario();
             
-            if (!receptorIdentificador || !monto || monto < 10) {
+            // Validaciones
+            if (!receptorIdentificador) {
+                Swal.fire('Error', 'Ingresa el email o teléfono del destinatario', 'error');
+                return;
+            }
+            
+            if (!monto || monto < 10) {
                 Swal.fire('Error', 'Monto mínimo: $10.00 USD', 'error');
+                return;
+            }
+            
+            if (monto > 5000) {
+                Swal.fire('Error', 'Monto máximo por transferencia: $5,000.00 USD', 'error');
                 return;
             }
             
@@ -887,28 +921,29 @@
             btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Procesando...';
             resultDiv.style.display = 'none';
             
-            const esEmail = receptorIdentificador.includes('@');
-            const esTelefono = /^[0-9]{8}$/.test(receptorIdentificador);
-            
-            if (!esEmail && !esTelefono) {
-                Swal.fire('Error', 'Ingresa un email válido o un teléfono de 8 dígitos', 'error');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa fa-exchange"></i> Transferir';
-                return;
-            }
-            
             try {
-                let receptorEmail = receptorIdentificador;
-                if (esTelefono) {
-                    const { data: userData, error: rpcError } = await supabase
-                        .rpc('buscar_email_por_telefono', { p_telefono: receptorIdentificador });
-                    
-                    if (rpcError || !userData || userData.length === 0) {
-                        throw new Error('No se encontró un usuario con ese número de teléfono');
-                    }
-                    receptorEmail = userData[0].email;
+                // Verificar que el usuario existe
+                const { data: usuarioData, error: usuarioError } = await supabase
+                    .rpc('buscar_usuario_por_identificador', {
+                        p_identificador: receptorIdentificador
+                    });
+                
+                if (usuarioError) {
+                    console.error('Error buscando usuario:', usuarioError);
+                    throw new Error('Error al verificar el destinatario');
                 }
                 
+                if (!usuarioData || usuarioData.length === 0) {
+                    throw new Error('Usuario no encontrado. Verifica el email o teléfono.');
+                }
+                
+                const destinatario = usuarioData[0];
+                
+                if (destinatario.id === usuario.id) {
+                    throw new Error('No puedes transferirte a ti mismo');
+                }
+                
+                // Confirmar transferencia
                 let confirmado = false;
                 
                 if (selectedMethod === 'password' && tienePassword) {
@@ -916,7 +951,8 @@
                         title: 'Confirmar transferencia',
                         html: `
                             <p>Transferirás <strong>$${monto.toFixed(2)} USD</strong> a:</p>
-                            <p style="font-size: 18px; color: #009644;">${receptorEmail}</p>
+                            <p style="font-size: 18px; color: #009644; font-weight: 600;">${destinatario.nombre || destinatario.email}</p>
+                            <p style="font-size: 14px; color: #6c757d;">${destinatario.email}</p>
                             <p style="margin-top: 20px;">Confirma tu contraseña:</p>
                         `,
                         icon: 'question',
@@ -949,7 +985,8 @@
                         title: 'Confirmar transferencia',
                         html: `
                             <p>Transferirás <strong>$${monto.toFixed(2)} USD</strong> a:</p>
-                            <p style="font-size: 18px; color: #009644;">${receptorEmail}</p>
+                            <p style="font-size: 18px; color: #009644; font-weight: 600;">${destinatario.nombre || destinatario.email}</p>
+                            <p style="font-size: 14px; color: #6c757d;">${destinatario.email}</p>
                             <p style="margin-top: 20px;">Ingresa el código de <strong>6 dígitos</strong> de Google Authenticator:</p>
                         `,
                         icon: 'question',
@@ -965,6 +1002,10 @@
                                 Swal.showValidationMessage('Código inválido (6 dígitos)');
                                 return false;
                             }
+                            if (!/^\d{6}$/.test(cod)) {
+                                Swal.showValidationMessage('Solo números permitidos');
+                                return false;
+                            }
                             return cod;
                         }
                     });
@@ -978,7 +1019,11 @@
                     await verificarCodigo2FA(codigo2fa);
                     confirmado = true;
                 } else {
-                    throw new Error('No hay método de verificación disponible');
+                    // Sin 2FA ni contraseña - requerir 2FA
+                    await forzarActivacion2FA();
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa fa-exchange"></i> Transferir';
+                    return;
                 }
                 
                 if (!confirmado) {
@@ -987,37 +1032,45 @@
                     return;
                 }
                 
-                const usuarioId = auth.getUsuario()?.id;
-                
-                if (!usuarioId) {
-                    throw new Error('No se pudo obtener el ID del usuario');
-                }
-                
+                // Ejecutar transferencia
                 const { data, error } = await supabase
                     .rpc('transferir_saldo', {
-                        p_emisor_id: usuarioId,
+                        p_emisor_id: usuario.id,
                         p_identificador: receptorIdentificador,
                         p_monto: monto,
-                        p_concepto: concepto || null
+                        p_concepto: concepto || 'Transferencia'
                     });
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('Error en transferencia:', error);
+                    throw new Error(error.message || 'Error al procesar la transferencia');
+                }
                 
-                if (data.success) {
+                // Mostrar resultado
+                if (data && data.success) {
                     resultDiv.className = 'result-message result-success';
                     resultDiv.innerHTML = `
                         <i class="fa fa-check-circle"></i>
                         <strong>¡Transferencia exitosa!</strong><br>
-                        Se transfirieron $${data.monto.toFixed(2)} USD a ${data.receptor}<br>
-                        Tu nuevo saldo: $${data.nuevo_saldo.toFixed(2)} USD
+                        Se transfirieron <strong>$${monto.toFixed(2)} USD</strong> a ${destinatario.nombre || destinatario.email}<br>
+                        <span style="font-size: 14px;">Tu nuevo saldo: <strong>$${(data.nuevo_saldo || 0).toFixed(2)} USD</strong></span>
                     `;
                     resultDiv.style.display = 'block';
                     
                     await cargarSaldo();
                     await cargarSaldoHeader();
                     document.getElementById('transferForm').reset();
+                    
+                    // Mostrar notificación de éxito
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Transferencia completada!',
+                        text: `$${monto.toFixed(2)} USD enviados a ${destinatario.nombre || destinatario.email}`,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
                 } else {
-                    throw new Error(data.error);
+                    throw new Error(data?.mensaje || data?.error || 'Error en la transferencia');
                 }
                 
             } catch (error) {
@@ -1034,6 +1087,7 @@
             btn.innerHTML = '<i class="fa fa-exchange"></i> Transferir';
         });
         
+        // ========== INICIALIZAR ==========
         actualizarMenuUsuario();
         auth.onCambio(actualizarMenuUsuario);
         verificarAuth();

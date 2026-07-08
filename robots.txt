@@ -1,11 +1,41 @@
+# ============================================
+# ROBOTS.TXT - KOMERZIO
+# Configuración para buscadores y bots
+# ============================================
+
 # ===== ROBOTS GENERALES (Google, Bing, etc.) =====
 User-agent: *
 Allow: /
-Disallow: /admin/
-# Ya NO bloqueamos /js/ ni /css/ para que Google pueda renderizar la página bien
-Sitemap: https://cubazon.dpdns.org/sitemap.xml
+Allow: /producto.html
+Allow: /categoria.html
+Allow: /buscar.html
+Allow: /ofertas-especiales.html
+Allow: /destacados.html
+Allow: /novedades.html
 
-# ===== BOTS DE IA - BLOQUEADOS =====
+# Bloquear áreas administrativas y privadas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /p/checkout.html
+Disallow: /p/cart.html
+Disallow: /mi-cuenta.html
+Disallow: /transferir.html
+Disallow: /recibir.html
+Disallow: /lista-deseos.html
+
+# Bloquear archivos de configuración y datos
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /js/
+Disallow: /css/
+Disallow: /assets/
+
+# Sitemap
+Sitemap: https://komerzio.dpdns.org/sitemap.xml
+
+# ============================================
+# BOTS DE IA - BLOQUEADOS COMPLETAMENTE
+# ============================================
 User-agent: Amazonbot
 Disallow: /
 
@@ -43,11 +73,38 @@ User-agent: Omgili
 Disallow: /
 
 User-agent: FacebookBot
-Allow: /producto.html
-Allow: /producto-vendedor.html
-Allow: /categoria.html
-Disallow: /admin/
-# Facebook tampoco necesita ver tus scripts
+Disallow: /
 
-# ===== CONTENT SIGNALS (Cloudflare) =====
+User-agent: Twitterbot
+Disallow: /
+
+User-agent: Pinterestbot
+Disallow: /
+
+# ============================================
+# BOTS DE REDES SOCIALES - PERMITIR CONTENIDO
+# ============================================
+User-agent: FacebookBot
+Allow: /producto.html
+Allow: /categoria.html
+Allow: /ofertas-especiales.html
+Allow: /destacados.html
+Allow: /novedades.html
+Disallow: /admin/
+Disallow: /mi-cuenta.html
+Disallow: /p/checkout.html
+
+User-agent: Twitterbot
+Allow: /producto.html
+Allow: /categoria.html
+Allow: /ofertas-especiales.html
+Allow: /destacados.html
+Allow: /novedades.html
+Disallow: /admin/
+Disallow: /mi-cuenta.html
+Disallow: /p/checkout.html
+
+# ============================================
+# CONTENT SIGNALS (Cloudflare)
+# ============================================
 Content-Signal: search=yes,ai-train=no

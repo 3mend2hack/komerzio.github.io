@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Generador de Sitemap - KOMERZIO</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #0f172a; color: white; }
+        .container { max-width: 600px; margin: auto; background: #1e293b; padding: 30px; border-radius: 12px; }
+        button { background: #f97316; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #ea580c; }
+        textarea { width: 100%; height: 300px; margin: 20px 0; padding: 10px; border-radius: 8px; background: #0f172a; color: #e2e8f0; border: 1px solid #334155; font-family: monospace; font-size: 12px; }
+        .loading { display: none; }
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Generador de Sitemap</h1>
+        <p>KOMERZIO - Obtén todos los productos de Supabase</p>
+        
+        <button onclick="generarSitemap()">🚀 Generar Sitemap</button>
+        <div id="loading" class="loading">⏳ Generando...</div>
+        <div id="result"></div>
+        
+        <h3>📄 Sitemap generado:</h3>
+        <textarea id="sitemapOutput" readonly></textarea>
+        <button onclick="descargarSitemap()">💾 Descargar XML</button>
+        
+        <p style="margin-top: 20px; font-size: 12px; color: #94a3b8;">
+            Nota: El sitemap se generará con todos tus productos de la base de datos.
+        </p>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://houfrgnlctliwkzzelmi.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdWZyZ25sY3RsaXdrenplbG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MTQ2OTMsImV4cCI6MjA5NjE5MDY5M30.zUfcA755LEjBbn-N05LrmwFqsOFITRP4qLzxjgPIy54';
+
+        async function generarSitemap() {
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const output = document.getElementById('sitemapOutput');
+            
+            loading.style.display = 'block';
+            result.innerHTML = '';
+            output.value = '';
+            
+            try {
+                // Obtener productos
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/productos?select=id,nombre,updated_at&estado=eq.activo`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Error al obtener productos');
+                
+                const productos = await response.json();
+                
+                // Generar XML
+                let xml = `<?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+                xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+        `;
+                
+                // Productos
+                for (const producto of productos) {
+                    const fecha = producto.updated_at ? new Date(producto.updated_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+                    
+                    xml += `
+            <url>
+                <loc>https://komerzio.dpdns.org/producto.html?id=${producto.id}</loc>
+                <lastmod>${fecha}</lastmod>
+                <changefreq>weekly</changefreq>
+                <priority>0.7</priority>
+            </url>`;
+                }
+                
+                // Categorías
+                const categorias = ['ofertas', 'Electrónica', 'Ropa', 'Hogar', 'Accesorios', 'Consumibles', 'Limpieza', 'Deportes', 'Juguetes', 'Salud', 'Alimentos'];
+                for (const cat of categorias) {
+                    const prioridad = cat === 'ofertas' ? 0.9 : 0.8;
+                    xml += `
+            <url>
+                <loc>https://komerzio.dpdns.org/categoria.html?cat=${encodeURIComponent(cat)}</loc>
+                <changefreq>daily</changefreq>
+                <priority>${prioridad}</priority>
+            </url>`;
+                }
+                
+                // Páginas principales
+                const paginas = [
+                    { url: '/', prioridad: 1.0, freq: 'daily' },
+                    { url: '/index.html', prioridad: 1.0, freq: 'daily' },
+                    { url: '/buscar.html', prioridad: 0.7, freq: 'weekly' },
+                    { url: '/novedades.html', prioridad: 0.7, freq: 'daily' },
+                    { url: '/ofertas-especiales.html', prioridad: 0.9, freq: 'daily' },
+                    { url: '/destacados.html', prioridad: 0.8, freq: 'daily' },
+                    { url: '/sobre-nosotros.html', prioridad: 0.5, freq: 'monthly' },
+                    { url: '/terminos.html', prioridad: 0.3, freq: 'yearly' },
+                    { url: '/privacidad.html', prioridad: 0.3, freq: 'yearly' },
+                    { url: '/faq.html', prioridad: 0.5, freq: 'monthly' },
+                    { url: '/contacto.html', prioridad: 0.5, freq: 'monthly' }
+                ];
+                
+                const hoy = new Date().toISOString().split('T')[0];
+                for (const page of paginas) {
+                    xml += `
+            <url>
+                <loc>https://komerzio.dpdns.org${page.url}</loc>
+                <lastmod>${hoy}</lastmod>
+                <changefreq>${page.freq}</changefreq>
+                <priority>${page.prioridad}</priority>
+            </url>`;
+                }
+                
+                xml += `
+        </urlset>`;
+                
+                // Mostrar resultado
+                output.value = xml;
+                result.innerHTML = `<div class="success">✅ Sitemap generado con ${productos.length} productos, ${categorias.length} categorías y ${paginas.length} páginas</div>`;
+                
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+                console.error('Error:', error);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function descargarSitemap() {
+            const content = document.getElementById('sitemapOutput').value;
+            if (!content) {
+                alert('Primero genera el sitemap');
+                return;
+            }
+            
+            const blob = new Blob([content], { type: 'application/xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sitemap.xml';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

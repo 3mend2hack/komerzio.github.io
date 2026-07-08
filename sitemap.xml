@@ -5,132 +5,175 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
     
-    <!-- ========== PÁGINAS PRINCIPALES ========== -->
+    <!-- ==========================================
+         PÁGINAS PRINCIPALES
+    ========================================== -->
     <url>
-        <loc>https://cubazon.dpdns.org/</loc>
+        <loc>https://komerzio.dpdns.org/</loc>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/index2.html</loc>
+        <loc>https://komerzio.dpdns.org/index.html</loc>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+    
+    <!-- ==========================================
+         CATEGORÍAS DE PRODUCTOS
+    ========================================== -->
+    <url>
+        <loc>https://komerzio.dpdns.org/categoria.html?cat=ofertas</loc>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
     </url>
     
-    <!-- ========== CATEGORÍAS PRINCIPALES ========== -->
     <url>
-        <loc>https://cubazon.dpdns.org/ofertas/</loc>
-        <changefreq>daily</changefreq>
-        <priority>0.9</priority>
-    </url>
-    
-    <url>
-        <loc>https://cubazon.dpdns.org/electronica/</loc>
+        <loc>https://komerzio.dpdns.org/categoria.html?cat=Electrónica</loc>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/ropa/</loc>
+        <loc>https://komerzio.dpdns.org/categoria.html?cat=Ropa</loc>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/hogar/</loc>
+        <loc>https://komerzio.dpdns.org/categoria.html?cat=Hogar</loc>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/accesorios/</loc>
+        <loc>https://komerzio.dpdns.org/categoria.html?cat=Accesorios</loc>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/consumibles/</loc>
+        <loc>https://komerzio.dpdns.org/categoria.html?cat=Consumibles</loc>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/limpieza/</loc>
+        <loc>https://komerzio.dpdns.org/categoria.html?cat=Limpieza</loc>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/deportes/</loc>
+        <loc>https://komerzio.dpdns.org/categoria.html?cat=Deportes</loc>
         <changefreq>daily</changefreq>
         <priority>0.7</priority>
     </url>
     
-    <!-- ========== PÁGINAS DE LISTADOS ========== -->
     <url>
-        <loc>https://cubazon.dpdns.org/buscar.html</loc>
+        <loc>https://komerzio.dpdns.org/categoria.html?cat=Juguetes</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <url>
+        <loc>https://komerzio.dpdns.org/categoria.html?cat=Salud</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <url>
+        <loc>https://komerzio.dpdns.org/categoria.html?cat=Alimentos</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <!-- ==========================================
+         PÁGINAS DE LISTADOS
+    ========================================== -->
+    <url>
+        <loc>https://komerzio.dpdns.org/buscar.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/novedades.html</loc>
+        <loc>https://komerzio.dpdns.org/novedades.html</loc>
         <changefreq>daily</changefreq>
         <priority>0.7</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/ofertas-especiales.html</loc>
+        <loc>https://komerzio.dpdns.org/ofertas-especiales.html</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+    
+    <url>
+        <loc>https://komerzio.dpdns.org/destacados.html</loc>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     
+    <!-- ==========================================
+         PÁGINAS DE PRODUCTOS (DINÁMICOS)
+         NOTA: Si tienes muchos productos, usa un sitemap dinámico
+    ========================================== -->
+    <!-- Ejemplo de producto individual:
     <url>
-        <loc>https://cubazon.dpdns.org/destacados.html</loc>
-        <changefreq>daily</changefreq>
-        <priority>0.7</priority>
+        <loc>https://komerzio.dpdns.org/producto.html?id=123</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
     </url>
+    -->
     
-    <!-- ========== PÁGINAS DE USUARIO (NO INDEXAR) ========== -->
-    <!-- Google no necesita indexar login, registro o cuenta -->
-    
-    <!-- ========== PÁGINAS DE VENDEDOR (NO INDEXAR) ========== -->
-    
-    <!-- ========== RECARGAS (NO INDEXAR) ========== -->
-    
-    <!-- ========== PÁGINAS INFORMATIVAS ========== -->
+    <!-- ==========================================
+         PÁGINAS INFORMATIVAS
+    ========================================== -->
     <url>
-        <loc>https://cubazon.dpdns.org/sobre-nosotros.html</loc>
+        <loc>https://komerzio.dpdns.org/sobre-nosotros.html</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/terminos.html</loc>
+        <loc>https://komerzio.dpdns.org/terminos.html</loc>
         <changefreq>yearly</changefreq>
         <priority>0.3</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/privacidad.html</loc>
+        <loc>https://komerzio.dpdns.org/privacidad.html</loc>
         <changefreq>yearly</changefreq>
         <priority>0.3</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/faq.html</loc>
+        <loc>https://komerzio.dpdns.org/faq.html</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
     
     <url>
-        <loc>https://cubazon.dpdns.org/contacto.html</loc>
+        <loc>https://komerzio.dpdns.org/contacto.html</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
     
-    <!-- ========== PÁGINAS DE CARRITO (NO INDEXAR) ========== -->
-    <!-- Cart y Checkout no deben estar en el sitemap porque son temporales -->
+    <!-- ==========================================
+         PÁGINAS DE USUARIO (NO INDEXAR)
+         Estas NO deben estar en el sitemap
+    ========================================== -->
+    <!-- NO incluir:
+         - /login.html
+         - /registro.html
+         - /mi-cuenta.html
+         - /transferir.html
+         - /recibir.html
+         - /p/cart.html
+         - /p/checkout.html
+         - /lista-deseos.html
+    -->
     
 </urlset>
