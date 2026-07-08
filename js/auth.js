@@ -1,4 +1,4 @@
-// auth.js - CORREGIDO PARA USAR IMPORT DIRECTO
+// auth.js - VERSIÓN CORREGIDA
 // ============================================
 import { supabase } from './supabase-client.js'
 
@@ -6,7 +6,7 @@ import { supabase } from './supabase-client.js'
 let usuarioActual = null
 let listeners = []
 
-// ========== CLASE DE AUTENTICACIÓN ==========
+// ========== CLASE DE AUTENTICACIÓN CORREGIDA ==========
 export class AuthManager {
     constructor() {
         this.init()
@@ -21,13 +21,17 @@ export class AuthManager {
             } else {
                 const localUser = localStorage.getItem('komerzio_user')
                 if (localUser) {
-                    usuarioActual = JSON.parse(localUser)
-                    this.notificarCambio()
+                    try {
+                        usuarioActual = JSON.parse(localUser)
+                        this.notificarCambio()
+                    } catch (e) {
+                        localStorage.removeItem('komerzio_user')
+                    }
                 }
             }
-            console.log('✅ Auth inicializado correctamente');
+            console.log('✅ Auth inicializado correctamente')
         } catch (error) {
-            console.error('Error en init:', error)
+            console.error('❌ Error en init:', error)
         }
     }
 
@@ -38,41 +42,82 @@ export class AuthManager {
                 .select('estado, motivo_baneo')
                 .eq('id', userId)
                 .maybeSingle()
-            if (error) return false
+            
+            if (error) {
+                console.error('Error verificando baneo:', error)
+                return false
+            }
+            
             return data?.estado === 'baneado'
-        } catch (error) { return false }
+        } catch (error) {
+            console.error('Error en verificarBaneo:', error)
+            return false
+        }
     }
 
     async cargarUsuario(userId) {
         try {
             console.log('👤 Cargando usuario:', userId)
             
+            // Verificar si está baneado
             const baneado = await this.verificarBaneo(userId)
             if (baneado) {
+                console.log('⚠️ Usuario baneado')
                 await this.cerrarSesion()
                 return null
             }
             
+            // Obtener datos del perfil
             const { data, error } = await supabase
                 .from('perfiles')
                 .select('*')
                 .eq('id', userId)
                 .maybeSingle()
             
-            if (error) console.error('Error cargando perfil:', error)
+            if (error) {
+                console.error('❌ Error cargando perfil:', error)
+            }
             
             if (data) {
-                usuarioActual = { id: userId, ...data }
+                usuarioActual = { 
+                    id: userId, 
+                    ...data,
+                    // Asegurar campos requeridos
+                    nombre: data.nombre || data.email?.split('@')[0] || 'Usuario',
+                    email: data.email || ''
+                }
                 console.log('✅ Usuario cargado desde perfiles:', usuarioActual.email)
             } else {
+                // Si no hay perfil, crear uno básico
+                console.log('⚠️ Perfil no encontrado, creando uno básico')
                 const { data: userData } = await supabase.auth.getUser()
                 if (userData?.user) {
-                    usuarioActual = {
+                    const nuevoPerfil = {
                         id: userId,
                         email: userData.user.email,
                         nombre: userData.user.user_metadata?.nombre || userData.user.email?.split('@')[0] || 'Usuario',
                         telefono: userData.user.user_metadata?.telefono || '',
-                        estado: 'activo'
+                        provincia: userData.user.user_metadata?.provincia || '',
+                        estado: 'activo',
+                        created_at: new Date().toISOString()
+                    }
+                    
+                    const { error: insertError } = await supabase
+                        .from('perfiles')
+                        .insert([nuevoPerfil])
+                    
+                    if (!insertError) {
+                        usuarioActual = nuevoPerfil
+                    } else {
+                        console.error('❌ Error creando perfil básico:', insertError)
+                        usuarioActual = {
+                            id: userId,
+                            email: userData.user.email,
+                            nombre: userData.user.user_metadata?.nombre || userData.user.email?.split('@')[0] || 'Usuario',
+                            telefono: userData.user.user_metadata?.telefono || '',
+                            provincia: userData.user.user_metadata?.provincia || '',
+                            estado: 'activo'
+                        }
                     }
                 }
             }
@@ -80,22 +125,37 @@ export class AuthManager {
             localStorage.setItem('komerzio_user', JSON.stringify(usuarioActual))
             this.notificarCambio()
             return usuarioActual
+            
         } catch (error) {
-            console.error('Error cargando usuario:', error)
+            console.error('❌ Error cargando usuario:', error)
             return null
         }
     }
 
     async login(email, password) {
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-            
-            if (error) {
-                if (error.message?.includes('Invalid login credentials')) return { success: false, error: '❌ Email o contraseña incorrectos' }
-                if (error.message?.includes('Email not confirmed')) return { success: false, error: '📧 Debes confirmar tu email antes de iniciar sesión' }
-                return { success: false, error: error.message }
+            if (!email || !password) {
+                return { success: false, error: '❌ Email y contraseña son requeridos' }
             }
             
+            const { data, error } = await supabase.auth.signInWithPassword({ 
+                email: email.trim(), 
+                password: password 
+            })
+            
+            if (error) {
+                console.error('❌ Error de login:', error)
+                
+                if (error.message?.includes('Invalid login credentials')) {
+                    return { success: false, error: '❌ Email o contraseña incorrectos' }
+                }
+                if (error.message?.includes('Email not confirmed')) {
+                    return { success: false, error: '📧 Debes confirmar tu email antes de iniciar sesión. Revisa tu bandeja de entrada y SPAM.' }
+                }
+                return { success: false, error: `❌ ${error.message}` }
+            }
+            
+            // Verificar si está baneado
             const baneado = await this.verificarBaneo(data.user.id)
             if (baneado) {
                 await supabase.auth.signOut()
@@ -103,115 +163,266 @@ export class AuthManager {
             }
             
             await this.cargarUsuario(data.user.id)
-            return { success: true, user: data.user, session: data.session }
+            return { 
+                success: true, 
+                user: data.user, 
+                session: data.session,
+                message: '✅ Inicio de sesión exitoso'
+            }
+            
         } catch (error) {
-            return { success: false, error: error.message }
+            console.error('❌ Error en login:', error)
+            return { success: false, error: `❌ ${error.message}` }
         }
     }
 
     async registrar(email, password, datos) {
         try {
-            if (!email || !email.includes('@')) return { success: false, error: '❌ Ingresa un email válido' }
-            if (!password || password.length < 6) return { success: false, error: '❌ La contraseña debe tener al menos 6 caracteres' }
+            // Validaciones
+            if (!email || !email.includes('@')) {
+                return { success: false, error: '❌ Ingresa un email válido' }
+            }
+            if (!password || password.length < 6) {
+                return { success: false, error: '❌ La contraseña debe tener al menos 6 caracteres' }
+            }
             
+            // Verificar si el teléfono ya existe
+            if (datos.telefono) {
+                const { data: telefonoExiste, error: telefonoError } = await supabase
+                    .from('perfiles')
+                    .select('id')
+                    .eq('telefono', datos.telefono)
+                    .maybeSingle()
+                
+                if (telefonoError) {
+                    console.error('Error verificando teléfono:', telefonoError)
+                }
+                
+                if (telefonoExiste) {
+                    return { success: false, error: '⚠️ Este número de teléfono ya está registrado' }
+                }
+            }
+            
+            // Registrar en Supabase Auth
             const { data: authData, error: authError } = await supabase.auth.signUp({
-                email, password,
-                options: { data: { nombre: datos.nombre || '', telefono: datos.telefono || '' } }
+                email: email.trim(),
+                password: password,
+                options: {
+                    data: {
+                        nombre: datos.nombre || '',
+                        telefono: datos.telefono || '',
+                        provincia: datos.provincia || ''
+                    }
+                }
             })
             
             if (authError) {
-                if (authError.message?.includes('already registered')) return { success: false, error: '⚠️ Este email ya está registrado' }
-                return { success: false, error: `❌ Error: ${authError.message}` }
+                if (authError.message?.includes('already registered')) {
+                    return { success: false, error: '⚠️ Este email ya está registrado' }
+                }
+                return { success: false, error: `❌ ${authError.message}` }
             }
             
             if (authData?.user) {
-                const { error: perfilError } = await supabase.from('perfiles').insert([{
-                    id: authData.user.id, email: email,
-                    nombre: datos.nombre || '', telefono: datos.telefono || '', estado: 'activo'
-                }])
-                if (perfilError) console.error('❌ Error guardando perfil:', perfilError)
-                return { success: true, user: authData.user, message: '✅ ¡Registro exitoso!' }
+                // Crear perfil
+                const perfilData = {
+                    id: authData.user.id,
+                    email: email.trim(),
+                    nombre: datos.nombre || '',
+                    telefono: datos.telefono || '',
+                    provincia: datos.provincia || '',
+                    codigo_referido: datos.codigo_referido || null,
+                    referido_por: datos.referido_por || null,
+                    estado: 'activo',
+                    created_at: new Date().toISOString()
+                }
+                
+                const { error: perfilError } = await supabase
+                    .from('perfiles')
+                    .insert([perfilData])
+                
+                if (perfilError) {
+                    console.error('❌ Error guardando perfil:', perfilError)
+                    // Intentar eliminar el usuario de auth
+                    try {
+                        await supabase.auth.admin.deleteUser(authData.user.id)
+                    } catch (e) {
+                        console.error('Error eliminando usuario de auth:', e)
+                    }
+                    return { success: false, error: `❌ Error al crear el perfil: ${perfilError.message}` }
+                }
+                
+                return { 
+                    success: true, 
+                    user: authData.user,
+                    message: '✅ ¡Registro exitoso! Revisa tu email para confirmar tu cuenta'
+                }
             }
             
-            return { success: true, message: '📧 Te hemos enviado un email de confirmación' }
+            return { 
+                success: true, 
+                message: '📧 Te hemos enviado un email de confirmación. Revisa tu bandeja de entrada y SPAM.' 
+            }
+            
         } catch (error) {
-            return { success: false, error: '❌ Error inesperado' }
+            console.error('❌ Error en registrar:', error)
+            return { success: false, error: `❌ ${error.message}` }
         }
     }
 
     async obtenerPedidos() {
         if (!usuarioActual) return []
         try {
-            const { data, error } = await supabase.from('pedidos').select('*').eq('user_id', usuarioActual.id).order('created_at', { ascending: false })
+            const { data, error } = await supabase
+                .from('pedidos')
+                .select('*')
+                .eq('user_id', usuarioActual.id)
+                .order('created_at', { ascending: false })
+            
             if (error) throw error
             return data || []
-        } catch (error) { return [] }
+        } catch (error) {
+            console.error('Error obteniendo pedidos:', error)
+            return []
+        }
     }
 
     async actualizarPerfil(datos) {
-        if (!usuarioActual) return { success: false, error: 'No hay usuario autenticado' }
+        if (!usuarioActual) {
+            return { success: false, error: 'No hay usuario autenticado' }
+        }
         
+        // Verificar si está baneado
         const baneado = await this.verificarBaneo(usuarioActual.id)
-        if (baneado) { await this.cerrarSesion(); return { success: false, error: 'Cuenta suspendida' } }
+        if (baneado) {
+            await this.cerrarSesion()
+            return { success: false, error: 'Cuenta suspendida' }
+        }
         
         try {
-            const updateData = {}
-            if (datos.nombre !== undefined) updateData.nombre = datos.nombre
-            if (datos.nombre_completo !== undefined) updateData.nombre = datos.nombre_completo
-            if (datos.telefono !== undefined) updateData.telefono = datos.telefono
-            if (datos.carnet !== undefined) updateData.carnet = datos.carnet
-            if (datos.direccion !== undefined) updateData.direccion = datos.direccion
-            if (datos.localidad !== undefined) updateData.localidad = datos.localidad
-            if (datos.referencia !== undefined) updateData.referencia = datos.referencia
-            if (datos.provincia !== undefined) updateData.provincia = datos.provincia
-            if (datos.municipio !== undefined) updateData.municipio = datos.municipio
-            updateData.updated_at = new Date().toISOString()
+            // Construir objeto de actualización
+            const updateData = {
+                updated_at: new Date().toISOString()
+            }
             
-            const { error } = await supabase.from('perfiles').update(updateData).eq('id', usuarioActual.id)
+            // Mapeo de campos
+            const fieldMap = {
+                nombre: 'nombre',
+                nombre_completo: 'nombre',
+                telefono: 'telefono',
+                carnet: 'carnet',
+                direccion: 'direccion',
+                localidad: 'localidad',
+                referencia: 'referencia',
+                provincia: 'provincia',
+                municipio: 'municipio'
+            }
+            
+            for (const [key, dbField] of Object.entries(fieldMap)) {
+                if (datos[key] !== undefined) {
+                    updateData[dbField] = datos[key]
+                }
+            }
+            
+            const { error } = await supabase
+                .from('perfiles')
+                .update(updateData)
+                .eq('id', usuarioActual.id)
+            
             if (error) throw error
             
+            // Actualizar usuario local
             usuarioActual = { ...usuarioActual, ...datos }
             localStorage.setItem('komerzio_user', JSON.stringify(usuarioActual))
             this.notificarCambio()
-            return { success: true, message: '✅ Perfil actualizado' }
+            
+            return { 
+                success: true, 
+                message: '✅ Perfil actualizado correctamente' 
+            }
+            
         } catch (error) {
-            return { success: false, error: error.message }
+            console.error('Error actualizando perfil:', error)
+            return { success: false, error: `❌ ${error.message}` }
         }
     }
 
     async cambiarPassword(passwordActual, passwordNuevo) {
-        if (!usuarioActual) return { success: false, error: 'No hay usuario autenticado' }
+        if (!usuarioActual) {
+            return { success: false, error: 'No hay usuario autenticado' }
+        }
+        
         try {
-            const { error: signError } = await supabase.auth.signInWithPassword({ email: usuarioActual.email, password: passwordActual })
-            if (signError) return { success: false, error: 'Contraseña actual incorrecta' }
-            const { error } = await supabase.auth.updateUser({ password: passwordNuevo })
+            // Verificar contraseña actual
+            const { error: signError } = await supabase.auth.signInWithPassword({
+                email: usuarioActual.email,
+                password: passwordActual
+            })
+            
+            if (signError) {
+                return { success: false, error: '❌ Contraseña actual incorrecta' }
+            }
+            
+            // Cambiar contraseña
+            const { error } = await supabase.auth.updateUser({
+                password: passwordNuevo
+            })
+            
             if (error) throw error
-            return { success: true, message: '✅ Contraseña actualizada' }
+            
+            return { 
+                success: true, 
+                message: '✅ Contraseña actualizada correctamente' 
+            }
+            
         } catch (error) {
-            return { success: false, error: error.message }
+            console.error('Error cambiando password:', error)
+            return { success: false, error: `❌ ${error.message}` }
         }
     }
 
     async cerrarSesion() {
-        await supabase.auth.signOut()
-        usuarioActual = null
-        localStorage.removeItem('komerzio_user')
-        this.notificarCambio()
+        try {
+            await supabase.auth.signOut()
+        } catch (error) {
+            console.error('Error cerrando sesión:', error)
+        } finally {
+            usuarioActual = null
+            localStorage.removeItem('komerzio_user')
+            this.notificarCambio()
+        }
     }
 
-    getUsuario() { return usuarioActual }
-    isAuthenticated() { return usuarioActual !== null }
+    getUsuario() {
+        return usuarioActual
+    }
+    
+    isAuthenticated() {
+        return usuarioActual !== null
+    }
 
     onCambio(callback) {
         listeners.push(callback)
-        return () => { listeners = listeners.filter(l => l !== callback) }
+        return () => {
+            listeners = listeners.filter(l => l !== callback)
+        }
     }
 
     notificarCambio() {
-        listeners.forEach(cb => cb(usuarioActual))
-        window.dispatchEvent(new CustomEvent('auth-change', { detail: { user: usuarioActual } }))
+        listeners.forEach(cb => {
+            try {
+                cb(usuarioActual)
+            } catch (error) {
+                console.error('Error en listener:', error)
+            }
+        })
+        
+        window.dispatchEvent(new CustomEvent('auth-change', {
+            detail: { user: usuarioActual }
+        }))
     }
 }
 
+// ========== EXPORTAR INSTANCIA ==========
 export const auth = new AuthManager()
 window.auth = auth
