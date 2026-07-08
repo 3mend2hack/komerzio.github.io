@@ -1,4 +1,4 @@
-# 🛒 CUBAZON
+# 🛒 Komerzio
 
 ### Marketplace cubano para la compra y venta de productos, conectando vendedores independientes con compradores de toda la isla.
 
@@ -6,9 +6,9 @@
 
 ## 📌 Sobre el proyecto
 
-**CUBAZON** es una plataforma de comercio electrónico diseñada específicamente para el mercado cubano. Su objetivo principal es facilitar la **compra y venta de productos** entre particulares y pequeños negocios, actuando como un puente digital que conecta **vendedores externos** (independientes, emprendedores, pequeños comercios) con **potenciales compradores** en toda Cuba.
+**Komerzio** es una plataforma de comercio electrónico diseñada específicamente para el mercado cubano. Su objetivo principal es facilitar la **compra y venta de productos** entre particulares y pequeños negocios, actuando como un puente digital que conecta **vendedores externos** (independientes, emprendedores, pequeños comercios) con **potenciales compradores** en toda Cuba.
 
-A diferencia de los marketplaces tradicionales, CUBAZON está construido pensando en las necesidades y limitaciones del entorno cubano, ofreciendo una experiencia fluida, segura y accesible.
+A diferencia de los marketplaces tradicionales, Komerzio está construido pensando en las necesidades y limitaciones del entorno cubano, ofreciendo una experiencia fluida, segura y accesible.
 
 ---
 
@@ -51,7 +51,7 @@ A diferencia de los marketplaces tradicionales, CUBAZON está construido pensand
 - ✅ Añadir al carrito y gestionar compras
 - ✅ Contactar directamente con vendedores vía WhatsApp/Telegram
 - ✅ Sistema de lista de deseos
-- ✅ Métodos de pago adaptados (saldo CUBAZON, transferencias, etc.)
+- ✅ Métodos de pago adaptados (saldo Komerzio, transferencias, etc.)
 
 ### Para vendedores externos:
 - ✅ Espacio para ofrecer sus productos sin necesidad de tienda física
