@@ -289,6 +289,11 @@
         import { supabase } from '/js/supabase-client.js'
         import { auth } from '/js/auth.js'
         
+        // ========== LIMPIAR SESIÓN CORRUPTA AL INICIAR ==========
+        localStorage.removeItem('komerzio_user');
+        sessionStorage.clear();
+        console.log('🧹 Sesión limpiada');
+        
         // ========== DETECTAR APP ==========
         const esApp = navigator.userAgent.includes('wv') || 
                       navigator.userAgent.includes('WebView') ||
