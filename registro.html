@@ -134,28 +134,6 @@
         .form-control:focus { border-color: #667eea; outline: none; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
         .form-control::placeholder { color: #cbd5e0; font-size: 13px; }
         select.form-control { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; }
-        
-        .phone-input-wrapper {
-            display: flex; align-items: center; gap: 0;
-            border: 1px solid #e2e8f0; border-radius: 16px;
-            overflow: hidden; transition: all 0.2s ease; background: white;
-        }
-        .phone-input-wrapper:focus-within {
-            border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        .phone-prefix {
-            background: #f7fafc; padding: 14px 14px;
-            font-weight: 600; color: #4a5568; font-size: 14px;
-            border-right: 1px solid #e2e8f0; user-select: none;
-            white-space: nowrap;
-        }
-        .phone-input {
-            flex: 1; border: none; padding: 14px 16px;
-            font-size: 14px; font-family: 'Inter', sans-serif;
-            outline: none; background: transparent;
-        }
-        .phone-input::placeholder { color: #cbd5e0; font-size: 13px; }
-        
         .checkbox-wrapper { display: flex; align-items: center; gap: 12px; margin: 20px 0; padding: 8px 0; cursor: pointer; }
         .checkbox-wrapper input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: #667eea; }
         .checkbox-wrapper label { color: #4a5568; font-size: 14px; cursor: pointer; margin: 0; }
@@ -181,7 +159,7 @@
             .content { padding: 20px 16px; }
             .header h1 { font-size: 22px; }
         }
-        .btn, .form-control, .checkbox-wrapper, .phone-input-wrapper { touch-action: manipulation; }
+        .btn, .form-control, .checkbox-wrapper { touch-action: manipulation; }
         html { scroll-behavior: smooth; }
         #formularioEmail { transition: all 0.3s ease; }
     </style>
@@ -241,9 +219,9 @@
                         </div>
                         <div class="form-group">
                             <label><i class="fas fa-phone"></i> Teléfono móvil <span class="required">*</span></label>
-                            <div class="phone-input-wrapper">
-                                <span class="phone-prefix">+53</span>
-                                <input type="tel" id="telefonoEmail" class="phone-input" placeholder="Ej: 51234567" maxlength="8" autocomplete="tel" required>
+                            <div class="phone-input-wrapper" style="display: flex; align-items: center; gap: 0; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; transition: all 0.2s ease; background: white;">
+                                <span style="background: #f7fafc; padding: 14px 14px; font-weight: 600; color: #4a5568; font-size: 14px; border-right: 1px solid #e2e8f0; user-select: none; white-space: nowrap;">+53</span>
+                                <input type="tel" id="telefonoEmail" style="flex: 1; border: none; padding: 14px 16px; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; background: transparent;" placeholder="Ej: 51234567" maxlength="8" autocomplete="tel" required>
                             </div>
                         </div>
                         <div class="form-group">
@@ -308,19 +286,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script type="module">
-        // ============================================
-        // REGISTRO - KOMERZIO (VERSIÓN PRODUCCIÓN)
-        // ============================================
-        
-        console.log('🚀 Iniciando registro.html');
-        
-        // ========== CONFIGURACIÓN DE SUPABASE ==========
-        const SUPABASE_URL = 'https://houfrgnlctliwkzzelmi.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdWZyZ25sY3RsaXdrenplbG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MTQ2OTMsImV4cCI6MjA5NjE5MDY5M30.zUfcA755LEjBbn-N05LrmwFqsOFITRP4qLzxjgPIy54';
-        
-        // Crear cliente Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        console.log('✅ Cliente Supabase creado');
+        import { supabase } from '/js/supabase-client.js'
+        import { auth } from '/js/auth.js'
         
         // ========== DETECTAR APP ==========
         const esApp = navigator.userAgent.includes('wv') || 
@@ -338,169 +305,12 @@
             if (googleDivider) googleDivider.style.display = 'none';
         }
         
+        console.log('🚀 Iniciando registro.html');
+        
         // ========== VARIABLES ==========
         let codigoReferidoActual = '';
         let codigoReferidoValido = false;
         let referidoPorId = null;
-        
-        // ========== FUNCIÓN DE REGISTRO ==========
-        async function registrarUsuario(email, password, datos) {
-            console.log('📝 Iniciando registro:', { email, datos });
-            
-            try {
-                // 1. Verificar si el teléfono ya existe
-                console.log('🔍 Verificando teléfono:', datos.telefono);
-                const { data: telefonoExiste, error: telefonoError } = await supabase
-                    .from('perfiles')
-                    .select('id, telefono')
-                    .eq('telefono', datos.telefono)
-                    .maybeSingle();
-                
-                if (telefonoError) {
-                    console.error('❌ Error verificando teléfono:', telefonoError);
-                    throw new Error('Error al verificar el teléfono');
-                }
-                
-                if (telefonoExiste) {
-                    throw new Error('⚠️ Este número de teléfono ya está registrado');
-                }
-                
-                // 2. Intentar registrar en Supabase Auth
-                console.log('📝 Registrando en Supabase Auth...');
-                let authData, authError;
-                
-                try {
-                    const result = await supabase.auth.signUp({
-                        email: email,
-                        password: password,
-                        options: {
-                            data: {
-                                nombre: datos.nombre,
-                                telefono: datos.telefono,
-                                provincia: datos.provincia || ''
-                            }
-                        }
-                    });
-                    authData = result.data;
-                    authError = result.error;
-                } catch (err) {
-                    console.error('❌ Error en signUp:', err);
-                    throw new Error('Error al conectar con el servidor');
-                }
-                
-                console.log('📝 Respuesta de signUp:', authData);
-                
-                // Si el usuario ya existe, verificar si tiene perfil
-                if (authError && authError.message?.includes('already registered')) {
-                    console.log('⚠️ Usuario ya existe, verificando perfil...');
-                    
-                    const { data: userData, error: userError } = await supabase
-                        .from('perfiles')
-                        .select('*')
-                        .eq('email', email)
-                        .maybeSingle();
-                    
-                    if (userError) {
-                        console.error('❌ Error buscando usuario:', userError);
-                        throw new Error('Error al verificar el usuario');
-                    }
-                    
-                    if (userData) {
-                        throw new Error('⚠️ Este email ya está registrado. Inicia sesión.');
-                    }
-                    
-                    // Usuario existe en Auth pero no tiene perfil
-                    console.log('⚠️ Creando perfil para usuario existente...');
-                    
-                    const { data: authUserData, error: authUserError } = await supabase.auth.getUser();
-                    
-                    if (authUserError || !authUserData?.user) {
-                        throw new Error('Error al obtener datos del usuario');
-                    }
-                    
-                    const perfilData = {
-                        id: authUserData.user.id,
-                        nombre: datos.nombre,
-                        email: email,
-                        telefono: datos.telefono,
-                        provincia: datos.provincia || '',
-                        codigo_referido: datos.codigo_referido || null,
-                        referido_por: datos.referido_por || null,
-                        estado: 'activo'
-                    };
-                    
-                    const { error: perfilError } = await supabase
-                        .from('perfiles')
-                        .insert([perfilData]);
-                    
-                    if (perfilError) {
-                        console.error('❌ Error creando perfil:', perfilError);
-                        throw new Error('Error al completar el registro');
-                    }
-                    
-                    // Reenviar email de confirmación
-                    try {
-                        await supabase.auth.resend({ type: 'signup', email: email });
-                    } catch (e) {
-                        console.warn('⚠️ No se pudo reenviar email:', e);
-                    }
-                    
-                    return {
-                        success: true,
-                        user: authUserData.user,
-                        message: '✅ Registro completado. Revisa tu email.'
-                    };
-                }
-                
-                if (authError) {
-                    throw new Error(authError.message);
-                }
-                
-                if (!authData?.user) {
-                    throw new Error('No se pudo crear el usuario');
-                }
-                
-                // 3. Crear perfil para nuevo usuario
-                console.log('📝 Creando perfil para usuario nuevo:', authData.user.id);
-                const perfilData = {
-                    id: authData.user.id,
-                    nombre: datos.nombre,
-                    email: email,
-                    telefono: datos.telefono,
-                    provincia: datos.provincia || '',
-                    codigo_referido: datos.codigo_referido || null,
-                    referido_por: datos.referido_por || null,
-                    estado: 'activo'
-                };
-                
-                const { error: perfilError } = await supabase
-                    .from('perfiles')
-                    .insert([perfilData]);
-                
-                if (perfilError) {
-                    console.error('❌ Error creando perfil:', perfilError);
-                    // Intentar eliminar el usuario de auth
-                    try {
-                        await supabase.auth.admin.deleteUser(authData.user.id);
-                    } catch (e) {}
-                    throw new Error('Error al crear el perfil');
-                }
-                
-                console.log('✅ Registro completado');
-                return { 
-                    success: true, 
-                    user: authData.user,
-                    message: '📧 Te hemos enviado un email de confirmación.'
-                };
-                
-            } catch (error) {
-                console.error('❌ Error en registro:', error);
-                return { 
-                    success: false, 
-                    error: error.message || 'Error al registrar usuario'
-                };
-            }
-        }
         
         // ========== TELÉFONO ==========
         document.getElementById('telefonoEmail')?.addEventListener('input', function() {
@@ -640,7 +450,7 @@
             });
         }
         
-        // ========== FORMULARIO ==========
+        // ========== FORMULARIO - USANDO auth.registrar() ==========
         const registerForm = document.getElementById('emailRegistroForm');
         if (registerForm) {
             registerForm.addEventListener('submit', async function(e) {
@@ -699,7 +509,8 @@
                         referido_por: referidoPorId
                     };
                     
-                    const resultado = await registrarUsuario(email, password, datos);
+                    // 🔧 USAR auth.registrar() EN LUGAR DE registrarUsuario()
+                    const resultado = await auth.registrar(email, password, datos);
                     
                     if (resultado.success) {
                         document.getElementById('emailConfirmado').textContent = email;
