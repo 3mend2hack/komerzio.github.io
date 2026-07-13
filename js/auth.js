@@ -79,46 +79,92 @@ export class AuthManager {
             }
             
             if (data) {
+                // ✅ PERFIL EXISTE - usarlo
                 usuarioActual = { 
                     id: userId, 
                     ...data,
-                    // Asegurar campos requeridos
                     nombre: data.nombre || data.email?.split('@')[0] || 'Usuario',
                     email: data.email || ''
                 }
                 console.log('✅ Usuario cargado desde perfiles:', usuarioActual.email)
             } else {
-                // Si no hay perfil, crear uno básico
+                // ⚠️ PERFIL NO EXISTE - intentar crear
                 console.log('⚠️ Perfil no encontrado, creando uno básico')
-                const { data: userData } = await supabase.auth.getUser()
-                if (userData?.user) {
-                    const nuevoPerfil = {
+                
+                // Obtener datos del usuario de auth
+                const { data: userData, error: userError } = await supabase.auth.getUser()
+                
+                if (userError || !userData?.user) {
+                    console.error('❌ No se pudo obtener datos del usuario de auth:', userError)
+                    usuarioActual = {
+                        id: userId,
+                        email: 'usuario@email.com',
+                        nombre: 'Usuario',
+                        estado: 'activo'
+                    }
+                    localStorage.setItem('komerzio_user', JSON.stringify(usuarioActual))
+                    this.notificarCambio()
+                    return usuarioActual
+                }
+                
+                const nuevoPerfil = {
+                    id: userId,
+                    email: userData.user.email,
+                    nombre: userData.user.user_metadata?.nombre || userData.user.email?.split('@')[0] || 'Usuario',
+                    telefono: userData.user.user_metadata?.telefono || '',
+                    provincia: userData.user.user_metadata?.provincia || '',
+                    estado: 'activo',
+                    created_at: new Date().toISOString()
+                }
+                
+                // 🔧 VERIFICAR ANTES DE INSERTAR
+                const { data: existente, error: checkError } = await supabase
+                    .from('perfiles')
+                    .select('id')
+                    .eq('email', nuevoPerfil.email)
+                    .maybeSingle()
+                
+                if (existente) {
+                    // Ya existe un perfil con ese email, cargarlo
+                    console.log('⚠️ El perfil ya existe con email:', nuevoPerfil.email)
+                    const { data: perfilExistente, error: loadError } = await supabase
+                        .from('perfiles')
+                        .select('*')
+                        .eq('email', nuevoPerfil.email)
+                        .maybeSingle()
+                    
+                    if (perfilExistente) {
+                        usuarioActual = { 
+                            id: perfilExistente.id, 
+                            ...perfilExistente,
+                            nombre: perfilExistente.nombre || perfilExistente.email?.split('@')[0] || 'Usuario',
+                            email: perfilExistente.email || ''
+                        }
+                        localStorage.setItem('komerzio_user', JSON.stringify(usuarioActual))
+                        this.notificarCambio()
+                        return usuarioActual
+                    }
+                }
+                
+                // Insertar nuevo perfil
+                const { error: insertError } = await supabase
+                    .from('perfiles')
+                    .insert([nuevoPerfil])
+                
+                if (insertError) {
+                    console.error('❌ Error creando perfil básico:', insertError)
+                    // Si falla, usar datos básicos
+                    usuarioActual = {
                         id: userId,
                         email: userData.user.email,
                         nombre: userData.user.user_metadata?.nombre || userData.user.email?.split('@')[0] || 'Usuario',
                         telefono: userData.user.user_metadata?.telefono || '',
                         provincia: userData.user.user_metadata?.provincia || '',
-                        estado: 'activo',
-                        created_at: new Date().toISOString()
+                        estado: 'activo'
                     }
-                    
-                    const { error: insertError } = await supabase
-                        .from('perfiles')
-                        .insert([nuevoPerfil])
-                    
-                    if (!insertError) {
-                        usuarioActual = nuevoPerfil
-                    } else {
-                        console.error('❌ Error creando perfil básico:', insertError)
-                        usuarioActual = {
-                            id: userId,
-                            email: userData.user.email,
-                            nombre: userData.user.user_metadata?.nombre || userData.user.email?.split('@')[0] || 'Usuario',
-                            telefono: userData.user.user_metadata?.telefono || '',
-                            provincia: userData.user.user_metadata?.provincia || '',
-                            estado: 'activo'
-                        }
-                    }
+                } else {
+                    usuarioActual = nuevoPerfil
+                    console.log('✅ Perfil creado correctamente')
                 }
             }
             
