@@ -1,0 +1,5 @@
+# Ignore local config and environment files
+/js/komerzio-config.js
+.env
+node_modules/
+.DS_Store

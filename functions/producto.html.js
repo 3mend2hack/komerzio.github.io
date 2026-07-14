@@ -1,24 +1,25 @@
 export async function onRequest(context) {
-  const { request } = context;
+  const { request, env } = context;
   const url = new URL(request.url);
   const productId = url.searchParams.get('id') || url.searchParams.get('p');
   const userAgent = request.headers.get('user-agent') || '';
-  
+
   // Detectar si es un bot de WhatsApp, Facebook, Twitter, etc.
   const isBot = userAgent.includes('WhatsApp') ||
     userAgent.includes('Facebook') ||
     userAgent.includes('Twitterbot') ||
     userAgent.includes('TelegramBot') ||
     userAgent.includes('facebookexternalhit');
-  
-  const SUPABASE_URL = 'https://houfrgnlctliwkzzelmi.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdWZyZ25sY3RsaXdrenplbG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MTQ2OTMsImV4cCI6MjA5NjE5MDY5M30.zUfcA755LEjBbn-N05LrmwFqsOFITRP4qLzxjgPIy54';
-  
+
+  // Preferir variables en el entorno (Cloudflare Pages/Workers bindings)
+  const SUPABASE_URL = env?.SUPABASE_URL || (typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : '');
+  const SUPABASE_ANON_KEY = env?.SUPABASE_ANON_KEY || (typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KEY : '');
+
   // Si no es un bot O no hay ID, servir la página normal
   if (!isBot || !productId) {
     return context.next();
   }
-  
+
   try {
     const supabaseResponse = await fetch(
       `${SUPABASE_URL}/rest/v1/rpc/get_producto_oficial_meta`,
@@ -32,26 +33,26 @@ export async function onRequest(context) {
         body: JSON.stringify({ id_param: parseInt(productId) })
       }
     );
-    
+
     const data = await supabaseResponse.json();
-    
+
     if (!data || data.length === 0) {
       return context.next();
     }
-    
+
     const producto = data[0];
-    
+
     // Calcular precio actual (con oferta si existe)
     const precioActual = (producto.precio_oferta && producto.precio_oferta > 0 && producto.precio_oferta < producto.precio) ?
       producto.precio_oferta :
       producto.precio;
-    
+
     // Optimizar imagen para WhatsApp
     let imagenUrl = producto.imagen_url || 'https://komerzio.dpdns.org/assets/images/komerzio.png';
     if (imagenUrl.includes('supabase.co')) {
       imagenUrl = `https://wsrv.nl/?url=${encodeURIComponent(imagenUrl)}&w=1200&h=630&fit=cover&output=jpg&q=90`;
     }
-    
+
     // Página ultra simple SOLO para bots
     const html = `<!DOCTYPE html>
 <html>
@@ -74,11 +75,11 @@ export async function onRequest(context) {
     <p>Stock: ${producto.stock} unidades</p>
 </body>
 </html>`;
-    
+
     return new Response(html, {
       headers: { 'Content-Type': 'text/html' }
     });
-    
+
   } catch (error) {
     return context.next();
   }

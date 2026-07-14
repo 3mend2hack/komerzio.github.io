@@ -1,0 +1,9 @@
+// Example client-side config file (DO NOT COMMIT secrets)
+// Create `/js/komerzio-config.js` on your server or inject it during deploy.
+// This file should NOT be checked into the repository. Add `/js/komerzio-config.js` to .gitignore.
+
+window.KOMERZIO_CONFIG = {
+  // Public ANON key (only public-limited permissions). Configure RLS in Supabase.
+  SUPABASE_URL: 'https://your-project.supabase.co',
+  SUPABASE_ANON_KEY: 'public-anon-key'
+}
