@@ -218,7 +218,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVobGVidm1hbGF0c2R5dm9wdmtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMjg2MjAsImV4cCI6MjA5OTYwNDYyMH0.lsV-x6y3e-0fbdUqb--_CVi8c1gUhO4MUoo1grq66ZI';
         
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-        console.log('🚀 Iniciando registro.html (RPC - credenciales nuevas)');
+        console.log('🚀 Iniciando registro.html (con signUp)');
         console.log('✅ Supabase cliente creado');
         
         // ========== TELÉFONO ==========
@@ -291,72 +291,67 @@
             try {
                 const telefonoCompleto = '+53' + telefono;
                 
-                // Verificar si el email ya existe
-                const { data: existeEmail, error: checkError } = await supabase
-                    .from('perfiles')
-                    .select('id')
-                    .eq('email', email)
-                    .maybeSingle();
-                
-                if (checkError) {
-                    console.error('❌ Error verificando email:', checkError);
-                }
-                
-                if (existeEmail) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Email ya registrado',
-                        text: 'Este email ya tiene una cuenta. ¿Quieres iniciar sesión?',
-                        showCancelButton: true,
-                        confirmButtonText: 'Iniciar sesión',
-                        cancelButtonText: 'Usar otro email',
-                        confirmButtonColor: '#667eea',
-                        cancelButtonColor: '#dc3545'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '/login.html';
+                // ============================================
+                // 1. REGISTRAR CON auth.signUp() (envía correo automáticamente)
+                // ============================================
+                console.log('📤 Registrando usuario con auth.signUp()...');
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            nombre: nombre,
+                            telefono: telefonoCompleto,
+                            provincia: provincia
                         }
-                    });
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Crear cuenta';
-                    return;
-                }
-                
-                // Llamar a la RPC
-                console.log('📤 Llamando a RPC registrar_usuario_completo...');
-                const { data, error } = await supabase.rpc('registrar_usuario_completo', {
-                    p_email: email,
-                    p_password: password,
-                    p_nombre: nombre,
-                    p_telefono: telefonoCompleto,
-                    p_provincia: provincia,
-                    p_codigo_referido: null
+                    }
                 });
                 
-                console.log('📥 Respuesta RPC:', data);
+                if (error) throw error;
                 
-                if (error) {
-                    console.error('❌ Error RPC:', error);
-                    throw new Error(error.message);
+                if (!data.user) {
+                    throw new Error('No se pudo crear el usuario');
                 }
                 
-                if (!data?.success) {
-                    throw new Error(data?.message || 'Error al registrar');
+                console.log('✅ Usuario creado en auth:', data.user.id);
+                
+                // ============================================
+                // 2. CREAR PERFIL EN perfiles
+                // ============================================
+                const { error: perfilError } = await supabase
+                    .from('perfiles')
+                    .insert([{
+                        id: data.user.id,
+                        email: email,
+                        nombre: nombre,
+                        telefono: telefonoCompleto,
+                        provincia: provincia,
+                        estado: 'activo',
+                        created_at: new Date().toISOString()
+                    }]);
+                
+                if (perfilError) {
+                    console.error('❌ Error creando perfil:', perfilError);
+                    // Si falla el perfil, eliminamos el usuario de auth para mantener consistencia
+                    await supabase.auth.admin.deleteUser(data.user.id);
+                    throw new Error('Error al crear el perfil: ' + perfilError.message);
                 }
                 
-                // Éxito
+                console.log('✅ Perfil creado en perfiles');
+                
+                // ============================================
+                // 3. ÉXITO
+                // ============================================
                 document.getElementById('confirmacionEmail').style.display = 'block';
                 registerForm.style.display = 'none';
-                
-                if (data.codigo_referido) {
-                    document.getElementById('codigoReferidoMostrado').textContent = '🎁 Tu código de referido: ' + data.codigo_referido;
-                }
                 
                 Swal.fire({
                     icon: 'success',
                     title: '¡Registro exitoso! 🎉',
-                    html: `Tu cuenta ha sido creada correctamente.<br><br><strong>${email}</strong>`,
-                    confirmButtonText: 'Iniciar sesión',
+                    html: `Tu cuenta ha sido creada correctamente.<br><br>
+                           <strong>${email}</strong><br><br>
+                           <span style="font-size:14px;color:#6c757d;">Te hemos enviado un correo para confirmar tu cuenta.</span>`,
+                    confirmButtonText: 'Entendido',
                     confirmButtonColor: '#667eea'
                 }).then(() => {
                     window.location.href = '/login.html';
@@ -365,7 +360,7 @@
             } catch (error) {
                 console.error('❌ Error:', error);
                 
-                if (error.message?.includes('email ya está registrado') || error.message?.includes('UNIQUE_VIOLATION')) {
+                if (error.message?.includes('already registered') || error.message?.includes('User already registered')) {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Email ya registrado',
@@ -439,7 +434,7 @@
             });
         }
         
-        console.log('✅ registro.html listo para producción (credenciales nuevas)');
+        console.log('✅ registro.html listo para producción (con signUp)');
     </script>
 </body>
 </html>
