@@ -6,13 +6,9 @@
     <meta name="theme-color" content="#667eea">
     <title>Iniciar sesión · KOMERZIO</title>
     
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -237,7 +233,6 @@
             <p>Elige cómo quieres acceder</p>
         </div>
         
-        <!-- BOTÓN DE GOOGLE -->
         <button class="btn btn-google" id="googleLoginBtn">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
             Continuar con Google
@@ -247,7 +242,6 @@
             <span>o con email</span>
         </div>
         
-        <!-- ACCESO CON EMAIL -->
         <form id="loginForm">
             <div class="form-group">
                 <label><i class="fa fa-envelope"></i> Email</label>
@@ -270,35 +264,43 @@
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
+    <script type="importmap">
+    {
+        "imports": {
+            "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
+        }
+    }
+    </script>
+    
     <script type="module">
-        // Configuración de Supabase
-        const SUPABASE_URL = 'https://houfrgnlctliwkzzelmi.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdWZyZ25sY3RsaXdrenplbG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MTQ2OTMsImV4cCI6MjA5NjE5MDY5M30.zUfcA755LEjBbn-N05LrmwFqsOFITRP4qLzxjgPIy54';
+        import { createClient } from '@supabase/supabase-js';
         
-        // Inicializar Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = 'https://ehlebvmalatsdyvopvkn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVobGVidm1hbGF0c2R5dm9wdmtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMjg2MjAsImV4cCI6MjA5OTYwNDYyMH0.lsV-x6y3e-0fbdUqb--_CVi8c1gUhO4MUoo1grq66ZI';
         
-        // ========== DETECTAR SI VIENE DE LA APP ==========
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        console.log('🚀 login.html - Supabase cliente creado (importmap)');
+        
+        // ========== DETECTAR APP ==========
         const esApp = navigator.userAgent.includes('wv') || 
                       navigator.userAgent.includes('WebView') ||
                       !!(window.cordova || window.phonegap || window.PhoneGap) ||
                       (document.referrer === '' && window.location.search.includes('app=true')) ||
                       localStorage.getItem('komerzio_app') === 'true';
         
-        // Guardar para futuras navegaciones
-        if (esApp) { localStorage.setItem('komerzio_app', 'true'); }
-        
-        // Ocultar botón Google si es la app
         if (esApp) {
+            localStorage.setItem('komerzio_app', 'true');
             document.getElementById('googleLoginBtn').style.display = 'none';
             document.getElementById('googleDivider').style.display = 'none';
         }
         
-        console.log('🚀 login.html - App detectada:', esApp);
+        console.log('📱 App detectada:', esApp);
         
         // ========== GOOGLE LOGIN ==========
         document.getElementById('googleLoginBtn').addEventListener('click', async function() {
-            const btn = this; btn.disabled = true;
+            const btn = this;
+            btn.disabled = true;
             btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Conectando con Google...';
             try {
                 const { error } = await supabase.auth.signInWithOAuth({
@@ -320,9 +322,9 @@
             const password = document.getElementById('password').value;
             const btn = this.querySelector('button[type="submit"]');
             
-            if (!email || !password) { 
-                Swal.fire('Error', 'Completa todos los campos', 'error'); 
-                return; 
+            if (!email || !password) {
+                Swal.fire('Error', 'Completa todos los campos', 'error');
+                return;
             }
             
             btn.disabled = true;
@@ -349,6 +351,7 @@
                     }, 1500);
                 }
             } catch (error) {
+                console.error('❌ Error en login:', error);
                 Swal.fire({ 
                     icon: 'error', 
                     title: 'Error', 
