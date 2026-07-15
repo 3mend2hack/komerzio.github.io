@@ -1,4 +1,4 @@
-// auth.js - VERSIÓN CORREGIDA
+// auth.js - VERSIÓN CON RPC (CORREGIDA)
 // ============================================
 import { supabase } from './supabase-client.js'
 
@@ -79,7 +79,6 @@ export class AuthManager {
             }
             
             if (data) {
-                // ✅ PERFIL EXISTE - usarlo
                 usuarioActual = { 
                     id: userId, 
                     ...data,
@@ -88,83 +87,36 @@ export class AuthManager {
                 }
                 console.log('✅ Usuario cargado desde perfiles:', usuarioActual.email)
             } else {
-                // ⚠️ PERFIL NO EXISTE - intentar crear
                 console.log('⚠️ Perfil no encontrado, creando uno básico')
-                
-                // Obtener datos del usuario de auth
-                const { data: userData, error: userError } = await supabase.auth.getUser()
-                
-                if (userError || !userData?.user) {
-                    console.error('❌ No se pudo obtener datos del usuario de auth:', userError)
-                    usuarioActual = {
-                        id: userId,
-                        email: 'usuario@email.com',
-                        nombre: 'Usuario',
-                        estado: 'activo'
-                    }
-                    localStorage.setItem('komerzio_user', JSON.stringify(usuarioActual))
-                    this.notificarCambio()
-                    return usuarioActual
-                }
-                
-                const nuevoPerfil = {
-                    id: userId,
-                    email: userData.user.email,
-                    nombre: userData.user.user_metadata?.nombre || userData.user.email?.split('@')[0] || 'Usuario',
-                    telefono: userData.user.user_metadata?.telefono || '',
-                    provincia: userData.user.user_metadata?.provincia || '',
-                    estado: 'activo',
-                    created_at: new Date().toISOString()
-                }
-                
-                // 🔧 VERIFICAR ANTES DE INSERTAR
-                const { data: existente, error: checkError } = await supabase
-                    .from('perfiles')
-                    .select('id')
-                    .eq('email', nuevoPerfil.email)
-                    .maybeSingle()
-                
-                if (existente) {
-                    // Ya existe un perfil con ese email, cargarlo
-                    console.log('⚠️ El perfil ya existe con email:', nuevoPerfil.email)
-                    const { data: perfilExistente, error: loadError } = await supabase
-                        .from('perfiles')
-                        .select('*')
-                        .eq('email', nuevoPerfil.email)
-                        .maybeSingle()
-                    
-                    if (perfilExistente) {
-                        usuarioActual = { 
-                            id: perfilExistente.id, 
-                            ...perfilExistente,
-                            nombre: perfilExistente.nombre || perfilExistente.email?.split('@')[0] || 'Usuario',
-                            email: perfilExistente.email || ''
-                        }
-                        localStorage.setItem('komerzio_user', JSON.stringify(usuarioActual))
-                        this.notificarCambio()
-                        return usuarioActual
-                    }
-                }
-                
-                // Insertar nuevo perfil
-                const { error: insertError } = await supabase
-                    .from('perfiles')
-                    .insert([nuevoPerfil])
-                
-                if (insertError) {
-                    console.error('❌ Error creando perfil básico:', insertError)
-                    // Si falla, usar datos básicos
-                    usuarioActual = {
+                const { data: userData } = await supabase.auth.getUser()
+                if (userData?.user) {
+                    const nuevoPerfil = {
                         id: userId,
                         email: userData.user.email,
                         nombre: userData.user.user_metadata?.nombre || userData.user.email?.split('@')[0] || 'Usuario',
                         telefono: userData.user.user_metadata?.telefono || '',
                         provincia: userData.user.user_metadata?.provincia || '',
-                        estado: 'activo'
+                        estado: 'activo',
+                        created_at: new Date().toISOString()
                     }
-                } else {
-                    usuarioActual = nuevoPerfil
-                    console.log('✅ Perfil creado correctamente')
+                    
+                    const { error: insertError } = await supabase
+                        .from('perfiles')
+                        .insert([nuevoPerfil])
+                    
+                    if (!insertError) {
+                        usuarioActual = nuevoPerfil
+                    } else {
+                        console.error('❌ Error creando perfil básico:', insertError)
+                        usuarioActual = {
+                            id: userId,
+                            email: userData.user.email,
+                            nombre: userData.user.user_metadata?.nombre || userData.user.email?.split('@')[0] || 'Usuario',
+                            telefono: userData.user.user_metadata?.telefono || '',
+                            provincia: userData.user.user_metadata?.provincia || '',
+                            estado: 'activo'
+                        }
+                    }
                 }
             }
             
@@ -201,7 +153,6 @@ export class AuthManager {
                 return { success: false, error: `❌ ${error.message}` }
             }
             
-            // Verificar si está baneado
             const baneado = await this.verificarBaneo(data.user.id)
             if (baneado) {
                 await supabase.auth.signOut()
@@ -222,8 +173,13 @@ export class AuthManager {
         }
     }
 
+    // ============================================
+    // REGISTRAR CON RPC (NUEVO)
+    // ============================================
     async registrar(email, password, datos) {
         try {
+            console.log('📝 Registrando con RPC:', { email, datos });
+            
             // Validaciones
             if (!email || !email.includes('@')) {
                 return { success: false, error: '❌ Ingresa un email válido' }
@@ -232,82 +188,79 @@ export class AuthManager {
                 return { success: false, error: '❌ La contraseña debe tener al menos 6 caracteres' }
             }
             
-            // Verificar si el teléfono ya existe
+            // ============================================
+            // 1. VERIFICAR SI EL EMAIL YA EXISTE
+            // ============================================
+            const { data: existeEmail, error: checkError } = await supabase
+                .from('perfiles')
+                .select('id, email')
+                .eq('email', email)
+                .maybeSingle();
+            
+            if (checkError) {
+                console.error('❌ Error verificando email:', checkError);
+                return { success: false, error: 'Error al verificar el email' }
+            }
+            
+            if (existeEmail) {
+                return { success: false, error: '⚠️ Este email ya está registrado' }
+            }
+            
+            // ============================================
+            // 2. VERIFICAR SI EL TELÉFONO YA EXISTE
+            // ============================================
             if (datos.telefono) {
-                const { data: telefonoExiste, error: telefonoError } = await supabase
+                const { data: existeTelefono, error: checkTelError } = await supabase
                     .from('perfiles')
-                    .select('id')
+                    .select('id, telefono')
                     .eq('telefono', datos.telefono)
-                    .maybeSingle()
+                    .maybeSingle();
                 
-                if (telefonoError) {
-                    console.error('Error verificando teléfono:', telefonoError)
+                if (checkTelError) {
+                    console.error('❌ Error verificando teléfono:', checkTelError);
+                    return { success: false, error: 'Error al verificar el teléfono' }
                 }
                 
-                if (telefonoExiste) {
+                if (existeTelefono) {
                     return { success: false, error: '⚠️ Este número de teléfono ya está registrado' }
                 }
             }
             
-            // Registrar en Supabase Auth
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email: email.trim(),
-                password: password,
-                options: {
-                    data: {
-                        nombre: datos.nombre || '',
-                        telefono: datos.telefono || '',
-                        provincia: datos.provincia || ''
-                    }
-                }
-            })
+            // ============================================
+            // 3. LLAMAR A LA FUNCIÓN RPC
+            // ============================================
+            const { data, error } = await supabase.rpc('registrar_usuario_completo', {
+                p_email: email.trim(),
+                p_password: password,
+                p_nombre: datos.nombre || '',
+                p_telefono: datos.telefono || '',
+                p_provincia: datos.provincia || '',
+                p_codigo_referido: datos.codigo_referido || null
+            });
             
-            if (authError) {
-                if (authError.message?.includes('already registered')) {
-                    return { success: false, error: '⚠️ Este email ya está registrado' }
-                }
-                return { success: false, error: `❌ ${authError.message}` }
+            console.log('📥 Respuesta RPC:', data);
+            
+            if (error) {
+                console.error('❌ Error en RPC:', error);
+                return { success: false, error: `❌ ${error.message}` }
             }
             
-            if (authData?.user) {
-                // Crear perfil
-                const perfilData = {
-                    id: authData.user.id,
-                    email: email.trim(),
-                    nombre: datos.nombre || '',
-                    telefono: datos.telefono || '',
-                    provincia: datos.provincia || '',
-                    codigo_referido: datos.codigo_referido || null,
-                    referido_por: datos.referido_por || null,
-                    estado: 'activo',
-                    created_at: new Date().toISOString()
-                }
-                
-                const { error: perfilError } = await supabase
-                    .from('perfiles')
-                    .insert([perfilData])
-                
-                if (perfilError) {
-                    console.error('❌ Error guardando perfil:', perfilError)
-                    // Intentar eliminar el usuario de auth
-                    try {
-                        await supabase.auth.admin.deleteUser(authData.user.id)
-                    } catch (e) {
-                        console.error('Error eliminando usuario de auth:', e)
-                    }
-                    return { success: false, error: `❌ Error al crear el perfil: ${perfilError.message}` }
-                }
-                
-                return { 
-                    success: true, 
-                    user: authData.user,
-                    message: '✅ ¡Registro exitoso! Revisa tu email para confirmar tu cuenta'
-                }
+            if (!data || !data.success) {
+                const errorMsg = data?.message || data?.error || 'Error al registrar';
+                console.error('❌ RPC falló:', errorMsg);
+                return { success: false, error: `❌ ${errorMsg}` }
             }
+            
+            console.log('✅ Registro exitoso:', data);
+            
+            // Cargar el usuario recién creado
+            await this.cargarUsuario(data.user_id);
             
             return { 
                 success: true, 
-                message: '📧 Te hemos enviado un email de confirmación. Revisa tu bandeja de entrada y SPAM.' 
+                user: { id: data.user_id, email: data.email },
+                codigo_referido: data.codigo_referido,
+                message: '✅ ¡Registro exitoso!'
             }
             
         } catch (error) {
@@ -338,7 +291,6 @@ export class AuthManager {
             return { success: false, error: 'No hay usuario autenticado' }
         }
         
-        // Verificar si está baneado
         const baneado = await this.verificarBaneo(usuarioActual.id)
         if (baneado) {
             await this.cerrarSesion()
@@ -346,12 +298,10 @@ export class AuthManager {
         }
         
         try {
-            // Construir objeto de actualización
             const updateData = {
                 updated_at: new Date().toISOString()
             }
             
-            // Mapeo de campos
             const fieldMap = {
                 nombre: 'nombre',
                 nombre_completo: 'nombre',
@@ -377,7 +327,6 @@ export class AuthManager {
             
             if (error) throw error
             
-            // Actualizar usuario local
             usuarioActual = { ...usuarioActual, ...datos }
             localStorage.setItem('komerzio_user', JSON.stringify(usuarioActual))
             this.notificarCambio()
@@ -399,7 +348,6 @@ export class AuthManager {
         }
         
         try {
-            // Verificar contraseña actual
             const { error: signError } = await supabase.auth.signInWithPassword({
                 email: usuarioActual.email,
                 password: passwordActual
@@ -409,7 +357,6 @@ export class AuthManager {
                 return { success: false, error: '❌ Contraseña actual incorrecta' }
             }
             
-            // Cambiar contraseña
             const { error } = await supabase.auth.updateUser({
                 password: passwordNuevo
             })
