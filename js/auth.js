@@ -1,4 +1,4 @@
-// auth.js - VERSIÓN CON RPC (CORREGIDA)
+// auth.js - VERSIÓN COMPLETA CORREGIDA CON VERIFICACIÓN DE BANEO
 // ============================================
 import { supabase } from './supabase-client.js'
 
@@ -6,7 +6,7 @@ import { supabase } from './supabase-client.js'
 let usuarioActual = null
 let listeners = []
 
-// ========== CLASE DE AUTENTICACIÓN CORREGIDA ==========
+// ========== CLASE DE AUTENTICACIÓN ==========
 export class AuthManager {
     constructor() {
         this.init()
@@ -17,12 +17,31 @@ export class AuthManager {
             const { data: { session } } = await supabase.auth.getSession()
             
             if (session?.user) {
+                // ✅ VERIFICAR BANEO ANTES DE CARGAR EL USUARIO
+                const baneado = await this.verificarBaneo(session.user.id)
+                if (baneado) {
+                    console.log('⚠️ Sesión de usuario baneado detectada, cerrando...')
+                    await supabase.auth.signOut()
+                    localStorage.removeItem('komerzio_user')
+                    usuarioActual = null
+                    this.notificarCambio()
+                    return
+                }
                 await this.cargarUsuario(session.user.id)
             } else {
                 const localUser = localStorage.getItem('komerzio_user')
                 if (localUser) {
                     try {
                         usuarioActual = JSON.parse(localUser)
+                        // ✅ VERIFICAR BANEO DEL USUARIO EN LOCALSTORAGE
+                        const baneado = await this.verificarBaneo(usuarioActual.id)
+                        if (baneado) {
+                            console.log('⚠️ Usuario en localStorage está baneado, limpiando...')
+                            localStorage.removeItem('komerzio_user')
+                            usuarioActual = null
+                            this.notificarCambio()
+                            return
+                        }
                         this.notificarCambio()
                     } catch (e) {
                         localStorage.removeItem('komerzio_user')
@@ -130,6 +149,9 @@ export class AuthManager {
         }
     }
 
+    // ============================================
+    // LOGIN - CORREGIDO CON VERIFICACIÓN DE BANEO
+    // ============================================
     async login(email, password) {
         try {
             if (!email || !password) {
@@ -153,8 +175,10 @@ export class AuthManager {
                 return { success: false, error: `❌ ${error.message}` }
             }
             
+            // ✅ VERIFICAR BANEO INMEDIATAMENTE DESPUÉS DEL LOGIN
             const baneado = await this.verificarBaneo(data.user.id)
             if (baneado) {
+                console.log('⚠️ Usuario baneado, cerrando sesión')
                 await supabase.auth.signOut()
                 return { success: false, error: '🚫 Tu cuenta ha sido suspendida' }
             }
@@ -174,13 +198,41 @@ export class AuthManager {
     }
 
     // ============================================
-    // REGISTRAR CON RPC (NUEVO)
+    // LOGIN CON GOOGLE
+    // ============================================
+    async loginGoogle() {
+        try {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/mi-cuenta.html`
+                }
+            })
+            
+            if (error) {
+                console.error('❌ Error en login con Google:', error)
+                return { success: false, error: `❌ ${error.message}` }
+            }
+            
+            return { 
+                success: true, 
+                url: data.url,
+                message: '✅ Redirigiendo a Google...'
+            }
+            
+        } catch (error) {
+            console.error('❌ Error en login con Google:', error)
+            return { success: false, error: `❌ ${error.message}` }
+        }
+    }
+
+    // ============================================
+    // REGISTRAR
     // ============================================
     async registrar(email, password, datos) {
         try {
-            console.log('📝 Registrando con RPC:', { email, datos });
+            console.log('📝 Registrando usuario:', { email, datos });
             
-            // Validaciones
             if (!email || !email.includes('@')) {
                 return { success: false, error: '❌ Ingresa un email válido' }
             }
@@ -188,9 +240,6 @@ export class AuthManager {
                 return { success: false, error: '❌ La contraseña debe tener al menos 6 caracteres' }
             }
             
-            // ============================================
-            // 1. VERIFICAR SI EL EMAIL YA EXISTE
-            // ============================================
             const { data: existeEmail, error: checkError } = await supabase
                 .from('perfiles')
                 .select('id, email')
@@ -206,9 +255,6 @@ export class AuthManager {
                 return { success: false, error: '⚠️ Este email ya está registrado' }
             }
             
-            // ============================================
-            // 2. VERIFICAR SI EL TELÉFONO YA EXISTE
-            // ============================================
             if (datos.telefono) {
                 const { data: existeTelefono, error: checkTelError } = await supabase
                     .from('perfiles')
@@ -226,45 +272,106 @@ export class AuthManager {
                 }
             }
             
-            // ============================================
-            // 3. LLAMAR A LA FUNCIÓN RPC
-            // ============================================
-            const { data, error } = await supabase.rpc('registrar_usuario_completo', {
-                p_email: email.trim(),
-                p_password: password,
-                p_nombre: datos.nombre || '',
-                p_telefono: datos.telefono || '',
-                p_provincia: datos.provincia || '',
-                p_codigo_referido: datos.codigo_referido || null
+            const { data, error } = await supabase.auth.signUp({
+                email: email.trim(),
+                password: password,
+                options: {
+                    emailRedirectTo: `${window.location.origin}/login.html`,
+                    data: {
+                        nombre: datos.nombre || '',
+                        telefono: datos.telefono || '',
+                        provincia: datos.provincia || '',
+                        codigo_referido: datos.codigo_referido || null
+                    }
+                }
             });
             
-            console.log('📥 Respuesta RPC:', data);
+            console.log('📥 Respuesta signUp:', data);
             
             if (error) {
-                console.error('❌ Error en RPC:', error);
+                console.error('❌ Error en signUp:', error);
                 return { success: false, error: `❌ ${error.message}` }
             }
             
-            if (!data || !data.success) {
-                const errorMsg = data?.message || data?.error || 'Error al registrar';
-                console.error('❌ RPC falló:', errorMsg);
-                return { success: false, error: `❌ ${errorMsg}` }
+            if (!data.user) {
+                return { success: false, error: '❌ No se pudo crear el usuario' }
             }
             
-            console.log('✅ Registro exitoso:', data);
+            console.log('✅ Usuario creado - Email de confirmación enviado a:', email);
             
-            // Cargar el usuario recién creado
-            await this.cargarUsuario(data.user_id);
+            const perfilData = {
+                id: data.user.id,
+                email: email.trim(),
+                nombre: datos.nombre || '',
+                telefono: datos.telefono || '',
+                provincia: datos.provincia || '',
+                estado: 'activo',
+                created_at: new Date().toISOString()
+            };
+            
+            if (datos.codigo_referido) {
+                perfilData.codigo_referido = datos.codigo_referido;
+            }
+            if (datos.referido_por) {
+                perfilData.referido_por = datos.referido_por;
+            }
+            
+            const { error: perfilError } = await supabase
+                .from('perfiles')
+                .insert([perfilData]);
+            
+            if (perfilError) {
+                console.error('❌ Error creando perfil:', perfilError);
+                return { 
+                    success: true, 
+                    user: data.user,
+                    warning: 'Usuario creado pero hubo un error al crear el perfil. Contacta a soporte.',
+                    message: '✅ Cuenta creada. Revisa tu email para confirmar.'
+                }
+            }
+            
+            if (datos.codigo_referido && datos.referido_por) {
+                try {
+                    await supabase
+                        .from('historial_referidos')
+                        .insert([{
+                            usuario_id: datos.referido_por,
+                            referido_id: data.user.id,
+                            codigo_utilizado: datos.codigo_referido,
+                            estado: 'pendiente',
+                            created_at: new Date().toISOString()
+                        }]);
+                    
+                    console.log('✅ Referido registrado correctamente');
+                } catch (refError) {
+                    console.error('⚠️ Error registrando referido:', refError);
+                }
+            }
+            
+            try {
+                await supabase
+                    .from('saldo_usuarios')
+                    .insert([{
+                        user_id: data.user.id,
+                        saldo_actual: 0,
+                        created_at: new Date().toISOString()
+                    }]);
+                console.log('✅ Saldo inicial creado');
+            } catch (saldoError) {
+                console.error('⚠️ Error creando saldo:', saldoError);
+            }
+            
+            await this.cargarUsuario(data.user.id);
             
             return { 
                 success: true, 
-                user: { id: data.user_id, email: data.email },
-                codigo_referido: data.codigo_referido,
-                message: '✅ ¡Registro exitoso!'
+                user: data.user,
+                codigo_referido: datos.codigo_referido || null,
+                message: '✅ Cuenta creada correctamente. Revisa tu correo para confirmar tu cuenta.'
             }
             
         } catch (error) {
-            console.error('❌ Error en registrar:', error)
+            console.error('❌ Error en registrar:', error);
             return { success: false, error: `❌ ${error.message}` }
         }
     }
@@ -419,3 +526,5 @@ export class AuthManager {
 // ========== EXPORTAR INSTANCIA ==========
 export const auth = new AuthManager()
 window.auth = auth
+
+console.log('✅ Auth Manager cargado correctamente')
