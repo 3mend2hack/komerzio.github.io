@@ -143,42 +143,6 @@
         a { text-decoration: none; color: inherit; }
         #outer-wrapper { overflow-x: hidden !important; width: 100% !important; }
 
-        /* ========== BANNER DE BANEO ========== */
-        .ban-banner {
-            background: #fee2e2;
-            border-bottom: 3px solid #dc2626;
-            padding: 10px 20px;
-            text-align: center;
-            display: none;
-            position: sticky;
-            top: 0;
-            z-index: 999;
-            width: 100%;
-        }
-        .ban-banner.show { display: block; }
-        .ban-banner p {
-            color: #991b1b;
-            font-size: 14px;
-            font-weight: 600;
-            margin: 0;
-        }
-        .ban-banner p i { margin-right: 8px; }
-        .ban-banner .ban-motive { font-weight: 400; color: #7f1d1d; }
-        .ban-banner .ban-time { font-weight: 400; color: #7f1d1d; }
-        .ban-banner .btn-logout-ban {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 4px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-left: 10px;
-            transition: all 0.2s;
-        }
-        .ban-banner .btn-logout-ban:hover { background: #b91c1c; }
-
         /* ===== HEADER ===== */
         #header-wrap {
             background: var(--primary);
@@ -355,7 +319,7 @@
         .hot-header a:hover { color: white; transform: translateX(4px); }
 
         /* ===== PRODUCT GRIDS ===== */
-        .products-grid, #featured-products, #latest-products {
+        .products-grid: ;, #featured-products, #latest-products {
             display: grid !important; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
             gap: 24px !important; max-width: 1500px !important; margin: 0 auto !important;
             padding: 0 20px !important; width: 100% !important;
@@ -619,21 +583,6 @@
 </head>
 <body>
     <div id="outer-wrapper">
-
-        <!-- ============================================================ -->
-        <!-- BANNER DE BANEO - NUEVO                                -->
-        <!-- ============================================================ -->
-        <div id="banBanner" class="ban-banner">
-            <p>
-                <i class="fa fa-ban"></i>
-                <span id="banMotive">Tu cuenta ha sido suspendida</span>
-                <span id="banTimeInfo" class="ban-time"></span>
-                <button class="btn-logout-ban" onclick="window.cerrarSesionBan()">
-                    <i class="fa fa-sign-out"></i> Cerrar sesión
-                </button>
-            </p>
-        </div>
-
         <!-- HEADER COMPLETO -->
         <div id="header-wrap">
             <div class="header-header">
@@ -822,85 +771,6 @@
         import { notificaciones } from '/js/notificaciones.js'
         
         console.log('✅ Supabase iniciado correctamente');
-
-        // ================================================================
-        // NUEVAS FUNCIONES PARA BANEO
-        // ================================================================
-        
-        async function verificarBaneo() {
-            const usuario = auth.getUsuario();
-            if (!usuario) return null;
-            
-            try {
-                const { data, error } = await supabase.rpc('verificar_baneo', {
-                    p_user_id: usuario.id
-                });
-                
-                if (error) {
-                    console.error('Error verificando baneo:', error);
-                    return null;
-                }
-                
-                if (data && data.length > 0) {
-                    const info = data[0];
-                    if (info.esta_baneado) {
-                        return info;
-                    }
-                }
-                return null;
-            } catch (error) {
-                console.error('Error en verificarBaneo:', error);
-                return null;
-            }
-        }
-
-        function mostrarBannerBan(info) {
-            const banner = document.getElementById('banBanner');
-            const motiveEl = document.getElementById('banMotive');
-            const timeEl = document.getElementById('banTimeInfo');
-            
-            if (!info || !info.esta_baneado) {
-                banner.classList.remove('show');
-                return;
-            }
-            
-            banner.classList.add('show');
-            
-            motiveEl.textContent = info.motivo ? `Motivo: ${info.motivo}` : 'Tu cuenta ha sido suspendida';
-            
-            if (info.tipo_baneo_val === 'temporal' && info.baneo_hasta_val) {
-                const fechaFin = new Date(info.baneo_hasta_val);
-                const ahora = new Date();
-                const diffMs = fechaFin - ahora;
-                
-                if (diffMs > 0) {
-                    const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
-                    const diffMin = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-                    
-                    if (diffHoras > 24) {
-                        const dias = Math.floor(diffHoras / 24);
-                        timeEl.textContent = ` · Restan ${dias} día${dias > 1 ? 's' : ''}`;
-                    } else if (diffHoras > 0) {
-                        timeEl.textContent = ` · Restan ${diffHoras} hora${diffHoras > 1 ? 's' : ''}`;
-                    } else {
-                        timeEl.textContent = ` · Restan ${diffMin} minuto${diffMin > 1 ? 's' : ''}`;
-                    }
-                } else {
-                    timeEl.textContent = ' · El baneo expiró, recarga la página';
-                }
-            } else {
-                timeEl.textContent = ' · Baneo permanente';
-            }
-        }
-
-        window.cerrarSesionBan = async function() {
-            await auth.cerrarSesion();
-            window.location.reload();
-        };
-
-        // ================================================================
-        // FUNCIONES EXISTENTES - SIN MODIFICAR
-        // ================================================================
         
         async function cargarNotificacionesMasivas() {
             if (!auth.isAuthenticated()) return [];
@@ -1143,6 +1013,7 @@
 
         let autoplayIntervals = {};
 
+        // ===== FUNCIONES CORREGIDAS - USAN SECCIONES =====
         async function cargarConsumibles() {
             try {
                 const { data, error } = await supabase
@@ -1252,28 +1123,7 @@
             }).join('')
         }
 
-        // ================================================================
-        // INICIALIZAR - CON VERIFICACIÓN DE BANEO
-        // ================================================================
         async function inicializar() {
-            // Verificar baneo ANTES de cargar cualquier contenido
-            const banInfo = await verificarBaneo();
-            if (banInfo && banInfo.esta_baneado) {
-                mostrarBannerBan(banInfo);
-                // Ocultar todo el contenido principal si está baneado
-                document.querySelector('.slider-outer-wrap').style.display = 'none';
-                document.querySelector('.hot-section').style.display = 'none';
-                document.querySelector('.products-grid#featured-products').style.display = 'none';
-                document.querySelector('.categorias-grid').style.display = 'none';
-                document.querySelector('.carrusel-container').style.display = 'none';
-                document.getElementById('latest-products').style.display = 'none';
-                document.querySelector('.section-title').style.display = 'none';
-                return;
-            } else {
-                document.getElementById('banBanner').classList.remove('show');
-            }
-
-            // Cargar resto del contenido
             await cargarListaDeseos();
             actualizarBotonLogin();
             await Promise.all([cargarSlider(), cargarDestacados(), cargarOfertas(), cargarConsumibles(), cargarLimpieza(), cargarUltimos()]);
@@ -1284,29 +1134,6 @@
 
         auth.onCambio(async (usuario) => {
             actualizarBotonLogin();
-            if (usuario) {
-                const banInfo = await verificarBaneo();
-                if (banInfo && banInfo.esta_baneado) {
-                    mostrarBannerBan(banInfo);
-                    document.querySelector('.slider-outer-wrap').style.display = 'none';
-                    document.querySelector('.hot-section').style.display = 'none';
-                    document.querySelector('.products-grid#featured-products').style.display = 'none';
-                    document.querySelector('.categorias-grid').style.display = 'none';
-                    document.querySelector('.carrusel-container').style.display = 'none';
-                    document.getElementById('latest-products').style.display = 'none';
-                    document.querySelector('.section-title').style.display = 'none';
-                    return;
-                } else {
-                    document.getElementById('banBanner').classList.remove('show');
-                    document.querySelector('.slider-outer-wrap').style.display = 'block';
-                    document.querySelector('.hot-section').style.display = 'block';
-                    document.querySelector('.products-grid#featured-products').style.display = 'grid';
-                    document.querySelector('.categorias-grid').style.display = 'grid';
-                    document.querySelector('.carrusel-container').style.display = 'block';
-                    document.getElementById('latest-products').style.display = 'grid';
-                    document.querySelector('.section-title').style.display = 'flex';
-                }
-            }
             await cargarListaDeseos();
             await Promise.all([cargarSlider(), cargarDestacados(), cargarOfertas(), cargarConsumibles(), cargarLimpieza(), cargarUltimos()]);
             setTimeout(async () => { await renderizarListaNotificaciones(); await actualizarBadgeCampana(); }, 1000);

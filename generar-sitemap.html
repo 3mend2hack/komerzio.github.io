@@ -1,52 +1,385 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Generador de Sitemap - KOMERZIO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Sitemap · KOMERZIO</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://komerzio.dpdns.org/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="https://komerzio.dpdns.org/favicon.svg" />
+    <link rel="shortcut icon" href="https://komerzio.dpdns.org/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://komerzio.dpdns.org/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="KOMERZIO" />
+    <link rel="manifest" href="https://komerzio.dpdns.org/site.webmanifest" />
+    
     <style>
-        body { font-family: Arial; padding: 20px; background: #0f172a; color: white; }
-        .container { max-width: 600px; margin: auto; background: #1e293b; padding: 30px; border-radius: 12px; }
-        button { background: #f97316; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; }
-        button:hover { background: #ea580c; }
-        textarea { width: 100%; height: 300px; margin: 20px 0; padding: 10px; border-radius: 8px; background: #0f172a; color: #e2e8f0; border: 1px solid #334155; font-family: monospace; font-size: 12px; }
-        .loading { display: none; }
-        .success { color: #22c55e; }
-        .error { color: #ef4444; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 35px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f97316, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 10px;
+            color: #f1f5f9;
+        }
+        
+        .header p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+            width: 100%;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(249,115,22,0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(249,115,22,0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            box-shadow: none;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background: #334155;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .status {
+            margin: 20px 0;
+            padding: 14px 18px;
+            border-radius: 10px;
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .status.loading {
+            display: block;
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #334155;
+        }
+        
+        .status.loading i {
+            animation: spin 1s linear infinite;
+        }
+        
+        .status.success {
+            display: block;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+        
+        .status.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .status.info {
+            display: block;
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #7dd3fc;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #334155;
+        }
+        
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #f97316;
+            display: block;
+        }
+        
+        .stat-card .label {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        
+        .sitemap-output {
+            margin-top: 20px;
+        }
+        
+        .sitemap-output h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sitemap-output h3 i { color: #f97316; }
+        
+        textarea {
+            width: 100%;
+            height: 320px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #0f172a;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #f97316;
+        }
+        
+        textarea::placeholder {
+            color: #475569;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .actions .btn {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .footer-note {
+            margin-top: 20px;
+            padding: 16px;
+            background: #1e293b;
+            border-radius: 10px;
+            border: 1px solid #334155;
+        }
+        
+        .footer-note p {
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .footer-note strong {
+            color: #e2e8f0;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 640px) {
+            .container { padding: 20px; margin: 20px auto; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .actions { flex-direction: column; }
+            .actions .btn { width: 100%; }
+            .header .logo-text { font-size: 24px; }
+            .header h1 { font-size: 20px; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📝 Generador de Sitemap</h1>
-        <p>KOMERZIO - Obtén todos los productos de Supabase</p>
+        <!-- Header -->
+        <div class="header">
+            <span class="logo-text">KOMERZIO</span>
+            <h1>📝 Generador de Sitemap</h1>
+            <p>Genera automáticamente el sitemap.xml con todos tus productos</p>
+        </div>
         
-        <button onclick="generarSitemap()">🚀 Generar Sitemap</button>
-        <div id="loading" class="loading">⏳ Generando...</div>
-        <div id="result"></div>
+        <!-- Botón principal -->
+        <button class="btn" id="generateBtn" onclick="generarSitemap()">
+            <i class="fas fa-sitemap"></i> Generar Sitemap
+        </button>
         
-        <h3>📄 Sitemap generado:</h3>
-        <textarea id="sitemapOutput" readonly></textarea>
-        <button onclick="descargarSitemap()">💾 Descargar XML</button>
+        <!-- Status -->
+        <div id="status" class="status"></div>
         
-        <p style="margin-top: 20px; font-size: 12px; color: #94a3b8;">
-            Nota: El sitemap se generará con todos tus productos de la base de datos.
-        </p>
+        <!-- Stats -->
+        <div id="statsContainer" class="stats-grid" style="display: none;">
+            <div class="stat-card">
+                <span class="number" id="statProductos">0</span>
+                <span class="label">Productos</span>
+            </div>
+            <div class="stat-card">
+                <span class="number" id="statCategorias">0</span>
+                <span class="label">Categorías</span>
+            </div>
+            <div class="stat-card">
+                <span class="number" id="statPaginas">0</span>
+                <span class="label">Páginas</span>
+            </div>
+        </div>
+        
+        <!-- Sitemap Output -->
+        <div class="sitemap-output">
+            <h3><i class="fas fa-code"></i> Sitemap generado</h3>
+            <textarea id="sitemapOutput" placeholder="Genera el sitemap para ver el resultado aquí..." readonly></textarea>
+            
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="copiarSitemap()">
+                    <i class="fas fa-copy"></i> Copiar
+                </button>
+                <button class="btn btn-secondary" onclick="descargarSitemap()">
+                    <i class="fas fa-download"></i> Descargar XML
+                </button>
+            </div>
+        </div>
+        
+        <!-- Footer note -->
+        <div class="footer-note">
+            <p>
+                <strong>📌 Nota:</strong> El sitemap incluye todos tus productos, categorías y páginas principales.
+                La prioridad y frecuencia se asignan automáticamente según el tipo de contenido.
+                <br><br>
+                <strong>⏱️ Tiempo estimado:</strong> La generación puede tomar unos segundos dependiendo de la cantidad de productos.
+            </p>
+        </div>
     </div>
 
+    <!-- ========== SCRIPTS ========== -->
     <script>
-        const SUPABASE_URL = 'https://houfrgnlctliwkzzelmi.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdWZyZ25sY3RsaXdrenplbG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MTQ2OTMsImV4cCI6MjA5NjE5MDY5M30.zUfcA755LEjBbn-N05LrmwFqsOFITRP4qLzxjgPIy54';
+        // ============================================================
+        // ✅ CREDENCIALES DE SUPABASE (ACTUALIZADAS)
+        // ============================================================
+        const SUPABASE_URL = 'https://ehlebvmalatsdyvopvkn.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVobGVidm1hbGF0c2R5dm9wdmtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMjg2MjAsImV4cCI6MjA5OTYwNDYyMH0.lsV-x6y3e-0fbdUqb--_CVi8c1gUhO4MUoo1grq66ZI';
+        
+        const DOMINIO = 'https://komerzio.dpdns.org';
+        const FECHA_HOY = new Date().toISOString().split('T')[0];
 
+        // ============================================================
+        // REFERENCIAS DOM
+        // ============================================================
+        const statusEl = document.getElementById('status');
+        const outputEl = document.getElementById('sitemapOutput');
+        const statsContainer = document.getElementById('statsContainer');
+        const statProductos = document.getElementById('statProductos');
+        const statCategorias = document.getElementById('statCategorias');
+        const statPaginas = document.getElementById('statPaginas');
+        const generateBtn = document.getElementById('generateBtn');
+
+        // ============================================================
+        // FUNCIONES DE ESTADO
+        // ============================================================
+        function setStatus(mensaje, tipo = 'loading') {
+            statusEl.className = `status ${tipo}`;
+            statusEl.innerHTML = mensaje;
+        }
+
+        function setLoading() {
+            setStatus('<i class="fas fa-spinner"></i> Generando sitemap... Por favor espera', 'loading');
+        }
+
+        function setSuccess(mensaje) {
+            setStatus(`✅ ${mensaje}`, 'success');
+        }
+
+        function setError(mensaje) {
+            setStatus(`❌ ${mensaje}`, 'error');
+        }
+
+        function setInfo(mensaje) {
+            setStatus(`ℹ️ ${mensaje}`, 'info');
+        }
+
+        // ============================================================
+        // GENERAR SITEMAP
+        // ============================================================
         async function generarSitemap() {
-            const loading = document.getElementById('loading');
-            const result = document.getElementById('result');
-            const output = document.getElementById('sitemapOutput');
+            // Resetear estado
+            outputEl.value = '';
+            statsContainer.style.display = 'none';
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
             
-            loading.style.display = 'block';
-            result.innerHTML = '';
-            output.value = '';
+            setLoading();
             
             try {
-                // Obtener productos
+                // ============================================================
+                // 1. OBTENER PRODUCTOS
+                // ============================================================
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/productos?select=id,nombre,updated_at&estado=eq.activo`, {
                     headers: {
                         'apikey': SUPABASE_KEY,
@@ -54,42 +387,57 @@
                     }
                 });
                 
-                if (!response.ok) throw new Error('Error al obtener productos');
+                if (!response.ok) throw new Error(`Error al obtener productos: ${response.status}`);
                 
                 const productos = await response.json();
+                console.log(`✅ ${productos.length} productos cargados`);
                 
-                // Generar XML
+                // ============================================================
+                // 2. GENERAR XML
+                // ============================================================
                 let xml = `<?xml version="1.0" encoding="UTF-8"?>
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
                 xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
         `;
                 
-                // Productos
+                let contadorProductos = 0;
+                
+                // 2.1 Productos
                 for (const producto of productos) {
-                    const fecha = producto.updated_at ? new Date(producto.updated_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+                    const fecha = producto.updated_at ? 
+                        new Date(producto.updated_at).toISOString().split('T')[0] : 
+                        FECHA_HOY;
+                    
+                    // Solo incluir productos con ID válido
+                    if (!producto.id) continue;
                     
                     xml += `
             <url>
-                <loc>https://komerzio.dpdns.org/producto.html?id=${producto.id}</loc>
+                <loc>${DOMINIO}/producto.html?id=${producto.id}</loc>
                 <lastmod>${fecha}</lastmod>
                 <changefreq>weekly</changefreq>
                 <priority>0.7</priority>
             </url>`;
+                    contadorProductos++;
                 }
                 
-                // Categorías
-                const categorias = ['ofertas', 'Electrónica', 'Ropa', 'Hogar', 'Accesorios', 'Consumibles', 'Limpieza', 'Deportes', 'Juguetes', 'Salud', 'Alimentos'];
+                // 2.2 Categorías
+                const categorias = [
+                    'ofertas', 'Electrónica', 'Ropa', 'Hogar', 'Accesorios', 
+                    'Consumibles', 'Limpieza', 'Deportes', 'Útiles'
+                ];
+                
                 for (const cat of categorias) {
                     const prioridad = cat === 'ofertas' ? 0.9 : 0.8;
                     xml += `
             <url>
-                <loc>https://komerzio.dpdns.org/categoria.html?cat=${encodeURIComponent(cat)}</loc>
+                <loc>${DOMINIO}/categoria.html?cat=${encodeURIComponent(cat)}</loc>
                 <changefreq>daily</changefreq>
                 <priority>${prioridad}</priority>
             </url>`;
                 }
                 
-                // Páginas principales
+                // 2.3 Páginas principales
                 const paginas = [
                     { url: '/', prioridad: 1.0, freq: 'daily' },
                     { url: '/index.html', prioridad: 1.0, freq: 'daily' },
@@ -97,19 +445,22 @@
                     { url: '/novedades.html', prioridad: 0.7, freq: 'daily' },
                     { url: '/ofertas-especiales.html', prioridad: 0.9, freq: 'daily' },
                     { url: '/destacados.html', prioridad: 0.8, freq: 'daily' },
+                    { url: '/nuevos-productos.html', prioridad: 0.8, freq: 'daily' },
                     { url: '/sobre-nosotros.html', prioridad: 0.5, freq: 'monthly' },
                     { url: '/terminos.html', prioridad: 0.3, freq: 'yearly' },
-                    { url: '/privacidad.html', prioridad: 0.3, freq: 'yearly' },
                     { url: '/faq.html', prioridad: 0.5, freq: 'monthly' },
-                    { url: '/contacto.html', prioridad: 0.5, freq: 'monthly' }
+                    { url: '/contacto.html', prioridad: 0.5, freq: 'monthly' },
+                    { url: '/mi-cuenta.html', prioridad: 0.4, freq: 'monthly' },
+                    { url: '/recarga.html', prioridad: 0.6, freq: 'weekly' },
+                    { url: '/transferir.html', prioridad: 0.6, freq: 'weekly' },
+                    { url: '/recibir.html', prioridad: 0.6, freq: 'weekly' }
                 ];
                 
-                const hoy = new Date().toISOString().split('T')[0];
                 for (const page of paginas) {
                     xml += `
             <url>
-                <loc>https://komerzio.dpdns.org${page.url}</loc>
-                <lastmod>${hoy}</lastmod>
+                <loc>${DOMINIO}${page.url}</loc>
+                <lastmod>${FECHA_HOY}</lastmod>
                 <changefreq>${page.freq}</changefreq>
                 <priority>${page.prioridad}</priority>
             </url>`;
@@ -118,33 +469,114 @@
                 xml += `
         </urlset>`;
                 
-                // Mostrar resultado
-                output.value = xml;
-                result.innerHTML = `<div class="success">✅ Sitemap generado con ${productos.length} productos, ${categorias.length} categorías y ${paginas.length} páginas</div>`;
+                // ============================================================
+                // 3. MOSTRAR RESULTADO
+                // ============================================================
+                outputEl.value = xml;
+                
+                // Mostrar estadísticas
+                const totalCategorias = categorias.length;
+                const totalPaginas = paginas.length;
+                
+                statProductos.textContent = contadorProductos;
+                statCategorias.textContent = totalCategorias;
+                statPaginas.textContent = totalPaginas;
+                statsContainer.style.display = 'grid';
+                
+                setSuccess(`Sitemap generado con ${contadorProductos} productos, ${totalCategorias} categorías y ${totalPaginas} páginas`);
                 
             } catch (error) {
-                result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
-                console.error('Error:', error);
+                console.error('❌ Error:', error);
+                setError(`Error al generar el sitemap: ${error.message}`);
             } finally {
-                loading.style.display = 'none';
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-sitemap"></i> Generar Sitemap';
             }
         }
 
-        function descargarSitemap() {
-            const content = document.getElementById('sitemapOutput').value;
+        // ============================================================
+        // COPIAR SITEMAP
+        // ============================================================
+        function copiarSitemap() {
+            const content = outputEl.value;
             if (!content) {
-                alert('Primero genera el sitemap');
+                setInfo('Primero genera el sitemap antes de copiar');
+                setTimeout(() => {
+                    if (statusEl.classList.contains('info')) {
+                        statusEl.style.display = 'none';
+                    }
+                }, 3000);
                 return;
             }
             
-            const blob = new Blob([content], { type: 'application/xml' });
+            navigator.clipboard.writeText(content).then(() => {
+                setSuccess('✅ Sitemap copiado al portapapeles');
+                setTimeout(() => {
+                    if (statusEl.classList.contains('success')) {
+                        statusEl.style.display = 'none';
+                    }
+                }, 3000);
+            }).catch(() => {
+                // Fallback: seleccionar el texto
+                outputEl.select();
+                document.execCommand('copy');
+                setSuccess('✅ Sitemap copiado al portapapeles');
+                setTimeout(() => {
+                    if (statusEl.classList.contains('success')) {
+                        statusEl.style.display = 'none';
+                    }
+                }, 3000);
+            });
+        }
+
+        // ============================================================
+        // DESCARGAR SITEMAP
+        // ============================================================
+        function descargarSitemap() {
+            const content = outputEl.value;
+            if (!content) {
+                setInfo('Primero genera el sitemap antes de descargar');
+                setTimeout(() => {
+                    if (statusEl.classList.contains('info')) {
+                        statusEl.style.display = 'none';
+                    }
+                }, 3000);
+                return;
+            }
+            
+            const blob = new Blob([content], { type: 'application/xml;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = 'sitemap.xml';
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            
+            setSuccess('✅ Sitemap descargado como sitemap.xml');
+            setTimeout(() => {
+                if (statusEl.classList.contains('success')) {
+                    statusEl.style.display = 'none';
+                }
+            }, 3000);
         }
+
+        // ============================================================
+        // INICIALIZAR
+        // ============================================================
+        console.log('✅ Generador de Sitemap - KOMERZIO');
+        console.log(`🌐 Dominio: ${DOMINIO}`);
+        console.log(`📅 Fecha: ${FECHA_HOY}`);
+        console.log('🔑 Credenciales de Supabase cargadas');
+        
+        // Mostrar mensaje inicial
+        setInfo('Presiona "Generar Sitemap" para comenzar');
+        setTimeout(() => {
+            if (statusEl.classList.contains('info')) {
+                statusEl.style.display = 'none';
+            }
+        }, 4000);
     </script>
 </body>
 </html>

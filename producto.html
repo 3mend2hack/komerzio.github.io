@@ -27,6 +27,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://komerzio.dpdns.org/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="https://komerzio.dpdns.org/favicon.svg" />
+    <link rel="shortcut icon" href="https://komerzio.dpdns.org/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://komerzio.dpdns.org/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="KOMERZIO" />
+    <link rel="manifest" href="https://komerzio.dpdns.org/site.webmanifest" />
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -103,6 +111,7 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
+            position: relative;
         }
         .sora-cart-details:hover {
             background: #f97316;
@@ -169,6 +178,7 @@
             width: 24px; height: 24px; background: #f0f2f5; border: 1px solid #ddd; border-radius: 4px;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
+        .cart-preview-quantity-btn:hover { background: #e5e7eb; }
         .cart-preview-quantity-number {
             font-weight: 600; min-width: 35px; text-align: center; font-size: 16px;
             color: #0f1111; background: #ffffff; padding: 4px 0; border-radius: 4px;
@@ -178,14 +188,19 @@
         .cart-preview-item-remove:hover { color: #dc3545; }
         .cart-preview-footer { border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px; background: white; }
         .cart-preview-total { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 10px; }
-        .cart-preview-buttons { display: flex; gap: 10px; }
+        .cart-preview-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
         .cart-preview-btn {
             flex: 1; padding: 10px; border: none; border-radius: 20px; font-weight: 600;
             font-size: 13px; cursor: pointer; text-align: center; text-decoration: none;
+            min-width: 80px;
         }
         .cart-preview-btn-primary { background: #ffd814; color: #0f1111; }
         .cart-preview-btn-primary:hover { background: #f7ca00; }
         .cart-preview-btn-secondary { background: #f0f2f5; color: #0f1111; }
+        .cart-preview-btn-secondary:hover { background: #e5e7eb; }
+        .cart-preview-btn-danger { background: #dc3545; color: white; }
+        .cart-preview-btn-danger:hover { background: #c82333; }
+        
         .header-menu {
             background: #1e293b;
             padding: 0 20px;
@@ -219,6 +234,7 @@
             max-width: 1400px;
             margin: 40px auto;
             padding: 0 20px;
+            min-height: 60vh;
         }
         
         .official-badge {
@@ -409,6 +425,8 @@
             justify-content: center;
             gap: 10px;
             flex: 1;
+            min-width: 120px;
+            text-decoration: none;
         }
         
         .btn-primary {
@@ -449,6 +467,11 @@
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+        }
+        
+        .btn-success {
+            background: #16a34a;
+            color: white;
         }
         
         .product-agotado-large {
@@ -579,6 +602,69 @@
             color: white;
         }
         
+        .related-products {
+            margin-top: 50px;
+            background: white;
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        
+        .related-products h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #0f172a;
+        }
+        
+        .related-products h2 i { color: #f97316; }
+        
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .related-item {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid #e2e8f0;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .related-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-color: #f97316;
+        }
+        
+        .related-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        
+        .related-item h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        
+        .related-item .related-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #dc2626;
+            margin-top: 5px;
+        }
+        
         #footer-wrapper {
             background: #0f172a;
             color: white;
@@ -633,6 +719,13 @@
             color: #f97316;
             margin-bottom: 20px;
         }
+        .loading-container .spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         .error-container {
             text-align: center;
             padding: 100px 20px;
@@ -663,7 +756,17 @@
             .product-title { font-size: 24px; }
             .current-price { font-size: 32px; }
             .product-actions { flex-direction: column; }
-            .btn { padding: 14px 20px; }
+            .btn { padding: 14px 20px; min-width: 100%; }
+            .footer-widgets-wrap { grid-template-columns: 1fr; gap: 30px; }
+            .sora-cart-description { width: 300px; right: -100px; }
+            .product-detail-grid { padding: 15px; }
+            .product-description { padding: 20px; }
+        }
+        @media (max-width: 480px) {
+            .header-header { padding: 10px; }
+            .sora-cart-description { width: 280px; right: -120px; }
+            .product-title { font-size: 20px; }
+            .current-price { font-size: 28px; }
         }
     </style>
 </head>
@@ -703,7 +806,7 @@
                                     </div>
                                     <div class="cart-preview-buttons">
                                         <a href="/p/cart.html" class="cart-preview-btn cart-preview-btn-primary">Ver Carrito</a>
-                                        <button onclick="window.vaciarCarrito()" class="cart-preview-btn cart-preview-btn-secondary">Vaciar</button>
+                                        <button onclick="window.vaciarCarrito()" class="cart-preview-btn cart-preview-btn-danger">Vaciar</button>
                                         <a href="/p/checkout.html" class="cart-preview-btn cart-preview-btn-primary">Pagar</a>
                                     </div>
                                 </div>
@@ -717,11 +820,11 @@
                 <div class="container row">
                     <div id="main-menu">
                         <ul>
-                            <li><a href="/">Inicio</a></li>
-                            <li><a href="/categoria.html?cat=ofertas">Ofertas</a></li>
-                            <li><a href="/categoria.html?cat=Electrónica">Electrónica</a></li>
-                            <li><a href="/categoria.html?cat=Ropa">Ropa</a></li>
-                            <li><a href="/categoria.html?cat=Hogar">Hogar</a></li>
+                            <li><a href="/"><i class="fa fa-home"></i> Inicio</a></li>
+                            <li><a href="/categoria.html?cat=ofertas"><i class="fa fa-tag"></i> Ofertas</a></li>
+                            <li><a href="/categoria.html?cat=Electrónica"><i class="fa fa-laptop"></i> Electrónica</a></li>
+                            <li><a href="/categoria.html?cat=Ropa"><i class="fa fa-tshirt"></i> Ropa</a></li>
+                            <li><a href="/categoria.html?cat=Hogar"><i class="fa fa-home"></i> Hogar</a></li>
                             <li><a href="/buscar.html"><i class="fa fa-search"></i> Buscar</a></li>
                             <li><a href="/lista-deseos.html"><i class="fa fa-heart"></i> Mi Lista</a></li>
                         </ul>
@@ -732,7 +835,7 @@
 
         <div id="product-content" class="product-detail-container">
             <div id="loadingContainer" class="loading-container">
-                <i class="fa fa-spinner fa-pulse"></i>
+                <i class="fa fa-spinner fa-pulse spinner"></i>
                 <h2>Cargando producto...</h2>
                 <p>Por favor espera</p>
             </div>
@@ -741,7 +844,7 @@
                 <i class="fa fa-exclamation-triangle"></i>
                 <h2>Producto no encontrado</h2>
                 <p>El producto que buscas no existe o ha sido eliminado.</p>
-                <a href="/" class="btn btn-primary" style="display: inline-block; padding: 12px 30px; text-decoration: none; margin-top: 20px;">
+                <a href="/" class="btn btn-primary" style="display: inline-block; padding: 12px 30px; text-decoration: none; margin-top: 20px; min-width: auto;">
                     <i class="fa fa-arrow-left"></i> Volver al inicio
                 </a>
             </div>
@@ -784,18 +887,27 @@
     </div>
 
     <!-- ========== SCRIPTS ========== -->
-    <!-- Librería Supabase UMD (debe cargarse antes del módulo) -->
-    <!-- jQuery y SweetAlert2 -->
+    <!-- Librerías externas -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- 🔥 Configuración de Supabase (CREDENCIALES CORRECTAS) -->
+    <script src="/js/komerzio-config.js"></script>
     
     <!-- Módulo principal -->
     <script type="module">
+        // ============================================================
+        // IMPORTAR CONFIGURACIÓN DE SUPABASE
+        // ============================================================
         import { supabase } from '/js/supabase-client.js';
         import { auth } from '/js/auth.js';
         import { initCarrito } from '/js/cart.js';
         
-        // ========== INICIALIZAR CARRITO ==========
+        console.log('✅ producto.html - Inicializado con Supabase');
+        
+        // ============================================================
+        // INICIALIZAR CARRITO
+        // ============================================================
         const carrito = initCarrito();
         window.carrito = carrito;
         window.cart = carrito;
@@ -804,32 +916,48 @@
         carrito.cargarDeLocalStorage();
         carrito.actualizarInterfaz();
         
-        // ========== FUNCIÓN PARA ACTUALIZAR META TAGS (OPTIMIZADA PARA WHATSAPP) ==========
+        // ============================================================
+        // ACTUALIZAR META TAGS (OPTIMIZADO PARA WHATSAPP)
+        // ============================================================
         function actualizarMetaTags(producto, precioActual) {
             const url = `https://komerzio.dpdns.org/producto.html?id=${producto.id}`;
             const titulo = `${producto.nombre} | KOMERZIO`;
-            const descripcion = `💰 $${parseFloat(precioActual).toFixed(2)} USD | 📦 Stock: ${producto.stock} unidades | Envío en Sagua de Tánamo`;
+            const descripcion = `💰 $${parseFloat(precioActual).toFixed(2)} USD | 📦 Stock: ${producto.stock || 0} unidades | 🚚 Envío en Sagua de Tánamo`;
             
             let imagenUrl = producto.imagen_url || 'https://komerzio.dpdns.org/android-chrome-512x512.png';
             
-            // Usar proxy para optimizar imagen para WhatsApp (1200x630)
+            // Optimizar imagen para WhatsApp (1200x630)
             if (imagenUrl.includes('supabase.co')) {
                 imagenUrl = `https://images.weserv.nl/?url=${encodeURIComponent(imagenUrl)}&w=1200&h=630&fit=cover&output=jpg&q=85`;
             }
             
+            // Actualizar todas las etiquetas
             document.title = titulo;
-            document.getElementById('metaTitle').setAttribute('content', titulo);
-            document.getElementById('metaDescription').setAttribute('content', descripcion);
-            document.getElementById('ogTitle').setAttribute('content', titulo);
-            document.getElementById('ogDescription').setAttribute('content', descripcion);
-            document.getElementById('ogImage').setAttribute('content', imagenUrl);
-            document.getElementById('ogUrl').setAttribute('content', url);
-            document.getElementById('twitterTitle').setAttribute('content', titulo);
-            document.getElementById('twitterDescription').setAttribute('content', descripcion);
-            document.getElementById('twitterImage').setAttribute('content', imagenUrl);
+            
+            const metaTitle = document.getElementById('metaTitle');
+            const metaDesc = document.getElementById('metaDescription');
+            const ogTitle = document.getElementById('ogTitle');
+            const ogDesc = document.getElementById('ogDescription');
+            const ogImage = document.getElementById('ogImage');
+            const ogUrl = document.getElementById('ogUrl');
+            const twitterTitle = document.getElementById('twitterTitle');
+            const twitterDesc = document.getElementById('twitterDescription');
+            const twitterImage = document.getElementById('twitterImage');
+            
+            if (metaTitle) metaTitle.setAttribute('content', titulo);
+            if (metaDesc) metaDesc.setAttribute('content', descripcion);
+            if (ogTitle) ogTitle.setAttribute('content', titulo);
+            if (ogDesc) ogDesc.setAttribute('content', descripcion);
+            if (ogImage) ogImage.setAttribute('content', imagenUrl);
+            if (ogUrl) ogUrl.setAttribute('content', url);
+            if (twitterTitle) twitterTitle.setAttribute('content', titulo);
+            if (twitterDesc) twitterDesc.setAttribute('content', descripcion);
+            if (twitterImage) twitterImage.setAttribute('content', imagenUrl);
         }
         
-        // ========== FUNCIÓN PARA CARGAR SALDO EN HEADER ==========
+        // ============================================================
+        // CARGAR SALDO EN HEADER
+        // ============================================================
         async function cargarSaldoHeader() {
             const saldoCard = document.getElementById('saldoHeaderCard');
             const saldoAmount = document.getElementById('saldoHeaderAmount');
@@ -841,6 +969,8 @@
             
             try {
                 const usuario = auth.getUsuario();
+                if (!usuario) return;
+                
                 const { data, error } = await supabase
                     .from('saldo_usuarios')
                     .select('saldo_actual')
@@ -857,14 +987,17 @@
             }
         }
         
-        // ========== ACTUALIZAR MENÚ DE USUARIO ==========
+        // ============================================================
+        // ACTUALIZAR MENÚ DE USUARIO
+        // ============================================================
         function actualizarMenuUsuario() {
             const loginBtn = document.getElementById('loginBtnHeader');
             if (!loginBtn) return;
             
             if (auth.isAuthenticated()) {
                 const usuario = auth.getUsuario();
-                const inicial = usuario?.nombre_completo?.charAt(0).toUpperCase() || usuario?.email?.charAt(0).toUpperCase() || 'U';
+                const inicial = usuario?.nombre_completo?.charAt(0).toUpperCase() || 
+                               usuario?.email?.charAt(0).toUpperCase() || 'U';
                 loginBtn.innerHTML = `<i class="fa fa-user"></i><span>${inicial}</span>`;
                 loginBtn.href = '/mi-cuenta.html';
                 cargarSaldoHeader();
@@ -875,22 +1008,29 @@
             }
         }
         
-        // ========== OBTENER SLUG O ID DE LA URL ==========
+        // ============================================================
+        // OBTENER SLUG O ID DE LA URL
+        // ============================================================
         function getSlugOrIdFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get('id') || urlParams.get('p') || urlParams.get('slug');
         }
         
-        // ========== FUNCIÓN GLOBAL PARA COMPARTIR ==========
+        // ============================================================
+        // FUNCIÓN GLOBAL PARA COMPARTIR EN WHATSAPP
+        // ============================================================
         window.compartirEnWhatsAppWindow = function(id, slug) {
             const producto = window.currentProducto;
             if (!producto) return;
+            
             const url = `${window.location.origin}/producto.html?id=${id}`;
             const mensaje = `¡Mira este producto en KOMERZIO!\n\n*${producto.nombre}*\n💰 Precio: $${producto.precio_actual} USD\n📦 Stock: ${producto.stock || 'Disponible'} unidades\n🔗 ${url}`;
             window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank');
         };
         
-        // ========== CARGAR PRODUCTO ==========
+        // ============================================================
+        // CARGAR PRODUCTO DESDE SUPABASE
+        // ============================================================
         async function cargarProducto() {
             const slugOrId = getSlugOrIdFromUrl();
             
@@ -901,12 +1041,14 @@
             }
             
             try {
+                // Primero intentar por slug
                 let { data, error } = await supabase
                     .from('productos')
                     .select('*')
                     .eq('slug', slugOrId)
                     .single();
                 
+                // Si falla, intentar por ID
                 if (error || !data) {
                     const { data: dataById, error: errorById } = await supabase
                         .from('productos')
@@ -918,9 +1060,13 @@
                     data = dataById;
                 }
                 
+                // Ocultar loading, mostrar producto
                 document.getElementById('loadingContainer').style.display = 'none';
                 document.getElementById('productContainer').style.display = 'block';
                 renderizarProducto(data);
+                
+                // Cargar productos relacionados
+                cargarProductosRelacionados(data.categoria, data.id);
                 
             } catch (error) {
                 console.error('Error cargando producto:', error);
@@ -929,10 +1075,46 @@
             }
         }
         
-        // ========== RENDERIZAR PRODUCTO ==========
+        // ============================================================
+        // CARGAR PRODUCTOS RELACIONADOS
+        // ============================================================
+        async function cargarProductosRelacionados(categoria, productoId) {
+            try {
+                const { data, error } = await supabase
+                    .from('productos')
+                    .select('*')
+                    .eq('categoria', categoria)
+                    .neq('id', productoId)
+                    .limit(4);
+                
+                if (error) throw error;
+                
+                const container = document.getElementById('relatedProducts');
+                if (!container) return;
+                
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="color: #64748b;">No hay productos relacionados.</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.map(p => `
+                    <a href="/producto.html?id=${p.id}" class="related-item">
+                        <img src="${p.imagen_url || '/assets/images/no-image.jpg'}" alt="${p.nombre}" onerror="this.src='/assets/images/no-image.jpg'">
+                        <h4>${p.nombre}</h4>
+                        <div class="related-price">$${parseFloat(p.precio).toFixed(2)} USD</div>
+                    </a>
+                `).join('');
+            } catch (error) {
+                console.error('Error cargando productos relacionados:', error);
+            }
+        }
+        
+        // ============================================================
+        // RENDERIZAR PRODUCTO
+        // ============================================================
         function renderizarProducto(p) {
             let stockClass = 'stock-available';
-            let stockText = `✅ Stock disponible: ${p.stock} unidades`;
+            let stockText = `✅ Stock disponible: ${p.stock || 0} unidades`;
             
             if (p.stock <= 0) {
                 stockClass = 'stock-out';
@@ -951,7 +1133,7 @@
             const precioOferta = tieneOferta ? parseFloat(p.precio_oferta) : null;
             const precioActual = tieneOferta ? precioOferta : precioOriginal;
             
-            // ACTUALIZAR META TAGS INMEDIATAMENTE
+            // ACTUALIZAR META TAGS
             actualizarMetaTags(p, precioActual);
             
             let descuento = 0;
@@ -968,13 +1150,13 @@
             } else {
                 accionesHtml = `
                     <div class="product-actions">
-                        <button class="btn btn-primary" onclick="agregarAlCarrito('${p.id}')">
+                        <button class="btn btn-primary" onclick="window.agregarAlCarrito('${p.id}')">
                             <i class="fa fa-shopping-cart"></i> Añadir al carrito
                         </button>
-                        <button class="btn btn-buy-now" onclick="comprarAhora('${p.id}')">
+                        <button class="btn btn-buy-now" onclick="window.comprarAhora('${p.id}')">
                             <i class="fa fa-bolt"></i> Comprar ahora
                         </button>
-                        <button class="btn btn-share" onclick="compartirEnWhatsAppWindow('${p.id}', '${p.slug}')">
+                        <button class="btn btn-share" onclick="window.compartirEnWhatsAppWindow('${p.id}', '${p.slug}')">
                             <i class="fab fa-whatsapp"></i> Compartir
                         </button>
                     </div>
@@ -1012,6 +1194,7 @@
                 `;
             }
             
+            // Guardar producto actual para compartir
             window.currentProducto = {
                 id: p.id,
                 slug: p.slug,
@@ -1090,14 +1273,23 @@
                     <p>${p.descripcion || 'No hay descripción disponible.'}</p>
                     ${p.etiquetas?.length ? `
                         <div class="product-tags">
-                            ${p.etiquetas.map(e => `<span class="product-tag">${e}</span>`).join('')}
+                            ${p.etiquetas.map(e => `<span class="product-tag">#${e}</span>`).join('')}
                         </div>
                     ` : ''}
+                </div>
+                
+                <div class="related-products">
+                    <h2><i class="fas fa-th-list"></i> Productos relacionados</h2>
+                    <div id="relatedProducts" class="related-grid">
+                        <p style="color: #64748b; grid-column: 1/-1; text-align: center;">Cargando productos relacionados...</p>
+                    </div>
                 </div>
             `;
         }
         
-        // ========== FUNCIONES GLOBALES ==========
+        // ============================================================
+        // FUNCIONES GLOBALES PARA EL CARRITO
+        // ============================================================
         window.agregarAlCarrito = async function(id) {
             await carrito.agregar(id, 1);
         };
@@ -1107,11 +1299,16 @@
             if (exito) window.location.href = '/p/checkout.html';
         };
         
-        // ========== INICIALIZAR ==========
+        // ============================================================
+        // INICIALIZAR
+        // ============================================================
         actualizarMenuUsuario();
         auth.onCambio(actualizarMenuUsuario);
         cargarProducto();
         
+        // ============================================================
+        // BOTÓN VOLVER ARRIBA
+        // ============================================================
         window.addEventListener('scroll', function() {
             const backTop = document.querySelector('.back-top');
             if (backTop) backTop.style.display = window.scrollY > 300 ? 'flex' : 'none';

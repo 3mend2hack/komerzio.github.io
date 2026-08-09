@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>KOMERZIO · Tu tienda online</title>
+    
+    <!-- Open Graph / WhatsApp -->
+    <meta property="og:title" content="KOMERZIO · Tu tienda online">
+    <meta property="og:description" content="Compra y vende en KOMERZIO, el marketplace de confianza">
+    <meta property="og:image" content="https://komerzio.dpdns.org/android-chrome-512x512.png">
+    <meta property="og:url" content="https://komerzio.dpdns.org/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="KOMERZIO">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="KOMERZIO · Tu tienda online">
+    <meta name="twitter:description" content="Compra y vende en KOMERZIO, el marketplace de confianza">
+    <meta name="twitter:image" content="https://komerzio.dpdns.org/android-chrome-512x512.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://komerzio.dpdns.org/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="https://komerzio.dpdns.org/favicon.svg" />
+    <link rel="shortcut icon" href="https://komerzio.dpdns.org/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://komerzio.dpdns.org/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="KOMERZIO" />
+    <link rel="manifest" href="https://komerzio.dpdns.org/site.webmanifest" />
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f0f2f5;
+            color: #0f1111;
+            line-height: 1.5;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+        
+        /* HEADER */
+        #header-wrap { background: #0f172a; color: white; position: sticky; top: 0; z-index: 100; width: 100%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .header-header { padding: 10px 20px; width: 100%; }
+        .container.row { max-width: 1500px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .header-logo img { height: 50px; width: auto; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .saldo-mini-card { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 5px 15px; border-radius: 30px; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2); }
+        .login-btn { color: white; text-decoration: none; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 5px; padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 30px; transition: all 0.2s; white-space: nowrap; border: 1px solid rgba(255,255,255,0.05); }
+        .login-btn:hover { background: #f97316; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(249,115,22,0.3); }
+        .sora-cart { position: relative; }
+        .sora-cart-details { width: 45px; height: 45px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        .sora-cart-details:hover { background: #f97316; transform: translateY(-2px); }
+        .sora-cart-details:after { content: '\f290'; font-family: 'FontAwesome'; font-size: 20px; }
+        .simpleCart_quantity { background: #f97316; color: white; font-weight: 700; padding: 2px 6px; border-radius: 20px; font-size: 11px; position: absolute; top: -5px; right: -5px; min-width: 20px; text-align: center; }
+        .sora-cart-description { position: absolute; right: 0; top: 50px; width: 350px; background: white; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); padding: 15px; display: none; z-index: 1000; }
+        .sora-cart:hover .sora-cart-description { display: block; }
+        .header-menu { background: #1e293b; padding: 0 20px; overflow-x: auto; border-top: 1px solid rgba(255,255,255,0.1); }
+        .header-menu::-webkit-scrollbar { display: none; }
+        #main-menu ul { display: flex; list-style: none; gap: 25px; padding: 10px 0; margin: 0; white-space: nowrap; }
+        #main-menu ul li a { color: #e2e8f0; font-size: 14px; font-weight: 500; text-decoration: none; transition: color 0.2s; padding: 5px 0; }
+        #main-menu ul li a:hover { color: #f97316; }
+        #main-menu ul li a i { margin-right: 4px; }
+        
+        /* BANNER DE BANEO */
+        .ban-banner {
+            background: #fee2e2;
+            border-bottom: 3px solid #dc2626;
+            padding: 12px 20px;
+            text-align: center;
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+        .ban-banner.show { display: block; }
+        .ban-banner p {
+            color: #991b1b;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .ban-banner p i { margin-right: 8px; }
+        .ban-banner .ban-motive {
+            font-weight: 400;
+            color: #7f1d1d;
+        }
+        .ban-banner .ban-time {
+            font-weight: 400;
+            color: #7f1d1d;
+        }
+        .ban-banner .btn-logout-ban {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.2s;
+        }
+        .ban-banner .btn-logout-ban:hover { background: #b91c1c; }
+        
+        /* MAIN CONTENT */
+        .main-container { max-width: 1500px; margin: 0 auto; padding: 20px; }
+        
+        /* SLIDER */
+        .slider-container { position: relative; overflow: hidden; border-radius: 16px; margin-bottom: 30px; background: #1e293b; aspect-ratio: 16/5; min-height: 200px; }
+        .slider-track { display: flex; transition: transform 0.5s ease; height: 100%; }
+        .slider-slide { min-width: 100%; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; }
+        .slider-slide img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; padding: 10px 14px; cursor: pointer; border-radius: 50%; font-size: 18px; z-index: 10; transition: all 0.2s; }
+        .slider-btn:hover { background: #f97316; }
+        .slider-btn.prev { left: 10px; }
+        .slider-btn.next { right: 10px; }
+        .slider-dots { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
+        .slider-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s; }
+        .slider-dot.active { background: #f97316; transform: scale(1.2); }
+        
+        /* SECCIONES */
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #0f172a;
+        }
+        .section-title i { color: #f97316; }
+        .section-title .ver-todo {
+            font-size: 14px;
+            font-weight: 500;
+            color: #f97316;
+            text-decoration: none;
+            margin-left: auto;
+        }
+        .section-title .ver-todo:hover { text-decoration: underline; }
+        
+        .productos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .producto-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+        .producto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #f97316;
+        }
+        .producto-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #f8fafc;
+            padding: 10px;
+        }
+        .producto-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 10px 0 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 44px;
+        }
+        .producto-card .precio {
+            font-size: 18px;
+            font-weight: 700;
+            color: #dc2626;
+            margin-bottom: 4px;
+        }
+        .producto-card .precio-original {
+            font-size: 13px;
+            color: #94a3b8;
+            text-decoration: line-through;
+            margin-left: 8px;
+            font-weight: 400;
+        }
+        .producto-card .btn-agregar {
+            background: #f97316;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: auto;
+            font-size: 14px;
+        }
+        .producto-card .btn-agregar:hover { background: #ea580c; }
+        .producto-card .btn-agregar:disabled { background: #94a3b8; cursor: not-allowed; }
+        .producto-card .stock-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .stock-disponible { background: #dcfce7; color: #166534; }
+        .stock-bajo { background: #fef3c7; color: #92400e; }
+        .stock-agotado { background: #fee2e2; color: #991b1b; }
+        
+        .loading { text-align: center; padding: 60px; color: #64748b; }
+        .loading i { font-size: 48px; color: #f97316; margin-bottom: 20px; display: block; }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* CART PREVIEW */
+        .cart-preview-footer { margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0; }
+        .cart-preview-total { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 10px; font-size: 14px; color: #1e293b; }
+        .cart-preview-total span:last-child { color: #dc2626; }
+        .cart-preview-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .cart-preview-btn { flex: 1; padding: 8px 10px; border-radius: 20px; font-weight: 600; font-size: 12px; text-align: center; text-decoration: none; cursor: pointer; border: none; min-width: 60px; }
+        .cart-preview-btn-primary { background: #f97316; color: white; }
+        .cart-preview-btn-primary:hover { background: #ea580c; }
+        .cart-preview-btn-secondary { background: #e2e8f0; color: #1e293b; }
+        .cart-preview-btn-secondary:hover { background: #cbd5e1; }
+        .simpleCart_items { max-height: 250px; overflow-y: auto; }
+        
+        /* FOOTER */
+        footer { background: #0f172a; color: white; padding: 3rem 2rem; margin-top: 4rem; }
+        footer h3, footer h4 { background: linear-gradient(135deg, #f97316, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        footer a { color: #94a3b8; text-decoration: none; transition: color 0.2s; }
+        footer a:hover { color: #f97316; }
+        .sub-footer { background: #1e293b; padding: 20px; text-align: center; color: #94a3b8; font-size: 14px; }
+        
+        @media (max-width: 768px) {
+            .slider-container { aspect-ratio: 16/7; min-height: 150px; }
+            .productos-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+            .producto-card h3 { font-size: 13px; height: 36px; }
+            .producto-card .precio { font-size: 15px; }
+            .section-title { font-size: 18px; }
+            .main-container { padding: 12px; }
+            .header-logo img { height: 35px; }
+            .login-btn span { display: none; }
+            .login-btn { padding: 8px; border-radius: 50%; }
+            .saldo-mini-card span { display: none; }
+            .saldo-mini-card { padding: 5px 10px; }
+            .ban-banner p { font-size: 12px; }
+        }
+        @media (max-width: 480px) {
+            .productos-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .producto-card { padding: 12px; }
+            .producto-card img { height: 120px; padding: 5px; }
+            .slider-container { aspect-ratio: 16/9; min-height: 120px; }
+            .ban-banner p { font-size: 11px; }
+            .ban-banner .btn-logout-ban { font-size: 10px; padding: 3px 12px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div id="header-wrap">
+        <div class="header-header">
+            <div class="container row">
+                <div class="header-logo">
+                    <a href="/"><img src="https://i.postimg.cc/MZRbKh98/Cubazon.png" alt="KOMERZIO"></a>
+                </div>
+                <div class="header-right">
+                    <div id="saldoHeaderCard" class="saldo-mini-card" style="display: none;">
+                        <i class="fa fa-credit-card"></i>
+                        <span id="saldoHeaderAmount">$0.00</span>
+                    </div>
+                    <a href="/login.html" class="login-btn" id="loginBtnHeader">
+                        <i class="fa fa-user"></i>
+                        <span>Iniciar sesión</span>
+                    </a>
+                    <div class="sora-cart">
+                        <div class="sora-cart-details">
+                            <span class="simpleCart_quantity" id="cart-counter">0</span>
+                        </div>
+                        <div class="sora-cart-description" id="cart-preview">
+                            <div class="simpleCart_items"></div>
+                            <div class="cart-preview-footer">
+                                <div class="cart-preview-total">
+                                    <span>Total:</span>
+                                    <span id="cart-preview-total-amount">$0.00 USD</span>
+                                </div>
+                                <div class="cart-preview-buttons">
+                                    <a href="/p/cart.html" class="cart-preview-btn cart-preview-btn-primary">Ver Carrito</a>
+                                    <button onclick="window.vaciarCarrito()" class="cart-preview-btn cart-preview-btn-secondary">Vaciar</button>
+                                    <a href="/p/checkout.html" class="cart-preview-btn cart-preview-btn-primary">Pagar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="header-menu">
+            <div class="container row">
+                <div id="main-menu">
+                    <ul>
+                        <li><a href="/"><i class="fa fa-home"></i> Inicio</a></li>
+                        <li><a href="/categoria.html?cat=ofertas"><i class="fa fa-fire"></i> Ofertas</a></li>
+                        <li><a href="/categoria.html?cat=Electrónica"><i class="fa fa-laptop"></i> Electrónica</a></li>
+                        <li><a href="/categoria.html?cat=Ropa"><i class="fa fa-tshirt"></i> Ropa</a></li>
+                        <li><a href="/categoria.html?cat=Hogar"><i class="fa fa-home"></i> Hogar</a></li>
+                        <li><a href="/buscar.html"><i class="fa fa-search"></i> Buscar</a></li>
+                        <li><a href="/lista-deseos.html"><i class="fa fa-heart"></i> Mi Lista</a></li>
+                        <li><a href="/recarga.html" style="background: linear-gradient(135deg, #f97316, #f59e0b); color: white; padding: 5px 15px; border-radius: 30px;"><i class="fa fa-bolt"></i> Recargar</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BANNER DE BANEO -->
+    <div id="banBanner" class="ban-banner">
+        <p>
+            <i class="fa fa-ban"></i>
+            <span id="banMotive">Tu cuenta ha sido suspendida</span>
+            <span id="banTimeInfo" class="ban-time"></span>
+            <button class="btn-logout-ban" onclick="window.cerrarSesionBan()">
+                <i class="fa fa-sign-out"></i> Cerrar sesión
+            </button>
+        </p>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-container">
+        <div id="contenido-principal">
+            <!-- LOADING -->
+            <div id="loadingContainer" class="loading">
+                <i class="fa fa-spinner spinner"></i>
+                <p>Cargando productos...</p>
+            </div>
+            
+            <!-- CONTENIDO -->
+            <div id="mainContent" style="display: none;">
+                <!-- SLIDER -->
+                <div id="sliderContainer" class="slider-container">
+                    <div id="sliderTrack" class="slider-track">
+                        <!-- Slider se llena con JavaScript -->
+                    </div>
+                    <button class="slider-btn prev" onclick="window.sliderAnterior()">
+                        <i class="fa fa-chevron-left"></i>
+                    </button>
+                    <button class="slider-btn next" onclick="window.sliderSiguiente()">
+                        <i class="fa fa-chevron-right"></i>
+                    </button>
+                    <div id="sliderDots" class="slider-dots"></div>
+                </div>
+                
+                <!-- OFERTAS DEL DÍA -->
+                <div id="ofertasSection">
+                    <div class="section-title">
+                        <i class="fa fa-fire"></i> Ofertas del Día
+                        <a href="/categoria.html?cat=ofertas" class="ver-todo">Ver todo →</a>
+                    </div>
+                    <div id="ofertasGrid" class="productos-grid"></div>
+                </div>
+                
+                <!-- DESTACADOS -->
+                <div id="destacadosSection">
+                    <div class="section-title">
+                        <i class="fa fa-star"></i> Productos Destacados
+                        <a href="/categoria.html?cat=destacados" class="ver-todo">Ver todo →</a>
+                    </div>
+                    <div id="destacadosGrid" class="productos-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div style="max-width: 1500px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px;">
+            <div>
+                <h3 style="font-size: 24px; font-weight: 800;">KOMERZIO</h3>
+                <p style="color: #94a3b8; margin-top: 10px;">Tu tienda online de confianza en Sagua de Tánamo.</p>
+                <p style="color: #94a3b8; margin-top: 8px;"><i class="fa fa-map-marker"></i> Sagua de Tánamo, Holguín, Cuba</p>
+            </div>
+            <div>
+                <h4 style="color: #e2e8f0; margin-bottom: 15px;">Enlaces rápidos</h4>
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 8px;"><a href="/sobre-nosotros.html">Sobre nosotros</a></li>
+                    <li style="margin-bottom: 8px;"><a href="/terminos.html">Términos y condiciones</a></li>
+                    <li style="margin-bottom: 8px;"><a href="/faq.html">Preguntas frecuentes</a></li>
+                    <li style="margin-bottom: 8px;"><a href="/contacto.html">Contacto</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: #e2e8f0; margin-bottom: 15px;">Contacto</h4>
+                <ul style="list-style: none;">
+                    <li style="color: #94a3b8; margin-bottom: 8px;"><i class="fas fa-phone"></i> +53 56591892</li>
+                    <li style="color: #94a3b8; margin-bottom: 8px;"><i class="fas fa-envelope"></i> komerzio.oficial@gmail.com</li>
+                    <li style="color: #94a3b8;"><i class="fab fa-whatsapp"></i> +53 56591892</li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+    <div class="sub-footer">
+        <p>© 2026 KOMERZIO · Diseñado por Des.Joshua_Technology · Todos los derechos reservados</p>
+    </div>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Configuración de Supabase -->
+    <script src="/js/komerzio-config.js"></script>
+    
+    <script type="module">
+        // ============================================================
+        // IMPORTAR
+        // ============================================================
+        import { supabase } from '/js/supabase-client.js';
+        import { auth } from '/js/auth.js';
+        import { initCarrito } from '/js/cart.js';
+        
+        console.log('✅ index.html - Inicializado con Supabase');
+        
+        // ============================================================
+        // INICIALIZAR CARRITO
+        // ============================================================
+        const carrito = initCarrito();
+        window.carrito = carrito;
+        window.vaciarCarrito = () => carrito.vaciar();
+        carrito.cargarDeLocalStorage();
+        carrito.actualizarInterfaz();
+
+        // ============================================================
+        // VARIABLES GLOBALES
+        // ============================================================
+        let productos = [];
+        let sliderIndex = 0;
+        let sliderInterval = null;
+
+        // ============================================================
+        // FUNCIÓN: VERIFICAR BANEO
+        // ============================================================
+        async function verificarBaneo() {
+            const usuario = auth.getUsuario();
+            if (!usuario) return null;
+            
+            try {
+                const { data, error } = await supabase.rpc('verificar_baneo', {
+                    p_user_id: usuario.id
+                });
+                
+                if (error) {
+                    console.error('Error verificando baneo:', error);
+                    return null;
+                }
+                
+                if (data && data.length > 0) {
+                    const info = data[0];
+                    if (info.esta_baneado) {
+                        return info;
+                    }
+                }
+                return null;
+            } catch (error) {
+                console.error('Error en verificarBaneo:', error);
+                return null;
+            }
+        }
+
+        // ============================================================
+        // FUNCIÓN: MOSTRAR BANNER DE BANEO
+        // ============================================================
+        function mostrarBannerBan(info) {
+            const banner = document.getElementById('banBanner');
+            const motiveEl = document.getElementById('banMotive');
+            const timeEl = document.getElementById('banTimeInfo');
+            
+            if (!info || !info.esta_baneado) {
+                banner.classList.remove('show');
+                return;
+            }
+            
+            banner.classList.add('show');
+            
+            // Motivo
+            motiveEl.textContent = info.motivo ? `Motivo: ${info.motivo}` : 'Tu cuenta ha sido suspendida';
+            
+            // Tiempo
+            if (info.tipo_baneo_val === 'temporal' && info.baneo_hasta_val) {
+                const fechaFin = new Date(info.baneo_hasta_val);
+                const ahora = new Date();
+                const diffMs = fechaFin - ahora;
+                
+                if (diffMs > 0) {
+                    const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffMin = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    
+                    if (diffHoras > 24) {
+                        const dias = Math.floor(diffHoras / 24);
+                        timeEl.textContent = ` · Restan ${dias} día${dias > 1 ? 's' : ''}`;
+                    } else if (diffHoras > 0) {
+                        timeEl.textContent = ` · Restan ${diffHoras} hora${diffHoras > 1 ? 's' : ''}`;
+                    } else {
+                        timeEl.textContent = ` · Restan ${diffMin} minuto${diffMin > 1 ? 's' : ''}`;
+                    }
+                } else {
+                    timeEl.textContent = ' · El baneo expiró, recarga la página';
+                }
+            } else {
+                timeEl.textContent = ' · Baneo permanente';
+            }
+        }
+
+        // ============================================================
+        // FUNCIÓN: CERRAR SESIÓN DESDE BANEO
+        // ============================================================
+        window.cerrarSesionBan = async function() {
+            await auth.cerrarSesion();
+            window.location.reload();
+        };
+
+        // ============================================================
+        // CARGAR SALDO EN HEADER
+        // ============================================================
+        async function cargarSaldoHeader() {
+            const saldoCard = document.getElementById('saldoHeaderCard');
+            const saldoAmount = document.getElementById('saldoHeaderAmount');
+            
+            if (!auth.isAuthenticated()) {
+                saldoCard.style.display = 'none';
+                return;
+            }
+            try {
+                const usuario = auth.getUsuario();
+                if (!usuario) return;
+                
+                const { data, error } = await supabase
+                    .from('saldo_usuarios')
+                    .select('saldo_actual')
+                    .eq('user_id', usuario.id)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') throw error;
+                const saldo = data?.saldo_actual || 0;
+                saldoAmount.textContent = `$${saldo.toFixed(2)}`;
+                saldoCard.style.display = 'flex';
+            } catch (error) {
+                console.error('Error cargando saldo:', error);
+            }
+        }
+
+        // ============================================================
+        // ACTUALIZAR MENÚ DE USUARIO
+        // ============================================================
+        function actualizarMenuUsuario() {
+            const loginBtn = document.getElementById('loginBtnHeader');
+            if (!loginBtn) return;
+            
+            if (auth.isAuthenticated()) {
+                const usuario = auth.getUsuario();
+                const inicial = usuario?.nombre?.charAt(0).toUpperCase() || 
+                               usuario?.email?.charAt(0).toUpperCase() || 'U';
+                loginBtn.innerHTML = `<i class="fa fa-user"></i><span>${inicial}</span>`;
+                loginBtn.href = '/mi-cuenta.html';
+                cargarSaldoHeader();
+            } else {
+                loginBtn.innerHTML = '<i class="fa fa-sign-in"></i><span>Iniciar sesión</span>';
+                loginBtn.href = '/login.html';
+                document.getElementById('saldoHeaderCard').style.display = 'none';
+            }
+        }
+
+        // ============================================================
+        // CARGAR PRODUCTOS
+        // ============================================================
+        async function cargarProductos() {
+            try {
+                const { data, error } = await supabase
+                    .from('productos')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                productos = data || [];
+                console.log('✅ Productos cargados:', productos.length);
+                
+                return productos;
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+                return [];
+            }
+        }
+
+        // ============================================================
+        // RENDERIZAR SLIDER
+        // ============================================================
+        function renderizarSlider() {
+            const sliderProductos = productos.filter(p => 
+                p.secciones && p.secciones.includes('slider')
+            );
+            
+            const track = document.getElementById('sliderTrack');
+            const dots = document.getElementById('sliderDots');
+            
+            if (sliderProductos.length === 0) {
+                track.innerHTML = `
+                    <div class="slider-slide">
+                        <div style="text-align: center; color: white;">
+                            <h2 style="font-size: 28px;">Bienvenido a KOMERZIO</h2>
+                            <p style="color: #94a3b8;">Descubre nuestras ofertas</p>
+                        </div>
+                    </div>
+                `;
+                dots.innerHTML = '';
+                return;
+            }
+            
+            track.innerHTML = sliderProductos.map(p => `
+                <div class="slider-slide" onclick="window.verProducto('${p.id}')">
+                    <img src="${p.imagen_url || 'https://via.placeholder.com/1200x400?text=KOMERZIO'}" alt="${p.nombre}" loading="lazy" onerror="this.src='https://via.placeholder.com/1200x400?text=KOMERZIO'">
+                    <div style="position: absolute; bottom: 30px; left: 30px; background: rgba(0,0,0,0.7); padding: 15px 25px; border-radius: 12px; max-width: 80%;">
+                        <h3 style="color: white; font-size: 20px;">${p.nombre}</h3>
+                        <p style="color: #fbbf24; font-size: 18px; font-weight: 700;">$${p.precio.toFixed(2)} USD</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            dots.innerHTML = sliderProductos.map((_, i) => `
+                <span class="slider-dot ${i === 0 ? 'active' : ''}" onclick="window.irSlider(${i})"></span>
+            `).join('');
+            
+            sliderIndex = 0;
+            if (sliderProductos.length > 1) {
+                if (sliderInterval) clearInterval(sliderInterval);
+                sliderInterval = setInterval(window.sliderSiguiente, 5000);
+            }
+        }
+
+        window.sliderAnterior = function() {
+            const total = document.querySelectorAll('.slider-slide').length;
+            if (total <= 1) return;
+            sliderIndex = (sliderIndex - 1 + total) % total;
+            actualizarSlider(total);
+        };
+
+        window.sliderSiguiente = function() {
+            const total = document.querySelectorAll('.slider-slide').length;
+            if (total <= 1) return;
+            sliderIndex = (sliderIndex + 1) % total;
+            actualizarSlider(total);
+        };
+
+        window.irSlider = function(index) {
+            const total = document.querySelectorAll('.slider-slide').length;
+            if (index < 0 || index >= total) return;
+            sliderIndex = index;
+            actualizarSlider(total);
+        };
+
+        function actualizarSlider(total) {
+            const track = document.getElementById('sliderTrack');
+            track.style.transform = `translateX(-${sliderIndex * 100}%)`;
+            
+            document.querySelectorAll('.slider-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === sliderIndex);
+            });
+        }
+
+        // ============================================================
+        // RENDERIZAR PRODUCTOS
+        // ============================================================
+        function renderizarProductos(containerId, productosLista, titulo = '') {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            if (productosLista.length === 0) {
+                container.innerHTML = `<p style="color: #64748b;">No hay productos en ${titulo}</p>`;
+                return;
+            }
+            
+            container.innerHTML = productosLista.map(p => {
+                const precioOferta = p.oferta_del_dia && p.precio_oferta ? p.precio_oferta : null;
+                const stockClass = p.stock <= 0 ? 'stock-agotado' : (p.stock <= 5 ? 'stock-bajo' : 'stock-disponible');
+                const stockText = p.stock <= 0 ? 'Agotado' : (p.stock <= 5 ? 'Últimas unidades' : `${p.stock} disponibles`);
+                
+                return `
+                    <div class="producto-card" onclick="window.verProducto('${p.id}')">
+                        <img src="${p.imagen_url || 'https://via.placeholder.com/300x300?text=Sin+imagen'}" alt="${p.nombre}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x300?text=Error'">
+                        <span class="stock-badge ${stockClass}">${stockText}</span>
+                        <h3>${p.nombre}</h3>
+                        <div>
+                            <span class="precio">$${(precioOferta || p.precio).toFixed(2)} USD</span>
+                            ${precioOferta ? `<span class="precio-original">$${p.precio.toFixed(2)} USD</span>` : ''}
+                        </div>
+                        <button class="btn-agregar" onclick="event.stopPropagation(); window.agregarAlCarrito('${p.id}')" ${p.stock <= 0 ? 'disabled' : ''}>
+                            <i class="fa fa-cart-plus"></i> Agregar
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================================
+        // FUNCIONES GLOBALES
+        // ============================================================
+        window.verProducto = function(id) {
+            window.location.href = `/producto.html?id=${id}`;
+        };
+
+        window.agregarAlCarrito = function(id) {
+            const producto = productos.find(p => p.id === id);
+            if (!producto) return;
+            
+            carrito.agregar(id, 1, {});
+            carrito.actualizarInterfaz();
+            
+            Swal.fire({
+                icon: 'success',
+                title: '¡Agregado!',
+                text: `${producto.nombre} agregado al carrito`,
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        };
+
+        // ============================================================
+        // INICIALIZAR
+        // ============================================================
+        async function inicializar() {
+            // Esperar autenticación
+            for (let i = 0; i < 15; i++) {
+                if (auth.getUsuario()) break;
+                await new Promise(r => setTimeout(r, 300));
+            }
+            
+            actualizarMenuUsuario();
+            
+            // Verificar baneo
+            const banInfo = await verificarBaneo();
+            if (banInfo && banInfo.esta_baneado) {
+                mostrarBannerBan(banInfo);
+                // Ocultar contenido principal si está baneado
+                document.getElementById('mainContent').style.display = 'none';
+                document.getElementById('loadingContainer').style.display = 'none';
+                return;
+            } else {
+                document.getElementById('banBanner').classList.remove('show');
+            }
+            
+            // Cargar productos
+            await cargarProductos();
+            
+            // Renderizar slider
+            renderizarSlider();
+            
+            // Renderizar ofertas
+            const ofertas = productos.filter(p => p.oferta_del_dia === true && p.stock > 0);
+            renderizarProductos('ofertasGrid', ofertas, 'ofertas');
+            
+            // Renderizar destacados
+            const destacados = productos.filter(p => p.destacado === true && p.stock > 0);
+            renderizarProductos('destacadosGrid', destacados, 'destacados');
+            
+            // Mostrar contenido
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+        }
+
+        // ============================================================
+        // EVENTO: CAMBIO DE AUTENTICACIÓN
+        // ============================================================
+        auth.onCambio(async (usuario) => {
+            actualizarMenuUsuario();
+            if (usuario) {
+                const banInfo = await verificarBaneo();
+                if (banInfo && banInfo.esta_baneado) {
+                    mostrarBannerBan(banInfo);
+                    document.getElementById('mainContent').style.display = 'none';
+                    document.getElementById('loadingContainer').style.display = 'none';
+                } else {
+                    document.getElementById('banBanner').classList.remove('show');
+                }
+            } else {
+                document.getElementById('banBanner').classList.remove('show');
+            }
+        });
+
+        // ============================================================
+        // INICIAR
+        // ============================================================
+        actualizarMenuUsuario();
+        inicializar();
+        
+        console.log('✅ Index page ready');
+    </script>
+</body>
+</html>

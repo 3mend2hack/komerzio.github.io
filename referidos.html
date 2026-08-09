@@ -3,17 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Mis Referidos · CUBAZON</title>
+    <title>Mis Referidos · KOMERZIO</title>
+    
+    <!-- Open Graph / WhatsApp -->
+    <meta property="og:title" content="Mis Referidos · KOMERZIO">
+    <meta property="og:description" content="Invita a tus amigos y gana saldo en KOMERZIO">
+    <meta property="og:image" content="https://komerzio.dpdns.org/android-chrome-512x512.png">
+    <meta property="og:url" content="https://komerzio.dpdns.org/referidos.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="KOMERZIO">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Mis Referidos · KOMERZIO">
+    <meta name="twitter:description" content="Invita a tus amigos y gana saldo en KOMERZIO">
+    <meta name="twitter:image" content="https://komerzio.dpdns.org/android-chrome-512x512.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://komerzio.dpdns.org/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="https://komerzio.dpdns.org/favicon.svg" />
+    <link rel="shortcut icon" href="https://komerzio.dpdns.org/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://komerzio.dpdns.org/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="KOMERZIO" />
+    <link rel="manifest" href="https://komerzio.dpdns.org/site.webmanifest" />
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #f0f2f5;
             color: #0f1111;
             line-height: 1.5;
@@ -110,6 +131,8 @@
             padding: 15px 30px;
             border-radius: 60px;
             margin-bottom: 15px;
+            width: 100%;
+            max-width: 100%;
         }
         
         .codigo-texto {
@@ -117,14 +140,14 @@
             font-weight: 800;
             letter-spacing: 8px;
             color: #c62828;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
         }
         
         .codigo-enlace {
             font-size: 12px;
             color: #6c757d;
             letter-spacing: normal;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             word-break: break-all;
             max-width: 100%;
         }
@@ -196,6 +219,10 @@
             color: #28a745;
         }
         
+        .ganancia-valor.amarillo {
+            color: #f59e0b;
+        }
+        
         .ganancia-item small {
             color: #6c757d;
             font-size: 12px;
@@ -260,6 +287,9 @@
             font-size: 12px;
             font-weight: 600;
             white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
         
         .badge-pendiente {
@@ -270,6 +300,9 @@
             font-size: 12px;
             font-weight: 600;
             white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
         
         .empty-state {
@@ -281,6 +314,7 @@
             font-size: 64px;
             color: #cbd5e1;
             margin-bottom: 20px;
+            display: block;
         }
         
         .empty-state h3 {
@@ -322,10 +356,12 @@
         .btn-secondary {
             background: #f0f2f5;
             color: #0f1111;
+            border: 1px solid #e2e8f0;
         }
         
         .btn-secondary:hover {
             background: #e3e6e9;
+            transform: translateY(-2px);
         }
         
         .compartir-botones {
@@ -381,6 +417,15 @@
             box-shadow: 0 4px 12px rgba(24,119,242,0.3);
         }
         
+        .btn-twitter {
+            background: #000000;
+        }
+        
+        .btn-twitter:hover {
+            background: #1a1a1a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
         .loading {
             text-align: center;
             padding: 80px 20px;
@@ -390,6 +435,20 @@
             font-size: 48px;
             color: #c62828;
             margin-bottom: 20px;
+            display: block;
+        }
+        
+        .loading p {
+            color: #6c757d;
+        }
+        
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .toast-copiado {
@@ -403,8 +462,9 @@
             border-radius: 30px;
             font-weight: 600;
             z-index: 9999;
-            animation: slideUpFade 2s ease;
+            animation: slideUpFade 2.5s ease;
             font-size: 14px;
+            box-shadow: 0 4px 15px rgba(40,167,69,0.3);
         }
         
         @keyframes slideUpFade {
@@ -438,20 +498,26 @@
             }
             
             .ganancias-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr;
             }
             
             .compartir-botones {
-                flex-direction: column;
+                flex-direction: row;
+                flex-wrap: wrap;
             }
             
             .btn-compartir {
+                flex: 1;
+                min-width: 100px;
                 justify-content: center;
-                width: 100%;
             }
             
             .referidos-icon {
                 font-size: 48px;
+            }
+            
+            .table-container {
+                overflow-x: auto;
             }
         }
         
@@ -485,6 +551,10 @@
                 font-size: 24px;
             }
             
+            .ganancias-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .referidos-lista-card {
                 padding: 20px;
             }
@@ -493,100 +563,166 @@
                 padding: 10px;
                 font-size: 12px;
             }
+            
+            .btn-compartir {
+                font-size: 12px;
+                padding: 8px 16px;
+                min-width: 80px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="referidos-container">
         <div id="loadingContainer" class="loading">
-            <i class="fa fa-spinner fa-pulse"></i>
-            <h2>Cargando tus referidos...</h2>
+            <i class="fa fa-spinner spinner"></i>
+            <h2 style="color: #0f1111;">Cargando tus referidos...</h2>
+            <p>Por favor espera un momento</p>
         </div>
         
         <div id="referidosContent" style="display: none;"></div>
     </div>
-    
+
+    <!-- ========== SCRIPTS ========== -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Configuración de Supabase -->
+    <script src="/js/komerzio-config.js"></script>
+
     <script type="module">
+        // ============================================================
+        // IMPORTAR CONFIGURACIÓN DE SUPABASE
+        // ============================================================
         import { supabase } from '/js/supabase-client.js';
         import { auth } from '/js/auth.js';
         
+        console.log('✅ referidos.html - Inicializado con Supabase');
+        
+        // ============================================================
+        // ESTADO
+        // ============================================================
         let codigoReferido = '';
         let referidos = [];
         let totalReferidos = 0;
         let montoPorReferido = 20;
         let sistemaActivo = true;
-        
+
+        // ============================================================
+        // VERIFICAR AUTENTICACIÓN
+        // ============================================================
         async function verificarAutenticacion() {
             for (let i = 0; i < 15; i++) {
                 if (auth.isAuthenticated() && auth.getUsuario()) return true;
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
-            window.location.href = '/login.html';
+            
+            Swal.fire({
+                icon: 'info',
+                title: 'Inicia sesión',
+                text: 'Necesitas iniciar sesión para ver tus referidos',
+                confirmButtonText: 'Iniciar sesión'
+            }).then(() => {
+                window.location.href = '/login.html?redirect=/referidos.html';
+            });
             return false;
         }
-        
+
+        // ============================================================
+        // CARGAR CONFIGURACIÓN
+        // ============================================================
         async function cargarConfiguracion() {
             try {
-                const { data } = await supabase
+                const { data, error } = await supabase
                     .from('config_referidos')
                     .select('activo, monto_por_referido')
-                    .single();
+                    .maybeSingle();
+                
+                if (error) {
+                    console.error('Error cargando configuración:', error);
+                    return;
+                }
                 
                 if (data) {
-                    sistemaActivo = data.activo;
+                    sistemaActivo = data.activo !== false;
                     montoPorReferido = data.monto_por_referido || 20;
                 }
             } catch (error) {
                 console.error('Error cargando configuración:', error);
             }
         }
-        
+
+        // ============================================================
+        // CARGAR DATOS
+        // ============================================================
         async function cargarDatos() {
             const usuario = auth.getUsuario();
             if (!usuario) return;
             
             try {
                 // Obtener código de referido del perfil
-                const { data: perfil } = await supabase
+                const { data: perfil, error: perfilError } = await supabase
                     .from('perfiles')
                     .select('codigo_referido')
                     .eq('id', usuario.id)
-                    .single();
+                    .maybeSingle();
+                
+                if (perfilError) {
+                    console.error('Error cargando perfil:', perfilError);
+                }
                 
                 codigoReferido = perfil?.codigo_referido || 'PENDIENTE';
                 
-                // ✅ CORREGIDO: seleccionar 'nombre_completo' en lugar de 'nombre'
-                const { data: referidosData } = await supabase
+                // Obtener lista de referidos (usuarios que usaron tu código)
+                const { data: referidosData, error: referidosError } = await supabase
                     .from('perfiles')
-                    .select('id, nombre_completo, email, telefono, created_at, codigo_referido')
+                    .select('id, nombre, email, telefono, created_at, codigo_referido')
                     .eq('referido_por', usuario.id)
                     .order('created_at', { ascending: false });
                 
-                referidos = referidosData || [];
+                if (referidosError) {
+                    console.error('Error cargando referidos:', referidosError);
+                    referidos = [];
+                } else {
+                    referidos = referidosData || [];
+                }
+                
                 totalReferidos = referidos.length;
                 
-                // Verificar cuáles referidos ya generaron saldo
+                // Verificar cuáles referidos ya generaron saldo usando historial_referidos
                 const referidosIds = referidos.map(r => r.id);
+                const acreditadosIds = new Set();
+                
                 if (referidosIds.length > 0) {
-                    const { data: historial } = await supabase
-                        .from('historial_referidos')
-                        .select('referido_id')
-                        .eq('referidor_id', usuario.id)
-                        .in('referido_id', referidosIds)
-                        .eq('acreditado', true);
-                    
-                    const acreditadosIds = new Set(historial?.map(h => h.referido_id) || []);
-                    referidos = referidos.map(r => ({
-                        ...r,
-                        acreditado: acreditadosIds.has(r.id)
-                    }));
+                    try {
+                        const { data: historial, error: histError } = await supabase
+                            .from('historial_referidos')
+                            .select('referido_id')
+                            .eq('usuario_id', usuario.id)
+                            .in('referido_id', referidosIds)
+                            .eq('acreditado', true);
+                        
+                        if (!histError && historial) {
+                            historial.forEach(h => acreditadosIds.add(h.referido_id));
+                        }
+                    } catch (e) {
+                        console.error('Error cargando historial:', e);
+                    }
                 }
+                
+                referidos = referidos.map(r => ({
+                    ...r,
+                    acreditado: acreditadosIds.has(r.id)
+                }));
                 
             } catch (error) {
                 console.error('Error cargando datos:', error);
             }
         }
-        
+
+        // ============================================================
+        // RENDERIZAR
+        // ============================================================
         function renderizar() {
             const container = document.getElementById('referidosContent');
             const totalAcreditados = referidos.filter(r => r.acreditado).length;
@@ -595,11 +731,18 @@
             
             const urlRegistro = `${window.location.origin}/registro.html?ref=${codigoReferido}`;
             
+            const mensajeCompartir = encodeURIComponent(
+                `🎁 *¡Gana $${montoPorReferido} USD en KOMERZIO!*\n\n` +
+                `Regístrate con mi enlace y recibe saldo de regalo.\n\n` +
+                `👉 ${urlRegistro}\n\n` +
+                `¡La mejor tienda online de Cuba! 🇨🇺`
+            );
+            
             container.innerHTML = `
                 <div class="referidos-header">
                     <span class="referidos-icon">👥</span>
                     <h1>Programa de Referidos</h1>
-                    <p>Invita a tus amigos y gana <strong>$${montoPorReferido} CUP</strong> por cada uno que se registre con tu enlace</p>
+                    <p>Invita a tus amigos y gana <strong>$${montoPorReferido} USD</strong> por cada uno que se registre con tu enlace</p>
                 </div>
                 
                 <div class="codigo-card">
@@ -610,19 +753,22 @@
                         <span class="codigo-enlace">${urlRegistro}</span>
                     </div>
                     <br>
-                    <button class="btn-copiar" id="btnCopiar" onclick="copiarCodigo()">
+                    <button class="btn-copiar" id="btnCopiar" onclick="window.copiarCodigo()">
                         <i class="fa fa-copy"></i> Copiar enlace
                     </button>
                     
                     <div class="compartir-botones">
-                        <button class="btn-compartir btn-whatsapp" onclick="compartirWhatsApp()">
-                            <i class="fa fa-whatsapp"></i> WhatsApp
+                        <button class="btn-compartir btn-whatsapp" onclick="window.compartirWhatsApp()">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
                         </button>
-                        <button class="btn-compartir btn-telegram" onclick="compartirTelegram()">
-                            <i class="fa fa-telegram"></i> Telegram
+                        <button class="btn-compartir btn-telegram" onclick="window.compartirTelegram()">
+                            <i class="fab fa-telegram"></i> Telegram
                         </button>
-                        <button class="btn-compartir btn-facebook" onclick="compartirFacebook()">
-                            <i class="fa fa-facebook"></i> Facebook
+                        <button class="btn-compartir btn-facebook" onclick="window.compartirFacebook()">
+                            <i class="fab fa-facebook"></i> Facebook
+                        </button>
+                        <button class="btn-compartir btn-twitter" onclick="window.compartirTwitter()">
+                            <i class="fab fa-twitter"></i> Twitter/X
                         </button>
                     </div>
                 </div>
@@ -643,12 +789,12 @@
                         <div class="ganancia-item">
                             <h3>Por Referido</h3>
                             <div class="ganancia-valor">$${montoPorReferido.toFixed(2)}</div>
-                            <small>CUP cada uno</small>
+                            <small>USD cada uno</small>
                         </div>
                         <div class="ganancia-item">
                             <h3>Pendientes</h3>
-                            <div class="ganancia-valor" style="color: ${pendientes > 0 ? '#f59e0b' : '#28a745'};">${pendientes}</div>
-                            <small>por acreditar</small>
+                            <div class="ganancia-valor ${pendientes > 0 ? 'amarillo' : 'verde'}">${pendientes}</div>
+                            <small>${pendientes > 0 ? 'por acreditar' : 'todos acreditados ✅'}</small>
                         </div>
                     </div>
                 </div>
@@ -681,14 +827,14 @@
                                     ${referidos.map((r, index) => `
                                         <tr>
                                             <td><strong>${index + 1}</strong></td>
-                                            <td><strong>${r.nombre_completo || 'Usuario'}</strong></td>
+                                            <td><strong>${r.nombre || 'Usuario'}</strong></td>
                                             <td style="font-size: 13px;">${r.email || '---'}</td>
                                             <td style="font-size: 13px;">${r.telefono || '---'}</td>
                                             <td style="font-size: 13px;">${r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : '---'}</td>
                                             <td>
                                                 ${r.acreditado ? 
-                                                    '<span class="badge-recibio">💰 Saldo acreditado</span>' : 
-                                                    '<span class="badge-pendiente">⏳ Pendiente</span>'
+                                                    '<span class="badge-recibio"><i class="fa fa-check-circle"></i> Saldo acreditado</span>' : 
+                                                    '<span class="badge-pendiente"><i class="fa fa-clock"></i> Pendiente</span>'
                                                 }
                                             </td>
                                         </tr>
@@ -706,7 +852,10 @@
                 </div>
             `;
         }
-        
+
+        // ============================================================
+        // FUNCIONES GLOBALES
+        // ============================================================
         window.copiarCodigo = function() {
             const urlCompleta = `${window.location.origin}/registro.html?ref=${codigoReferido}`;
             navigator.clipboard.writeText(urlCompleta).then(() => {
@@ -714,6 +863,7 @@
                 btn.classList.add('copiado');
                 btn.innerHTML = '<i class="fa fa-check"></i> ¡Enlace copiado!';
                 
+                // Toast notification
                 const toast = document.createElement('div');
                 toast.className = 'toast-copiado';
                 toast.innerHTML = '<i class="fa fa-check-circle"></i> Enlace de referido copiado al portapapeles';
@@ -723,7 +873,7 @@
                     btn.classList.remove('copiado');
                     btn.innerHTML = '<i class="fa fa-copy"></i> Copiar enlace';
                     toast.remove();
-                }, 2000);
+                }, 2500);
             }).catch(() => {
                 Swal.fire({
                     title: 'Copia manual',
@@ -733,44 +883,69 @@
                 });
             });
         };
-        
+
         window.compartirWhatsApp = function() {
             const urlRegistro = `${window.location.origin}/registro.html?ref=${codigoReferido}`;
             const mensaje = encodeURIComponent(
-                `🎁 *¡Gana $${montoPorReferido} CUP en CUBAZON!*\n\n` +
+                `🎁 *¡Gana $${montoPorReferido} USD en KOMERZIO!*\n\n` +
                 `Regístrate con mi enlace y recibe saldo de regalo.\n\n` +
                 `👉 ${urlRegistro}\n\n` +
                 `¡La mejor tienda online de Cuba! 🇨🇺`
             );
             window.open(`https://wa.me/?text=${mensaje}`, '_blank');
         };
-        
+
         window.compartirTelegram = function() {
             const urlRegistro = `${window.location.origin}/registro.html?ref=${codigoReferido}`;
             const mensaje = encodeURIComponent(
-                `🎁 ¡Gana $${montoPorReferido} CUP en CUBAZON!\n\n` +
+                `🎁 ¡Gana $${montoPorReferido} USD en KOMERZIO!\n\n` +
                 `Regístrate con mi enlace y recibe saldo de regalo.\n\n` +
                 `👉 ${urlRegistro}`
             );
             window.open(`https://t.me/share/url?url=${encodeURIComponent(urlRegistro)}&text=${mensaje}`, '_blank');
         };
-        
+
         window.compartirFacebook = function() {
             const urlRegistro = `${window.location.origin}/registro.html?ref=${codigoReferido}`;
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlRegistro)}&quote=${encodeURIComponent(`¡Gana $${montoPorReferido} CUP con mi enlace en CUBAZON!`)}`, '_blank');
+            window.open(
+                `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlRegistro)}&quote=${encodeURIComponent(`¡Gana $${montoPorReferido} USD con mi enlace en KOMERZIO!`)}`,
+                '_blank'
+            );
         };
-        
-        // Inicializar
-        try {
-            await verificarAutenticacion();
-            await cargarConfiguracion();
-            await cargarDatos();
-            document.getElementById('loadingContainer').style.display = 'none';
-            document.getElementById('referidosContent').style.display = 'block';
-            renderizar();
-        } catch (error) {
-            window.location.href = '/login.html';
+
+        window.compartirTwitter = function() {
+            const urlRegistro = `${window.location.origin}/registro.html?ref=${codigoReferido}`;
+            const mensaje = encodeURIComponent(
+                `🎁 ¡Gana $${montoPorReferido} USD en KOMERZIO!\n\nRegístrate con mi enlace y recibe saldo de regalo.\n\n${urlRegistro}`
+            );
+            window.open(`https://twitter.com/intent/tweet?text=${mensaje}`, '_blank');
+        };
+
+        // ============================================================
+        // INICIALIZAR
+        // ============================================================
+        async function init() {
+            try {
+                const autenticado = await verificarAutenticacion();
+                if (!autenticado) return;
+                
+                await cargarConfiguracion();
+                await cargarDatos();
+                
+                document.getElementById('loadingContainer').style.display = 'none';
+                document.getElementById('referidosContent').style.display = 'block';
+                renderizar();
+            } catch (error) {
+                console.error('Error inicializando:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo cargar la página de referidos'
+                });
+            }
         }
+        
+        init();
     </script>
 </body>
 </html>

@@ -3,7 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pagar con QR · CUBAZON</title>
+    <title>Pagar con QR · KOMERZIO</title>
+    
+    <!-- Open Graph / WhatsApp -->
+    <meta property="og:title" content="Pagar con QR · KOMERZIO">
+    <meta property="og:description" content="Paga al instante escaneando un código QR en KOMERZIO">
+    <meta property="og:image" content="https://komerzio.dpdns.org/android-chrome-512x512.png">
+    <meta property="og:url" content="https://komerzio.dpdns.org/pagar-qr.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="KOMERZIO">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Pagar con QR · KOMERZIO">
+    <meta name="twitter:description" content="Paga al instante escaneando un código QR en KOMERZIO">
+    <meta name="twitter:image" content="https://komerzio.dpdns.org/android-chrome-512x512.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://komerzio.dpdns.org/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="https://komerzio.dpdns.org/favicon.svg" />
+    <link rel="shortcut icon" href="https://komerzio.dpdns.org/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://komerzio.dpdns.org/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="KOMERZIO" />
+    <link rel="manifest" href="https://komerzio.dpdns.org/site.webmanifest" />
     
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -11,20 +33,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- QR Scanner -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #f0f2f5;
             color: #0f1111;
             line-height: 1.5;
             min-height: 100vh;
         }
         
-        /* ===== HEADER COMPLETO (IGUAL QUE INDEX.HTML) ===== */
+        /* ===== HEADER ===== */
         #header-wrap {
             background: #0f172a;
             color: white;
@@ -35,11 +57,7 @@
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
 
-        .header-header {
-            padding: 10px 20px;
-            width: 100%;
-        }
-
+        .header-header { padding: 10px 20px; width: 100%; }
         .container.row {
             max-width: 1500px;
             margin: 0 auto;
@@ -48,19 +66,8 @@
             justify-content: space-between;
             width: 100%;
         }
-
-        .header-logo img {
-            height: 50px;
-            width: auto;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        /* TARJETA DE SALDO */
+        .header-logo img { height: 50px; width: auto; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
         .saldo-mini-card {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
@@ -75,8 +82,6 @@
             border: 1px solid rgba(255,255,255,0.2);
         }
         .saldo-mini-card i { font-size: 16px; }
-
-        /* BOTÓN INICIAR SESIÓN */
         .login-btn {
             color: white;
             text-decoration: none;
@@ -92,19 +97,13 @@
             white-space: nowrap;
             border: 1px solid rgba(255,255,255,0.1);
         }
-
         .login-btn:hover {
             background: #f97316;
             border-color: #f97316;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(249,115,22,0.3);
         }
-
-        /* CARRITO */
-        .sora-cart {
-            position: relative;
-        }
-
+        .sora-cart { position: relative; }
         .sora-cart-details {
             width: 45px;
             height: 45px;
@@ -116,19 +115,16 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-
         .sora-cart-details:hover {
             background: #f97316;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(249,115,22,0.3);
         }
-
         .sora-cart-details:after {
             content: '\f290';
             font-family: 'FontAwesome';
             font-size: 20px;
         }
-
         .simpleCart_quantity {
             background: #f97316;
             color: white;
@@ -143,7 +139,6 @@
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-
         .sora-cart-description {
             position: absolute;
             right: 0;
@@ -155,48 +150,9 @@
             padding: 15px;
             display: none;
             z-index: 1000;
+            color: #0f1111;
         }
-
         .sora-cart:hover .sora-cart-description { display: block; }
-
-        .simpleCart_items {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-        }
-
-        .cart-preview-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .cart-preview-item img {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-            border: 1px solid #eee;
-            border-radius: 4px;
-            background: #f8f9fa;
-        }
-
-        .cart-preview-item-details { flex: 1; }
-        .cart-preview-item-name { font-size: 13px; font-weight: 500; color: #0f1111; margin-bottom: 4px; }
-        .cart-preview-item-price { font-size: 14px; font-weight: 700; color: #b12704; }
-        .cart-preview-item-quantity { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
-        .cart-preview-quantity-btn {
-            width: 24px; height: 24px; background: #f0f2f5; border: 1px solid #ddd; border-radius: 4px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-        }
-        .cart-preview-quantity-number {
-            font-weight: 600; min-width: 35px; text-align: center; font-size: 16px;
-            color: #0f1111; background: #ffffff; padding: 4px 0; border-radius: 4px;
-            border: 1px solid #d0d0d0;
-        }
-        .cart-preview-item-remove { color: #565959; cursor: pointer; }
-        .cart-preview-item-remove:hover { color: #dc3545; }
         .cart-preview-footer { border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px; background: white; }
         .cart-preview-total { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 10px; }
         .cart-preview-buttons { display: flex; gap: 10px; }
@@ -216,9 +172,7 @@
             scrollbar-width: none;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
-
         .header-menu::-webkit-scrollbar { display: none; }
-
         #main-menu ul {
             display: flex;
             list-style: none;
@@ -227,7 +181,6 @@
             margin: 0;
             white-space: nowrap;
         }
-
         #main-menu ul li a {
             color: #e2e8f0;
             font-size: 14px;
@@ -237,204 +190,176 @@
             transition: color 0.2s;
             text-decoration: none;
         }
-
         #main-menu ul li a:hover { color: #f97316; }
+        #main-menu ul li a i { margin-right: 4px; }
         
-        /* Contenido principal */
+        /* ===== CONTENIDO PRINCIPAL ===== */
         .pagar-container {
             max-width: 600px;
             margin: 50px auto;
             background: white;
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 40px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
         h1 {
             font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #0f1111;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #0f172a;
         }
+        h1 i { color: #f97316; }
         .subtitle {
-            color: #6c757d;
+            color: #64748b;
             margin-bottom: 30px;
+            font-size: 14px;
         }
         #reader {
             width: 100%;
             max-width: 500px;
             margin: 0 auto 20px;
-            border: 2px solid #ddd;
+            border: 2px solid #e2e8f0;
             border-radius: 12px;
             overflow: hidden;
-            background: #000;
+            background: #0f172a;
+        }
+        #reader video {
+            width: 100%;
+            height: auto;
         }
         .pago-info {
-            background: #f8f9fa;
-            border-radius: 12px;
+            background: #f8fafc;
+            border-radius: 16px;
             padding: 25px;
             margin-top: 20px;
-            border-left: 4px solid #28a745;
+            border-left: 4px solid #22c55e;
             display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .info-row {
             display: flex;
             justify-content: space-between;
             padding: 10px 0;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid #e2e8f0;
         }
+        .info-row:last-child { border-bottom: none; }
         .info-label {
             font-weight: 600;
-            color: #495057;
+            color: #475569;
         }
         .info-value {
             font-weight: 500;
-            color: #0f1111;
+            color: #0f172a;
         }
         .btn {
             width: 100%;
             padding: 16px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
         }
         .btn-primary {
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #0f1111;
+            box-shadow: 0 4px 12px rgba(245,158,11,0.3);
         }
         .btn-primary:hover {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
             transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245,158,11,0.4);
         }
         .btn-primary:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
         .btn-secondary {
-            background: #f0f2f5;
-            color: #0f1111;
-            margin-top: 10px;
+            background: #f1f5f9;
+            color: #0f172a;
+            border: 2px solid #e2e8f0;
+            margin-top: 12px;
         }
         .btn-secondary:hover {
-            background: #e3e6e9;
+            background: #e2e8f0;
             transform: translateY(-2px);
         }
-        .btn-danger {
-            background: #dc3545;
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white;
+            box-shadow: 0 4px 12px rgba(34,197,94,0.3);
         }
-        .btn-danger:hover {
-            background: #c82333;
+        .btn-success:hover {
             transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(34,197,94,0.4);
         }
+        
         .manual-input {
             margin-top: 20px;
             padding: 20px;
-            background: #f8f9fa;
+            background: #f8fafc;
             border-radius: 12px;
+            border: 2px solid #e2e8f0;
             display: none;
         }
         .manual-input input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-size: 14px;
+            font-family: 'Inter', sans-serif;
         }
+        .manual-input input:focus {
+            border-color: #f97316;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
+        }
+        .manual-input .btn { margin-top: 8px; }
+        
         .method-selector {
             display: flex;
-            gap: 15px;
-            margin: 20px 0;
+            gap: 12px;
+            margin: 20px 0 15px;
             flex-wrap: wrap;
         }
         .method-btn {
             flex: 1;
-            padding: 12px;
-            background: #f0f2f5;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
             cursor: pointer;
             text-align: center;
             transition: all 0.2s;
+            font-weight: 600;
+            font-size: 13px;
+            color: #475569;
+            min-width: 100px;
         }
+        .method-btn:hover { border-color: #94a3b8; }
         .method-btn.active {
             border-color: #f97316;
             background: #fff7ed;
             color: #f97316;
+            box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
         }
-        
-        /* Footer */
-        .footer {
-            background: #0f172a;
-            color: white;
-            padding: 3rem 2rem;
-            margin-top: 4rem;
-        }
-
-        .footer-content {
-            max-width: 1500px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 40px;
-        }
-
-        .footer h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #f97316, #fbbf24);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .footer h4 {
-            color: #e2e8f0;
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-        }
-
-        .footer ul {
-            list-style: none;
-        }
-
-        .footer ul li {
-            margin-bottom: 0.8rem;
-            color: #94a3b8;
-        }
-
-        .footer ul li i {
-            width: 20px;
-            color: #f97316;
-        }
-
-        .footer ul li a {
-            color: #94a3b8;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer ul li a:hover {
-            color: #f97316;
-        }
-
-        #sub-footer-wrapper {
-            background: #1e293b;
-            padding: 20px;
-            text-align: center;
-            color: #94a3b8;
-            font-size: 14px;
-        }
+        .method-btn i { margin-right: 6px; }
         
         .loading-spinner {
             text-align: center;
             padding: 3rem;
         }
         .spinner {
-            border: 4px solid #f3f3f3;
+            border: 4px solid #f1f5f9;
             border-top: 4px solid #f97316;
             border-radius: 50%;
             width: 50px;
@@ -447,43 +372,84 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* ===== FOOTER ===== */
+        #footer-wrapper {
+            background: #0f172a;
+            color: white;
+            padding: 50px 20px;
+            margin-top: 50px;
+        }
+        .footer-widgets-wrap {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+        .footer h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            background: linear-gradient(135deg, #f97316, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .footer a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer a:hover { color: #f97316; }
+        .footer ul { list-style: none; }
+        .footer ul li { margin-bottom: 6px; }
+        #sub-footer-wrapper {
+            background: #1e293b;
+            padding: 20px;
+            text-align: center;
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+        
         @media (max-width: 768px) {
             .header-logo img { height: 35px; }
             .login-btn span { display: none; }
             .login-btn { padding: 8px; border-radius: 50%; }
             .saldo-mini-card span { display: none; }
             .saldo-mini-card { padding: 5px 10px; }
-            .pagar-container { margin: 20px; padding: 25px; }
+            .pagar-container { margin: 20px 15px; padding: 25px 20px; }
             .method-selector { flex-direction: column; }
+            .method-btn { min-width: auto; }
+            .footer-widgets-wrap { grid-template-columns: 1fr; text-align: center; }
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 22px; }
+            .pagar-container { padding: 20px 15px; }
+            #reader { max-width: 100%; }
         }
     </style>
 </head>
 <body>
     <div id="outer-wrapper">
-        <!-- HEADER COMPLETO -->
+        <!-- HEADER -->
         <div id="header-wrap">
             <div class="header-header">
                 <div class="container row">
                     <div class="header-logo">
                         <a href="/">
-                            <img src="http://imgfz.com/i/oXOfVlT.png" alt="CUBAZON">
+                            <img src="https://i.postimg.cc/MZRbKh98/Cubazon.png" alt="KOMERZIO">
                         </a>
                     </div>
                     
                     <div class="header-right">
-                        <!-- TARJETA DE SALDO -->
                         <div id="saldoHeaderCard" class="saldo-mini-card" style="display: none;">
                             <i class="fa fa-credit-card"></i>
                             <span id="saldoHeaderAmount">$0.00</span>
                         </div>
 
-                        <!-- BOTÓN INICIAR SESIÓN -->
                         <a href="/login.html" class="login-btn" id="loginBtnHeader">
                             <i class="fa fa-user"></i>
                             <span>Iniciar sesión</span>
                         </a>
                         
-                        <!-- CARRITO -->
                         <div class="sora-cart">
                             <div class="sora-cart-details">
                                 <span class="simpleCart_quantity" id="cart-counter">0</span>
@@ -493,7 +459,7 @@
                                 <div class="cart-preview-footer">
                                     <div class="cart-preview-total">
                                         <span>Total:</span>
-                                        <span id="cart-preview-total-amount">$0.00 CUP</span>
+                                        <span id="cart-preview-total-amount">$0.00 USD</span>
                                     </div>
                                     <div class="cart-preview-buttons">
                                         <a href="/p/cart.html" class="cart-preview-btn cart-preview-btn-primary">Ver Carrito</a>
@@ -511,11 +477,11 @@
                 <div class="container row">
                     <div id="main-menu">
                         <ul>
-                            <li><a href="/">Inicio</a></li>
-                            <li><a href="/categoria.html?cat=ofertas">Ofertas</a></li>
-                            <li><a href="/categoria.html?cat=Electrónica">Electrónica</a></li>
-                            <li><a href="/categoria.html?cat=Ropa">Ropa</a></li>
-                            <li><a href="/categoria.html?cat=Hogar">Hogar</a></li>
+                            <li><a href="/"><i class="fa fa-home"></i> Inicio</a></li>
+                            <li><a href="/categoria.html?cat=ofertas"><i class="fa fa-fire"></i> Ofertas</a></li>
+                            <li><a href="/categoria.html?cat=Electrónica"><i class="fa fa-laptop"></i> Electrónica</a></li>
+                            <li><a href="/categoria.html?cat=Ropa"><i class="fa fa-tshirt"></i> Ropa</a></li>
+                            <li><a href="/categoria.html?cat=Hogar"><i class="fa fa-home"></i> Hogar</a></li>
                             <li><a href="/buscar.html"><i class="fa fa-search"></i> Buscar</a></li>
                             <li><a href="/lista-deseos.html"><i class="fa fa-heart"></i> Mi Lista</a></li>
                             <li><a href="/transferir.html"><i class="fa fa-exchange"></i> Transferir</a></li>
@@ -528,22 +494,22 @@
 
         <!-- CONTENIDO PRINCIPAL -->
         <div class="pagar-container">
-            <h1>📱 Pagar con QR</h1>
+            <h1><i class="fa fa-qrcode"></i> Pagar con QR</h1>
             <p class="subtitle">Escanea el código QR de quien recibirá el pago</p>
             
             <div id="loadingIndicator" class="loading-spinner" style="display: none;">
                 <div class="spinner"></div>
-                <p>Cargando...</p>
+                <p style="color: #64748b;">Cargando...</p>
             </div>
             
             <div id="reader"></div>
             
             <button class="btn btn-secondary" id="manualBtn">
-                <i class="fa fa-keyboard-o"></i> Ingresar código manualmente
+                <i class="fa fa-keyboard"></i> Ingresar código manualmente
             </button>
             
             <div id="manualInput" class="manual-input">
-                <h4>📝 Ingresa el código QR:</h4>
+                <h4 style="margin-bottom: 12px; color: #0f172a;">📝 Ingresa el código QR:</h4>
                 <input type="text" id="codigoManual" placeholder="Ej: REC-ABCD1234">
                 <button class="btn btn-primary" id="buscarManualBtn">
                     <i class="fa fa-search"></i> Buscar pago
@@ -554,25 +520,25 @@
             </div>
             
             <div id="pagoInfo" class="pago-info">
-                <h3>📋 Detalles del pago</h3>
+                <h3 style="margin-bottom: 16px; color: #0f172a;">📋 Detalles del pago</h3>
                 <div class="info-row">
-                    <span class="info-label">👤 Pagando a:</span>
+                    <span class="info-label"><i class="fa fa-user"></i> Pagando a:</span>
                     <span class="info-value" id="receptorNombre">---</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">💰 Monto:</span>
+                    <span class="info-label"><i class="fa fa-dollar"></i> Monto:</span>
                     <span class="info-value" id="montoPago">---</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">📝 Concepto:</span>
+                    <span class="info-label"><i class="fa fa-pencil"></i> Concepto:</span>
                     <span class="info-value" id="conceptoPago">---</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">⏰ Expira:</span>
+                    <span class="info-label"><i class="fa fa-clock"></i> Expira:</span>
                     <span class="info-value" id="expiraPago">---</span>
                 </div>
                 
-                <div id="methodSelector" class="method-selector" style="display: none; margin-top: 20px;">
+                <div id="methodSelector" class="method-selector" style="display: none;">
                     <div class="method-btn" data-method="password">
                         <i class="fa fa-key"></i> Confirmar con contraseña
                     </div>
@@ -581,51 +547,62 @@
                     </div>
                 </div>
                 
-                <div style="margin-top: 25px;">
-                    <button class="btn btn-primary" id="confirmarPagoBtn">
-                        <i class="fa fa-check-circle"></i> Confirmar pago
-                    </button>
-                </div>
+                <button class="btn btn-success" id="confirmarPagoBtn" style="margin-top: 16px;">
+                    <i class="fa fa-check-circle"></i> Confirmar pago
+                </button>
             </div>
         </div>
 
         <!-- FOOTER -->
-        <footer class="footer">
-            <div class="footer-content">
-                <div>
-                    <h3>CUBAZON</h3>
-                    <p style="color: #94a3b8; margin-bottom: 1rem;">Tu tienda online de confianza en Cuba 🇨🇺</p>
-                    <p style="color: #94a3b8;"><i class="fas fa-map-marker-alt"></i> Sagua de Tánamo, Holguín, Cuba</p>
+        <div id="footer-wrapper">
+            <div class="footer-widgets-wrap">
+                <div class="footer">
+                    <h3>KOMERZIO</h3>
+                    <p style="color: #cbd5e1; margin-bottom: 12px;">Tu tienda online de confianza en Sagua de Tánamo.</p>
+                    <p style="color: #cbd5e1;"><i class="fa fa-map-marker"></i> Sagua de Tánamo, Holguín, Cuba</p>
                 </div>
-                <div>
-                    <h4>Enlaces rápidos</h4>
+                <div class="footer">
+                    <h3>Enlaces rápidos</h3>
                     <ul>
-                        <li><a href="/ofertas-especiales.html"><i class="fas fa-tags"></i> Ofertas</a></li>
-                        <li><a href="/destacados.html"><i class="fas fa-star"></i> Destacados</a></li>
-                        <li><a href="/novedades.html"><i class="fas fa-clock"></i> Novedades</a></li>
+                        <li><a href="/sobre-nosotros.html">Sobre nosotros</a></li>
+                        <li><a href="/terminos.html">Términos y condiciones</a></li>
+                        <li><a href="/faq.html">Preguntas frecuentes</a></li>
+                        <li><a href="/contacto.html">Contacto</a></li>
                     </ul>
                 </div>
-                <div>
-                    <h4>Contacto</h4>
-                    <ul>
-                        <li><i class="fas fa-phone"></i> +53 56591892</li>
-                        <li><i class="fas fa-envelope"></i> ventas@cubazon.com</li>
-                        <li><i class="fab fa-whatsapp"></i> +53 56591892</li>
-                    </ul>
+                <div class="footer">
+                    <h3>Atención al cliente</h3>
+                    <p><i class="fa fa-phone"></i> +53 56591892</p>
+                    <p><i class="fa fa-envelope"></i> komerzio.oficial@gmail.com</p>
+                    <p><i class="fa fa-whatsapp"></i> +53 56591892</p>
                 </div>
             </div>
-        </footer>
+        </div>
         <div id="sub-footer-wrapper">
-            <p>© 2026 CUBAZON · Diseñado por Des.Joshua_Technology · Todos los derechos reservados</p>
+            <p>© 2026 KOMERZIO · Diseñado por Des.Joshua_Technology · Todos los derechos reservados</p>
         </div>
     </div>
 
+    <!-- ========== SCRIPTS ========== -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Configuración de Supabase -->
+    <script src="/js/komerzio-config.js"></script>
+
     <script type="module">
+        // ============================================================
+        // IMPORTAR CONFIGURACIÓN DE SUPABASE
+        // ============================================================
         import { supabase } from '/js/supabase-client.js';
         import { auth } from '/js/auth.js';
         import { initCarrito } from '/js/cart.js';
         
-        // ========== INICIALIZAR CARRITO ==========
+        console.log('✅ pagar-qr.html - Inicializado con Supabase');
+        
+        // ============================================================
+        // INICIALIZAR CARRITO
+        // ============================================================
         const carrito = initCarrito();
         window.carrito = carrito;
         window.cart = carrito;
@@ -633,8 +610,10 @@
         
         carrito.cargarDeLocalStorage();
         carrito.actualizarInterfaz();
-        
-        // ========== FUNCIÓN PARA CARGAR SALDO EN HEADER ==========
+
+        // ============================================================
+        // CARGAR SALDO EN HEADER
+        // ============================================================
         async function cargarSaldoHeader() {
             const saldoCard = document.getElementById('saldoHeaderCard');
             const saldoAmount = document.getElementById('saldoHeaderAmount');
@@ -646,6 +625,8 @@
             
             try {
                 const usuario = auth.getUsuario();
+                if (!usuario) return;
+                
                 const { data, error } = await supabase
                     .from('saldo_usuarios')
                     .select('saldo_actual')
@@ -661,15 +642,18 @@
                 console.error('Error cargando saldo:', error);
             }
         }
-        
-        // ========== ACTUALIZAR MENÚ DE USUARIO ==========
+
+        // ============================================================
+        // ACTUALIZAR MENÚ DE USUARIO
+        // ============================================================
         function actualizarMenuUsuario() {
             const loginBtn = document.getElementById('loginBtnHeader');
             if (!loginBtn) return;
             
             if (auth.isAuthenticated()) {
                 const usuario = auth.getUsuario();
-                const inicial = usuario?.nombre_completo?.charAt(0).toUpperCase() || usuario?.email?.charAt(0).toUpperCase() || 'U';
+                const inicial = usuario?.nombre_completo?.charAt(0).toUpperCase() || 
+                               usuario?.email?.charAt(0).toUpperCase() || 'U';
                 loginBtn.innerHTML = `<i class="fa fa-user"></i><span>${inicial}</span>`;
                 loginBtn.href = '/mi-cuenta.html';
                 cargarSaldoHeader();
@@ -679,26 +663,21 @@
                 document.getElementById('saldoHeaderCard').style.display = 'none';
             }
         }
-        
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const readerDiv = document.getElementById('reader');
-        const pagoInfo = document.getElementById('pagoInfo');
-        const manualBtn = document.getElementById('manualBtn');
-        const manualInput = document.getElementById('manualInput');
-        const codigoManual = document.getElementById('codigoManual');
-        const buscarManualBtn = document.getElementById('buscarManualBtn');
-        const volverEscanearBtn = document.getElementById('volverEscanearBtn');
-        const methodSelector = document.getElementById('methodSelector');
-        
-        let html5QrCode;
+
+        // ============================================================
+        // VARIABLES GLOBALES
+        // ============================================================
+        let html5QrCode = null;
         let peticionActual = null;
-        
         let mfaActivo = false;
         let mfaFactorId = null;
         let selectedMethod = 'password';
         let tienePassword = false;
         let esUsuarioGoogle = false;
-        
+
+        // ============================================================
+        // VERIFICAR ESTADO 2FA
+        // ============================================================
         async function verificarEstado2FA() {
             try {
                 const { data: factors, error } = await supabase.auth.mfa.listFactors();
@@ -712,20 +691,35 @@
                 return false;
             }
         }
-        
+
+        // ============================================================
+        // VERIFICAR CÓDIGO 2FA
+        // ============================================================
         async function verificarCodigo2FA(codigo) {
             if (!mfaFactorId) throw new Error('No se encontró el factor 2FA');
-            const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId });
+            const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
+                factorId: mfaFactorId
+            });
             if (challengeError) throw challengeError;
-            const { error: verifyError } = await supabase.auth.mfa.verify({ factorId: mfaFactorId, challengeId: challenge.id, code: codigo });
+            const { error: verifyError } = await supabase.auth.mfa.verify({
+                factorId: mfaFactorId,
+                challengeId: challenge.id,
+                code: codigo
+            });
             if (verifyError) throw verifyError;
             return true;
         }
-        
+
+        // ============================================================
+        // FORZAR ACTIVACIÓN 2FA
+        // ============================================================
         async function forzarActivacion2FA() {
             const result = await Swal.fire({
                 title: '🔐 Seguridad requerida',
-                html: `<p>Tu cuenta requiere autenticación de dos factores (2FA) para realizar pagos con QR.</p><p style="margin-top: 15px;">Por favor, activa Google Authenticator en tu perfil antes de continuar.</p>`,
+                html: `
+                    <p>Tu cuenta requiere autenticación de dos factores (2FA) para realizar pagos con QR.</p>
+                    <p style="margin-top: 15px;">Por favor, activa Google Authenticator en tu perfil antes de continuar.</p>
+                `,
                 icon: 'warning',
                 confirmButtonText: 'Ir a mi cuenta',
                 cancelButtonText: 'Cancelar',
@@ -734,7 +728,28 @@
             if (result.isConfirmed) window.location.href = '/mi-cuenta.html?tab=seguridad';
             return false;
         }
-        
+
+        // ============================================================
+        // VERIFICAR SI TIENE CONTRASEÑA
+        // ============================================================
+        async function usuarioTienePassword() {
+            const usuario = auth.getUsuario();
+            if (!usuario) return false;
+            try {
+                const { data, error } = await supabase.auth.getUser();
+                if (error) return false;
+                const identities = data.user?.identities || [];
+                const provider = identities[0]?.provider;
+                if (provider === 'google' || provider === 'telegram') return false;
+                return true;
+            } catch (error) {
+                return true;
+            }
+        }
+
+        // ============================================================
+        // VERIFICAR ESTADO DEL USUARIO
+        // ============================================================
         async function verificarEstadoUsuario() {
             const usuario = auth.getUsuario();
             if (!usuario) return false;
@@ -750,6 +765,8 @@
             
             tienePassword = await usuarioTienePassword();
             await verificarEstado2FA();
+            
+            const methodSelector = document.getElementById('methodSelector');
             
             if (tienePassword && mfaActivo) {
                 methodSelector.style.display = 'flex';
@@ -777,26 +794,15 @@
             }
             return true;
         }
-        
-        async function usuarioTienePassword() {
-            const usuario = auth.getUsuario();
-            if (!usuario) return false;
-            try {
-                const { data, error } = await supabase.auth.getUser();
-                if (error) return false;
-                const identities = data.user?.identities || [];
-                const provider = identities[0]?.provider;
-                if (provider === 'google' || provider === 'telegram') return false;
-                return true;
-            } catch (error) {
-                return true;
-            }
-        }
-        
+
+        // ============================================================
+        // EXTRAER CÓDIGO DE URL
+        // ============================================================
         function extraerCodigoDeURL() {
             const urlParams = new URLSearchParams(window.location.search);
             let codigo = urlParams.get('c');
             if (codigo) return codigo;
+            
             const hash = window.location.hash.substring(1);
             if (hash) {
                 const hashParams = new URLSearchParams(hash);
@@ -805,7 +811,9 @@
             }
             return null;
         }
-        
+
+        // ============================================================
+        // PROCESAR CÓDIGO QR        // ============================================================
         async function procesarCodigo(texto) {
             try {
                 console.log('📥 Procesando texto:', texto);
@@ -831,11 +839,21 @@
                 }
                 
                 if (!codigo || codigo.length < 8) {
-                    Swal.fire({ icon: 'error', title: 'Código inválido', text: 'El código QR no es válido. Debe comenzar con REC-', confirmButtonText: 'Reintentar' }).then(() => setTimeout(() => iniciarEscanner(), 1000));
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Código inválido',
+                        text: 'El código QR no es válido. Debe comenzar con REC-',
+                        confirmButtonText: 'Reintentar'
+                    }).then(() => setTimeout(() => iniciarEscanner(), 1000));
                     return;
                 }
                 
-                Swal.fire({ title: 'Buscando pago...', text: 'Verificando código: ' + codigo, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                Swal.fire({
+                    title: 'Buscando pago...',
+                    text: 'Verificando código: ' + codigo,
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
                 
                 const ahora = new Date();
                 const ahoraISO = ahora.toISOString();
@@ -889,23 +907,32 @@
                 
                 let receptorData = { email: 'Desconocido', nombre_completo: 'Usuario' };
                 try {
-                    const { data: receptor } = await supabase.from('perfiles').select('email, nombre_completo').eq('id', peticion.receptor_id).maybeSingle();
+                    const { data: receptor } = await supabase
+                        .from('perfiles')
+                        .select('email, nombre_completo')
+                        .eq('id', peticion.receptor_id)
+                        .maybeSingle();
                     if (receptor) receptorData = receptor;
                 } catch (e) {}
                 
                 peticion.receptor = receptorData;
                 peticionActual = peticion;
                 
-                document.getElementById('receptorNombre').innerHTML = `${receptorData.nombre_completo || receptorData.email} <small style="color: #6c757d;">(${receptorData.email})</small>`;
-                document.getElementById('montoPago').innerHTML = peticion.monto ? `<strong>$${parseFloat(peticion.monto).toFixed(2)} CUP</strong>` : '💰 <em>Monto libre (ingrésalo al pagar)</em>';
+                document.getElementById('receptorNombre').innerHTML = `
+                    ${receptorData.nombre_completo || receptorData.email}
+                    <small style="color: #64748b;">(${receptorData.email})</small>
+                `;
+                document.getElementById('montoPago').innerHTML = peticion.monto ?
+                    `<strong>$${parseFloat(peticion.monto).toFixed(2)} USD</strong>` :
+                    '💰 <em>Monto libre (ingrésalo al pagar)</em>';
                 document.getElementById('conceptoPago').textContent = peticion.concepto || 'Sin concepto';
-                document.getElementById('expiraPago').innerHTML = `<span style="color: #dc3545">${expiraDate.toLocaleString()}</span>`;
+                document.getElementById('expiraPago').innerHTML = `<span style="color: #dc2626;">${expiraDate.toLocaleString()}</span>`;
                 
-                methodSelector.style.display = 'none';
-                pagoInfo.style.display = 'block';
-                manualBtn.style.display = 'none';
-                manualInput.style.display = 'none';
-                readerDiv.style.display = 'none';
+                document.getElementById('methodSelector').style.display = 'none';
+                document.getElementById('pagoInfo').style.display = 'block';
+                document.getElementById('manualBtn').style.display = 'none';
+                document.getElementById('manualInput').style.display = 'none';
+                document.getElementById('reader').style.display = 'none';
                 
             } catch (error) {
                 console.error('Error procesando QR:', error);
@@ -913,7 +940,10 @@
                 setTimeout(() => iniciarEscanner(), 1000);
             }
         }
-        
+
+        // ============================================================
+        // INICIAR ESCÁNER
+        // ============================================================
         function iniciarEscanner() {
             if (typeof Html5Qrcode === 'undefined') {
                 mostrarErrorCamara('No se pudo cargar el escáner QR');
@@ -924,10 +954,10 @@
                 return;
             }
             
-            readerDiv.style.display = 'block';
-            manualInput.style.display = 'none';
-            manualBtn.style.display = 'block';
-            pagoInfo.style.display = 'none';
+            document.getElementById('reader').style.display = 'block';
+            document.getElementById('manualInput').style.display = 'none';
+            document.getElementById('manualBtn').style.display = 'block';
+            document.getElementById('pagoInfo').style.display = 'none';
             
             try {
                 if (html5QrCode && html5QrCode.isScanning) {
@@ -939,7 +969,7 @@
                 mostrarErrorCamara('Error al iniciar el escáner');
             }
         }
-        
+
         function iniciarScannerConCamara() {
             html5QrCode = new Html5Qrcode("reader");
             const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
@@ -949,13 +979,21 @@
                         .catch(err2 => mostrarErrorCamara('No se pudo acceder a la cámara. Verifica los permisos.'));
                 });
         }
-        
+
         function mostrarErrorCamara(mensaje) {
-            readerDiv.innerHTML = `<div style="text-align: center; padding: 30px;"><i class="fa fa-camera fa-3x" style="color: #dc3545; margin-bottom: 15px;"></i><p style="color: #666;">${mensaje}</p><button class="btn btn-primary" style="width: auto; margin-top: 15px;" id="reintentarCamaraBtn"><i class="fa fa-refresh"></i> Reintentar</button></div>`;
+            document.getElementById('reader').innerHTML = `
+                <div style="text-align: center; padding: 30px;">
+                    <i class="fa fa-camera fa-3x" style="color: #dc2626; margin-bottom: 15px; display: block;"></i>
+                    <p style="color: #64748b;">${mensaje}</p>
+                    <button class="btn btn-primary" style="width: auto; margin-top: 15px; padding: 10px 24px;" id="reintentarCamaraBtn">
+                        <i class="fa fa-refresh"></i> Reintentar
+                    </button>
+                </div>
+            `;
             document.getElementById('reintentarCamaraBtn')?.addEventListener('click', () => location.reload());
-            manualBtn.style.display = 'block';
+            document.getElementById('manualBtn').style.display = 'block';
         }
-        
+
         async function onScanSuccess(decodedText) {
             console.log('✅ QR escaneado:', decodedText);
             if (html5QrCode && html5QrCode.isScanning) {
@@ -963,14 +1001,18 @@
             }
             await procesarCodigo(decodedText);
         }
-        
+
         function onScanError(error) {
             if (error && !error.includes('No MultiFormat Readers') && !error.includes('NotFoundException')) {
                 console.log('Escaneando...');
             }
         }
-        
+
+        // ============================================================
+        // VERIFICAR AUTENTICACIÓN
+        // ============================================================
         async function verificarAuth() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
             loadingIndicator.style.display = 'block';
             
             for (let i = 0; i < 20; i++) {
@@ -994,7 +1036,6 @@
             }
             
             loadingIndicator.style.display = 'none';
-            sessionStorage.setItem('redirect_after_login', window.location.pathname);
             const result = await Swal.fire({
                 title: '🔐 Inicia sesión',
                 text: 'Debes iniciar sesión para pagar con QR',
@@ -1010,84 +1051,188 @@
                 window.location.href = '/';
             }
         }
-        
-        manualBtn.addEventListener('click', () => {
-            if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().catch(e => console.log('Error deteniendo:', e));
-            readerDiv.style.display = 'none';
-            manualInput.style.display = 'block';
-            manualBtn.style.display = 'none';
-            codigoManual.focus();
+
+        // ============================================================
+        // EVENTOS DEL DOM
+        // ============================================================
+        document.getElementById('manualBtn').addEventListener('click', () => {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(e => console.log('Error deteniendo:', e));
+            }
+            document.getElementById('reader').style.display = 'none';
+            document.getElementById('manualInput').style.display = 'block';
+            document.getElementById('manualBtn').style.display = 'none';
+            document.getElementById('codigoManual').focus();
         });
-        
-        volverEscanearBtn.addEventListener('click', () => {
-            manualInput.style.display = 'none';
-            manualBtn.style.display = 'block';
-            readerDiv.style.display = 'block';
-            pagoInfo.style.display = 'none';
-            codigoManual.value = '';
+
+        document.getElementById('volverEscanearBtn').addEventListener('click', () => {
+            document.getElementById('manualInput').style.display = 'none';
+            document.getElementById('manualBtn').style.display = 'block';
+            document.getElementById('reader').style.display = 'block';
+            document.getElementById('pagoInfo').style.display = 'none';
+            document.getElementById('codigoManual').value = '';
             iniciarEscanner();
         });
-        
-        buscarManualBtn.addEventListener('click', async () => {
-            const codigo = codigoManual.value.trim();
-            if (!codigo) { Swal.fire('Error', 'Ingresa un código válido', 'error'); return; }
+
+        document.getElementById('buscarManualBtn').addEventListener('click', async () => {
+            const codigo = document.getElementById('codigoManual').value.trim();
+            if (!codigo) {
+                Swal.fire('Error', 'Ingresa un código válido', 'error');
+                return;
+            }
             await procesarCodigo(codigo);
         });
-        
-        codigoManual.addEventListener('keypress', (e) => { if (e.key === 'Enter') buscarManualBtn.click(); });
-        
+
+        document.getElementById('codigoManual').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('buscarManualBtn').click();
+        });
+
+        // ============================================================
+        // CONFIRMAR PAGO
+        // ============================================================
         document.getElementById('confirmarPagoBtn').addEventListener('click', async () => {
-            if (!peticionActual) { Swal.fire('Error', 'No hay petición activa', 'error'); return; }
+            if (!peticionActual) {
+                Swal.fire('Error', 'No hay petición activa', 'error');
+                return;
+            }
             
             let monto = peticionActual.monto;
             if (!monto) {
                 const { value: montoIngresado } = await Swal.fire({
-                    title: '💰 Ingresa el monto a pagar', input: 'number', inputLabel: 'Monto en CUP', inputPlaceholder: '100.00',
-                    inputAttributes: { min: '1', step: '0.01' }, showCancelButton: true, confirmButtonText: 'Continuar', cancelButtonText: 'Cancelar',
-                    inputValidator: (value) => { if (!value || value <= 0) return 'Debes ingresar un monto válido'; if (value < 10) return 'El monto mínimo es $10.00 CUP'; return null; }
+                    title: '💰 Ingresa el monto a pagar',
+                    input: 'number',
+                    inputLabel: 'Monto en USD',
+                    inputPlaceholder: '100.00',
+                    inputAttributes: { min: '1', step: '0.01' },
+                    showCancelButton: true,
+                    confirmButtonText: 'Continuar',
+                    cancelButtonText: 'Cancelar',
+                    inputValidator: (value) => {
+                        if (!value || value <= 0) return 'Debes ingresar un monto válido';
+                        if (value < 10) return 'El monto mínimo es $10.00 USD';
+                        return null;
+                    }
                 });
                 if (!montoIngresado) return;
                 monto = parseFloat(montoIngresado);
-            } else { monto = parseFloat(monto); }
+            } else {
+                monto = parseFloat(monto);
+            }
             
             const usuario = auth.getUsuario();
-            if (!usuario) { Swal.fire('Error', 'No estás autenticado', 'error'); return; }
+            if (!usuario) {
+                Swal.fire('Error', 'No estás autenticado', 'error');
+                return;
+            }
             
             const emisorId = usuario.id;
             const receptorEmail = peticionActual.receptor?.email;
-            if (!receptorEmail || receptorEmail === 'Desconocido') { Swal.fire('Error', 'No se pudo identificar al receptor', 'error'); return; }
-            if (emisorId === peticionActual.receptor_id) { Swal.fire({ icon: 'error', title: 'No puedes pagarte a ti mismo', text: 'No está permitido realizar pagos a tu propia cuenta' }); return; }
+            if (!receptorEmail || receptorEmail === 'Desconocido') {
+                Swal.fire('Error', 'No se pudo identificar al receptor', 'error');
+                return;
+            }
+            if (emisorId === peticionActual.receptor_id) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No puedes pagarte a ti mismo',
+                    text: 'No está permitido realizar pagos a tu propia cuenta'
+                });
+                return;
+            }
             
             let confirmado = false;
             
             if (selectedMethod === 'password' && tienePassword) {
                 const { value: password } = await Swal.fire({
                     title: '🔐 Confirmar pago',
-                    html: `<div style="text-align: left;"><p>Vas a pagar <strong style="color: #28a745; font-size: 20px;">$${monto.toFixed(2)} CUP</strong></p><p style="margin: 10px 0;">a:</p><p style="font-size: 16px; color: #009644; background: #e8f5e9; padding: 10px; border-radius: 8px;"><i class="fa fa-user"></i> ${peticionActual.receptor?.nombre_completo || receptorEmail}<br><small>${receptorEmail}</small></p><p style="margin-top: 15px;"><strong>📝 Concepto:</strong> ${peticionActual.concepto || 'Sin concepto'}</p><p style="margin-top: 15px;"><strong>🔑 Confirma tu contraseña:</strong></p></div>`,
-                    icon: 'question', input: 'password', inputLabel: 'Contraseña', inputPlaceholder: '••••••••',
-                    showCancelButton: true, confirmButtonText: '✅ Pagar ahora', cancelButtonText: 'Cancelar'
+                    html: `
+                        <div style="text-align: left;">
+                            <p>Vas a pagar <strong style="color: #22c55e; font-size: 20px;">$${monto.toFixed(2)} USD</strong></p>
+                            <p style="margin: 10px 0;">a:</p>
+                            <p style="font-size: 16px; color: #16a34a; background: #dcfce7; padding: 12px; border-radius: 8px;">
+                                <i class="fa fa-user"></i> ${peticionActual.receptor?.nombre_completo || receptorEmail}<br>
+                                <small>${receptorEmail}</small>
+                            </p>
+                            <p style="margin-top: 15px;"><strong>📝 Concepto:</strong> ${peticionActual.concepto || 'Sin concepto'}</p>
+                            <p style="margin-top: 15px;"><strong>🔑 Confirma tu contraseña:</strong></p>
+                        </div>
+                    `,
+                    icon: 'question',
+                    input: 'password',
+                    inputLabel: 'Contraseña',
+                    inputPlaceholder: '••••••••',
+                    showCancelButton: true,
+                    confirmButtonText: '✅ Pagar ahora',
+                    cancelButtonText: 'Cancelar'
                 });
                 if (!password) return;
-                const { error: signInError } = await supabase.auth.signInWithPassword({ email: usuario.email, password: password });
-                if (signInError) { Swal.fire('Error', 'Contraseña incorrecta', 'error'); return; }
+                const { error: signInError } = await supabase.auth.signInWithPassword({
+                    email: usuario.email,
+                    password: password
+                });
+                if (signInError) {
+                    Swal.fire('Error', 'Contraseña incorrecta', 'error');
+                    return;
+                }
                 confirmado = true;
+                
             } else if (selectedMethod === '2fa' && mfaActivo) {
                 const { value: codigo2fa } = await Swal.fire({
                     title: '🔐 Confirmar pago',
-                    html: `<div style="text-align: left;"><p>Vas a pagar <strong style="color: #28a745; font-size: 20px;">$${monto.toFixed(2)} CUP</strong></p><p style="margin: 10px 0;">a:</p><p style="font-size: 16px; color: #009644; background: #e8f5e9; padding: 10px; border-radius: 8px;"><i class="fa fa-user"></i> ${peticionActual.receptor?.nombre_completo || receptorEmail}<br><small>${receptorEmail}</small></p><p style="margin-top: 15px;"><strong>📝 Concepto:</strong> ${peticionActual.concepto || 'Sin concepto'}</p><p style="margin-top: 15px;"><strong>🔑 Ingresa el código de Google Authenticator:</strong></p></div>`,
-                    icon: 'question', input: 'text', inputLabel: 'Código de 6 dígitos', inputPlaceholder: '123456',
-                    inputAttributes: { maxlength: 6, pattern: '[0-9]*', inputmode: 'numeric' }, showCancelButton: true,
-                    confirmButtonText: '✅ Pagar ahora', cancelButtonText: 'Cancelar',
-                    preConfirm: (cod) => { if (!cod || cod.length !== 6) { Swal.showValidationMessage('Código inválido (6 dígitos)'); return false; } return cod; }
+                    html: `
+                        <div style="text-align: left;">
+                            <p>Vas a pagar <strong style="color: #22c55e; font-size: 20px;">$${monto.toFixed(2)} USD</strong></p>
+                            <p style="margin: 10px 0;">a:</p>
+                            <p style="font-size: 16px; color: #16a34a; background: #dcfce7; padding: 12px; border-radius: 8px;">
+                                <i class="fa fa-user"></i> ${peticionActual.receptor?.nombre_completo || receptorEmail}<br>
+                                <small>${receptorEmail}</small>
+                            </p>
+                            <p style="margin-top: 15px;"><strong>📝 Concepto:</strong> ${peticionActual.concepto || 'Sin concepto'}</p>
+                            <p style="margin-top: 15px;"><strong>🔑 Ingresa el código de Google Authenticator:</strong></p>
+                        </div>
+                    `,
+                    icon: 'question',
+                    input: 'text',
+                    inputLabel: 'Código de 6 dígitos',
+                    inputPlaceholder: '123456',
+                    inputAttributes: { maxlength: 6, pattern: '[0-9]*', inputmode: 'numeric' },
+                    showCancelButton: true,
+                    confirmButtonText: '✅ Pagar ahora',
+                    cancelButtonText: 'Cancelar',
+                    preConfirm: (cod) => {
+                        if (!cod || cod.length !== 6) {
+                            Swal.showValidationMessage('Código inválido (6 dígitos)');
+                            return false;
+                        }
+                        if (!/^\d{6}$/.test(cod)) {
+                            Swal.showValidationMessage('Solo números permitidos');
+                            return false;
+                        }
+                        return cod;
+                    }
                 });
                 if (!codigo2fa) return;
-                try { await verificarCodigo2FA(codigo2fa); confirmado = true; } catch (error) { Swal.fire('Error', 'Código 2FA incorrecto', 'error'); return; }
-            } else { Swal.fire('Error', 'No hay método de verificación disponible', 'error'); return; }
+                try {
+                    await verificarCodigo2FA(codigo2fa);
+                    confirmado = true;
+                } catch (error) {
+                    Swal.fire('Error', 'Código 2FA incorrecto', 'error');
+                    return;
+                }
+            } else {
+                Swal.fire('Error', 'No hay método de verificación disponible', 'error');
+                return;
+            }
             
             if (!confirmado) return;
             
             try {
-                Swal.fire({ title: 'Procesando pago...', html: 'Por favor espera', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                Swal.fire({
+                    title: 'Procesando pago...',
+                    html: 'Por favor espera',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
                 
                 const { data, error } = await supabase.rpc('transferir_saldo', {
                     p_emisor_id: emisorId,
@@ -1099,23 +1244,52 @@
                 if (error) throw error;
                 
                 if (data?.success) {
-                    await supabase.from('peticiones_pago').update({ estado: 'usada' }).eq('id', peticionActual.id);
-                    await Swal.fire({ icon: 'success', title: '🎉 ¡Pago exitoso!', html: `<p>Se transfirieron <strong>$${monto.toFixed(2)} CUP</strong></p><p>Receptor: ${receptorEmail}</p><p style="margin-top: 15px;">Redirigiendo a tu cuenta...</p>`, timer: 2500, showConfirmButton: false });
+                    await supabase
+                        .from('peticiones_pago')
+                        .update({ estado: 'usada' })
+                        .eq('id', peticionActual.id);
+                    
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '🎉 ¡Pago exitoso!',
+                        html: `
+                            <p>Se transfirieron <strong>$${monto.toFixed(2)} USD</strong></p>
+                            <p>Receptor: ${receptorEmail}</p>
+                            <p style="margin-top: 15px;">Redirigiendo a tu cuenta...</p>
+                        `,
+                        timer: 2500,
+                        showConfirmButton: false
+                    });
                     setTimeout(() => window.location.href = '/mi-cuenta.html', 2500);
-                } else { throw new Error(data?.error || 'Error en la transferencia'); }
+                } else {
+                    throw new Error(data?.error || 'Error en la transferencia');
+                }
             } catch (error) {
                 console.error('Error en pago:', error);
-                Swal.fire({ icon: 'error', title: 'Error al pagar', text: error.message || 'No se pudo completar la transferencia', confirmButtonText: 'Entendido' });
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al pagar',
+                    text: error.message || 'No se pudo completar la transferencia',
+                    confirmButtonText: 'Entendido'
+                });
                 setTimeout(() => iniciarEscanner(), 1000);
             }
         });
-        
+
+        // ============================================================
+        // INICIALIZAR
+        // ============================================================
         actualizarMenuUsuario();
         auth.onCambio(actualizarMenuUsuario);
         verificarAuth();
-        
+
+        // ============================================================
+        // LIMPIAR AL SALIR
+        // ============================================================
         window.addEventListener('beforeunload', () => {
-            if (html5QrCode && html5QrCode.isScanning) { try { html5QrCode.stop(); } catch (e) {} }
+            if (html5QrCode && html5QrCode.isScanning) {
+                try { html5QrCode.stop(); } catch (e) {}
+            }
         });
     </script>
 </body>

@@ -6,8 +6,30 @@
     <meta name="theme-color" content="#667eea">
     <title>Iniciar sesión · KOMERZIO</title>
     
+    <!-- Open Graph / WhatsApp -->
+    <meta property="og:title" content="Iniciar sesión · KOMERZIO">
+    <meta property="og:description" content="Accede a tu cuenta KOMERZIO">
+    <meta property="og:image" content="https://komerzio.dpdns.org/android-chrome-512x512.png">
+    <meta property="og:url" content="https://komerzio.dpdns.org/login.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="KOMERZIO">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Iniciar sesión · KOMERZIO">
+    <meta name="twitter:description" content="Accede a tu cuenta KOMERZIO">
+    <meta name="twitter:image" content="https://komerzio.dpdns.org/android-chrome-512x512.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://komerzio.dpdns.org/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="https://komerzio.dpdns.org/favicon.svg" />
+    <link rel="shortcut icon" href="https://komerzio.dpdns.org/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://komerzio.dpdns.org/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="KOMERZIO" />
+    <link rel="manifest" href="https://komerzio.dpdns.org/site.webmanifest" />
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
     <style>
@@ -15,7 +37,7 @@
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
             min-height: 100vh;
             min-height: 100dvh;
             display: flex;
@@ -34,9 +56,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.05)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x bottom;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.03)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x bottom;
             background-size: cover;
-            opacity: 0.3;
+            opacity: 0.5;
             pointer-events: none;
             z-index: 0;
         }
@@ -45,10 +67,10 @@
             max-width: 420px;
             width: 100%;
             background: rgba(255, 255, 255, 0.97);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 28px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
             padding: 32px 24px;
             position: relative;
             z-index: 1;
@@ -56,8 +78,8 @@
         }
         
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(24px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(24px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
         
         .header {
@@ -65,20 +87,26 @@
             margin-bottom: 28px;
         }
         
+        .logo-text {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f97316 0%, #fbbf24 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            display: inline-block;
+            letter-spacing: -0.5px;
+        }
+        
         .header h1 {
             font-size: clamp(22px, 5vw, 28px);
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 6px;
-            letter-spacing: -0.3px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
         }
         
         .header p {
-            color: #6c757d;
+            color: #64748b;
             font-size: 14px;
             font-weight: 500;
         }
@@ -87,7 +115,7 @@
             width: 100%;
             padding: 14px 18px;
             border: none;
-            border-radius: 16px;
+            border-radius: 14px;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
@@ -107,32 +135,37 @@
         
         .btn-google {
             background: white;
-            color: #3c4043;
-            border: 1px solid #dadce0;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            color: #1e293b;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
         .btn-google:hover {
-            background: #f8f9fa;
-            border-color: #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            background: #f8fafc;
+            border-color: #f97316;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.15);
+            transform: translateY(-2px);
         }
-        .btn-google:disabled { opacity: 0.7; cursor: not-allowed; }
+        .btn-google:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
         .btn-google img { width: 20px; height: 20px; flex-shrink: 0; }
         
         .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #f97316, #ea580c);
             color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35);
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.35);
         }
-        .btn-primary:hover { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5); }
-        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+        .btn-primary:hover {
+            box-shadow: 0 8px 25px rgba(249, 115, 22, 0.5);
+            transform: translateY(-2px);
+        }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        .btn-primary i { font-size: 16px; }
         
         .divider {
             display: flex;
             align-items: center;
             text-align: center;
             margin: 22px 0;
-            color: #a0aec0;
+            color: #94a3b8;
         }
         .divider::before, .divider::after {
             content: '';
@@ -141,10 +174,11 @@
         }
         .divider span {
             padding: 0 16px;
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            color: #94a3b8;
         }
         
         .form-group { margin-bottom: 16px; }
@@ -152,17 +186,17 @@
             display: block;
             margin-bottom: 6px;
             font-weight: 600;
-            color: #2d3748;
+            color: #0f172a;
             font-size: 13px;
             letter-spacing: -0.2px;
         }
-        .form-group label i { color: #667eea; margin-right: 6px; width: 16px; }
+        .form-group label i { color: #f97316; margin-right: 6px; width: 16px; }
         
         .form-control {
             width: 100%;
             padding: 13px 16px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
             font-size: 14px;
             transition: all 0.2s ease;
             background: white;
@@ -170,11 +204,11 @@
             -webkit-appearance: none;
         }
         .form-control:focus {
-            border-color: #667eea;
+            border-color: #f97316;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
         }
-        .form-control::placeholder { color: #cbd5e0; font-size: 13px; }
+        .form-control::placeholder { color: #94a3b8; font-size: 13px; }
         
         .footer-links {
             text-align: center;
@@ -186,47 +220,54 @@
             gap: 8px;
         }
         .footer-links a {
-            color: #718096;
+            color: #64748b;
             text-decoration: none;
             font-size: 13px;
             font-weight: 500;
             transition: color 0.2s;
         }
-        .footer-links a:hover { color: #667eea; }
+        .footer-links a:hover { color: #f97316; }
         
         .fa-spinner { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         
+        .back-to-home {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            color: #94a3b8;
+            font-size: 20px;
+            transition: color 0.2s;
+        }
+        .back-to-home:hover { color: #f97316; }
+        
         @media (max-width: 480px) {
             body { padding: 12px; align-items: flex-start; padding-top: 24px; }
             .login-container { border-radius: 24px; padding: 24px 18px; }
-            .btn { padding: 13px 16px; font-size: 14px; border-radius: 14px; }
+            .btn { padding: 13px 16px; font-size: 14px; border-radius: 12px; }
             .form-control { padding: 12px 14px; font-size: 13px; }
+            .logo-text { font-size: 34px; }
+            .back-to-home { top: 12px; left: 12px; font-size: 18px; }
         }
         @media (max-width: 360px) {
             .login-container { padding: 20px 14px; border-radius: 20px; }
             .header h1 { font-size: 20px; }
             .btn { padding: 12px 14px; font-size: 13px; gap: 8px; }
+            .logo-text { font-size: 28px; }
         }
         @media (min-width: 768px) {
             body { padding: 24px; }
             .login-container { padding: 40px 32px; border-radius: 32px; }
         }
-        
-        .logo-text {
-            font-size: 42px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 8px;
-            display: inline-block;
-        }
     </style>
 </head>
 <body>
     <div class="login-container">
+        <!-- Botón volver al inicio -->
+        <a href="/index.html" class="back-to-home" title="Volver al inicio">
+            <i class="fa fa-arrow-left"></i>
+        </a>
+        
         <div class="header">
             <div class="logo-text">KOMERZIO</div>
             <h1>Bienvenido</h1>
@@ -262,27 +303,31 @@
         </div>
     </div>
     
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <script type="importmap">
-    {
-        "imports": {
-            "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
-        }
-    }
-    </script>
+    <!-- Configuración de Supabase -->
+    <script src="/js/komerzio-config.js"></script>
     
     <script type="module">
-        import { createClient } from '@supabase/supabase-js';
+        // ============================================================
+        // IMPORTAR CONFIGURACIÓN DE SUPABASE
+        // ============================================================
+        import { supabase } from '/js/supabase-client.js';
+        import { auth } from '/js/auth.js';
         
-        const SUPABASE_URL = 'https://ehlebvmalatsdyvopvkn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVobGVidm1hbGF0c2R5dm9wdmtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMjg2MjAsImV4cCI6MjA5OTYwNDYyMH0.lsV-x6y3e-0fbdUqb--_CVi8c1gUhO4MUoo1grq66ZI';
+        console.log('✅ login.html - Inicializado con Supabase');
         
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // ============================================================
+        // REDIRECCIÓN POST-LOGIN
+        // ============================================================
+        const redirectUrl = sessionStorage.getItem('redirect_after_login') || 
+                           new URLSearchParams(window.location.search).get('redirect') || 
+                           '/index.html';
         
-        console.log('🚀 login.html - Supabase cliente creado (importmap)');
-        
-        // ========== DETECTAR APP ==========
+        // ============================================================
+        // DETECTAR APP WEBVIEW
+        // ============================================================
         const esApp = navigator.userAgent.includes('wv') || 
                       navigator.userAgent.includes('WebView') ||
                       !!(window.cordova || window.phonegap || window.PhoneGap) ||
@@ -297,71 +342,118 @@
         
         console.log('📱 App detectada:', esApp);
         
-        // ========== GOOGLE LOGIN ==========
+        // ============================================================
+        // SI YA ESTÁ AUTENTICADO, REDIRIGIR
+        // ============================================================
+        if (auth.isAuthenticated()) {
+            window.location.href = redirectUrl;
+        }
+        
+        // ============================================================
+        // GOOGLE LOGIN
+        // ============================================================
         document.getElementById('googleLoginBtn').addEventListener('click', async function() {
             const btn = this;
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Conectando con Google...';
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Conectando con Google...';
+            
             try {
-                const { error } = await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: { redirectTo: window.location.origin + '/index.html' }
-                });
-                if (error) throw error;
+                const result = await auth.loginGoogle();
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+                // Redirige a Google automáticamente
+                if (result.url) {
+                    window.location.href = result.url;
+                }
             } catch (error) {
-                Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'No se pudo conectar con Google.', confirmButtonColor: '#667eea' });
+                console.error('❌ Error en Google login:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'No se pudo conectar con Google.',
+                    confirmButtonColor: '#f97316'
+                });
                 btn.disabled = false;
                 btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continuar con Google';
             }
         });
         
-        // ========== LOGIN CON EMAIL ==========
+        // ============================================================
+        // LOGIN CON EMAIL Y CONTRASEÑA - USANDO AUTH.LOGIN()
+        // ============================================================
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const btn = this.querySelector('button[type="submit"]');
             
             if (!email || !password) {
-                Swal.fire('Error', 'Completa todos los campos', 'error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos incompletos',
+                    text: 'Por favor, completa todos los campos',
+                    confirmButtonColor: '#f97316'
+                });
                 return;
             }
             
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i> Iniciando sesión...';
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Iniciando sesión...';
             
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
+                // ✅ USAR auth.login() QUE YA TIENE VERIFICACIÓN DE BANEO
+                const result = await auth.login(email, password);
+                
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+                
+                // ✅ Login exitoso
+                sessionStorage.removeItem('redirect_after_login');
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Bienvenido!',
+                    text: result.message || 'Inicio de sesión exitoso',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    timerProgressBar: true
                 });
                 
-                if (error) throw error;
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 1500);
                 
-                if (data.user) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Bienvenido!',
-                        text: 'Inicio de sesión exitoso',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    setTimeout(() => {
-                        window.location.href = '/index.html';
-                    }, 1500);
-                }
             } catch (error) {
                 console.error('❌ Error en login:', error);
-                Swal.fire({ 
-                    icon: 'error', 
-                    title: 'Error', 
-                    text: error.message || 'Email o contraseña incorrectos', 
-                    confirmButtonColor: '#667eea' 
+                
+                let mensaje = error.message || 'Email o contraseña incorrectos';
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: mensaje,
+                    confirmButtonColor: '#f97316'
                 });
+                
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa fa-sign-in"></i> Iniciar sesión';
             }
         });
+        
+        // ============================================================
+        // ENTER KEY PARA ENVIAR
+        // ============================================================
+        document.getElementById('password').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+        
+        console.log('✅ Login page ready');
     </script>
 </body>
 </html>

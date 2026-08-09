@@ -1,13 +1,17 @@
-<!-- ===== PANEL DE NOTIFICACIONES FLOTANTE ===== -->
+<!-- ============================================================
+     PANEL DE NOTIFICACIONES FLOTANTE - KOMERZIO
+     ============================================================ -->
 <div id="notificaciones-container" style="display: none;">
+    <!-- Icono de campana -->
     <div class="notificaciones-icon" onclick="window.toggleNotificacionesPanel()">
         <i class="fa fa-bell"></i>
         <span id="notificaciones-badge" class="notificaciones-badge">0</span>
     </div>
     
+    <!-- Panel de notificaciones -->
     <div id="notificaciones-panel" class="notificaciones-panel">
         <div class="notificaciones-header">
-            <h3>Notificaciones</h3>
+            <h3><i class="fa fa-bell" style="color: #f97316;"></i> Notificaciones</h3>
             <button onclick="window.marcarTodasLeidas()" class="btn-marcar-leidas">
                 <i class="fa fa-check-double"></i> Marcar todas
             </button>
@@ -15,16 +19,19 @@
         
         <div id="notificaciones-lista" class="notificaciones-lista">
             <div class="notificaciones-loading">
-                <i class="fa fa-spinner fa-pulse"></i> Cargando...
+                <i class="fa fa-spinner fa-spin"></i> Cargando...
             </div>
         </div>
         
         <div class="notificaciones-footer">
-            <a href="/notificaciones.html">Ver todas</a>
+            <a href="/notificaciones.html">Ver todas las notificaciones</a>
         </div>
     </div>
 </div>
 
+<!-- ============================================================
+     ESTILOS DEL PANEL
+     ============================================================ -->
 <style>
     #notificaciones-container {
         position: fixed;
@@ -36,35 +43,36 @@
     .notificaciones-icon {
         width: 50px;
         height: 50px;
-        background: #f08804;
+        background: linear-gradient(135deg, #f97316, #ea580c);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 15px rgba(249,115,22,0.3);
         position: relative;
-        transition: all 0.2s;
+        transition: all 0.3s;
     }
     
     .notificaciones-icon:hover {
         transform: scale(1.1);
-        background: #f7ca00;
+        box-shadow: 0 6px 25px rgba(249,115,22,0.4);
     }
     
     .notificaciones-icon i {
         color: white;
         font-size: 24px;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
     }
     
     .notificaciones-badge {
         position: absolute;
         top: -5px;
         right: -5px;
-        background: #dc3545;
+        background: #dc2626;
         color: white;
-        font-size: 12px;
-        font-weight: 600;
+        font-size: 11px;
+        font-weight: 700;
         min-width: 20px;
         height: 20px;
         border-radius: 10px;
@@ -72,20 +80,28 @@
         align-items: center;
         justify-content: center;
         padding: 0 5px;
+        box-shadow: 0 2px 8px rgba(220,38,38,0.4);
     }
     
     .notificaciones-panel {
         position: absolute;
         top: 60px;
         right: 0;
-        width: 350px;
+        width: 360px;
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
         display: none;
         max-height: 500px;
         flex-direction: column;
         overflow: hidden;
+        border: 1px solid #e2e8f0;
+        animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
     .notificaciones-panel.show {
@@ -93,117 +109,237 @@
     }
     
     .notificaciones-header {
-        padding: 15px;
-        border-bottom: 1px solid #dee2e6;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        background: #f8fafc;
+        border-radius: 16px 16px 0 0;
     }
     
     .notificaciones-header h3 {
         margin: 0;
         font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
     
     .btn-marcar-leidas {
         background: none;
         border: none;
-        color: #007185;
+        color: #f97316;
         cursor: pointer;
         font-size: 12px;
+        font-weight: 600;
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .btn-marcar-leidas:hover {
+        color: #ea580c;
     }
     
     .notificaciones-lista {
         flex: 1;
         overflow-y: auto;
-        max-height: 400px;
+        max-height: 380px;
+        padding: 4px 0;
+    }
+    
+    .notificaciones-lista::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .notificaciones-lista::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
     }
     
     .notificacion-item {
-        padding: 15px;
-        border-bottom: 1px solid #f0f2f5;
+        padding: 14px 20px;
+        border-bottom: 1px solid #f1f5f9;
         cursor: pointer;
         transition: background 0.2s;
     }
     
     .notificacion-item:hover {
-        background: #f8f9fa;
+        background: #f8fafc;
     }
     
     .notificacion-item.no-leida {
-        background: #fff6e5;
+        background: #fffbeb;
+        border-left: 3px solid #f97316;
     }
     
     .notificacion-item.no-leida:hover {
-        background: #ffe6cc;
+        background: #fef3c7;
     }
     
     .notificacion-header {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 5px;
+        align-items: flex-start;
+        margin-bottom: 4px;
+        gap: 8px;
     }
     
     .notificacion-titulo {
         font-weight: 600;
         font-size: 14px;
+        color: #0f172a;
     }
     
     .notificacion-fecha {
         font-size: 11px;
-        color: #6c757d;
+        color: #94a3b8;
+        white-space: nowrap;
+        flex-shrink: 0;
+        margin-top: 2px;
     }
     
     .notificacion-mensaje {
         font-size: 13px;
-        color: #495057;
-        margin-bottom: 5px;
+        color: #475569;
+        margin-bottom: 6px;
+        line-height: 1.5;
     }
     
     .notificacion-tipo {
         display: inline-block;
-        padding: 2px 8px;
-        border-radius: 12px;
+        padding: 2px 10px;
+        border-radius: 20px;
         font-size: 10px;
         font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
-    .tipo-visita { background: #e3f2fd; color: #1976d2; }
-    .tipo-clic { background: #e8f5e9; color: #2e7d32; }
-    .tipo-aprobado { background: #d4edda; color: #155724; }
-    .tipo-rechazado { background: #f8d7da; color: #721c24; }
-    .tipo-pedido { background: #fff3cd; color: #856404; }
-    .tipo-reporte { background: #cce5ff; color: #004085; }
+    .tipo-visita { background: #e0f2fe; color: #0369a1; }
+    .tipo-clic { background: #dcfce7; color: #166534; }
+    .tipo-aprobado { background: #dcfce7; color: #166534; }
+    .tipo-rechazado { background: #fee2e2; color: #991b1b; }
+    .tipo-pedido { background: #fef3c7; color: #92400e; }
+    .tipo-reporte { background: #e0f2fe; color: #0369a1; }
+    .tipo-masiva { background: #f97316; color: white; }
     
     .notificaciones-loading,
     .notificaciones-vacio {
         text-align: center;
         padding: 40px 20px;
-        color: #6c757d;
+        color: #94a3b8;
+    }
+    
+    .notificaciones-loading i {
+        font-size: 24px;
+        color: #f97316;
+        display: block;
+        margin-bottom: 10px;
+    }
+    
+    .notificaciones-vacio i {
+        font-size: 36px;
+        color: #e2e8f0;
+        display: block;
+        margin-bottom: 10px;
     }
     
     .notificaciones-footer {
-        padding: 10px;
-        border-top: 1px solid #dee2e6;
+        padding: 12px 20px;
+        border-top: 1px solid #e2e8f0;
         text-align: center;
+        background: #f8fafc;
+        border-radius: 0 0 16px 16px;
     }
     
     .notificaciones-footer a {
-        color: #007185;
+        color: #f97316;
         text-decoration: none;
         font-size: 13px;
+        font-weight: 600;
+        transition: color 0.2s;
     }
     
+    .notificaciones-footer a:hover {
+        color: #ea580c;
+    }
+    
+    /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
+        #notificaciones-container {
+            top: 70px;
+            right: 12px;
+        }
+        
         .notificaciones-panel {
-            width: 300px;
+            width: 320px;
             right: -10px;
+            max-height: 450px;
+        }
+        
+        .notificaciones-icon {
+            width: 44px;
+            height: 44px;
+        }
+        
+        .notificaciones-icon i {
+            font-size: 20px;
+        }
+        
+        .notificacion-item {
+            padding: 12px 16px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        #notificaciones-container {
+            top: 60px;
+            right: 8px;
+        }
+        
+        .notificaciones-panel {
+            width: 290px;
+            right: -20px;
+            max-height: 400px;
+        }
+        
+        .notificaciones-icon {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .notificaciones-icon i {
+            font-size: 18px;
+        }
+        
+        .notificaciones-badge {
+            font-size: 10px;
+            min-width: 18px;
+            height: 18px;
+        }
+        
+        .notificacion-titulo {
+            font-size: 13px;
+        }
+        
+        .notificacion-mensaje {
+            font-size: 12px;
         }
     }
 </style>
 
+<!-- ============================================================
+     SCRIPTS DEL PANEL
+     ============================================================ -->
 <script>
-    // Esperar a que el DOM esté listo
+    // ============================================================
+    // INICIAR PANEL DE NOTIFICACIONES
+    // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         iniciarNotificacionesUI();
     });
@@ -212,29 +348,33 @@
         const container = document.getElementById('notificaciones-container');
         if (!container) return;
         
-        // Verificar si el usuario está autenticado (verificar existencia de notificaciones global)
+        // Esperar a que notificaciones esté disponible
         if (typeof notificaciones === 'undefined' || !notificaciones) {
             console.log('⏳ Esperando que notificaciones esté disponible...');
             setTimeout(iniciarNotificacionesUI, 500);
             return;
         }
         
+        // Inicializar notificaciones si no está iniciado
         if (!notificaciones.inicializado) {
             await notificaciones.iniciar();
         }
         
+        // Mostrar contenedor
         container.style.display = 'block';
         
+        // Renderizar notificaciones
         const lista = notificaciones.notificaciones || [];
         renderizarNotificaciones(lista);
         actualizarBadge();
         
         // Escuchar nuevas notificaciones
-        notificaciones.onNuevaNotificacion((notificacion) => {
+        notificaciones.onNuevaNotificacion(() => {
             renderizarNotificaciones(notificaciones.notificaciones);
             actualizarBadge();
         });
         
+        // Escuchar eventos de actualización
         window.addEventListener('notificacion-actualizada', () => {
             renderizarNotificaciones(notificaciones.notificaciones);
             actualizarBadge();
@@ -244,8 +384,13 @@
             renderizarNotificaciones(notificaciones.notificaciones);
             actualizarBadge();
         });
+        
+        console.log('✅ Panel de notificaciones iniciado');
     }
-    
+
+    // ============================================================
+    // RENDERIZAR NOTIFICACIONES
+    // ============================================================
     function renderizarNotificaciones(lista) {
         const container = document.getElementById('notificaciones-lista');
         if (!container) return;
@@ -253,15 +398,19 @@
         if (!lista || lista.length === 0) {
             container.innerHTML = `
                 <div class="notificaciones-vacio">
-                    <i class="fa fa-bell-slash fa-2x" style="margin-bottom: 10px;"></i>
+                    <i class="fa fa-bell-slash"></i>
                     <p>No tienes notificaciones</p>
                 </div>
             `;
             return;
         }
         
-        container.innerHTML = lista.slice(0, 10).map(n => {
-            const fecha = new Date(n.created_at).toLocaleString('es-ES', {
+        // Mostrar solo las 10 más recientes
+        const mostrar = lista.slice(0, 10);
+        
+        container.innerHTML = mostrar.map(n => {
+            const fecha = new Date(n.created_at);
+            const fechaStr = fecha.toLocaleString('es-ES', {
                 day: '2-digit',
                 month: '2-digit',
                 hour: '2-digit',
@@ -269,35 +418,51 @@
             });
             
             const noLeidaClass = !n.leida ? 'no-leida' : '';
+            const tipo = n.tipo || 'visita';
+            const dataStr = JSON.stringify(n.data || {}).replace(/"/g, '&quot;');
             
             return `
-                <div class="notificacion-item ${noLeidaClass}" onclick="window.abrirNotificacion(${n.id}, '${n.tipo}', ${JSON.stringify(n.data).replace(/"/g, '&quot;')})">
+                <div class="notificacion-item ${noLeidaClass}" 
+                     onclick="window.abrirNotificacion('${n.id}', '${tipo}', '${dataStr}', ${n.es_masiva || false})">
                     <div class="notificacion-header">
-                        <span class="notificacion-titulo">${n.titulo}</span>
-                        <span class="notificacion-fecha">${fecha}</span>
+                        <span class="notificacion-titulo">${n.titulo || 'Notificación'}</span>
+                        <span class="notificacion-fecha">${fechaStr}</span>
                     </div>
-                    <div class="notificacion-mensaje">${n.mensaje}</div>
+                    <div class="notificacion-mensaje">${n.mensaje || ''}</div>
                     <div>
-                        <span class="notificacion-tipo tipo-${n.tipo}">${n.tipo}</span>
+                        <span class="notificacion-tipo tipo-${tipo}">${tipo}</span>
+                        ${n.es_masiva ? '<span style="font-size: 9px; background: #f97316; color: white; padding: 2px 8px; border-radius: 20px; margin-left: 6px;">MASIVA</span>' : ''}
                     </div>
                 </div>
             `;
         }).join('');
     }
-    
+
+    // ============================================================
+    // ACTUALIZAR BADGE
+    // ============================================================
     function actualizarBadge() {
         const badge = document.getElementById('notificaciones-badge');
         if (!badge) return;
+        
         if (typeof notificaciones !== 'undefined' && notificaciones) {
             const count = notificaciones.contarNoLeidas();
             badge.textContent = count;
             badge.style.display = count > 0 ? 'flex' : 'none';
+        } else {
+            badge.style.display = 'none';
         }
     }
+
+    // ============================================================
+    // FUNCIONES GLOBALES
+    // ============================================================
     
+    // Alternar panel
     window.toggleNotificacionesPanel = function() {
         const panel = document.getElementById('notificaciones-panel');
         if (!panel) return;
+        
         const isVisible = panel.classList.contains('show');
         if (isVisible) {
             panel.classList.remove('show');
@@ -306,24 +471,73 @@
         }
     };
     
+    // Marcar todas como leídas
     window.marcarTodasLeidas = async function() {
         if (typeof notificaciones !== 'undefined' && notificaciones) {
             await notificaciones.marcarTodasComoLeidas();
             renderizarNotificaciones(notificaciones.notificaciones);
             actualizarBadge();
+            
+            // Mostrar feedback
+            const panel = document.getElementById('notificaciones-panel');
+            if (panel && panel.classList.contains('show')) {
+                // Mostrar mensaje temporal
+                const lista = document.getElementById('notificaciones-lista');
+                if (lista) {
+                    lista.innerHTML = `
+                        <div class="notificaciones-vacio">
+                            <i class="fa fa-check-circle" style="color: #22c55e;"></i>
+                            <p style="color: #22c55e;">Todas las notificaciones marcadas como leídas</p>
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        renderizarNotificaciones(notificaciones.notificaciones);
+                    }, 1500);
+                }
+            }
         }
     };
     
-    window.abrirNotificacion = async function(id, tipo, data) {
+    // Abrir notificación
+    window.abrirNotificacion = async function(id, tipo, dataStr, esMasiva = false) {
+        // Marcar como leída
         if (typeof notificaciones !== 'undefined' && notificaciones) {
-            await notificaciones.marcarComoLeida(id);
+            if (esMasiva) {
+                // Para notificaciones masivas, marcar como leída
+                const usuario = await supabase.auth.getUser();
+                if (usuario.data?.user) {
+                    await supabase
+                        .from('notificaciones_masivas_leidas')
+                        .upsert({
+                            notificacion_id: id,
+                            user_id: usuario.data.user.id,
+                            leida_at: new Date().toISOString()
+                        }, { onConflict: 'notificacion_id,user_id' });
+                }
+            } else {
+                await notificaciones.marcarComoLeida(id);
+            }
             renderizarNotificaciones(notificaciones.notificaciones);
             actualizarBadge();
         }
         
+        // Cerrar panel
+        const panel = document.getElementById('notificaciones-panel');
+        if (panel) panel.classList.remove('show');
+        
+        // Parsear data
+        let data = {};
+        try { data = JSON.parse(dataStr); } catch (e) {}
+        
+        // Redirigir según tipo
+        if (data.link_url) {
+            window.location.href = data.link_url;
+            return;
+        }
+        
         if (tipo === 'visita' || tipo === 'clic') {
             if (data.producto_id) {
-                window.location.href = `/producto-vendedor.html?id=${data.producto_id}`;
+                window.location.href = `/producto.html?id=${data.producto_id}`;
             }
         } else if (tipo === 'pedido') {
             if (data.pedido_id) {
@@ -332,16 +546,24 @@
         } else if (tipo === 'aprobado' || tipo === 'rechazado') {
             window.location.href = '/mi-cuenta.html';
         } else if (tipo === 'reporte' && data.vendedor_id) {
-            window.location.href = `/admin/admin-marketplace.html?vendedor=${data.vendedor_id}`;
+            window.location.href = `/admin/admin-reportes.html?vendedor=${data.vendedor_id}`;
+        } else {
+            // Fallback: ir a notificaciones
+            window.location.href = '/notificaciones.html';
         }
     };
     
-    // Cerrar panel al hacer clic fuera
+    // ============================================================
+    // CERRAR PANEL AL HACER CLIC FUERA
+    // ============================================================
     document.addEventListener('click', function(e) {
         const container = document.getElementById('notificaciones-container');
         const panel = document.getElementById('notificaciones-panel');
+        
         if (container && panel && panel.classList.contains('show') && !container.contains(e.target)) {
             panel.classList.remove('show');
         }
     });
+    
+    console.log('✅ Panel de notificaciones cargado');
 </script>

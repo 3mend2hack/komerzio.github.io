@@ -2,20 +2,41 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Pedido Confirmado · KOMERZIO</title>
     
+    <!-- Open Graph / WhatsApp -->
+    <meta property="og:title" content="Pedido Confirmado · KOMERZIO">
+    <meta property="og:description" content="Tu pedido ha sido confirmado en KOMERZIO">
+    <meta property="og:image" content="https://komerzio.dpdns.org/android-chrome-512x512.png">
+    <meta property="og:url" content="https://komerzio.dpdns.org/pedido-exitoso.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="KOMERZIO">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Pedido Confirmado · KOMERZIO">
+    <meta name="twitter:description" content="Tu pedido ha sido confirmado en KOMERZIO">
+    <meta name="twitter:image" content="https://komerzio.dpdns.org/android-chrome-512x512.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://komerzio.dpdns.org/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="https://komerzio.dpdns.org/favicon.svg" />
+    <link rel="shortcut icon" href="https://komerzio.dpdns.org/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://komerzio.dpdns.org/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="KOMERZIO" />
+    <link rel="manifest" href="https://komerzio.dpdns.org/site.webmanifest" />
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
-            background: #f0f2f5;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -27,7 +48,7 @@
             width: 100%;
             background: white;
             border-radius: 32px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
             animation: slideUp 0.5s ease;
         }
@@ -40,6 +61,22 @@
             color: white;
             padding: 35px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .receipt-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.6; }
         }
         .receipt-header .success-icon {
             width: 80px;
@@ -51,102 +88,188 @@
             justify-content: center;
             font-size: 40px;
             margin: 0 auto 20px;
+            position: relative;
+            z-index: 1;
         }
         .receipt-header h1 {
             font-size: 28px;
-            margin-bottom: 10px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        .receipt-header p {
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
         }
         .receipt-header .order-id {
-            font-family: monospace;
-            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
             background: rgba(255,255,255,0.2);
             display: inline-block;
-            padding: 8px 20px;
+            padding: 8px 24px;
             border-radius: 30px;
-            margin-top: 15px;
+            margin-top: 12px;
+            position: relative;
+            z-index: 1;
         }
         .receipt-body {
             padding: 35px;
         }
         .status-badge {
             display: inline-block;
-            padding: 6px 15px;
+            padding: 6px 16px;
             border-radius: 30px;
             font-size: 13px;
             font-weight: 600;
-            background: #d4edda;
-            color: #155724;
-            margin-bottom: 20px;
         }
+        .status-confirmado {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status-pendiente {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status-entregado {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status-cancelado {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .receipt-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .receipt-meta .fecha {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
         .info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            background: #f8f9fa;
+            gap: 16px;
+            background: #f8fafc;
             padding: 20px;
-            border-radius: 16px;
-            margin: 20px 0;
+            border-radius: 12px;
+            margin: 15px 0 20px;
+            border: 1px solid #e2e8f0;
         }
         .info-item {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 3px;
         }
         .info-label {
-            font-size: 12px;
-            color: #6c757d;
+            font-size: 11px;
+            color: #94a3b8;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            font-weight: 600;
         }
         .info-value {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
-            color: #0f1111;
+            color: #0f172a;
             word-break: break-word;
         }
+        .info-value.moneda {
+            color: #059669;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 20px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #0f172a;
+        }
+        .section-title i { color: #f97316; }
+        
         .products-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 12px 0 16px;
+            font-size: 14px;
         }
         .products-table th, .products-table td {
-            padding: 12px;
+            padding: 10px 12px;
             text-align: left;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 1px solid #e2e8f0;
         }
         .products-table th {
-            background: #f8f9fa;
+            background: #f8fafc;
             font-weight: 600;
-            color: #495057;
+            color: #475569;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+        .products-table tr:hover td {
+            background: #fafbfc;
+        }
+        .products-table .producto-nombre {
+            font-weight: 600;
+        }
+        
         .total-row {
             display: flex;
             justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #e9ecef;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
         }
         .total-row:last-child {
             border-bottom: none;
         }
+        .total-row .label {
+            color: #64748b;
+        }
+        .total-row .value {
+            font-weight: 600;
+            color: #0f172a;
+        }
         .total-row.total {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
-            color: #b12704;
-            border-top: 2px solid #dee2e6;
-            margin-top: 15px;
-            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            margin-top: 12px;
+            padding-top: 16px;
         }
         .total-row.total .value {
             font-size: 24px;
+            color: #dc2626;
         }
+        .total-row.descuento .value {
+            color: #059669;
+        }
+        .total-row.tasa-info {
+            font-size: 12px;
+            color: #94a3b8;
+            border-top: 1px dashed #e2e8f0;
+            margin-top: 8px;
+            padding-top: 10px;
+        }
+        
         .btn-group {
             display: flex;
-            gap: 15px;
-            margin-top: 30px;
+            gap: 12px;
+            margin-top: 25px;
             flex-wrap: wrap;
         }
         .btn {
-            padding: 14px 25px;
+            padding: 12px 24px;
             border: none;
             border-radius: 40px;
             font-weight: 600;
@@ -157,6 +280,10 @@
             gap: 8px;
             transition: all 0.3s;
             font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            flex: 1;
+            justify-content: center;
+            min-width: 140px;
         }
         .btn-primary {
             background: #ffd814;
@@ -167,25 +294,75 @@
             transform: translateY(-2px);
         }
         .btn-secondary {
-            background: #f0f2f5;
-            color: #0f1111;
+            background: #f1f5f9;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
         }
         .btn-secondary:hover {
-            background: #e3e6e9;
+            background: #e2e8f0;
+            transform: translateY(-2px);
         }
         .btn-success {
-            background: #10b981;
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
         }
         .btn-success:hover {
-            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16,185,129,0.3);
         }
+        
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+        .loading-container i {
+            font-size: 48px;
+            color: #f97316;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .error-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .error-container i {
+            font-size: 48px;
+            color: #dc2626;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .error-container h3 {
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+        .error-container p {
+            color: #64748b;
+        }
+        
         @media (max-width: 640px) {
+            body { padding: 20px 12px; }
             .receipt-body { padding: 20px; }
-            .info-grid { grid-template-columns: 1fr; }
+            .receipt-header { padding: 24px 20px; }
+            .receipt-header h1 { font-size: 22px; }
+            .receipt-header .success-icon { width: 60px; height: 60px; font-size: 30px; }
+            .info-grid { grid-template-columns: 1fr; gap: 12px; }
             .btn-group { flex-direction: column; }
-            .btn { width: 100%; justify-content: center; }
-            .products-table th, .products-table td { font-size: 13px; padding: 8px; }
+            .btn { width: 100%; }
+            .products-table th, .products-table td { font-size: 12px; padding: 8px 10px; }
+            .products-table { font-size: 13px; }
+            .receipt-meta { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 480px) {
+            .receipt-body { padding: 16px; }
+            .receipt-header h1 { font-size: 20px; }
+            .info-grid { padding: 14px; }
+            .info-value { font-size: 13px; }
+            .total-row.total .value { font-size: 20px; }
+            .btn { font-size: 13px; padding: 10px 16px; }
         }
     </style>
 </head>
@@ -195,41 +372,95 @@
             <div class="success-icon">
                 <i class="fa fa-check"></i>
             </div>
-            <h1>¡Pedido Confirmado!</h1>
+            <h1>🎉 ¡Pedido Confirmado!</h1>
             <p>Tu pedido ha sido registrado exitosamente</p>
             <div class="order-id" id="orderId">Cargando...</div>
         </div>
         
         <div class="receipt-body" id="receiptBody">
-            <div style="text-align: center; padding: 40px;">
-                <i class="fa fa-spinner fa-pulse fa-2x"></i>
-                <p style="margin-top: 15px;">Cargando información del pedido...</p>
+            <div class="loading-container">
+                <i class="fa fa-spinner spinner"></i>
+                <p>Cargando información del pedido...</p>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- ========== SCRIPTS ========== -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Configuración de Supabase -->
+    <script src="/js/komerzio-config.js"></script>
+
     <script type="module">
-        // ============================================
-        // CORRECCIÓN: Importar Supabase correctamente
-        // ============================================
+        // ============================================================
+        // IMPORTAR CONFIGURACIÓN DE SUPABASE
+        // ============================================================
         import { supabase } from '/js/supabase-client.js';
         import { auth } from '/js/auth.js';
         
-        let pedidoData = null;
+        console.log('✅ pedido-exitoso.html - Inicializado con Supabase');
         
-        // Obtener ID del pedido desde la URL
+        // ============================================================
+        // OBTENER ID DE LA URL
+        // ============================================================
         const urlParams = new URLSearchParams(window.location.search);
         const pedidoId = urlParams.get('id');
         
-        // Función para obtener la moneda según el método de pago
+        let pedidoData = null;
+
+        // ============================================================
+        // FUNCIÓN PARA OBTENER LA MONEDA
+        // ============================================================
         function obtenerMoneda(metodoPago) {
-            if (metodoPago === 'efectivo_cup' || metodoPago === 'saldo_cup') {
+            if (metodoPago === 'efectivo_cup') {
                 return 'CUP';
             }
             return 'USD';
         }
-        
+
+        // ============================================================
+        // FUNCIÓN PARA OBTENER ESTADO
+        // ============================================================
+        function obtenerEstadoClase(estado) {
+            const clases = {
+                'confirmado': 'status-confirmado',
+                'pagado': 'status-confirmado',
+                'pendiente': 'status-pendiente',
+                'entregado': 'status-entregado',
+                'cancelado': 'status-cancelado',
+                'anulado': 'status-cancelado'
+            };
+            return clases[estado] || 'status-pendiente';
+        }
+
+        function obtenerEstadoIcono(estado) {
+            const iconos = {
+                'confirmado': 'fa-check-circle',
+                'pagado': 'fa-check-circle',
+                'pendiente': 'fa-clock-o',
+                'entregado': 'fa-check-circle',
+                'cancelado': 'fa-times-circle',
+                'anulado': 'fa-times-circle'
+            };
+            return iconos[estado] || 'fa-clock-o';
+        }
+
+        function obtenerEstadoTexto(estado) {
+            const textos = {
+                'confirmado': 'CONFIRMADO',
+                'pagado': 'PAGADO',
+                'pendiente': 'PENDIENTE',
+                'entregado': 'ENTREGADO',
+                'cancelado': 'CANCELADO',
+                'anulado': 'ANULADO'
+            };
+            return textos[estado] || estado.toUpperCase();
+        }
+
+        // ============================================================
+        // CARGAR PEDIDO
+        // ============================================================
         async function cargarPedido() {
             const receiptBody = document.getElementById('receiptBody');
             
@@ -238,11 +469,11 @@
                 
                 if (!usuario) {
                     receiptBody.innerHTML = `
-                        <div style="text-align: center; padding: 40px;">
-                            <i class="fa fa-exclamation-triangle" style="font-size: 48px; color: #dc3545;"></i>
-                            <h3 style="margin-top: 15px;">No se pudo cargar el pedido</h3>
+                        <div class="error-container">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            <h3>No se pudo cargar el pedido</h3>
                             <p>Inicia sesión para ver tus pedidos</p>
-                            <a href="/login.html" class="btn btn-primary" style="margin-top: 20px;">Iniciar sesión</a>
+                            <a href="/login.html" class="btn btn-primary" style="margin-top: 20px; display: inline-flex;">Iniciar sesión</a>
                         </div>
                     `;
                     return;
@@ -250,7 +481,6 @@
                 
                 console.log('👤 Usuario autenticado:', usuario.email);
                 
-                // Buscar pedido por ID si viene en URL, o el último pedido del usuario
                 let pedido = null;
                 
                 if (pedidoId) {
@@ -268,7 +498,6 @@
                 }
                 
                 if (!pedido) {
-                    // Buscar último pedido del usuario
                     console.log('🔍 Buscando último pedido del usuario');
                     const { data: pedidos, error } = await supabase
                         .from('pedidos')
@@ -293,112 +522,79 @@
             } catch (error) {
                 console.error('❌ Error cargando pedido:', error);
                 receiptBody.innerHTML = `
-                    <div style="text-align: center; padding: 40px;">
-                        <i class="fa fa-exclamation-triangle" style="font-size: 48px; color: #dc3545;"></i>
-                        <h3 style="margin-top: 15px;">Pedido no encontrado</h3>
+                    <div class="error-container">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        <h3>Pedido no encontrado</h3>
                         <p>${error.message || 'No pudimos encontrar la información de tu pedido.'}</p>
-                        <a href="/mi-cuenta.html" class="btn btn-primary" style="margin-top: 20px;">Ver mis pedidos</a>
+                        <a href="/mi-cuenta.html" class="btn btn-primary" style="margin-top: 20px; display: inline-flex;">Ver mis pedidos</a>
                     </div>
                 `;
             }
         }
-        
+
+        // ============================================================
+        // RENDERIZAR RECIBO
+        // ============================================================
         function renderizarRecibo() {
-            if (!pedidoData) return
+            if (!pedidoData) return;
             
-            const fecha = pedidoData.created_at ? new Date(pedidoData.created_at).toLocaleString('es-ES') : new Date().toLocaleString('es-ES')
+            const fecha = pedidoData.created_at 
+                ? new Date(pedidoData.created_at).toLocaleString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+                : new Date().toLocaleString('es-ES');
             
-            // Determinar moneda
             const moneda = obtenerMoneda(pedidoData.metodo_pago);
             const simbolo = '$';
+            const estadoClase = obtenerEstadoClase(pedidoData.estado);
+            const estadoIcono = obtenerEstadoIcono(pedidoData.estado);
+            const estadoTexto = obtenerEstadoTexto(pedidoData.estado);
             
             // Productos HTML
-            let productosHtml = `
-                <table class="products-table">
-                    <thead>
-                        <tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr>
-                    </thead>
-                    <tbody>
-            `
-            if (pedidoData.items && pedidoData.items.length > 0) {
-                pedidoData.items.forEach(item => {
-                    productosHtml += `
-                        <tr>
-                            <td><strong>${item.nombre || 'Producto'}</strong></td>
-                            <td>${item.cantidad || 0}</td>
-                            <td>${simbolo}${(item.precio || 0).toFixed(2)}</td>
-                            <td>${simbolo}${((item.precio || 0) * (item.cantidad || 0)).toFixed(2)}</td>
-                        </tr>
-                    `
-                })
-            }
-            productosHtml += '</tbody></table>'
+            let productosHtml = '';
+            const items = pedidoData.items || [];
             
-            // Resumen HTML
-            let resumenHtml = `
-                <div class="total-row">
-                    <span>Subtotal</span>
-                    <span class="value">${simbolo}${(pedidoData.subtotal || 0).toFixed(2)}</span>
-                </div>
-                <div class="total-row">
-                    <span>Envío</span>
-                    <span class="value">${simbolo}${(pedidoData.envio || 0).toFixed(2)}</span>
-                </div>
-            `
-            if (pedidoData.descuento > 0) {
-                resumenHtml += `
-                    <div class="total-row">
-                        <span>Descuento</span>
-                        <span class="value" style="color: #059669;">-${simbolo}${(pedidoData.descuento || 0).toFixed(2)}</span>
-                    </div>
-                `
-            }
-            
-            let estadoTexto = 'PENDIENTE';
-            let estadoColor = '#856404';
-            let estadoBg = '#fff3cd';
-            
-            if (pedidoData.estado === 'pagado' || pedidoData.estado === 'confirmado') {
-                estadoTexto = 'CONFIRMADO';
-                estadoColor = '#155724';
-                estadoBg = '#d4edda';
-            } else if (pedidoData.estado === 'entregado') {
-                estadoTexto = 'ENTREGADO';
-                estadoColor = '#155724';
-                estadoBg = '#d4edda';
-            } else if (pedidoData.estado === 'cancelado') {
-                estadoTexto = 'CANCELADO';
-                estadoColor = '#721c24';
-                estadoBg = '#f8d7da';
-            }
-            
-            resumenHtml += `
-                <div class="total-row total">
-                    <span>Total</span>
-                    <span class="value">${simbolo}${(pedidoData.total || 0).toFixed(2)} ${moneda}</span>
-                </div>
-            `
-            
-            // Mostrar tasa aplicada si es CUP
-            if (moneda === 'CUP' && pedidoData.tasa_aplicada) {
-                resumenHtml += `
-                    <div class="total-row" style="font-size: 13px; color: #64748b; border-top: 1px dashed #e2e8f0; margin-top: 10px; padding-top: 10px;">
-                        <span>Tasa aplicada:</span>
-                        <span>1 USD = ${pedidoData.tasa_aplicada} CUP</span>
-                    </div>
-                `
+            if (items.length > 0) {
+                productosHtml = `
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cant.</th>
+                                <th>Precio</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${items.map(item => `
+                                <tr>
+                                    <td class="producto-nombre">${item.nombre || 'Producto'}</td>
+                                    <td>${item.cantidad || 0}</td>
+                                    <td>${simbolo}${(item.precio || 0).toFixed(2)}</td>
+                                    <td>${simbolo}${((item.precio || 0) * (item.cantidad || 0)).toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                productosHtml = `<p style="color: #64748b; font-size: 14px;">No hay productos en este pedido</p>`;
             }
             
             const cliente = pedidoData.cliente || {};
             
-            document.getElementById('orderId').textContent = `#${pedidoData.id.slice(0, 8)}`
+            document.getElementById('orderId').textContent = `#${pedidoData.id.slice(0, 8)}`;
             
             document.getElementById('receiptBody').innerHTML = `
-                <div>
-                    <span class="status-badge" style="background: ${estadoBg}; color: ${estadoColor};">
-                        <i class="fa ${pedidoData.estado === 'pagado' || pedidoData.estado === 'confirmado' ? 'fa-check-circle' : 'fa-clock-o'}"></i> ${estadoTexto}
+                <div class="receipt-meta">
+                    <span class="status-badge ${estadoClase}">
+                        <i class="fa ${estadoIcono}"></i> ${estadoTexto}
                     </span>
-                    <span style="float: right; color: #6c757d; font-size: 14px;">${fecha}</span>
+                    <span class="fecha"><i class="fa fa-calendar"></i> ${fecha}</span>
                 </div>
                 
                 <div class="info-grid">
@@ -432,15 +628,39 @@
                     </div>
                     <div class="info-item">
                         <span class="info-label">Moneda</span>
-                        <span class="info-value"><strong>${moneda}</strong></span>
+                        <span class="info-value moneda"><strong>${moneda}</strong></span>
                     </div>
                 </div>
                 
-                <h3 style="margin: 20px 0 10px;">📦 Productos</h3>
+                <div class="section-title"><i class="fa fa-shopping-cart"></i> Productos</div>
                 ${productosHtml}
                 
-                <h3 style="margin: 25px 0 10px;">💰 Resumen de pago</h3>
-                ${resumenHtml}
+                <div class="section-title"><i class="fa fa-credit-card"></i> Resumen de pago</div>
+                
+                <div class="total-row">
+                    <span class="label">Subtotal</span>
+                    <span class="value">${simbolo}${(pedidoData.subtotal || 0).toFixed(2)}</span>
+                </div>
+                <div class="total-row">
+                    <span class="label">Envío</span>
+                    <span class="value">${simbolo}${(pedidoData.envio || 0).toFixed(2)}</span>
+                </div>
+                ${pedidoData.descuento > 0 ? `
+                    <div class="total-row descuento">
+                        <span class="label">Descuento</span>
+                        <span class="value">-${simbolo}${(pedidoData.descuento || 0).toFixed(2)}</span>
+                    </div>
+                ` : ''}
+                <div class="total-row total">
+                    <span class="label">Total</span>
+                    <span class="value">${simbolo}${(pedidoData.total || 0).toFixed(2)} ${moneda}</span>
+                </div>
+                ${moneda === 'CUP' && pedidoData.tasa_aplicada ? `
+                    <div class="total-row tasa-info">
+                        <span>Tasa aplicada:</span>
+                        <span>1 USD = ${pedidoData.tasa_aplicada} CUP</span>
+                    </div>
+                ` : ''}
                 
                 <div class="btn-group">
                     <button class="btn btn-success" id="downloadPdfBtn">
@@ -450,27 +670,29 @@
                         <i class="fa fa-user"></i> Mis pedidos
                     </a>
                     <a href="/" class="btn btn-secondary">
-                        <i class="fa fa-home"></i> Volver al inicio
+                        <i class="fa fa-home"></i> Inicio
                     </a>
                 </div>
-            `
+            `;
             
             // Configurar descarga de PDF
             document.getElementById('downloadPdfBtn').addEventListener('click', () => {
-                const element = document.getElementById('receiptContainer')
+                const element = document.getElementById('receiptContainer');
                 const opt = {
                     margin: 0.5,
                     filename: `recibo_komerzio_${pedidoData.id.slice(0, 8)}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
+                    html2canvas: { scale: 2, useCORS: true },
                     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-                }
-                html2pdf().set(opt).from(element).save()
-            })
+                };
+                html2pdf().set(opt).from(element).save();
+            });
         }
-        
-        // Inicializar
-        cargarPedido()
+
+        // ============================================================
+        // INICIALIZAR
+        // ============================================================
+        cargarPedido();
     </script>
 </body>
 </html>
