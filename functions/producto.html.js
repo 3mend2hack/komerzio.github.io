@@ -11,8 +11,8 @@ export async function onRequest(context) {
     userAgent.includes('TelegramBot') ||
     userAgent.includes('facebookexternalhit');
   
-  const SUPABASE_URL = 'https://houfrgnlctliwkzzelmi.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdWZyZ25sY3RsaXdrenplbG1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MTQ2OTMsImV4cCI6MjA5NjE5MDY5M30.zUfcA755LEjBbn-N05LrmwFqsOFITRP4qLzxjgPIy54';
+  const SUPABASE_URL = 'https://ehlebvmalatsdyvopvkn.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVobGVidm1hbGF0c2R5dm9wdmtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMjg2MjAsImV4cCI6MjA5OTYwNDYyMH0.lsV-x6y3e-0fbdUqb--_CVi8c1gUhO4MUoo1grq66ZI';
   
   // Si no es un bot O no hay ID, servir la página normal
   if (!isBot || !productId) {
