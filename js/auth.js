@@ -14,7 +14,9 @@ export class AuthManager {
 
     async init() {
         try {
+            console.log('🔍 Auth.init - Iniciando...')
             const { data: { session } } = await supabase.auth.getSession()
+            console.log('🔍 Auth.init - Session:', session?.user?.email || 'No session')
             
             if (session?.user) {
                 // ✅ VERIFICAR BANEO ANTES DE CARGAR EL USUARIO
@@ -29,6 +31,7 @@ export class AuthManager {
                 }
                 await this.cargarUsuario(session.user.id)
             } else {
+                console.log('🔍 No hay sesión activa')
                 const localUser = localStorage.getItem('komerzio_user')
                 if (localUser) {
                     try {
@@ -42,6 +45,7 @@ export class AuthManager {
                             this.notificarCambio()
                             return
                         }
+                        console.log('✅ Usuario cargado desde localStorage:', usuarioActual.email)
                         this.notificarCambio()
                     } catch (e) {
                         localStorage.removeItem('komerzio_user')
@@ -198,14 +202,22 @@ export class AuthManager {
     }
 
     // ============================================
-    // LOGIN CON GOOGLE
+    // LOGIN CON GOOGLE - CORREGIDO
     // ============================================
     async loginGoogle() {
         try {
+            // ✅ URL completa y explícita
+            const redirectTo = 'https://komerzio.dpdns.org/mi-cuenta.html';
+            console.log('🔍 Redirigiendo a:', redirectTo);
+            
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/mi-cuenta.html`
+                    redirectTo: redirectTo,
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'consent'
+                    }
                 }
             })
             
@@ -213,6 +225,8 @@ export class AuthManager {
                 console.error('❌ Error en login con Google:', error)
                 return { success: false, error: `❌ ${error.message}` }
             }
+            
+            console.log('✅ URL de Google:', data.url);
             
             return { 
                 success: true, 
@@ -371,7 +385,7 @@ export class AuthManager {
             }
             
         } catch (error) {
-            console.error('❌ Error en registrar:', error);
+            console.error('❌ Error en registrar:', error)
             return { success: false, error: `❌ ${error.message}` }
         }
     }
