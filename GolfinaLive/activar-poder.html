@@ -2,57 +2,189 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Activar Poder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Activar Poder</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        #mensaje {
+            font-size: 1.2rem;
+            padding: 15px 25px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            max-width: 500px;
+            min-height: 50px;
+        }
+        .exito { color: #4caf50; }
+        .error { color: #ff1744; }
+        .advertencia { color: #ffd700; }
+        .info { color: #2979ff; }
+        .grande {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        .poder-activo {
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255,215,0,0.5);
+        }
+    </style>
 </head>
 <body>
     <h1>⚡ Activando poder...</h1>
-    <p id="mensaje">Procesando...</p>
+    <div id="mensaje" class="info">⏳ Procesando...</div>
+    <div id="detalle" style="font-size:0.8rem;color:#555;margin-top:20px;"></div>
 
     <script>
-        // Obtener el poder de la URL
+        // ============================================
+        // CONFIGURACIÓN DE SUPABASE
+        // ============================================
+        const SUPABASE_URL = 'https://qddfdisbnwnnlvkrnckd.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZGZkaXNibndubmx2a3JuY2tkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDQwMzcsImV4cCI6MjEwMjQyMDAzN30.9Jsgl0qepqjJ8oiiewyPZK3vOsqm49EnLCEtOar5MiQ';
+
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ============================================
+        // OBTENER EL PODER DE LA URL
+        // ============================================
         const params = new URLSearchParams(window.location.search);
         const poder = params.get('poder');
 
-        // Configurar Supabase
-        const supabase = supabase.createClient(
-            'https://qddfdisbnwnnlvkrnckd.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZGZkaXNibndubmx2a3JuY2tkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDQwMzcsImV4cCI6MjEwMjQyMDAzN30.9Jsgl0qepqjJ8oiiewyPZK3vOsqm49EnLCEtOar5MiQ'
-        );
+        const mensaje = document.getElementById('mensaje');
+        const detalle = document.getElementById('detalle');
 
+        // ============================================
+        // MAPA DE PODERES PARA MOSTRAR NOMBRES LEGIBLES
+        // ============================================
+        const nombresPoderes = {
+            'velocidad-rojo': '⚡ Ronaldo Rápido',
+            'velocidad-azul': '⚡ Messi Rápido',
+            'lento-rojo': '🐢 Ronaldo Lento',
+            'lento-azul': '🐢 Messi Lento',
+            'porteria-grande-rojo': '📐 Portería Grande (Ronaldo)',
+            'porteria-grande-azul': '📐 Portería Grande (Messi)',
+            'porteria-pequena-rojo': '📏 Portería Pequeña (Ronaldo)',
+            'porteria-pequena-azul': '📏 Portería Pequeña (Messi)',
+            'caos': '🌀 Caos Total',
+            'doble-goles': '🔥 Doble Goles'
+        };
+
+        // ============================================
+        // FUNCIÓN PRINCIPAL: ACTIVAR PODER
+        // ============================================
         async function activarPoder() {
-            const mensaje = document.getElementById('mensaje');
 
+            // --- VALIDAR QUE SE ESPECIFICÓ UN PODER ---
             if (!poder) {
                 mensaje.textContent = '❌ No se especificó ningún poder';
+                mensaje.className = 'error';
+                detalle.textContent = 'Uso: ?poder=nombre-del-poder';
                 return;
             }
 
-            try {
-                // Buscar el poder en la tabla
-                const { data, error } = await supabase
-                    .from('poderes')
-                    .update({ 
-                        activo: true,
-                        expira_en: new Date(Date.now() + 60000).toISOString()
-                    })
-                    .eq('nombre', poder);
+            // Mostrar qué poder se está activando
+            const nombreLegible = nombresPoderes[poder] || poder;
+            mensaje.textContent = `⏳ Activando: ${nombreLegible}...`;
+            mensaje.className = 'info';
+            detalle.textContent = `Comando recibido: ${poder}`;
 
-                if (error) {
-                    mensaje.textContent = '❌ Error al activar: ' + error.message;
+            try {
+                // --- PASO 1: VERIFICAR QUE EL PODER EXISTE ---
+                const { data: existe, error: errorExiste } = await supabase
+                    .from('poderes')
+                    .select('id, activo, expira_en')
+                    .eq('nombre', poder)
+                    .single();
+
+                if (errorExiste || !existe) {
+                    mensaje.textContent = `❌ Poder "${poder}" no existe en la base de datos`;
+                    mensaje.className = 'error';
+                    detalle.textContent = 'Revisa que el nombre sea correcto.';
                     return;
                 }
 
-                mensaje.textContent = '✅ ¡Poder "' + poder + '" activado por 1 minuto!';
-                
-                // Mostrar mensaje grande en la pantalla
-                document.querySelector('h1').textContent = '⚡ ' + poder + ' ACTIVADO!';
+                // --- PASO 2: VERIFICAR QUE NO ESTÉ YA ACTIVO ---
+                if (existe.activo) {
+                    const tiempoRestante = calcularTiempoRestante(existe.expira_en);
+                    mensaje.textContent = `⏳ ¡${nombreLegible} YA ESTÁ ACTIVO! ${tiempoRestante}`;
+                    mensaje.className = 'advertencia';
+                    detalle.textContent = 'Espera a que termine (1 minuto) antes de volver a activarlo.';
+                    return;
+                }
+
+                // --- PASO 3: ACTIVAR EL PODER ---
+                const { error: errorUpdate } = await supabase
+                    .from('poderes')
+                    .update({
+                        activo: true,
+                        expira_en: new Date(Date.now() + 60000).toISOString() // 1 minuto
+                    })
+                    .eq('nombre', poder);
+
+                if (errorUpdate) {
+                    mensaje.textContent = `❌ Error al activar: ${errorUpdate.message}`;
+                    mensaje.className = 'error';
+                    detalle.textContent = 'Intenta de nuevo.';
+                    return;
+                }
+
+                // --- PASO 4: CONFIRMAR ACTIVACIÓN ---
+                mensaje.textContent = `✅ ¡${nombreLegible} ACTIVADO por 1 minuto! 🎉`;
+                mensaje.className = 'exito grande';
+
+                // Mostrar el nombre en grande
+                document.querySelector('h1').textContent = `⚡ ${nombreLegible}`;
+                document.querySelector('h1').className = 'poder-activo';
+
+                detalle.textContent = 'Los espectadores verán el cambio en la transmisión.';
 
             } catch (error) {
-                mensaje.textContent = '❌ Error: ' + error.message;
+                mensaje.textContent = `❌ Error inesperado: ${error.message}`;
+                mensaje.className = 'error';
+                detalle.textContent = 'Revisa la consola para más detalles.';
+                console.error('Error:', error);
             }
         }
 
+        // ============================================
+        // FUNCIÓN PARA CALCULAR TIEMPO RESTANTE
+        // ============================================
+        function calcularTiempoRestante(fechaExpiracion) {
+            if (!fechaExpiracion) return '';
+            
+            const ahora = Date.now();
+            const expira = new Date(fechaExpiracion).getTime();
+            const diferencia = expira - ahora;
+
+            if (diferencia <= 0) return '⚡ ¡Ya expiró!';
+
+            const segundos = Math.ceil(diferencia / 1000);
+            if (segundos < 60) {
+                return `⏱️ ${segundos}s restantes`;
+            }
+            const minutos = Math.floor(segundos / 60);
+            const segs = segundos % 60;
+            return `⏱️ ${minutos}m ${segs}s restantes`;
+        }
+
+        // ============================================
+        // INICIAR
+        // ============================================
         activarPoder();
     </script>
 </body>
