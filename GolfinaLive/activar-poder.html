@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Activar Poder</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>⚡ Activando poder...</h1>
+    <p id="mensaje">Procesando...</p>
+
+    <script>
+        // Obtener el poder de la URL
+        const params = new URLSearchParams(window.location.search);
+        const poder = params.get('poder');
+
+        // Configurar Supabase
+        const supabase = supabase.createClient(
+            'https://qddfdisbnwnnlvkrnckd.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZGZkaXNibndubmx2a3JuY2tkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDQwMzcsImV4cCI6MjEwMjQyMDAzN30.9Jsgl0qepqjJ8oiiewyPZK3vOsqm49EnLCEtOar5MiQ'
+        );
+
+        async function activarPoder() {
+            const mensaje = document.getElementById('mensaje');
+
+            if (!poder) {
+                mensaje.textContent = '❌ No se especificó ningún poder';
+                return;
+            }
+
+            try {
+                // Buscar el poder en la tabla
+                const { data, error } = await supabase
+                    .from('poderes')
+                    .update({ 
+                        activo: true,
+                        expira_en: new Date(Date.now() + 60000).toISOString()
+                    })
+                    .eq('nombre', poder);
+
+                if (error) {
+                    mensaje.textContent = '❌ Error al activar: ' + error.message;
+                    return;
+                }
+
+                mensaje.textContent = '✅ ¡Poder "' + poder + '" activado por 1 minuto!';
+                
+                // Mostrar mensaje grande en la pantalla
+                document.querySelector('h1').textContent = '⚡ ' + poder + ' ACTIVADO!';
+
+            } catch (error) {
+                mensaje.textContent = '❌ Error: ' + error.message;
+            }
+        }
+
+        activarPoder();
+    </script>
+</body>
+</html>
