@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar puntos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #1a1a2e;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 30px;
+            background: #16213e;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 400px;
+        }
+        .puntos { font-size: 60px; color: #f5c842; margin: 10px 0; }
+        .nombre { font-size: 20px; }
+        .mensaje { margin-top: 15px; padding: 10px; border-radius: 10px; }
+        .info { background: #3498db; color: #fff; }
+        .error { background: #e74c3c; color: #fff; }
+        .loading { font-size: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🏦 Tus Puntos</h2>
+        <div id="contenido">
+            <div class="loading">⏳</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN DE SUPABASE
+        // ============================================================
+        const SUPABASE_URL = 'https://qddfdisbnwnnlvkrnckd.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZGZkaXNibndubmx2a3JuY2tkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDQwMzcsImV4cCI6MjEwMjQyMDAzN30.9Jsgl0qepqjJ8oiiewyPZK3vOsqm49EnLCEtOar5MiQ';
+
+        // ============================================================
+        // OBTENER PARÁMETROS DE LA URL
+        // ============================================================
+        const urlParams = new URLSearchParams(window.location.search);
+        const user = urlParams.get('user') || 'Anonimo';
+        const channel = urlParams.get('channel') || 'golfinalive';
+
+        // ============================================================
+        // CONSULTAR PUNTOS
+        // ============================================================
+        async function consultarPuntos() {
+            const contenido = document.getElementById('contenido');
+
+            try {
+                const response = await fetch(
+                    `${SUPABASE_URL}/rest/v1/jugadores?select=puntos&nombre=eq.${encodeURIComponent(user)}&channel=eq.${encodeURIComponent(channel)}&limit=1`,
+                    {
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
+                    }
+                );
+                if (!response.ok) throw new Error('Error al consultar');
+
+                const data = await response.json();
+                const puntos = data.length > 0 ? data[0].puntos || 0 : 0;
+
+                contenido.innerHTML = `
+                    <div class="nombre">👤 ${user}</div>
+                    <div class="puntos">${puntos}</div>
+                    <div style="color: #aaa; font-size: 14px;">puntos</div>
+                    <div class="mensaje info">💡 Ganas 2 puntos por minuto viendo el directo</div>
+                `;
+            } catch (error) {
+                contenido.innerHTML = `
+                    <div class="mensaje error">❌ Error al consultar puntos</div>
+                `;
+            }
+        }
+
+        window.onload = consultarPuntos;
+    </script>
+</body>
+</html>
