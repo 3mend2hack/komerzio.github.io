@@ -26,6 +26,10 @@ let direccionPorteriaRojo = 1;
 let direccionPorteriaAzul = 1;
 let animacionMovimientoId = null;
 
+// Poderes
+let poderesActivos = {};
+let intervaloCuentas = null;
+
 // ============================================
 // REFERENCIAS DOM
 // ============================================
@@ -60,7 +64,9 @@ const DOM = {
     moverRojo: document.getElementById('mover-porteria-rojo'),
     moverAzul: document.getElementById('mover-porteria-azul'),
     velRojo: document.getElementById('velocidad-porteria-rojo'),
-    velAzul: document.getElementById('velocidad-porteria-azul')
+    velAzul: document.getElementById('velocidad-porteria-azul'),
+    listaPoderes: document.getElementById('lista-poderes-activos'),
+    contadorPoderes: document.getElementById('contador-poderes')
 };
 
 // ============================================
@@ -111,6 +117,10 @@ function cerrarSesion() {
         cancelAnimationFrame(animacionMovimientoId);
         animacionMovimientoId = null;
     }
+    if (intervaloCuentas) {
+        clearInterval(intervaloCuentas);
+        intervaloCuentas = null;
+    }
 }
 
 // ============================================
@@ -130,19 +140,31 @@ async function cargarJugadores() {
         if (jugador.color === 'rojo') {
             DOM.nombreRojo.textContent = jugador.nombre;
             if (jugador.imagen_url) {
-                DOM.avatarRojo.innerHTML = `<img src="${jugador.imagen_url}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`;
+                const img = document.getElementById('img-rojo');
+                if (img) {
+                    img.src = jugador.imagen_url;
+                    img.style.display = 'block';
+                    const emoji = document.getElementById('emoji-rojo');
+                    if (emoji) emoji.style.display = 'none';
+                }
             }
         } else if (jugador.color === 'azul') {
             DOM.nombreAzul.textContent = jugador.nombre;
             if (jugador.imagen_url) {
-                DOM.avatarAzul.innerHTML = `<img src="${jugador.imagen_url}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`;
+                const img = document.getElementById('img-azul');
+                if (img) {
+                    img.src = jugador.imagen_url;
+                    img.style.display = 'block';
+                    const emoji = document.getElementById('emoji-azul');
+                    if (emoji) emoji.style.display = 'none';
+                }
             }
         }
     });
 }
 
 // ============================================
-// FUNCIÓN PARA ACTUALIZAR MOVIMIENTO DE PORTERÍAS CON LÍMITES
+// FUNCIÓN PARA ACTUALIZAR MOVIMIENTO DE PORTERÍAS
 // ============================================
 function actualizarMovimientoPorterias() {
     moverPorteriaRojo = DOM.moverRojo.checked;
@@ -153,7 +175,6 @@ function actualizarMovimientoPorterias() {
     if (velocidadPorteriaRojo < 0.1) velocidadPorteriaRojo = 0.1;
     if (velocidadPorteriaAzul < 0.1) velocidadPorteriaAzul = 0.1;
     
-    // Si se desactiva, resetear posición al centro
     if (!moverPorteriaRojo) {
         const dimsRojo = getDimensionesPorteria(tamanoPorteriaRojo);
         offsetPorteriaRojo = canvasHeight/2 - dimsRojo.alto/2 - 5;
@@ -165,7 +186,6 @@ function actualizarMovimientoPorterias() {
         direccionPorteriaAzul = 1;
     }
     
-    // Si ambos están desactivados, detener la animación
     if (!moverPorteriaRojo && !moverPorteriaAzul) {
         if (animacionMovimientoId) {
             cancelAnimationFrame(animacionMovimientoId);
@@ -178,7 +198,6 @@ function actualizarMovimientoPorterias() {
         return;
     }
     
-    // Iniciar animación si no está corriendo
     if (!animacionMovimientoId) {
         animarPorterias();
     }
@@ -187,7 +206,7 @@ function actualizarMovimientoPorterias() {
 }
 
 // ============================================
-// ANIMACIÓN DE MOVIMIENTO DE PORTERÍAS CON LÍMITES CORRECTOS
+// ANIMACIÓN DE MOVIMIENTO DE PORTERÍAS
 // ============================================
 function animarPorterias() {
     const dimsRojo = getDimensionesPorteria(tamanoPorteriaRojo);
@@ -196,13 +215,11 @@ function animarPorterias() {
     const altoRojo = dimsRojo.alto;
     const altoAzul = dimsAzul.alto;
     
-    // LÍMITES DEL CAMPO (dentro del área visible)
     const margen = 20;
     const limiteSuperior = margen + 10;
     const limiteInferiorRojo = canvasHeight - margen - altoRojo - 10;
     const limiteInferiorAzul = canvasHeight - margen - altoAzul - 10;
     
-    // Movimiento de portería ROJA
     if (moverPorteriaRojo) {
         offsetPorteriaRojo += velocidadPorteriaRojo * 0.6 * direccionPorteriaRojo;
         
@@ -215,7 +232,6 @@ function animarPorterias() {
         }
     }
     
-    // Movimiento de portería AZUL
     if (moverPorteriaAzul) {
         offsetPorteriaAzul += velocidadPorteriaAzul * 0.6 * direccionPorteriaAzul;
         
@@ -228,13 +244,11 @@ function animarPorterias() {
         }
     }
     
-    // Redibujar campo
     if (ctx) {
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         dibujarCampo();
     }
     
-    // Continuar animación si al menos una está activa
     if (moverPorteriaRojo || moverPorteriaAzul) {
         animacionMovimientoId = requestAnimationFrame(animarPorterias);
     } else {
@@ -260,12 +274,10 @@ async function crearPartida() {
     tamanoPorteriaRojo = DOM.tamanoRojo.value;
     tamanoPorteriaAzul = DOM.tamanoAzul.value;
     
-    // Obtener dimensiones iniciales
     const dimsRojoIni = getDimensionesPorteria(tamanoPorteriaRojo);
     const dimsAzulIni = getDimensionesPorteria(tamanoPorteriaAzul);
     const centroY = canvasHeight / 2;
     
-    // Resetear offset al centro de la cancha
     offsetPorteriaRojo = centroY - dimsRojoIni.alto/2 - 5;
     offsetPorteriaAzul = centroY - dimsAzulIni.alto/2 - 5;
     direccionPorteriaRojo = 1;
@@ -292,7 +304,6 @@ async function crearPartida() {
         actualizarContadorGoles();
         
         actualizarTamanosPorterias();
-        
         suscribirseCambios();
 
     } catch (error) {
@@ -308,7 +319,6 @@ function actualizarTamanosPorterias() {
     tamanoPorteriaRojo = DOM.tamanoRojo.value;
     tamanoPorteriaAzul = DOM.tamanoAzul.value;
     
-    // Actualizar offset al centro con nuevo tamaño
     const dimsRojo = getDimensionesPorteria(tamanoPorteriaRojo);
     const dimsAzul = getDimensionesPorteria(tamanoPorteriaAzul);
     const centroY = canvasHeight / 2;
@@ -677,7 +687,6 @@ class Bola {
         const dimsRojo = getDimensionesPorteria(tamanoPorteriaRojo);
         const dimsAzul = getDimensionesPorteria(tamanoPorteriaAzul);
         
-        // Área de detección de goles (se actualiza con el offset)
         this.porteriaRoja = { 
             x: 0, 
             y: offsetPorteriaRojo,
@@ -695,7 +704,6 @@ class Bola {
     actualizar(bolas) {
         if (!this.activa) return;
 
-        // Actualizar posición de las porterías en tiempo real
         this.porteriaRoja.y = offsetPorteriaRojo;
         this.porteriaAzul.y = offsetPorteriaAzul;
 
@@ -738,7 +746,6 @@ class Bola {
         }
 
         // DETECCIÓN DE GOL CORRECTA
-        // BOLA ROJA → anota en PORTERÍA AZUL (derecha)
         if (this.color === 'rojo') {
             const px = this.porteriaAzul.x;
             const py = this.porteriaAzul.y;
@@ -755,7 +762,6 @@ class Bola {
             }
         }
         
-        // BOLA AZUL → anota en PORTERÍA ROJA (izquierda)
         if (this.color === 'azul') {
             const px = this.porteriaRoja.x;
             const py = this.porteriaRoja.y;
@@ -810,7 +816,6 @@ class Bola {
     dibujar(ctx) {
         if (!this.activa && !this.entradaGol) return;
 
-        // Estela
         if (this.trayectoria.length > 1) {
             for (let i = 0; i < this.trayectoria.length - 1; i++) {
                 const alpha = (i / this.trayectoria.length) * 0.2;
@@ -822,13 +827,11 @@ class Bola {
             }
         }
 
-        // Sombra
         ctx.beginPath();
         ctx.arc(this.x + 2, this.y + 3, this.radio * 0.9, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(0,0,0,0.15)';
         ctx.fill();
 
-        // Cuerpo 3D
         const gradiente = ctx.createRadialGradient(
             this.x - this.radio * 0.3, 
             this.y - this.radio * 0.3, 
@@ -856,7 +859,6 @@ class Bola {
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // Brillo
         ctx.beginPath();
         ctx.arc(this.x - this.radio * 0.25, this.y - this.radio * 0.25, this.radio * 0.25, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(255,255,255,0.35)';
@@ -866,7 +868,6 @@ class Bola {
         ctx.fillStyle = 'rgba(255,255,255,0.55)';
         ctx.fill();
 
-        // Número
         ctx.fillStyle = 'rgba(255,255,255,0.85)';
         ctx.font = `${this.radio * 0.6}px Arial`;
         ctx.textAlign = 'center';
@@ -876,10 +877,9 @@ class Bola {
 }
 
 // ============================================
-// DIBUJAR CAMPO DE FÚTBOL CON MOVIMIENTO DE PORTERÍAS
+// DIBUJAR CAMPO DE FÚTBOL
 // ============================================
 function dibujarCampo() {
-    // Césped
     const gradiente = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight);
     gradiente.addColorStop(0, '#1a6e1a');
     gradiente.addColorStop(0.5, '#2d8a2d');
@@ -887,7 +887,6 @@ function dibujarCampo() {
     ctx.fillStyle = gradiente;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // Líneas del campo
     ctx.strokeStyle = 'rgba(255,255,255,0.25)';
     ctx.lineWidth = 1.5;
 
@@ -897,21 +896,17 @@ function dibujarCampo() {
     const centroX = canvasWidth / 2;
     const centroY = canvasHeight / 2;
 
-    // Borde del campo
     ctx.strokeRect(margen, margen, anchoCampo, altoCampo);
 
-    // Línea central
     ctx.beginPath();
     ctx.moveTo(centroX, margen);
     ctx.lineTo(centroX, canvasHeight - margen);
     ctx.stroke();
 
-    // Círculo central
     ctx.beginPath();
     ctx.arc(centroX, centroY, 40, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Obtener dimensiones de portería
     const dimsRojo = getDimensionesPorteria(tamanoPorteriaRojo);
     const dimsAzul = getDimensionesPorteria(tamanoPorteriaAzul);
     
@@ -920,18 +915,15 @@ function dibujarCampo() {
     const altoAzul = dimsAzul.alto;
     const anchoAzul = dimsAzul.ancho;
 
-    // Posición de la portería ROJA (izquierda)
     const porteriaRojaX = 0;
     const porteriaRojaY = offsetPorteriaRojo;
     const porteriaRojaAncho = anchoRojo + 15;
     const porteriaRojaAlto = altoRojo + 10;
     
-    // Área de portería ROJA
     ctx.strokeStyle = 'rgba(255,23,68,0.2)';
     ctx.lineWidth = 1;
     ctx.strokeRect(margen, porteriaRojaY - 10, 35, porteriaRojaAlto + 20);
     
-    // Portería ROJA
     ctx.strokeStyle = '#ff1744';
     ctx.lineWidth = 4;
     ctx.strokeRect(porteriaRojaX, porteriaRojaY, porteriaRojaAncho, porteriaRojaAlto);
@@ -941,7 +933,6 @@ function dibujarCampo() {
     ctx.fillRect(porteriaRojaX - 1, porteriaRojaY - 2, porteriaRojaAncho + 2, 4);
     ctx.fillRect(porteriaRojaX - 1, porteriaRojaY + porteriaRojaAlto - 2, porteriaRojaAncho + 2, 4);
     
-    // Red de la portería ROJA
     ctx.strokeStyle = 'rgba(255,23,68,0.15)';
     ctx.lineWidth = 0.5;
     const celdasRojo = Math.floor(porteriaRojaAlto / 15);
@@ -957,18 +948,15 @@ function dibujarCampo() {
         ctx.stroke();
     }
 
-    // Posición de la portería AZUL (derecha)
     const porteriaAzulX = canvasWidth - anchoAzul - 15;
     const porteriaAzulY = offsetPorteriaAzul;
     const porteriaAzulAncho = anchoAzul + 15;
     const porteriaAzulAlto = altoAzul + 10;
     
-    // Área de portería AZUL
     ctx.strokeStyle = 'rgba(41,121,255,0.2)';
     ctx.lineWidth = 1;
     ctx.strokeRect(canvasWidth - margen - 35, porteriaAzulY - 10, 35, porteriaAzulAlto + 20);
     
-    // Portería AZUL
     ctx.strokeStyle = '#2979ff';
     ctx.lineWidth = 4;
     ctx.strokeRect(porteriaAzulX, porteriaAzulY, porteriaAzulAncho, porteriaAzulAlto);
@@ -978,7 +966,6 @@ function dibujarCampo() {
     ctx.fillRect(porteriaAzulX - 1, porteriaAzulY - 2, porteriaAzulAncho + 2, 4);
     ctx.fillRect(porteriaAzulX - 1, porteriaAzulY + porteriaAzulAlto - 2, porteriaAzulAncho + 2, 4);
     
-    // Red de la portería AZUL
     ctx.strokeStyle = 'rgba(41,121,255,0.15)';
     ctx.lineWidth = 0.5;
     const celdasAzul = Math.floor(porteriaAzulAlto / 15);
@@ -994,7 +981,6 @@ function dibujarCampo() {
         ctx.stroke();
     }
 
-    // Nombre de las porterías con indicador de movimiento
     ctx.fillStyle = 'rgba(255,255,255,0.4)';
     ctx.font = '10px Arial';
     ctx.textAlign = 'center';
@@ -1012,14 +998,12 @@ function dibujarCampo() {
     ctx.fillText(textoRojo, porteriaRojaX + porteriaRojaAncho/2 + 10, porteriaRojaY + porteriaRojaAlto + 18);
     ctx.fillText(textoAzul, porteriaAzulX + porteriaAzulAncho/2 - 10, porteriaAzulY + porteriaAzulAlto + 18);
 
-    // Escudo central
     ctx.fillStyle = 'rgba(255,215,0,0.08)';
     ctx.font = '30px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('⚽', centroX, centroY);
     
-    // Marcador en el campo
     ctx.fillStyle = 'rgba(255,255,255,0.15)';
     ctx.font = '14px Arial';
     ctx.textAlign = 'center';
@@ -1028,7 +1012,7 @@ function dibujarCampo() {
 }
 
 // ============================================
-// GESTOR DE BOLAS Y ANIMACIÓN CON CUENTA REGRESIVA
+// GESTOR DE BOLAS Y ANIMACIÓN
 // ============================================
 let bolas = [];
 let animacionEnCurso = false;
@@ -1132,7 +1116,6 @@ function animarCampo() {
         }
     }
     
-    // Procesar el gol después de dibujar todo
     if (golDetectado && ganadorGol && !partidaFinalizada && !reiniciando) {
         reiniciando = true;
         animacionEnCurso = false;
@@ -1164,14 +1147,12 @@ function animarCampo() {
         
         if (onGol) onGol(ganadorGol);
         
-        // Verificar si alguien alcanzó la meta
         if (golesRojo >= metaGoles || golesAzul >= metaGoles) {
             setTimeout(() => {
                 finalizarPartidaPorGoles();
             }, 800);
             return;
         } else {
-            // CUENTA REGRESIVA DE 3 SEGUNDOS ANTES DE REINICIAR
             setTimeout(() => {
                 mensaje.style.opacity = '0';
                 setTimeout(() => {
@@ -1189,7 +1170,6 @@ function animarCampo() {
         return;
     }
     
-    // Si las bolas se detuvieron sin gol, reiniciar
     if (!golDetectado && bolas.every(b => !b.activa) && !reiniciando) {
         animacionEnCurso = false;
         setTimeout(() => {
@@ -1290,6 +1270,137 @@ async function lanzarBolas() {
 }
 
 // ============================================
+// PANEL DE PODERES ACTIVOS
+// ============================================
+
+function calcularTiempoRestante(fechaExpiracion) {
+    if (!fechaExpiracion) return 'Expirado';
+    
+    const ahora = Date.now();
+    const expira = new Date(fechaExpiracion).getTime();
+    const diferencia = expira - ahora;
+
+    if (diferencia <= 0) return '⏳ Expirado';
+
+    const segundos = Math.ceil(diferencia / 1000);
+    if (segundos < 60) {
+        return `${segundos}s`;
+    }
+    const minutos = Math.floor(segundos / 60);
+    const segs = segundos % 60;
+    return `${minutos}m ${segs}s`;
+}
+
+function actualizarPanelPoderes() {
+    const contenedor = DOM.listaPoderes;
+    const contador = DOM.contadorPoderes;
+    
+    if (!contenedor) return;
+    
+    supabaseClient
+        .from('poderes')
+        .select('*')
+        .eq('activo', true)
+        .then(({ data, error }) => {
+            if (error) {
+                console.error('Error al obtener poderes:', error);
+                return;
+            }
+            
+            if (!data || data.length === 0) {
+                contenedor.innerHTML = `<div style="text-align:center;color:#444;font-size:0.75rem;padding:6px 0;">Ningún poder activo</div>`;
+                if (contador) contador.textContent = '0 activos';
+                return;
+            }
+            
+            if (contador) contador.textContent = `${data.length} activo${data.length > 1 ? 's' : ''}`;
+            
+            const nombresPoderes = {
+                'velocidad-rojo': '⚡ Velocidad + (Ronaldo)',
+                'velocidad-azul': '⚡ Velocidad + (Messi)',
+                'lento-rojo': '🐢 Lentitud (Ronaldo)',
+                'lento-azul': '🐢 Lentitud (Messi)',
+                'caos': '🌀 Caos Total',
+                'doble-goles': '🔥 Doble Goles'
+            };
+            
+            const coloresPoderes = {
+                'velocidad-rojo': '#ff1744',
+                'velocidad-azul': '#2979ff',
+                'lento-rojo': '#ff1744',
+                'lento-azul': '#2979ff',
+                'caos': '#ffd700',
+                'doble-goles': '#ff6d00'
+            };
+            
+            let html = '';
+            data.forEach(poder => {
+                const nombreLegible = nombresPoderes[poder.nombre] || poder.nombre;
+                const color = coloresPoderes[poder.nombre] || '#ffd700';
+                const tiempoRestante = calcularTiempoRestante(poder.expira_en);
+                
+                let equipo = '⚪ Neutral';
+                let claseEquipo = 'neutral';
+                if (poder.nombre.includes('rojo')) {
+                    equipo = '🔴 Ronaldo';
+                    claseEquipo = 'rojo';
+                } else if (poder.nombre.includes('azul')) {
+                    equipo = '🔵 Messi';
+                    claseEquipo = 'azul';
+                }
+                
+                html += `
+                    <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:8px;border-left:3px solid ${color};">
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <span style="font-size:0.85rem;">${nombreLegible}</span>
+                            <span style="font-size:0.65rem;padding:1px 8px;border-radius:10px;background:rgba(255,255,255,0.05);color:#888;">${equipo}</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="font-size:0.65rem;color:#ffd700;" class="countdown" data-expira="${poder.expira_en}">⏱️ ${tiempoRestante}</span>
+                            <span style="font-size:0.55rem;color:#555;">👤 ${poder.usuario || 'Anónimo'}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contenedor.innerHTML = html;
+            iniciarCuentasRegresivas();
+        });
+}
+
+function iniciarCuentasRegresivas() {
+    if (intervaloCuentas) {
+        clearInterval(intervaloCuentas);
+    }
+    
+    intervaloCuentas = setInterval(() => {
+        document.querySelectorAll('.countdown').forEach(el => {
+            const expira = el.getAttribute('data-expira');
+            if (expira) {
+                const tiempo = calcularTiempoRestante(expira);
+                el.textContent = `⏱️ ${tiempo}`;
+                if (tiempo === '⏳ Expirado' || tiempo === 'Expirado') {
+                    el.style.color = '#ff1744';
+                }
+            }
+        });
+    }, 1000);
+}
+
+function escucharPoderesActivos() {
+    supabaseClient
+        .channel('poderes-activos-cambios')
+        .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'poderes'
+        }, () => {
+            actualizarPanelPoderes();
+        })
+        .subscribe();
+}
+
+// ============================================
 // FUNCIONES PARA MANTENER COMPATIBILIDAD
 // ============================================
 function lanzarDados() {
@@ -1336,6 +1447,12 @@ supabaseClient.auth.getSession().then(({ data }) => {
         cargarUltimaPartida();
         agregarEventoUI('✅ Sesión activa');
         dibujarCampo();
+        
+        // Inicializar panel de poderes
+        setTimeout(() => {
+            actualizarPanelPoderes();
+            escucharPoderesActivos();
+        }, 1000);
     }
 });
 
@@ -1354,3 +1471,4 @@ window.finalizarPartida = finalizarPartida;
 window.votar = votar;
 window.actualizarTamanosPorterias = actualizarTamanosPorterias;
 window.actualizarMovimientoPorterias = actualizarMovimientoPorterias;
+window.actualizarPanelPoderes = actualizarPanelPoderes;
