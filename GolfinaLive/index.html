@@ -39,123 +39,125 @@
         </header>
 
         <main>
-            <!-- PANEL DE CONTROL -->
-            <div id="panel-control" style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.1);border-radius:15px;padding:15px;margin-bottom:20px;">
-                <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
+            <!-- PANEL DE CONTROL - CONTROLES VISIBLES -->
+            <div id="panel-control" style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.08);border-radius:12px;padding:12px;margin-bottom:8px;">
+                
+                <!-- FILA 1: Nueva partida, Goles, Lanzar, Reiniciar, Finalizar -->
+                <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px;">
                     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                        <button onclick="crearPartida()" style="padding:8px 18px;background:linear-gradient(135deg,#ff1744,#d50000);border:none;border-radius:20px;color:#fff;font-weight:bold;cursor:pointer;">➕ Nueva</button>
-                        <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);padding:4px 12px;border-radius:10px;">
-                            <label style="font-size:0.8rem;color:#aaa;">Goles:</label>
-                            <input type="number" id="input-meta" value="5" min="1" max="100" style="width:50px;padding:4px 6px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #ffd700;text-align:center;font-size:0.9rem;">
+                        <button onclick="crearPartida()" style="padding:6px 16px;background:linear-gradient(135deg,#ff1744,#d50000);border:none;border-radius:16px;color:#fff;font-weight:bold;cursor:pointer;font-size:0.8rem;">➕ Nueva</button>
+                        <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);padding:4px 12px;border-radius:8px;">
+                            <label style="font-size:0.7rem;color:#aaa;font-weight:bold;">Goles:</label>
+                            <input type="number" id="input-meta" value="5" min="1" max="100" style="width:45px;padding:4px 6px;border-radius:4px;background:#1a1a2e;color:#fff;border:1px solid #ffd700;text-align:center;font-size:0.8rem;">
                         </div>
                     </div>
-                    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                        <button onclick="lanzarBolas()" class="btn-azar" style="padding:8px 16px;background:linear-gradient(135deg,#ffd700,#f5a623);border:none;border-radius:20px;font-weight:bold;color:#000;cursor:pointer;">⚽ Lanzar</button>
-                        <button onclick="reiniciarPartida()" style="padding:8px 16px;background:#333;border:none;border-radius:20px;color:#fff;cursor:pointer;">🔄 Reiniciar</button>
-                        <button onclick="finalizarPartida()" style="padding:8px 16px;background:#333;border:none;border-radius:20px;color:#fff;cursor:pointer;">🏆 Finalizar</button>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        <button onclick="lanzarBolas()" style="padding:6px 16px;background:linear-gradient(135deg,#ffd700,#f5a623);border:none;border-radius:16px;font-weight:bold;color:#000;cursor:pointer;font-size:0.8rem;">⚽ Lanzar</button>
+                        <button onclick="reiniciarPartida()" style="padding:6px 16px;background:#333;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;">🔄 Reiniciar</button>
+                        <button onclick="finalizarPartida()" style="padding:6px 16px;background:#333;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;">🏆 Finalizar</button>
                     </div>
                 </div>
                 
-                <!-- SELECTORES DE TAMAÑO DE PORTERÍA -->
-                <div style="display:flex;flex-wrap:wrap;gap:15px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05);">
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <span style="font-size:0.8rem;color:#ff1744;font-weight:bold;">🔴 RONALDO</span>
-                        <select id="tamano-porteria-rojo" onchange="actualizarTamanosPorterias()" style="padding:4px 10px;border-radius:8px;background:#1a1a2e;color:#fff;border:1px solid #ff1744;font-size:0.8rem;">
-                            <option value="muy-grande">Muy Grande (30x130)</option>
-                            <option value="grande" selected>Grande (22x100)</option>
-                            <option value="mediana">Mediana (16x75)</option>
-                            <option value="pequena">Pequeña (12x55)</option>
-                            <option value="muy-pequena">Muy Pequeña (8x40)</option>
-                        </select>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <span style="font-size:0.8rem;color:#2979ff;font-weight:bold;">🔵 MESSI</span>
-                        <select id="tamano-porteria-azul" onchange="actualizarTamanosPorterias()" style="padding:4px 10px;border-radius:8px;background:#1a1a2e;color:#fff;border:1px solid #2979ff;font-size:0.8rem;">
-                            <option value="muy-grande">Muy Grande (30x130)</option>
-                            <option value="grande" selected>Grande (22x100)</option>
-                            <option value="mediana">Mediana (16x75)</option>
-                            <option value="pequena">Pequeña (12x55)</option>
-                            <option value="muy-pequena">Muy Pequeña (8x40)</option>
-                        </select>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto;">
-                        <span style="font-size:0.7rem;color:#666;">Tamaños en píxeles</span>
-                    </div>
+                <!-- FILA 2: TAMAÑO DE PORTERÍA - RONALDO (visible) -->
+                <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:6px 10px;background:rgba(255,23,68,0.06);border-radius:8px;border:1px solid rgba(255,23,68,0.15);margin-bottom:4px;">
+                    <span style="font-size:0.8rem;color:#ff1744;font-weight:bold;min-width:75px;">🔴 RONALDO</span>
+                    <span style="font-size:0.65rem;color:#888;">Tamaño:</span>
+                    <select id="tamano-porteria-rojo" onchange="actualizarTamanosPorterias()" style="padding:4px 8px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #ff1744;font-size:0.75rem;min-width:100px;">
+                        <option value="muy-grande">Muy Grande</option>
+                        <option value="grande" selected>Grande</option>
+                        <option value="mediana">Mediana</option>
+                        <option value="pequena">Pequeña</option>
+                        <option value="muy-pequena">Muy Pequeña</option>
+                    </select>
+                    <span style="font-size:0.65rem;color:#888;">Mov:</span>
+                    <label style="font-size:0.75rem;color:#aaa;display:flex;align-items:center;gap:3px;">
+                        <input type="checkbox" id="mover-porteria-rojo" onchange="actualizarMovimientoPorterias()" style="width:16px;height:16px;"> Activar
+                    </label>
+                    <span style="font-size:0.65rem;color:#888;">Vel:</span>
+                    <input type="number" id="velocidad-porteria-rojo" min="0.1" max="5" step="0.1" value="1" style="width:50px;padding:3px 5px;border-radius:4px;background:#1a1a2e;color:#fff;border:1px solid #ff1744;text-align:center;font-size:0.75rem;" onchange="actualizarMovimientoPorterias()">
+                </div>
+
+                <!-- FILA 3: TAMAÑO DE PORTERÍA - MESSI (visible) -->
+                <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:6px 10px;background:rgba(41,121,255,0.06);border-radius:8px;border:1px solid rgba(41,121,255,0.15);">
+                    <span style="font-size:0.8rem;color:#2979ff;font-weight:bold;min-width:75px;">🔵 MESSI</span>
+                    <span style="font-size:0.65rem;color:#888;">Tamaño:</span>
+                    <select id="tamano-porteria-azul" onchange="actualizarTamanosPorterias()" style="padding:4px 8px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #2979ff;font-size:0.75rem;min-width:100px;">
+                        <option value="muy-grande">Muy Grande</option>
+                        <option value="grande" selected>Grande</option>
+                        <option value="mediana">Mediana</option>
+                        <option value="pequena">Pequeña</option>
+                        <option value="muy-pequena">Muy Pequeña</option>
+                    </select>
+                    <span style="font-size:0.65rem;color:#888;">Mov:</span>
+                    <label style="font-size:0.75rem;color:#aaa;display:flex;align-items:center;gap:3px;">
+                        <input type="checkbox" id="mover-porteria-azul" onchange="actualizarMovimientoPorterias()" style="width:16px;height:16px;"> Activar
+                    </label>
+                    <span style="font-size:0.65rem;color:#888;">Vel:</span>
+                    <input type="number" id="velocidad-porteria-azul" min="0.1" max="5" step="0.1" value="1" style="width:50px;padding:3px 5px;border-radius:4px;background:#1a1a2e;color:#fff;border:1px solid #2979ff;text-align:center;font-size:0.75rem;" onchange="actualizarMovimientoPorterias()">
                 </div>
                 
-                <!-- CONTROLES DE MOVIMIENTO DE PORTERÍA CON VELOCIDAD NUMÉRICA -->
-                <div style="display:flex;flex-wrap:wrap;gap:15px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05);">
-                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:rgba(255,23,68,0.1);padding:8px 15px;border-radius:10px;border:1px solid rgba(255,23,68,0.2);">
-                        <span style="font-size:0.8rem;color:#ff1744;font-weight:bold;">🔴 RONALDO</span>
-                        <label style="font-size:0.7rem;color:#aaa;">
-                            <input type="checkbox" id="mover-porteria-rojo" onchange="actualizarMovimientoPorterias()"> Movimiento
-                        </label>
-                        <label style="font-size:0.7rem;color:#aaa;">Vel:</label>
-                        <input type="number" id="velocidad-porteria-rojo" min="0.1" max="5" step="0.1" value="1" style="width:55px;padding:3px 6px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #ff1744;text-align:center;font-size:0.8rem;" onchange="actualizarMovimientoPorterias()">
-                    </div>
-                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:rgba(41,121,255,0.1);padding:8px 15px;border-radius:10px;border:1px solid rgba(41,121,255,0.2);">
-                        <span style="font-size:0.8rem;color:#2979ff;font-weight:bold;">🔵 MESSI</span>
-                        <label style="font-size:0.7rem;color:#aaa;">
-                            <input type="checkbox" id="mover-porteria-azul" onchange="actualizarMovimientoPorterias()"> Movimiento
-                        </label>
-                        <label style="font-size:0.7rem;color:#aaa;">Vel:</label>
-                        <input type="number" id="velocidad-porteria-azul" min="0.1" max="5" step="0.1" value="1" style="width:55px;padding:3px 6px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #2979ff;text-align:center;font-size:0.8rem;" onchange="actualizarMovimientoPorterias()">
-                    </div>
-                </div>
-                
-                <div id="resultado-accion" style="margin-top:10px;padding:10px;background:rgba(0,0,0,0.3);border-radius:10px;text-align:center;font-size:1.1rem;min-height:35px;">
+                <div id="resultado-accion" style="margin-top:8px;padding:6px 10px;background:rgba(0,0,0,0.3);border-radius:8px;text-align:center;font-size:0.8rem;min-height:24px;color:#aaa;">
                     🎯 Esperando acción...
                 </div>
             </div>
 
-            <!-- ARENA DE JUEGO -->
-            <div id="arena">
-                <div class="jugador" id="jugador-rojo">
-                    <div class="avatar" id="avatar-rojo">🐐</div>
-                    <h2 id="nombre-rojo">RONALDO</h2>
-                    <div class="puntos" id="puntos-rojo">0</div>
-                    <div class="barra" id="barra-rojo" style="width:0%"></div>
-                    <span class="color-indicador" style="background:#ff1744;">🔴</span>
+            <!-- ARENA DE JUEGO - AVATARES GIGANTES -->
+            <div id="arena" style="display:flex;justify-content:center;align-items:stretch;gap:10px;padding:10px 8px;background:rgba(0,0,0,0.3);border-radius:12px;margin-bottom:6px;min-height:280px;">
+                
+                <!-- RONALDO -->
+                <div class="jugador" id="jugador-rojo" style="text-align:center;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                    <div class="avatar" id="avatar-rojo" style="width:160px;height:220px;border-radius:12px;overflow:hidden;border:4px solid #ff1744;background:transparent;display:flex;align-items:center;justify-content:center;margin:0 auto 2px;box-shadow:0 0 30px rgba(255,23,68,0.15);">
+                        <img src="" alt="Ronaldo" id="img-rojo" style="width:100%;height:100%;object-fit:cover;display:none;">
+                    </div>
+                    <h2 id="nombre-rojo" style="font-size:1.1rem;margin:1px 0;color:#ff1744;font-weight:bold;letter-spacing:1px;">RONALDO</h2>
+                    <div class="puntos" id="puntos-rojo" style="font-size:2.8rem;font-weight:bold;color:#ff1744;line-height:1;">0</div>
+                    <div class="barra" id="barra-rojo" style="width:0%;height:4px;background:linear-gradient(90deg,#ff1744,#ff9100);border-radius:2px;max-width:70%;margin:2px auto;transition:width 0.5s;"></div>
+                    <span class="color-indicador" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ff1744;margin-top:2px;"></span>
                 </div>
-                <div class="vs">⚡VS⚡</div>
-                <div class="jugador" id="jugador-azul">
-                    <div class="avatar" id="avatar-azul">🐐</div>
-                    <h2 id="nombre-azul">MESSI</h2>
-                    <div class="puntos" id="puntos-azul">0</div>
-                    <div class="barra" id="barra-azul" style="width:0%"></div>
-                    <span class="color-indicador" style="background:#2979ff;">🔵</span>
+                
+                <div class="vs" style="font-size:1.8rem;font-weight:bold;color:#ffd700;text-shadow:0 0 30px rgba(255,215,0,0.2);display:flex;align-items:center;padding:0 8px;">⚡</div>
+                
+                <!-- MESSI -->
+                <div class="jugador" id="jugador-azul" style="text-align:center;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                    <div class="avatar" id="avatar-azul" style="width:160px;height:220px;border-radius:12px;overflow:hidden;border:4px solid #2979ff;background:transparent;display:flex;align-items:center;justify-content:center;margin:0 auto 2px;box-shadow:0 0 30px rgba(41,121,255,0.15);">
+                        <img src="" alt="Messi" id="img-azul" style="width:100%;height:100%;object-fit:cover;display:none;">
+                    </div>
+                    <h2 id="nombre-azul" style="font-size:1.1rem;margin:1px 0;color:#2979ff;font-weight:bold;letter-spacing:1px;">MESSI</h2>
+                    <div class="puntos" id="puntos-azul" style="font-size:2.8rem;font-weight:bold;color:#2979ff;line-height:1;">0</div>
+                    <div class="barra" id="barra-azul" style="width:0%;height:4px;background:linear-gradient(90deg,#2979ff,#00e5ff);border-radius:2px;max-width:70%;margin:2px auto;transition:width 0.5s;"></div>
+                    <span class="color-indicador" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2979ff;margin-top:2px;"></span>
                 </div>
             </div>
 
-            <!-- CAMPO DE FÚTBOL (Canvas) -->
-            <div id="campo-container" style="position:relative;width:100%;max-width:700px;margin:15px auto;aspect-ratio:16/10;background:#1a1a2e;border-radius:20px;border:2px solid rgba(255,215,0,0.1);overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.5);">
-                <canvas id="canvas-campo" width="700" height="437.5" style="width:100%;height:100%;display:block;border-radius:18px;"></canvas>
-                <div id="mensaje-gol" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3.5rem;font-weight:bold;text-shadow:0 0 40px rgba(255,215,0,0.9);pointer-events:none;opacity:0;transition:opacity 0.5s;background:rgba(0,0,0,0.7);padding:15px 35px;border-radius:20px;border:2px solid rgba(255,215,0,0.3);">
+            <!-- CAMPO DE FÚTBOL -->
+            <div id="campo-container" style="position:relative;width:100%;max-width:700px;margin:4px auto;aspect-ratio:14/9;background:#1a1a2e;border-radius:16px;border:2px solid rgba(255,215,0,0.06);overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.4);">
+                <canvas id="canvas-campo" width="700" height="450" style="width:100%;height:100%;display:block;border-radius:14px;"></canvas>
+                <div id="mensaje-gol" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.8rem;font-weight:bold;text-shadow:0 0 40px rgba(255,215,0,0.9);pointer-events:none;opacity:0;transition:opacity 0.4s;background:rgba(0,0,0,0.7);padding:10px 25px;border-radius:14px;border:2px solid rgba(255,215,0,0.15);">
                     ⚽ ¡GOL!
                 </div>
-                <div id="contador-goles" style="position:absolute;bottom:10px;right:15px;color:rgba(255,255,255,0.4);font-size:0.8rem;font-family:monospace;">
+                <div id="contador-goles" style="position:absolute;bottom:6px;right:10px;color:rgba(255,255,255,0.15);font-size:0.65rem;font-family:monospace;">
                     ⚽ 0-0
                 </div>
             </div>
 
+            <!-- PANEL DE PODERES ACTIVOS -->
+            <div id="panel-poderes-activos" style="width:100%;max-width:700px;margin:6px auto;background:rgba(0,0,0,0.4);border-radius:12px;padding:8px 12px;border:1px solid rgba(255,215,0,0.06);backdrop-filter:blur(5px);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                    <span style="font-size:0.65rem;color:#888;text-transform:uppercase;letter-spacing:1px;">⚡ PODERES ACTIVOS</span>
+                    <span id="contador-poderes" style="font-size:0.55rem;color:#555;">0 activos</span>
+                </div>
+                <div id="lista-poderes-activos" style="min-height:28px;display:flex;flex-direction:column;gap:3px;">
+                    <div style="text-align:center;color:#444;font-size:0.7rem;padding:4px 0;">Ningún poder activo</div>
+                </div>
+            </div>
+
             <!-- ÚLTIMO EVENTO -->
-            <div id="ultimo-evento" style="text-align:center;padding:10px;color:#aaa;font-size:0.9rem;min-height:30px;">
+            <div id="ultimo-evento" style="text-align:center;padding:4px;color:#555;font-size:0.7rem;min-height:20px;">
                 🎯 Esperando acción...
             </div>
 
             <!-- MENSAJE GANADOR -->
             <div id="mensaje-ganador" class="oculto"></div>
-
-            <!-- SELECCIÓN DE BANDO -->
-            <div id="seleccion-bando">
-                <p>🔥 ELIGE TU BANDO 🔥</p>
-                <div class="botones-bando">
-                    <button id="btn-rojo" class="btn-bando rojo" onclick="votar('rojo')">❤️ RONALDO</button>
-                    <button id="btn-azul" class="btn-bando azul" onclick="votar('azul')">💙 MESSI</button>
-                </div>
-                <p id="mensaje-bando">👆 Toca un botón para elegir</p>
-                <p id="contador-votos" style="font-size:0.8rem;color:#888;margin-top:5px;">Votos: 🔴 0 | 🔵 0</p>
-            </div>
 
             <footer>
                 <p>❤️ Hecho con pasión por el fútbol ⚽ | Datos en tiempo real</p>
