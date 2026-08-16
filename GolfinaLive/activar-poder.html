@@ -1,191 +1,345 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ Activar Poder</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Activando poder...</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-            background: #0a0a0a;
-            color: #fff;
-            min-height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #1a1a2e;
+            color: white;
+            flex-direction: column;
         }
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        #mensaje {
-            font-size: 1.2rem;
-            padding: 15px 25px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.05);
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: #16213e;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             max-width: 500px;
-            min-height: 50px;
         }
-        .exito { color: #4caf50; }
-        .error { color: #ff1744; }
-        .advertencia { color: #ffd700; }
-        .info { color: #2979ff; }
-        .grande {
-            font-size: 3rem;
-            font-weight: bold;
-            margin: 15px 0;
+        h1 { color: #f5c842; margin-bottom: 10px; }
+        .icono { font-size: 60px; margin: 20px 0; }
+        .mensaje { font-size: 18px; margin: 15px 0; padding: 15px; border-radius: 10px; }
+        .exito { background: #2ecc71; color: #fff; }
+        .error { background: #e74c3c; color: #fff; }
+        .info { background: #3498db; color: #fff; }
+        .puntos { font-size: 14px; color: #aaa; margin-top: 10px; }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f5c842;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
         }
-        .poder-activo {
-            color: #ffd700;
-            text-shadow: 0 0 20px rgba(255,215,0,0.5);
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <h1>⚡ Activando poder...</h1>
-    <div id="mensaje" class="info">⏳ Procesando...</div>
-    <div id="detalle" style="font-size:0.8rem;color:#555;margin-top:20px;"></div>
+    <div class="container">
+        <h1>⚡ Activando poder...</h1>
+        <div id="contenido">
+            <div class="loading"></div>
+            <p style="margin-top: 20px;">⏳ Procesando...</p>
+        </div>
+    </div>
 
     <script>
-        // ============================================
+        // ============================================================
         // CONFIGURACIÓN DE SUPABASE
-        // ============================================
+        // ============================================================
         const SUPABASE_URL = 'https://qddfdisbnwnnlvkrnckd.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZGZkaXNibndubmx2a3JuY2tkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDQwMzcsImV4cCI6MjEwMjQyMDAzN30.9Jsgl0qepqjJ8oiiewyPZK3vOsqm49EnLCEtOar5MiQ';
 
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // ============================================================
+        // OBTENER PARÁMETROS DE LA URL
+        // ============================================================
+        const urlParams = new URLSearchParams(window.location.search);
+        const poder = urlParams.get('poder');
+        const user = urlParams.get('user') || 'Anonimo';
+        const channel = urlParams.get('channel') || 'golfinalive';
 
-        // ============================================
-        // OBTENER EL PODER DE LA URL
-        // ============================================
-        const params = new URLSearchParams(window.location.search);
-        const poder = params.get('poder');
-
-        const mensaje = document.getElementById('mensaje');
-        const detalle = document.getElementById('detalle');
-
-        // ============================================
-        // MAPA DE PODERES PARA MOSTRAR NOMBRES LEGIBLES
-        // ============================================
-        const nombresPoderes = {
-            'velocidad-rojo': '⚡ Ronaldo Rápido',
-            'velocidad-azul': '⚡ Messi Rápido',
-            'lento-rojo': '🐢 Ronaldo Lento',
-            'lento-azul': '🐢 Messi Lento',
-            'porteria-grande-rojo': '📐 Portería Grande (Ronaldo)',
-            'porteria-grande-azul': '📐 Portería Grande (Messi)',
-            'porteria-pequena-rojo': '📏 Portería Pequeña (Ronaldo)',
-            'porteria-pequena-azul': '📏 Portería Pequeña (Messi)',
-            'caos': '🌀 Caos Total',
-            'doble-goles': '🔥 Doble Goles'
+        // ============================================================
+        // COSTOS DE CADA PODER
+        // ============================================================
+        const COSTOS = {
+            'ronaldo': 20,
+            'messi': 20,
+            'lento': 15,
+            'gol': 50,
+            'caos': 30,
+            'ayuda': 0
         };
 
-        // ============================================
-        // FUNCIÓN PRINCIPAL: ACTIVAR PODER
-        // ============================================
-        async function activarPoder() {
+        // ============================================================
+        // FUNCIÓN PARA CONSULTAR PUNTOS DEL USUARIO
+        // ============================================================
+        async function obtenerPuntosUsuario(nombre) {
+            try {
+                const response = await fetch(
+                    `${SUPABASE_URL}/rest/v1/jugadores?select=puntos&nombre=eq.${encodeURIComponent(nombre)}&channel=eq.${encodeURIComponent(channel)}&limit=1`,
+                    {
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
+                    }
+                );
+                if (!response.ok) return 0;
+                const data = await response.json();
+                return data.length > 0 ? data[0].puntos || 0 : 0;
+            } catch (error) {
+                console.error('Error al obtener puntos:', error);
+                return 0;
+            }
+        }
 
-            // --- VALIDAR QUE SE ESPECIFICÓ UN PODER ---
+        // ============================================================
+        // FUNCIÓN PARA ACTUALIZAR PUNTOS DEL USUARIO
+        // ============================================================
+        async function actualizarPuntosUsuario(nombre, nuevosPuntos) {
+            try {
+                // Verificar si el usuario existe
+                const checkResponse = await fetch(
+                    `${SUPABASE_URL}/rest/v1/jugadores?select=id&nombre=eq.${encodeURIComponent(nombre)}&channel=eq.${encodeURIComponent(channel)}&limit=1`,
+                    {
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
+                    }
+                );
+                const existing = await checkResponse.json();
+
+                if (existing.length > 0) {
+                    // Actualizar usuario existente
+                    await fetch(
+                        `${SUPABASE_URL}/rest/v1/jugadores?id=eq.${existing[0].id}`,
+                        {
+                            method: 'PATCH',
+                            headers: {
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ puntos: nuevosPuntos })
+                        }
+                    );
+                } else {
+                    // Crear nuevo usuario
+                    await fetch(
+                        `${SUPABASE_URL}/rest/v1/jugadores`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                nombre: nombre,
+                                channel: channel,
+                                puntos: nuevosPuntos
+                            })
+                        }
+                    );
+                }
+                return true;
+            } catch (error) {
+                console.error('Error al actualizar puntos:', error);
+                return false;
+            }
+        }
+
+        // ============================================================
+        // FUNCIÓN PARA REGISTRAR EVENTO EN SUPABASE
+        // ============================================================
+        async function registrarEvento(tipo, usuario, poder, puntos) {
+            try {
+                await fetch(
+                    `${SUPABASE_URL}/rest/v1/eventos`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            tipo: tipo,
+                            usuario: usuario,
+                            poder: poder,
+                            puntos: puntos,
+                            channel: channel
+                        })
+                    }
+                );
+            } catch (error) {
+                console.error('Error al registrar evento:', error);
+            }
+        }
+
+        // ============================================================
+        // FUNCIÓN PARA REGISTRAR PODER EN SUPABASE (tabla poderes)
+        // ============================================================
+        async function registrarPoder(tipo, usuario) {
+            try {
+                await fetch(
+                    `${SUPABASE_URL}/rest/v1/poderes`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            poder: tipo,
+                            usuario: usuario,
+                            channel: channel,
+                            timestamp: new Date().toISOString()
+                        })
+                    }
+                );
+            } catch (error) {
+                console.error('Error al registrar poder:', error);
+            }
+        }
+
+        // ============================================================
+        // FUNCIÓN PRINCIPAL PARA ACTIVAR PODER
+        // ============================================================
+        async function activarPoder() {
+            const contenido = document.getElementById('contenido');
+
+            // Validar que el poder existe
             if (!poder) {
-                mensaje.textContent = '❌ No se especificó ningún poder';
-                mensaje.className = 'error';
-                detalle.textContent = 'Uso: ?poder=nombre-del-poder';
+                contenido.innerHTML = `
+                    <div class="icono">❌</div>
+                    <div class="mensaje error">Error: No se especificó ningún poder.</div>
+                    <p class="puntos">Usa: ?poder=ronaldo</p>
+                `;
                 return;
             }
 
-            // Mostrar qué poder se está activando
-            const nombreLegible = nombresPoderes[poder] || poder;
-            mensaje.textContent = `⏳ Activando: ${nombreLegible}...`;
-            mensaje.className = 'info';
-            detalle.textContent = `Comando recibido: ${poder}`;
+            // Verificar si el poder tiene costo definido
+            const costo = COSTOS[poder];
+            if (costo === undefined) {
+                contenido.innerHTML = `
+                    <div class="icono">❓</div>
+                    <div class="mensaje error">Poder "${poder}" no válido.</div>
+                    <p class="puntos">Poderes disponibles: ronaldo, messi, lento, gol, caos, ayuda</p>
+                `;
+                return;
+            }
 
+            // Si es !ayuda (gratis)
+            if (poder === 'ayuda') {
+                contenido.innerHTML = `
+                    <div class="icono">📖</div>
+                    <div class="mensaje info">¡AYUDA ACTIVADA!</div>
+                    <p><b>Comandos disponibles:</b><br>
+                    !ronaldo (20 pts) - ¡GOOOOL!<br>
+                    !messi (20 pts) - ¡GOOOOL!<br>
+                    !lento (15 pts) - Ralentiza el juego<br>
+                    !gol (50 pts) - ¡GOL SEGURO!<br>
+                    !caos (30 pts) - Todo se mueve<br>
+                    !puntos - Ver tus puntos</p>
+                    <p class="puntos">Usuario: ${user}</p>
+                `;
+                return;
+            }
+
+            // ============================================================
+            // PROCESAR PODER CON COSTO
+            // ============================================================
             try {
-                // --- PASO 1: VERIFICAR QUE EL PODER EXISTE ---
-                const { data: existe, error: errorExiste } = await supabase
-                    .from('poderes')
-                    .select('id, activo, expira_en')
-                    .eq('nombre', poder)
-                    .single();
+                // 1. Obtener puntos actuales
+                const puntosActuales = await obtenerPuntosUsuario(user);
 
-                if (errorExiste || !existe) {
-                    mensaje.textContent = `❌ Poder "${poder}" no existe en la base de datos`;
-                    mensaje.className = 'error';
-                    detalle.textContent = 'Revisa que el nombre sea correcto.';
+                // 2. Verificar si tiene suficientes puntos
+                if (puntosActuales < costo) {
+                    contenido.innerHTML = `
+                        <div class="icono">🚫</div>
+                        <div class="mensaje error">❌ ¡Puntos insuficientes!</div>
+                        <div style="background: #2d2d4a; padding: 15px; border-radius: 10px; margin: 10px 0;">
+                            <p style="margin: 5px 0;"><b>${user}</b></p>
+                            <p style="margin: 5px 0;">Tienes: <b>${puntosActuales}</b> puntos</p>
+                            <p style="margin: 5px 0;">Necesitas: <b>${costo}</b> puntos</p>
+                            <p style="margin: 5px 0; color: #f5c842;">Te faltan: <b>${costo - puntosActuales}</b> puntos</p>
+                        </div>
+                        <p class="puntos">💡 Gana puntos viendo el directo (2 pts/minuto)</p>
+                    `;
                     return;
                 }
 
-                // --- PASO 2: VERIFICAR QUE NO ESTÉ YA ACTIVO ---
-                if (existe.activo) {
-                    const tiempoRestante = calcularTiempoRestante(existe.expira_en);
-                    mensaje.textContent = `⏳ ¡${nombreLegible} YA ESTÁ ACTIVO! ${tiempoRestante}`;
-                    mensaje.className = 'advertencia';
-                    detalle.textContent = 'Espera a que termine (1 minuto) antes de volver a activarlo.';
+                // 3. Calcular nuevos puntos
+                const nuevosPuntos = puntosActuales - costo;
+
+                // 4. Actualizar puntos en Supabase
+                const actualizado = await actualizarPuntosUsuario(user, nuevosPuntos);
+
+                if (!actualizado) {
+                    contenido.innerHTML = `
+                        <div class="icono">⚠️</div>
+                        <div class="mensaje error">Error al actualizar puntos. Intenta de nuevo.</div>
+                    `;
                     return;
                 }
 
-                // --- PASO 3: ACTIVAR EL PODER ---
-                const { error: errorUpdate } = await supabase
-                    .from('poderes')
-                    .update({
-                        activo: true,
-                        expira_en: new Date(Date.now() + 60000).toISOString() // 1 minuto
-                    })
-                    .eq('nombre', poder);
+                // 5. Registrar evento
+                await registrarEvento('poder_activado', user, poder, costo);
 
-                if (errorUpdate) {
-                    mensaje.textContent = `❌ Error al activar: ${errorUpdate.message}`;
-                    mensaje.className = 'error';
-                    detalle.textContent = 'Intenta de nuevo.';
-                    return;
+                // 6. Registrar poder en tabla poderes
+                await registrarPoder(poder, user);
+
+                // 7. Mostrar mensaje de éxito
+                let mensajePoder = '';
+                let emoji = '⚡';
+                switch(poder) {
+                    case 'ronaldo': mensajePoder = '🇵🇹 ¡RONALDO ACTIVADO! El Bicho va por el gol'; emoji = '🐐'; break;
+                    case 'messi': mensajePoder = '🇦🇷 ¡MESSI ACTIVADO! La Pulga hace magia'; emoji = '🐐'; break;
+                    case 'lento': mensajePoder = '🐢 ¡MODO LENTO! Todo se ralentiza'; emoji = '⏳'; break;
+                    case 'gol': mensajePoder = '⚽ ¡GOL SEGURO! La bola va directo al arco'; emoji = '🎯'; break;
+                    case 'caos': mensajePoder = '🌀 ¡CAOS! Todo se mueve sin control'; emoji = '💥'; break;
+                    default: mensajePoder = `¡${poder.toUpperCase()} ACTIVADO!`; break;
                 }
 
-                // --- PASO 4: CONFIRMAR ACTIVACIÓN ---
-                mensaje.textContent = `✅ ¡${nombreLegible} ACTIVADO por 1 minuto! 🎉`;
-                mensaje.className = 'exito grande';
-
-                // Mostrar el nombre en grande
-                document.querySelector('h1').textContent = `⚡ ${nombreLegible}`;
-                document.querySelector('h1').className = 'poder-activo';
-
-                detalle.textContent = 'Los espectadores verán el cambio en la transmisión.';
+                contenido.innerHTML = `
+                    <div class="icono">${emoji}</div>
+                    <div class="mensaje exito">✅ ¡${mensajePoder}!</div>
+                    <div style="background: #2d2d4a; padding: 15px; border-radius: 10px; margin: 10px 0;">
+                        <p style="margin: 5px 0;"><b>${user}</b></p>
+                        <p style="margin: 5px 0;">💰 Puntos gastados: <b>-${costo}</b></p>
+                        <p style="margin: 5px 0;">🏦 Puntos restantes: <b>${nuevosPuntos}</b></p>
+                    </div>
+                    <p class="puntos">⚡ ¡El poder se ha activado en el juego!</p>
+                `;
 
             } catch (error) {
-                mensaje.textContent = `❌ Error inesperado: ${error.message}`;
-                mensaje.className = 'error';
-                detalle.textContent = 'Revisa la consola para más detalles.';
-                console.error('Error:', error);
+                console.error('Error en activarPoder:', error);
+                contenido.innerHTML = `
+                    <div class="icono">💥</div>
+                    <div class="mensaje error">Error al procesar el poder. Intenta de nuevo.</div>
+                    <p class="puntos">${error.message}</p>
+                `;
             }
         }
 
-        // ============================================
-        // FUNCIÓN PARA CALCULAR TIEMPO RESTANTE
-        // ============================================
-        function calcularTiempoRestante(fechaExpiracion) {
-            if (!fechaExpiracion) return '';
-            
-            const ahora = Date.now();
-            const expira = new Date(fechaExpiracion).getTime();
-            const diferencia = expira - ahora;
-
-            if (diferencia <= 0) return '⚡ ¡Ya expiró!';
-
-            const segundos = Math.ceil(diferencia / 1000);
-            if (segundos < 60) {
-                return `⏱️ ${segundos}s restantes`;
-            }
-            const minutos = Math.floor(segundos / 60);
-            const segs = segundos % 60;
-            return `⏱️ ${minutos}m ${segs}s restantes`;
-        }
-
-        // ============================================
-        // INICIAR
-        // ============================================
-        activarPoder();
+        // ============================================================
+        // EJECUTAR AL CARGAR LA PÁGINA
+        // ============================================================
+        window.onload = activarPoder;
     </script>
 </body>
 </html>
