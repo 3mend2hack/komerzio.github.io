@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ GolFinaLive - Admin</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Librería para comprimir imágenes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/browser-image-compression/2.0.2/browser-image-compression.min.js"></script>
+</head>
+<body>
+    <div id="app-admin">
+        <header>
+            <h1>🎮 Panel de Administración</h1>
+            <div>
+                <span id="estado-bd" style="font-size:0.8rem;padding:5px 12px;border-radius:20px;background:#333;margin-right:10px;">⏳ Conectando...</span>
+                <button id="btn-inicializar" onclick="inicializarBaseDatos()" style="padding:8px 20px;background:#ffd700;border:none;border-radius:25px;font-weight:bold;color:#000;cursor:pointer;">
+                    🚀 Inicializar BD
+                </button>
+                <button id="btn-crear-partida" onclick="crearPartida()" style="padding:8px 20px;background:linear-gradient(135deg,#ff1744,#d50000);border:none;border-radius:25px;font-weight:bold;color:#fff;cursor:pointer;margin-left:10px;">
+                    ➕ Nueva Partida
+                </button>
+            </div>
+        </header>
+
+        <div id="contenido-admin">
+            <!-- Mensaje de bienvenida -->
+            <div id="mensaje-inicial" style="background:rgba(255,215,0,0.1);border:1px solid #ffd700;border-radius:15px;padding:20px;margin-bottom:20px;text-align:center;">
+                <p style="font-size:1.1rem;">⚠️ <strong>Primera vez?</strong> Toca "Inicializar BD" para crear las tablas necesarias en Supabase.</p>
+                <p style="font-size:0.9rem;color:#aaa;">Solo necesitas hacerlo una vez. Después los datos se guardarán automáticamente.</p>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- PANEL DE LOGS (NUEVO) -->
+            <!-- ========================================== -->
+            <section id="seccion-logs" style="background:rgba(0,0,0,0.6);border:1px solid #ff6d00;">
+                <h2 style="color:#ff6d00;">📋 CONSOLA DE LOGS EN TIEMPO REAL</h2>
+                <div id="panel-logs" style="background:#0a0a0a;border-radius:10px;padding:12px;max-height:200px;overflow-y:auto;font-family:'Courier New',monospace;font-size:0.8rem;color:#0f0;border:1px solid #333;">
+                    <div id="log-contenedor">
+                        <div class="log-entry log-info">🟢 Sistema iniciado. Esperando acciones...</div>
+                    </div>
+                </div>
+                <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+                    <button onclick="limpiarLogs()" style="padding:6px 16px;background:#333;border:none;border-radius:15px;color:#fff;cursor:pointer;">🗑️ Limpiar</button>
+                    <button onclick="exportarLogs()" style="padding:6px 16px;background:#ffd700;border:none;border-radius:15px;color:#000;cursor:pointer;font-weight:bold;">📥 Exportar Logs</button>
+                    <span id="log-contador" style="color:#666;font-size:0.8rem;display:flex;align-items:center;">Registros: 1</span>
+                </div>
+            </section>
+
+            <!-- Sección: Configurar jugadores -->
+            <section id="seccion-jugadores">
+                <h2>⚽ Configurar Jugadores</h2>
+                <div class="jugador-config">
+                    <div class="config-rojo">
+                        <h3>🔴 Ronaldo</h3>
+                        <input type="text" id="nombre-rojo-input" value="RONALDO" placeholder="Nombre">
+                        <input type="file" id="imagen-rojo-input" accept="image/*">
+                        <div style="display:flex;gap:10px;align-items:center;margin:8px 0;flex-wrap:wrap;">
+                            <label style="font-size:0.8rem;color:#aaa;">Calidad:</label>
+                            <select id="calidad-rojo" style="padding:4px 10px;border-radius:8px;background:#1a1a2e;color:#fff;border:1px solid #333;">
+                                <option value="0.9">Alta (90%)</option>
+                                <option value="0.7" selected>Media (70%)</option>
+                                <option value="0.5">Baja (50%)</option>
+                            </select>
+                            <span id="tamano-rojo" style="font-size:0.7rem;color:#666;">Sin imagen</span>
+                        </div>
+                        <img id="preview-rojo" src="" alt="Vista previa" style="max-width:100px;max-height:100px;border-radius:50%;margin:10px auto;display:block;border:3px solid #ffd700;">
+                        <button onclick="guardarJugador('rojo')">💾 Guardar</button>
+                    </div>
+                    <div class="config-azul">
+                        <h3>🔵 Messi</h3>
+                        <input type="text" id="nombre-azul-input" value="MESSI" placeholder="Nombre">
+                        <input type="file" id="imagen-azul-input" accept="image/*">
+                        <div style="display:flex;gap:10px;align-items:center;margin:8px 0;flex-wrap:wrap;">
+                            <label style="font-size:0.8rem;color:#aaa;">Calidad:</label>
+                            <select id="calidad-azul" style="padding:4px 10px;border-radius:8px;background:#1a1a2e;color:#fff;border:1px solid #333;">
+                                <option value="0.9">Alta (90%)</option>
+                                <option value="0.7" selected>Media (70%)</option>
+                                <option value="0.5">Baja (50%)</option>
+                            </select>
+                            <span id="tamano-azul" style="font-size:0.7rem;color:#666;">Sin imagen</span>
+                        </div>
+                        <img id="preview-azul" src="" alt="Vista previa" style="max-width:100px;max-height:100px;border-radius:50%;margin:10px auto;display:block;border:3px solid #ffd700;">
+                        <button onclick="guardarJugador('azul')">💾 Guardar</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección: Control de partida -->
+            <section id="seccion-partida">
+                <h2>🎯 Control de Partida</h2>
+                <div id="info-partida">
+                    <p><strong>Partida:</strong> <span id="partida-id">-</span></p>
+                    <p><strong>Modo:</strong> 
+                        <select id="select-modo" onchange="cambiarModo()">
+                            <option value="bolas">🎱 Bolas (primera en caer)</option>
+                            <option value="dados">🎲 Dados (suma de valores)</option>
+                            <option value="ruleta">🎡 Ruleta (giro aleatorio)</option>
+                        </select>
+                    </p>
+                    <p><strong>Estado:</strong> <span id="estado-partida-admin">-</span></p>
+                    <p><strong>Puntaje:</strong> 🔴 <span id="puntos-rojo-admin">0</span> | 🔵 <span id="puntos-azul-admin">0</span></p>
+                </div>
+
+                <div id="controles-partida">
+                    <div class="control-grupo">
+                        <h4>➕ Añadir punto</h4>
+                        <button onclick="añadirPunto('rojo', 1)">Rojo +1</button>
+                        <button onclick="añadirPunto('rojo', 5)">Rojo +5</button>
+                        <button onclick="añadirPunto('azul', 1)">Azul +1</button>
+                        <button onclick="añadirPunto('azul', 5)">Azul +5</button>
+                    </div>
+                    <div class="control-grupo">
+                        <h4>🎲 Modos de azar</h4>
+                        <button onclick="lanzarBola()" class="btn-especial">🎱 Lanzar Bola</button>
+                        <button onclick="lanzarDados()" class="btn-especial">🎲 Lanzar Dados</button>
+                        <button onclick="lanzarRuleta()" class="btn-especial">🎡 Girar Ruleta</button>
+                    </div>
+                    <div class="control-grupo">
+                        <h4>⚙️ Acciones</h4>
+                        <button onclick="reiniciarPartida()">🔄 Reiniciar</button>
+                        <button onclick="finalizarPartida()">🏆 Finalizar</button>
+                    </div>
+                </div>
+
+                <div id="resultado-accion" style="margin-top:15px;padding:15px;background:rgba(255,255,255,0.05);border-radius:10px;min-height:40px;font-size:1.2rem;text-align:center;">
+                    🎯 Esperando acción...
+                </div>
+            </section>
+
+            <!-- Sección: Historial de eventos -->
+            <section id="seccion-eventos">
+                <h2>📜 Historial de puntos</h2>
+                <ul id="lista-eventos"></ul>
+            </section>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
