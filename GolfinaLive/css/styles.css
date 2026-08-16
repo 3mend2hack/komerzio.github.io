@@ -1,1 +1,391 @@
+/* === RESET Y ESTILOS BASE === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+    color: #fff;
+    min-height: 100vh;
+    padding: 10px;
+    overflow-x: hidden;
+}
+
+/* === ENCABEZADO === */
+header {
+    text-align: center;
+    padding: 15px 0;
+    border-bottom: 2px solid #ff1744;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 2rem;
+    background: linear-gradient(90deg, #ff1744, #ff9100, #2979ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    letter-spacing: 2px;
+}
+
+#estado-partida {
+    font-size: 0.9rem;
+    background: #ff1744;
+    display: inline-block;
+    padding: 4px 15px;
+    border-radius: 20px;
+    color: #fff;
+    animation: parpadeo 1.5s infinite;
+}
+
+@keyframes parpadeo {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* === ARENA (zona de juego) === */
+#arena {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    padding: 20px 10px;
+    margin: 10px 0;
+    border: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+}
+
+.jugador {
+    flex: 1;
+    text-align: center;
+    padding: 15px 5px;
+    border-radius: 15px;
+    background: rgba(0,0,0,0.3);
+    position: relative;
+    transition: all 0.3s;
+    min-width: 0;
+}
+
+.jugador .avatar {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.jugador h2 {
+    font-size: 1.2rem;
+    margin: 5px 0;
+    letter-spacing: 1px;
+}
+
+#jugador-rojo h2 { color: #ff1744; }
+#jugador-azul h2 { color: #2979ff; }
+
+.puntos {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 8px 0;
+    font-family: 'Courier New', monospace;
+    background: rgba(0,0,0,0.5);
+    padding: 5px 10px;
+    border-radius: 10px;
+    display: inline-block;
+    min-width: 80px;
+}
+
+.barra {
+    height: 6px;
+    border-radius: 3px;
+    margin: 8px auto;
+    max-width: 90%;
+    transition: width 0.5s ease;
+}
+
+#barra-rojo { background: linear-gradient(90deg, #ff1744, #ff9100); }
+#barra-azul { background: linear-gradient(90deg, #2979ff, #00e5ff); }
+
+.color-indicador {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-top: 5px;
+}
+
+.vs {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+    padding: 0 5px;
+}
+
+/* === ZONA DE BOLAS === */
+#zona-bolas {
+    position: relative;
+    height: 60px;
+    margin: 10px 0;
+    overflow: hidden;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.2);
+}
+
+.bola {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    top: -30px;
+    animation: caerBola 1s ease-in forwards;
+    box-shadow: 0 0 15px rgba(255,255,255,0.3);
+}
+
+.bola.rojo {
+    background: radial-gradient(circle at 30% 30%, #ff6b6b, #ff1744);
+    border: 2px solid #ff9100;
+}
+
+.bola.azul {
+    background: radial-gradient(circle at 30% 30%, #6bb5ff, #2979ff);
+    border: 2px solid #00e5ff;
+}
+
+@keyframes caerBola {
+    0% { top: -30px; opacity: 1; transform: scale(0.5); }
+    70% { transform: scale(1.2); }
+    100% { top: 60px; opacity: 0; transform: scale(0.8); }
+}
+
+/* === SELECCIÓN DE BANDO === */
+#seleccion-bando {
+    text-align: center;
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 15px;
+    margin: 15px 0;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+#seleccion-bando p {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.botones-bando {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.btn-bando {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: #fff;
+    min-width: 130px;
+}
+
+.btn-bando.rojo {
+    background: linear-gradient(135deg, #ff1744, #d50000);
+    box-shadow: 0 4px 15px rgba(255,23,68,0.4);
+}
+
+.btn-bando.azul {
+    background: linear-gradient(135deg, #2979ff, #0d47a1);
+    box-shadow: 0 4px 15px rgba(41,121,255,0.4);
+}
+
+.btn-bando:active {
+    transform: scale(0.95);
+}
+
+.btn-bando:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: scale(0.95);
+}
+
+#mensaje-bando {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #aaa;
+    min-height: 25px;
+}
+
+/* === MENSAJE GANADOR === */
+#mensaje-ganador {
+    text-align: center;
+    padding: 20px;
+    font-size: 2.2rem;
+    font-weight: bold;
+    background: linear-gradient(90deg, #ffd700, #ff6d00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    animation: festejo 0.8s ease-in-out;
+    margin: 10px 0;
+}
+
+#mensaje-ganador.oculto {
+    display: none;
+}
+
+@keyframes festejo {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* === PANEL DE CONTROL === */
+#panel-control {
+    margin: 20px 0;
+    background: rgba(0,0,0,0.4);
+    border-radius: 15px;
+    padding: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+#panel-control summary {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 10px;
+    color: #ffd700;
+    font-size: 1.1rem;
+    user-select: none;
+}
+
+#controles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 10px 0;
+    justify-content: center;
+}
+
+.grupo-control {
+    background: rgba(255,255,255,0.05);
+    padding: 12px;
+    border-radius: 10px;
+    flex: 1;
+    min-width: 180px;
+    text-align: center;
+}
+
+.grupo-control h4 {
+    color: #aaa;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.grupo-control button {
+    padding: 8px 14px;
+    margin: 4px;
+    border: none;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.grupo-control button:active {
+    transform: scale(0.93);
+    background: rgba(255,255,255,0.25);
+}
+
+.grupo-control button:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+/* === HISTORIAL === */
+#historial {
+    position: fixed;
+    top: 10%;
+    left: 5%;
+    width: 90%;
+    max-height: 80%;
+    background: #1a1a2e;
+    border-radius: 20px;
+    padding: 20px;
+    border: 2px solid #ffd700;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+}
+
+#historial.oculto {
+    display: none;
+}
+
+#historial h3 {
+    text-align: center;
+    color: #ffd700;
+    margin-bottom: 15px;
+}
+
+#lista-historial {
+    list-style: none;
+    padding: 0;
+}
+
+#lista-historial li {
+    padding: 10px;
+    margin: 5px 0;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+#historial button {
+    display: block;
+    margin: 15px auto 0;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 25px;
+    background: #ff1744;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* === FOOTER === */
+footer {
+    text-align: center;
+    padding: 20px 0 10px;
+    color: #666;
+    font-size: 0.8rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 600px) {
+    header h1 { font-size: 1.5rem; }
+    .jugador h2 { font-size: 0.9rem; }
+    .puntos { font-size: 1.8rem; min-width: 60px; }
+    .vs { font-size: 0.9rem; }
+    .btn-bando { padding: 10px 15px; font-size: 0.85rem; min-width: 100px; }
+    #mensaje-ganador { font-size: 1.6rem; }
+    .grupo-control { min-width: 140px; }
+    .grupo-control button { font-size: 0.75rem; padding: 6px 10px; }
+}
+
+@media (max-width: 400px) {
+    #arena { flex-wrap: wrap; }
+    .vs { order: 3; width: 100%; }
+}
