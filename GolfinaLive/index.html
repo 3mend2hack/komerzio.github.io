@@ -39,7 +39,7 @@
         </header>
 
         <main>
-            <!-- PANEL DE CONTROL -->
+            <!-- PANEL DE CONTROL - SOLO VISIBLE EN ADMIN (NO EN STREAM) -->
             <div id="panel-control" style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.08);border-radius:12px;padding:12px;margin-bottom:8px;">
                 
                 <!-- FILA 1: Nueva partida, Goles, Lanzar, Reiniciar, Finalizar -->
@@ -58,7 +58,7 @@
                     </div>
                 </div>
                 
-                <!-- FILA 2: TAMAÑO Y MOVIMIENTO - RONALDO (visible) -->
+                <!-- FILA 2: TAMAÑO Y MOVIMIENTO - RONALDO -->
                 <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:8px 14px;background:rgba(255,23,68,0.08);border-radius:10px;border:1px solid rgba(255,23,68,0.2);margin-bottom:6px;">
                     <span style="font-size:0.85rem;color:#ff1744;font-weight:bold;min-width:75px;">🔴 RONALDO</span>
                     
@@ -80,7 +80,7 @@
                     <input type="number" id="velocidad-porteria-rojo" min="0.1" max="5" step="0.1" value="1" style="width:55px;padding:4px 6px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #ff1744;text-align:center;font-size:0.8rem;" onchange="actualizarMovimientoPorterias()">
                 </div>
 
-                <!-- FILA 3: TAMAÑO Y MOVIMIENTO - MESSI (visible) -->
+                <!-- FILA 3: TAMAÑO Y MOVIMIENTO - MESSI -->
                 <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:8px 14px;background:rgba(41,121,255,0.08);border-radius:10px;border:1px solid rgba(41,121,255,0.2);">
                     <span style="font-size:0.85rem;color:#2979ff;font-weight:bold;min-width:75px;">🔵 MESSI</span>
                     
@@ -157,7 +157,7 @@
                 </div>
             </div>
 
-            <!-- PANEL DE SONIDOS Y MENSAJES -->
+            <!-- PANEL DE SONIDOS Y MENSAJES - SOLO VISIBLE EN ADMIN -->
             <div id="panel-sonidos" style="width:100%;max-width:700px;margin:6px auto;background:rgba(0,0,0,0.4);border-radius:12px;padding:8px 12px;border:1px solid rgba(255,215,0,0.06);display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
                 <button onclick="reproducirSonido('gol')" style="padding:6px 14px;background:linear-gradient(135deg,#ffd700,#f5a623);border:none;border-radius:16px;font-weight:bold;color:#000;cursor:pointer;font-size:0.7rem;">⚽ Gol</button>
                 <button onclick="reproducirSonido('bienvenida')" style="padding:6px 14px;background:linear-gradient(135deg,#2979ff,#0d47a1);border:none;border-radius:16px;font-weight:bold;color:#fff;cursor:pointer;font-size:0.7rem;">👋 Bienvenida</button>
@@ -181,6 +181,36 @@
             </footer>
         </main>
     </div>
+
+    <script>
+        // ============================================================
+        // DETECTAR MODO STREAM (ocultar paneles de control)
+        // ============================================================
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const modoStream = urlParams.get('modo') === 'stream';
+            
+            if (modoStream) {
+                // Ocultar panel de control y sonidos (solo para stream)
+                const panelControl = document.getElementById('panel-control');
+                const panelSonidos = document.getElementById('panel-sonidos');
+                const botonSalir = document.querySelector('header button');
+                
+                if (panelControl) panelControl.style.display = 'none';
+                if (panelSonidos) panelSonidos.style.display = 'none';
+                if (botonSalir) botonSalir.style.display = 'none';
+                
+                // Ocultar el login completamente
+                document.getElementById('pantalla-login').style.display = 'none';
+                document.getElementById('pantalla-principal').style.display = 'block';
+                
+                // Cargar datos automáticamente
+                if (typeof cargarJugadores === 'function') cargarJugadores();
+                if (typeof cargarUltimaPartida === 'function') cargarUltimaPartida();
+                if (typeof dibujarCampo === 'function') dibujarCampo();
+            }
+        })();
+    </script>
 
     <script src="js/config.js"></script>
     <script src="js/index.js"></script>
