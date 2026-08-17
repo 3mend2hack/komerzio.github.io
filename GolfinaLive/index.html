@@ -40,55 +40,69 @@
 
         <main>
             <!-- PANEL DE CONTROL -->
-            <div id="panel-control" style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.08);border-radius:12px;padding:10px;margin-bottom:8px;">
-                <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:space-between;">
-                    <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-                        <button onclick="crearPartida()" style="padding:6px 14px;background:linear-gradient(135deg,#ff1744,#d50000);border:none;border-radius:16px;color:#fff;font-weight:bold;cursor:pointer;font-size:0.75rem;">➕ Nueva</button>
-                        <div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.05);padding:2px 8px;border-radius:8px;">
-                            <label style="font-size:0.65rem;color:#aaa;">Goles:</label>
-                            <input type="number" id="input-meta" value="5" min="1" max="100" style="width:40px;padding:2px 4px;border-radius:4px;background:#1a1a2e;color:#fff;border:1px solid #ffd700;text-align:center;font-size:0.75rem;">
+            <div id="panel-control" style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.08);border-radius:12px;padding:12px;margin-bottom:8px;">
+                
+                <!-- FILA 1: Nueva partida, Goles, Lanzar, Reiniciar, Finalizar -->
+                <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                        <button onclick="crearPartida()" style="padding:8px 18px;background:linear-gradient(135deg,#ff1744,#d50000);border:none;border-radius:20px;color:#fff;font-weight:bold;cursor:pointer;font-size:0.85rem;">➕ Nueva</button>
+                        <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);padding:4px 12px;border-radius:8px;">
+                            <label style="font-size:0.75rem;color:#aaa;font-weight:bold;">Goles:</label>
+                            <input type="number" id="input-meta" value="5" min="1" max="100" style="width:45px;padding:4px 6px;border-radius:4px;background:#1a1a2e;color:#fff;border:1px solid #ffd700;text-align:center;font-size:0.85rem;">
                         </div>
                     </div>
                     <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                        <button onclick="lanzarBolas()" style="padding:6px 14px;background:linear-gradient(135deg,#ffd700,#f5a623);border:none;border-radius:16px;font-weight:bold;color:#000;cursor:pointer;font-size:0.75rem;">⚽ Lanzar</button>
-                        <button onclick="reiniciarPartida()" style="padding:6px 14px;background:#333;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;">🔄</button>
-                        <button onclick="finalizarPartida()" style="padding:6px 14px;background:#333;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;">🏆</button>
+                        <button onclick="lanzarBolas()" style="padding:8px 18px;background:linear-gradient(135deg,#ffd700,#f5a623);border:none;border-radius:20px;font-weight:bold;color:#000;cursor:pointer;font-size:0.85rem;">⚽ Lanzar</button>
+                        <button onclick="reiniciarPartida()" style="padding:8px 16px;background:#333;border:none;border-radius:20px;color:#fff;cursor:pointer;font-size:0.8rem;">🔄 Reiniciar</button>
+                        <button onclick="finalizarPartida()" style="padding:8px 16px;background:#333;border:none;border-radius:20px;color:#fff;cursor:pointer;font-size:0.8rem;">🏆 Finalizar</button>
                     </div>
                 </div>
                 
-                <!-- SELECTORES DE TAMAÑO Y MOVIMIENTO -->
-                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.05);">
-                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:rgba(255,23,68,0.08);padding:4px 10px;border-radius:8px;border:1px solid rgba(255,23,68,0.15);">
-                        <span style="font-size:0.6rem;color:#ff1744;font-weight:bold;">🔴 RON</span>
-                        <select id="tamano-porteria-rojo" onchange="actualizarTamanosPorterias()" style="padding:2px 6px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #ff1744;font-size:0.6rem;">
-                            <option value="muy-grande">MG</option>
-                            <option value="grande" selected>G</option>
-                            <option value="mediana">M</option>
-                            <option value="pequena">P</option>
-                            <option value="muy-pequena">MP</option>
-                        </select>
-                        <label style="font-size:0.55rem;color:#aaa;">
-                            <input type="checkbox" id="mover-porteria-rojo" onchange="actualizarMovimientoPorterias()" style="width:12px;height:12px;"> Mov
-                        </label>
-                        <input type="number" id="velocidad-porteria-rojo" min="0.1" max="5" step="0.1" value="1" style="width:35px;padding:1px 3px;border-radius:4px;background:#1a1a2e;color:#fff;border:1px solid #ff1744;text-align:center;font-size:0.6rem;" onchange="actualizarMovimientoPorterias()">
-                    </div>
-                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:rgba(41,121,255,0.08);padding:4px 10px;border-radius:8px;border:1px solid rgba(41,121,255,0.15);">
-                        <span style="font-size:0.6rem;color:#2979ff;font-weight:bold;">🔵 MES</span>
-                        <select id="tamano-porteria-azul" onchange="actualizarTamanosPorterias()" style="padding:2px 6px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #2979ff;font-size:0.6rem;">
-                            <option value="muy-grande">MG</option>
-                            <option value="grande" selected>G</option>
-                            <option value="mediana">M</option>
-                            <option value="pequena">P</option>
-                            <option value="muy-pequena">MP</option>
-                        </select>
-                        <label style="font-size:0.55rem;color:#aaa;">
-                            <input type="checkbox" id="mover-porteria-azul" onchange="actualizarMovimientoPorterias()" style="width:12px;height:12px;"> Mov
-                        </label>
-                        <input type="number" id="velocidad-porteria-azul" min="0.1" max="5" step="0.1" value="1" style="width:35px;padding:1px 3px;border-radius:4px;background:#1a1a2e;color:#fff;border:1px solid #2979ff;text-align:center;font-size:0.6rem;" onchange="actualizarMovimientoPorterias()">
-                    </div>
+                <!-- FILA 2: TAMAÑO Y MOVIMIENTO - RONALDO (visible) -->
+                <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:8px 14px;background:rgba(255,23,68,0.08);border-radius:10px;border:1px solid rgba(255,23,68,0.2);margin-bottom:6px;">
+                    <span style="font-size:0.85rem;color:#ff1744;font-weight:bold;min-width:75px;">🔴 RONALDO</span>
+                    
+                    <span style="font-size:0.7rem;color:#888;">Tamaño:</span>
+                    <select id="tamano-porteria-rojo" onchange="actualizarTamanosPorterias()" style="padding:5px 10px;border-radius:8px;background:#1a1a2e;color:#fff;border:1px solid #ff1744;font-size:0.8rem;min-width:110px;">
+                        <option value="muy-grande">Muy Grande</option>
+                        <option value="grande" selected>Grande</option>
+                        <option value="mediana">Mediana</option>
+                        <option value="pequena">Pequeña</option>
+                        <option value="muy-pequena">Muy Pequeña</option>
+                    </select>
+                    
+                    <span style="font-size:0.7rem;color:#888;">Movimiento:</span>
+                    <label style="font-size:0.8rem;color:#aaa;display:flex;align-items:center;gap:4px;">
+                        <input type="checkbox" id="mover-porteria-rojo" onchange="actualizarMovimientoPorterias()" style="width:18px;height:18px;"> Activar
+                    </label>
+                    
+                    <span style="font-size:0.7rem;color:#888;">Vel:</span>
+                    <input type="number" id="velocidad-porteria-rojo" min="0.1" max="5" step="0.1" value="1" style="width:55px;padding:4px 6px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #ff1744;text-align:center;font-size:0.8rem;" onchange="actualizarMovimientoPorterias()">
+                </div>
+
+                <!-- FILA 3: TAMAÑO Y MOVIMIENTO - MESSI (visible) -->
+                <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:8px 14px;background:rgba(41,121,255,0.08);border-radius:10px;border:1px solid rgba(41,121,255,0.2);">
+                    <span style="font-size:0.85rem;color:#2979ff;font-weight:bold;min-width:75px;">🔵 MESSI</span>
+                    
+                    <span style="font-size:0.7rem;color:#888;">Tamaño:</span>
+                    <select id="tamano-porteria-azul" onchange="actualizarTamanosPorterias()" style="padding:5px 10px;border-radius:8px;background:#1a1a2e;color:#fff;border:1px solid #2979ff;font-size:0.8rem;min-width:110px;">
+                        <option value="muy-grande">Muy Grande</option>
+                        <option value="grande" selected>Grande</option>
+                        <option value="mediana">Mediana</option>
+                        <option value="pequena">Pequeña</option>
+                        <option value="muy-pequena">Muy Pequeña</option>
+                    </select>
+                    
+                    <span style="font-size:0.7rem;color:#888;">Movimiento:</span>
+                    <label style="font-size:0.8rem;color:#aaa;display:flex;align-items:center;gap:4px;">
+                        <input type="checkbox" id="mover-porteria-azul" onchange="actualizarMovimientoPorterias()" style="width:18px;height:18px;"> Activar
+                    </label>
+                    
+                    <span style="font-size:0.7rem;color:#888;">Vel:</span>
+                    <input type="number" id="velocidad-porteria-azul" min="0.1" max="5" step="0.1" value="1" style="width:55px;padding:4px 6px;border-radius:6px;background:#1a1a2e;color:#fff;border:1px solid #2979ff;text-align:center;font-size:0.8rem;" onchange="actualizarMovimientoPorterias()">
                 </div>
                 
-                <div id="resultado-accion" style="margin-top:6px;padding:4px 8px;background:rgba(0,0,0,0.3);border-radius:8px;text-align:center;font-size:0.75rem;min-height:22px;color:#888;">
+                <div id="resultado-accion" style="margin-top:8px;padding:6px 12px;background:rgba(0,0,0,0.3);border-radius:8px;text-align:center;font-size:0.85rem;min-height:28px;color:#aaa;">
                     🎯 Esperando acción...
                 </div>
             </div>
