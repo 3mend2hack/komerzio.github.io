@@ -78,6 +78,7 @@
             'lento': 15,
             'gol': 50,
             'caos': 30,
+            'escudo': 25,
             'ayuda': 0
         };
 
@@ -109,7 +110,6 @@
         // ============================================================
         async function actualizarPuntosUsuario(nombre, nuevosPuntos) {
             try {
-                // Verificar si el usuario existe
                 const checkResponse = await fetch(
                     `${SUPABASE_URL}/rest/v1/jugadores?select=id&nombre=eq.${encodeURIComponent(nombre)}&channel=eq.${encodeURIComponent(channel)}&limit=1`,
                     {
@@ -122,7 +122,6 @@
                 const existing = await checkResponse.json();
 
                 if (existing.length > 0) {
-                    // Actualizar usuario existente
                     await fetch(
                         `${SUPABASE_URL}/rest/v1/jugadores?id=eq.${existing[0].id}`,
                         {
@@ -136,7 +135,6 @@
                         }
                     );
                 } else {
-                    // Crear nuevo usuario
                     await fetch(
                         `${SUPABASE_URL}/rest/v1/jugadores`,
                         {
@@ -190,29 +188,64 @@
         }
 
         // ============================================================
-        // FUNCIÓN PARA REGISTRAR PODER EN SUPABASE (tabla poderes)
+        // FUNCIÓN PARA ACTIVAR PODER EN LA TABLA 'poderes'
         // ============================================================
-        async function registrarPoder(tipo, usuario) {
+        async function activarPoderEnJuego(poderNombre, usuario) {
             try {
-                await fetch(
-                    `${SUPABASE_URL}/rest/v1/poderes`,
+                const response = await fetch(
+                    `${SUPABASE_URL}/rest/v1/poderes?select=id&nombre=eq.${encodeURIComponent(poderNombre)}&limit=1`,
                     {
-                        method: 'POST',
                         headers: {
                             'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            poder: tipo,
-                            usuario: usuario,
-                            channel: channel,
-                            timestamp: new Date().toISOString()
-                        })
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
                     }
                 );
+                const data = await response.json();
+
+                if (data.length > 0) {
+                    await fetch(
+                        `${SUPABASE_URL}/rest/v1/poderes?id=eq.${data[0].id}`,
+                        {
+                            method: 'PATCH',
+                            headers: {
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                activo: true,
+                                usuario: usuario,
+                                expira_en: new Date(Date.now() + 60000).toISOString(),
+                                timestamp: new Date().toISOString()
+                            })
+                        }
+                    );
+                } else {
+                    await fetch(
+                        `${SUPABASE_URL}/rest/v1/poderes`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                nombre: poderNombre,
+                                usuario: usuario,
+                                channel: channel,
+                                activo: true,
+                                expira_en: new Date(Date.now() + 60000).toISOString(),
+                                timestamp: new Date().toISOString()
+                            })
+                        }
+                    );
+                }
+                return true;
             } catch (error) {
-                console.error('Error al registrar poder:', error);
+                console.error('Error al activar poder:', error);
+                return false;
             }
         }
 
@@ -222,7 +255,6 @@
         async function activarPoder() {
             const contenido = document.getElementById('contenido');
 
-            // Validar que el poder existe
             if (!poder) {
                 contenido.innerHTML = `
                     <div class="icono">❌</div>
@@ -232,42 +264,36 @@
                 return;
             }
 
-            // Verificar si el poder tiene costo definido
             const costo = COSTOS[poder];
             if (costo === undefined) {
                 contenido.innerHTML = `
                     <div class="icono">❓</div>
                     <div class="mensaje error">Poder "${poder}" no válido.</div>
-                    <p class="puntos">Poderes disponibles: ronaldo, messi, lento, gol, caos, ayuda</p>
+                    <p class="puntos">Poderes disponibles: ronaldo, messi, lento, gol, caos, escudo, ayuda</p>
                 `;
                 return;
             }
 
-            // Si es !ayuda (gratis)
             if (poder === 'ayuda') {
                 contenido.innerHTML = `
                     <div class="icono">📖</div>
                     <div class="mensaje info">¡AYUDA ACTIVADA!</div>
                     <p><b>Comandos disponibles:</b><br>
-                    !ronaldo (20 pts) - ¡GOOOOL!<br>
-                    !messi (20 pts) - ¡GOOOOL!<br>
+                    !ronaldo (20 pts) - Poder Ronaldo<br>
+                    !messi (20 pts) - Poder Messi<br>
                     !lento (15 pts) - Ralentiza el juego<br>
                     !gol (50 pts) - ¡GOL SEGURO!<br>
                     !caos (30 pts) - Todo se mueve<br>
+                    !escudo (25 pts) - Reduce portería rival<br>
                     !puntos - Ver tus puntos</p>
                     <p class="puntos">Usuario: ${user}</p>
                 `;
                 return;
             }
 
-            // ============================================================
-            // PROCESAR PODER CON COSTO
-            // ============================================================
             try {
-                // 1. Obtener puntos actuales
                 const puntosActuales = await obtenerPuntosUsuario(user);
 
-                // 2. Verificar si tiene suficientes puntos
                 if (puntosActuales < costo) {
                     contenido.innerHTML = `
                         <div class="icono">🚫</div>
@@ -283,10 +309,7 @@
                     return;
                 }
 
-                // 3. Calcular nuevos puntos
                 const nuevosPuntos = puntosActuales - costo;
-
-                // 4. Actualizar puntos en Supabase
                 const actualizado = await actualizarPuntosUsuario(user, nuevosPuntos);
 
                 if (!actualizado) {
@@ -297,13 +320,9 @@
                     return;
                 }
 
-                // 5. Registrar evento
                 await registrarEvento('poder_activado', user, poder, costo);
+                await activarPoderEnJuego(poder, user);
 
-                // 6. Registrar poder en tabla poderes
-                await registrarPoder(poder, user);
-
-                // 7. Mostrar mensaje de éxito
                 let mensajePoder = '';
                 let emoji = '⚡';
                 switch(poder) {
@@ -312,6 +331,7 @@
                     case 'lento': mensajePoder = '🐢 ¡MODO LENTO! Todo se ralentiza'; emoji = '⏳'; break;
                     case 'gol': mensajePoder = '⚽ ¡GOL SEGURO! La bola va directo al arco'; emoji = '🎯'; break;
                     case 'caos': mensajePoder = '🌀 ¡CAOS! Todo se mueve sin control'; emoji = '💥'; break;
+                    case 'escudo': mensajePoder = '🛡️ ¡ESCUDO! Portería rival reducida'; emoji = '🛡️'; break;
                     default: mensajePoder = `¡${poder.toUpperCase()} ACTIVADO!`; break;
                 }
 
@@ -327,7 +347,6 @@
                 `;
 
             } catch (error) {
-                console.error('Error en activarPoder:', error);
                 contenido.innerHTML = `
                     <div class="icono">💥</div>
                     <div class="mensaje error">Error al procesar el poder. Intenta de nuevo.</div>
@@ -336,9 +355,6 @@
             }
         }
 
-        // ============================================================
-        // EJECUTAR AL CARGAR LA PÁGINA
-        // ============================================================
         window.onload = activarPoder;
     </script>
 </body>

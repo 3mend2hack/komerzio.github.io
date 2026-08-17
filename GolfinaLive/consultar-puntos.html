@@ -29,6 +29,20 @@
         .info { background: #3498db; color: #fff; }
         .error { background: #e74c3c; color: #fff; }
         .loading { font-size: 30px; }
+        .volver {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 20px;
+            background: #333;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: none;
+            cursor: pointer;
+        }
+        .volver:hover { background: #555; }
+        .footer { color: #666; font-size: 0.7rem; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -78,11 +92,14 @@
                     <div class="nombre">👤 ${user}</div>
                     <div class="puntos">${puntos}</div>
                     <div style="color: #aaa; font-size: 14px;">puntos</div>
-                    <div class="mensaje info">💡 Ganas 2 puntos por minuto viendo el directo</div>
+                    <div class="mensaje info">💡 Ganas 2 puntos por minuto en el directo</div>
+                    <button class="volver" onclick="window.close()">✖ Cerrar</button>
+                    <div class="footer">Usa !ayuda para ver todos los comandos</div>
                 `;
             } catch (error) {
                 contenido.innerHTML = `
                     <div class="mensaje error">❌ Error al consultar puntos</div>
+                    <button class="volver" onclick="window.close()">✖ Cerrar</button>
                 `;
             }
         }
