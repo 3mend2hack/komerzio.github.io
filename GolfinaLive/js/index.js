@@ -100,6 +100,9 @@ async function iniciarSesion() {
         
         agregarEventoUI('✅ Sesión iniciada como: ' + email);
         
+        // Iniciar mensajes automáticos
+        iniciarMensajesAutomaticos();
+        
     } catch (error) {
         DOM.mensajeLogin.textContent = '❌ Error: ' + error.message;
         DOM.mensajeLogin.style.color = '#ff1744';
@@ -121,6 +124,8 @@ function cerrarSesion() {
         clearInterval(intervaloCuentas);
         intervaloCuentas = null;
     }
+    detenerMensajesAutomaticos();
+    detenerAudioCache();
 }
 
 // ============================================
@@ -144,8 +149,6 @@ async function cargarJugadores() {
                 if (img) {
                     img.src = jugador.imagen_url;
                     img.style.display = 'block';
-                    const emoji = document.getElementById('emoji-rojo');
-                    if (emoji) emoji.style.display = 'none';
                 }
             }
         } else if (jugador.color === 'azul') {
@@ -155,8 +158,6 @@ async function cargarJugadores() {
                 if (img) {
                     img.src = jugador.imagen_url;
                     img.style.display = 'block';
-                    const emoji = document.getElementById('emoji-azul');
-                    if (emoji) emoji.style.display = 'none';
                 }
             }
         }
@@ -1111,6 +1112,9 @@ function animarCampo() {
                 ganadorGol = resultado.gol;
                 bola.activa = false;
                 bola.entradaGol = true;
+                
+                // 🎵 REPRODUCIR SONIDO DE GOL
+                reproducirSonido('gol');
             }
             bola.dibujar(ctx);
         }
@@ -1270,6 +1274,77 @@ async function lanzarBolas() {
 }
 
 // ============================================
+// APLICAR PODERES
+// ============================================
+function aplicarPoder(nombre) {
+    switch (nombre) {
+        case 'ronaldo':
+            velocidadPorteriaRojo += 1;
+            setTimeout(() => { velocidadPorteriaRojo -= 1; }, 60000);
+            mostrarResultado('⚡ ¡Poder Ronaldo activado!');
+            reproducirSonido('poder');
+            break;
+            
+        case 'messi':
+            velocidadPorteriaAzul += 1;
+            setTimeout(() => { velocidadPorteriaAzul -= 1; }, 60000);
+            mostrarResultado('⚡ ¡Poder Messi activado!');
+            reproducirSonido('poder');
+            break;
+            
+        case 'lento':
+            mostrarResultado('🐢 ¡Modo Lento activado!');
+            reproducirSonido('poder');
+            break;
+            
+        case 'gol':
+            mostrarResultado('🎯 ¡Gol Seguro activado!');
+            reproducirSonido('poder');
+            break;
+            
+        case 'caos':
+            mostrarResultado('🌀 ¡Caos Total activado!');
+            reproducirSonido('poder');
+            break;
+            
+        case 'escudo':
+            if (golesRojo > golesAzul) {
+                tamanoPorteriaAzul = 'muy-pequena';
+                actualizarTamanosPorterias();
+                mostrarResultado('🛡️ ¡Escudo activado! Portería de Messi reducida');
+                setTimeout(() => {
+                    tamanoPorteriaAzul = 'grande';
+                    actualizarTamanosPorterias();
+                    mostrarResultado('🛡️ Escudo desactivado - Portería de Messi restaurada');
+                }, 60000);
+            } else if (golesAzul > golesRojo) {
+                tamanoPorteriaRojo = 'muy-pequena';
+                actualizarTamanosPorterias();
+                mostrarResultado('🛡️ ¡Escudo activado! Portería de Ronaldo reducida');
+                setTimeout(() => {
+                    tamanoPorteriaRojo = 'grande';
+                    actualizarTamanosPorterias();
+                    mostrarResultado('🛡️ Escudo desactivado - Portería de Ronaldo restaurada');
+                }, 60000);
+            } else {
+                tamanoPorteriaAzul = 'muy-pequena';
+                actualizarTamanosPorterias();
+                mostrarResultado('🛡️ ¡Escudo activado! Portería de Messi reducida');
+                setTimeout(() => {
+                    tamanoPorteriaAzul = 'grande';
+                    actualizarTamanosPorterias();
+                    mostrarResultado('🛡️ Escudo desactivado - Portería de Messi restaurada');
+                }, 60000);
+            }
+            reproducirSonido('poder');
+            break;
+            
+        default:
+            console.log('⚠️ Poder desconocido:', nombre);
+    }
+}
+
+// ============================================
 // PANEL DE PODERES ACTIVOS
 // ============================================
 
@@ -1316,21 +1391,21 @@ function actualizarPanelPoderes() {
             if (contador) contador.textContent = `${data.length} activo${data.length > 1 ? 's' : ''}`;
             
             const nombresPoderes = {
-                'velocidad-rojo': '⚡ Velocidad + (Ronaldo)',
-                'velocidad-azul': '⚡ Velocidad + (Messi)',
-                'lento-rojo': '🐢 Lentitud (Ronaldo)',
-                'lento-azul': '🐢 Lentitud (Messi)',
+                'ronaldo': '⚡ Poder Ronaldo',
+                'messi': '⚡ Poder Messi',
+                'lento': '🐢 Modo Lento',
+                'gol': '🎯 Gol Seguro',
                 'caos': '🌀 Caos Total',
-                'doble-goles': '🔥 Doble Goles'
+                'escudo': '🛡️ Escudo'
             };
             
             const coloresPoderes = {
-                'velocidad-rojo': '#ff1744',
-                'velocidad-azul': '#2979ff',
-                'lento-rojo': '#ff1744',
-                'lento-azul': '#2979ff',
-                'caos': '#ffd700',
-                'doble-goles': '#ff6d00'
+                'ronaldo': '#ff1744',
+                'messi': '#2979ff',
+                'lento': '#ffd700',
+                'gol': '#4caf50',
+                'caos': '#ff6d00',
+                'escudo': '#00bcd4'
             };
             
             let html = '';
@@ -1340,14 +1415,9 @@ function actualizarPanelPoderes() {
                 const tiempoRestante = calcularTiempoRestante(poder.expira_en);
                 
                 let equipo = '⚪ Neutral';
-                let claseEquipo = 'neutral';
-                if (poder.nombre.includes('rojo')) {
-                    equipo = '🔴 Ronaldo';
-                    claseEquipo = 'rojo';
-                } else if (poder.nombre.includes('azul')) {
-                    equipo = '🔵 Messi';
-                    claseEquipo = 'azul';
-                }
+                if (poder.nombre === 'ronaldo') equipo = '🔴 Ronaldo';
+                else if (poder.nombre === 'messi') equipo = '🔵 Messi';
+                else if (poder.nombre === 'escudo') equipo = '🛡️ Defensivo';
                 
                 html += `
                     <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:8px;border-left:3px solid ${color};">
@@ -1401,6 +1471,169 @@ function escucharPoderesActivos() {
 }
 
 // ============================================
+// SISTEMA DE SONIDOS Y MENSAJES
+// ============================================
+
+// Ruta base de los audios
+const RUTAS_AUDIOS = {
+    gol: 'audios/gol.mp3',
+    bienvenida: 'audios/bienvenida.mp3',
+    suscribete: 'audios/suscribete.mp3',
+    elige: 'audios/elige-favorito.mp3',
+    ayuda: 'audios/ayuda-favorito.mp3',
+    mejor: 'audios/mejor-mundo.mp3',
+    poder: 'audios/poder-activado.mp3'
+};
+
+// Cache de audios
+const audioCache = {};
+
+function precargarAudios() {
+    Object.keys(RUTAS_AUDIOS).forEach(key => {
+        const audio = new Audio(RUTAS_AUDIOS[key]);
+        audio.preload = 'auto';
+        audioCache[key] = audio;
+    });
+}
+
+function detenerAudioCache() {
+    Object.keys(audioCache).forEach(key => {
+        audioCache[key].pause();
+        audioCache[key].currentTime = 0;
+    });
+}
+
+function reproducirAudio(tipo) {
+    if (audioCache[tipo]) {
+        audioCache[tipo].pause();
+        audioCache[tipo].currentTime = 0;
+        audioCache[tipo].play().catch(error => {
+            console.log('Error al reproducir audio:', error);
+        });
+    } else {
+        console.warn('Audio no encontrado:', tipo);
+    }
+}
+
+function mostrarMensajeVoz(mensaje, tipo) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.85);
+        color: #ffd700;
+        padding: 20px 40px;
+        border-radius: 15px;
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+        z-index: 1000;
+        border: 2px solid rgba(255,215,0,0.3);
+        max-width: 90%;
+        box-shadow: 0 0 50px rgba(255,215,0,0.1);
+        animation: aparecerMensaje 0.5s ease;
+        pointer-events: none;
+        text-shadow: 0 0 20px rgba(255,215,0,0.2);
+    `;
+    
+    const emojis = {
+        'gol': '⚽',
+        'bienvenida': '👋',
+        'suscribete': '🔔',
+        'elige': '🔥',
+        'ayuda': '💪',
+        'mejor': '🏆',
+        'poder': '⚡'
+    };
+    
+    overlay.innerHTML = `
+        <div style="font-size: 4rem;">${emojis[tipo] || '🎯'}</div>
+        <div>${mensaje}</div>
+        <div style="font-size: 0.8rem; color: #888; margin-top: 10px;">${tipo === 'gol' ? '⚡ ¡INCREÍBLE!' : '💡 ¡ÚNETE A LA ACCIÓN!'}</div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    setTimeout(() => {
+        overlay.style.animation = 'desaparecerMensaje 0.5s ease forwards';
+        setTimeout(() => {
+            overlay.remove();
+        }, 500);
+    }, 4000);
+}
+
+function reproducirSonido(tipo) {
+    const mensajes = {
+        'gol': '¡GOOOOOOL! ¡GOLAZO! ¡Increíble!',
+        'bienvenida': '¡Bienvenidos a Gol Fina Live! El partido más emocionante entre Ronaldo y Messi. ¡Elige a tu favorito y ayúdalo a ganar!',
+        'suscribete': '¡Suscríbete al canal y gana puntos extra para ayudar a tu jugador favorito! Cada suscriptor nuevo es un punto más para tu equipo.',
+        'elige': '¿Quién es el mejor del mundo? ¿Ronaldo o Messi? ¡Elige a tu favorito y demuéstralo en el chat!',
+        'ayuda': '¡Ayuda a tu favorito a ganar! Usa los comandos en el chat para activar poderes especiales. ¡Cada poder cuenta!',
+        'mejor': '¿Quién es el mejor del mundo? ¿Ronaldo o Messi? ¡El chat decide! ¡Escribe tu voto ahora!',
+        'poder': '¡Poder activado! El juego cambia. ¡Aprovecha la ventaja!'
+    };
+    
+    const mensaje = mensajes[tipo] || '¡Sonido activado!';
+    
+    // Reproducir audio MP3 si existe
+    if (audioCache[tipo]) {
+        reproducirAudio(tipo);
+    }
+    
+    // Mostrar mensaje en pantalla
+    mostrarMensajeVoz(mensaje, tipo);
+}
+
+// ============================================
+// MENSAJES AUTOMÁTICOS
+// ============================================
+let intervaloMensajes = null;
+let mensajesAutomaticos = [
+    { tipo: 'suscribete', intervalo: 120 },
+    { tipo: 'elige', intervalo: 180 },
+    { tipo: 'ayuda', intervalo: 240 },
+    { tipo: 'mejor', intervalo: 300 }
+];
+
+function iniciarMensajesAutomaticos() {
+    if (intervaloMensajes) {
+        clearInterval(intervaloMensajes);
+    }
+    
+    let contador = 0;
+    intervaloMensajes = setInterval(() => {
+        const mensaje = mensajesAutomaticos[contador % mensajesAutomaticos.length];
+        reproducirSonido(mensaje.tipo);
+        contador++;
+    }, 60000);
+}
+
+function detenerMensajesAutomaticos() {
+    if (intervaloMensajes) {
+        clearInterval(intervaloMensajes);
+        intervaloMensajes = null;
+    }
+}
+
+// ============================================
+// ESTILOS PARA ANIMACIONES
+// ============================================
+const estiloAnimaciones = document.createElement('style');
+estiloAnimaciones.textContent = `
+    @keyframes aparecerMensaje {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+    @keyframes desaparecerMensaje {
+        0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+    }
+`;
+document.head.appendChild(estiloAnimaciones);
+
+// ============================================
 // FUNCIONES PARA MANTENER COMPATIBILIDAD
 // ============================================
 function lanzarDados() {
@@ -1448,6 +1681,9 @@ supabaseClient.auth.getSession().then(({ data }) => {
         agregarEventoUI('✅ Sesión activa');
         dibujarCampo();
         
+        // Precargar audios
+        precargarAudios();
+        
         // Inicializar panel de poderes
         setTimeout(() => {
             actualizarPanelPoderes();
@@ -1472,3 +1708,4 @@ window.votar = votar;
 window.actualizarTamanosPorterias = actualizarTamanosPorterias;
 window.actualizarMovimientoPorterias = actualizarMovimientoPorterias;
 window.actualizarPanelPoderes = actualizarPanelPoderes;
+window.reproducirSonido = reproducirSonido;
