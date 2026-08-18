@@ -3,141 +3,1026 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚽ GolFinaLive - Admin</title>
-    <link rel="stylesheet" href="css/admin.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Librería para comprimir imágenes -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/browser-image-compression/2.0.2/browser-image-compression.min.js"></script>
+    <title>GolFinaLive - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ffd700, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 30px;
+            background: #00ff88;
+            color: #0a0a1a;
+            font-weight: bold;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge.live {
+            background: #ff4444;
+            color: white;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,215,0,0.3);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title .icon {
+            font-size: 1.5em;
+        }
+
+        .score-controls {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .score-group {
+            flex: 1;
+            min-width: 150px;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .score-group .team-name {
+            font-size: 0.9em;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .score-group .score-value {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .score-group .score-value.ronaldo {
+            color: #ff4444;
+        }
+
+        .score-group .score-value.messi {
+            color: #4444ff;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ffd700, #ff6b35);
+            color: #0a0a1a;
+        }
+
+        .btn-danger {
+            background: #ff4444;
+            color: white;
+        }
+
+        .btn-success {
+            background: #00ff88;
+            color: #0a0a1a;
+        }
+
+        .btn-blue {
+            background: #4444ff;
+            color: white;
+        }
+
+        .btn-purple {
+            background: #9b59b6;
+            color: white;
+        }
+
+        .btn-orange {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-red {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-small {
+            padding: 6px 15px;
+            font-size: 0.8em;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .power-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .power-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .power-card:hover {
+            border-color: rgba(255,215,0,0.3);
+            transform: translateY(-3px);
+        }
+
+        .power-card .power-icon {
+            font-size: 1.5em;
+            margin-bottom: 3px;
+        }
+
+        .power-card .power-name {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .power-card .power-cost {
+            font-size: 0.7em;
+            opacity: 0.7;
+        }
+
+        .power-card.active {
+            border-color: #ffd700;
+            background: rgba(255,215,0,0.1);
+            box-shadow: 0 0 30px rgba(255,215,0,0.1);
+        }
+
+        .power-card .power-toggle {
+            margin-top: 8px;
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .power-card .power-toggle .btn {
+            padding: 4px 10px;
+            font-size: 0.7em;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .status-message.success {
+            display: block;
+            background: rgba(0,255,136,0.1);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .status-message.error {
+            display: block;
+            background: rgba(255,68,68,0.1);
+            border: 1px solid #ff4444;
+            color: #ff4444;
+        }
+
+        .status-message.info {
+            display: block;
+            background: rgba(68,68,255,0.1);
+            border: 1px solid #4444ff;
+            color: #4444ff;
+        }
+
+        .match-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .match-controls .btn {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .settings-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .settings-group label {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .settings-group input,
+        .settings-group select {
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 1em;
+        }
+
+        .settings-group input:focus,
+        .settings-group select:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        #event-log {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.85em;
+        }
+
+        #event-log .event-item {
+            padding: 6px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #event-log .event-item .time {
+            opacity: 0.5;
+            font-size: 0.8em;
+        }
+
+        #event-log .event-item .power-used {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .config-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .player-image-upload {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .player-image-upload .image-group {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .player-image-upload .image-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 10px auto;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .player-image-upload input[type="file"] {
+            display: none;
+        }
+
+        .player-image-upload .upload-btn {
+            padding: 6px 15px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+        }
+
+        .player-image-upload .upload-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Sección de poderes por jugador */
+        .power-section {
+            margin-bottom: 15px;
+        }
+
+        .power-section h4 {
+            font-size: 0.9em;
+            opacity: 0.7;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .power-section.ronaldo h4 {
+            color: #ff4444;
+        }
+
+        .power-section.messi h4 {
+            color: #4444ff;
+        }
+
+        .power-section.neutral h4 {
+            color: #ffd700;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .power-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .settings-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div id="app-admin">
+    <div class="container">
         <header>
-            <h1>🎮 Panel de Administración</h1>
-            <div>
-                <span id="estado-bd" style="font-size:0.8rem;padding:5px 12px;border-radius:20px;background:#333;margin-right:10px;">⏳ Conectando...</span>
-                <button id="btn-inicializar" onclick="inicializarBaseDatos()" style="padding:8px 20px;background:#ffd700;border:none;border-radius:25px;font-weight:bold;color:#000;cursor:pointer;">
-                    🚀 Inicializar BD
-                </button>
-                <button id="btn-crear-partida" onclick="crearPartida()" style="padding:8px 20px;background:linear-gradient(135deg,#ff1744,#d50000);border:none;border-radius:25px;font-weight:bold;color:#fff;cursor:pointer;margin-left:10px;">
-                    ➕ Nueva Partida
-                </button>
+            <h1>⚽ GolFinaLive - Admin</h1>
+            <div class="status-badge" id="status-badge">
+                🟢 En Vivo
             </div>
         </header>
 
-        <div id="contenido-admin">
-            <!-- Mensaje de bienvenida -->
-            <div id="mensaje-inicial" style="background:rgba(255,215,0,0.1);border:1px solid #ffd700;border-radius:15px;padding:20px;margin-bottom:20px;text-align:center;">
-                <p style="font-size:1.1rem;">⚠️ <strong>Primera vez?</strong> Toca "Inicializar BD" para crear las tablas necesarias en Supabase.</p>
-                <p style="font-size:0.9rem;color:#aaa;">Solo necesitas hacerlo una vez. Después los datos se guardarán automáticamente.</p>
+        <div id="status-message" class="status-message"></div>
+
+        <div class="grid">
+            <!-- Marcador -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">🏆</span> Marcador
+                </div>
+                <div class="score-controls">
+                    <div class="score-group">
+                        <div class="team-name">🇵🇹 Ronaldo</div>
+                        <div class="score-value ronaldo" id="score-ronaldo">0</div>
+                        <div class="btn-group">
+                            <button class="btn btn-danger btn-small" onclick="adjustScore('ronaldo', -1)">-</button>
+                            <button class="btn btn-success btn-small" onclick="adjustScore('ronaldo', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="score-group" style="display: flex; align-items: center; justify-content: center; font-size: 2em; opacity: 0.3;">
+                        VS
+                    </div>
+                    <div class="score-group">
+                        <div class="team-name">🇦🇷 Messi</div>
+                        <div class="score-value messi" id="score-messi">0</div>
+                        <div class="btn-group">
+                            <button class="btn btn-danger btn-small" onclick="adjustScore('messi', -1)">-</button>
+                            <button class="btn btn-success btn-small" onclick="adjustScore('messi', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- PANEL DE LOGS (NUEVO) -->
-            <!-- ========================================== -->
-            <section id="seccion-logs" style="background:rgba(0,0,0,0.6);border:1px solid #ff6d00;">
-                <h2 style="color:#ff6d00;">📋 CONSOLA DE LOGS EN TIEMPO REAL</h2>
-                <div id="panel-logs" style="background:#0a0a0a;border-radius:10px;padding:12px;max-height:200px;overflow-y:auto;font-family:'Courier New',monospace;font-size:0.8rem;color:#0f0;border:1px solid #333;">
-                    <div id="log-contenedor">
-                        <div class="log-entry log-info">🟢 Sistema iniciado. Esperando acciones...</div>
-                    </div>
+            <!-- Control del partido -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">🎮</span> Control del Partido
                 </div>
-                <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
-                    <button onclick="limpiarLogs()" style="padding:6px 16px;background:#333;border:none;border-radius:15px;color:#fff;cursor:pointer;">🗑️ Limpiar</button>
-                    <button onclick="exportarLogs()" style="padding:6px 16px;background:#ffd700;border:none;border-radius:15px;color:#000;cursor:pointer;font-weight:bold;">📥 Exportar Logs</button>
-                    <span id="log-contador" style="color:#666;font-size:0.8rem;display:flex;align-items:center;">Registros: 1</span>
+                <div class="match-controls">
+                    <button class="btn btn-success btn-block" onclick="startMatch()">▶️ Iniciar</button>
+                    <button class="btn btn-danger btn-block" onclick="endMatch()">⏹️ Finalizar</button>
+                    <button class="btn btn-primary btn-block" onclick="resetMatch()">🔄 Reiniciar</button>
                 </div>
-            </section>
-
-            <!-- Sección: Configurar jugadores -->
-            <section id="seccion-jugadores">
-                <h2>⚽ Configurar Jugadores</h2>
-                <div class="jugador-config">
-                    <div class="config-rojo">
-                        <h3>🔴 Ronaldo</h3>
-                        <input type="text" id="nombre-rojo-input" value="RONALDO" placeholder="Nombre">
-                        <input type="file" id="imagen-rojo-input" accept="image/*">
-                        <div style="display:flex;gap:10px;align-items:center;margin:8px 0;flex-wrap:wrap;">
-                            <label style="font-size:0.8rem;color:#aaa;">Calidad:</label>
-                            <select id="calidad-rojo" style="padding:4px 10px;border-radius:8px;background:#1a1a2e;color:#fff;border:1px solid #333;">
-                                <option value="0.9">Alta (90%)</option>
-                                <option value="0.7" selected>Media (70%)</option>
-                                <option value="0.5">Baja (50%)</option>
-                            </select>
-                            <span id="tamano-rojo" style="font-size:0.7rem;color:#666;">Sin imagen</span>
-                        </div>
-                        <img id="preview-rojo" src="" alt="Vista previa" style="max-width:100px;max-height:100px;border-radius:50%;margin:10px auto;display:block;border:3px solid #ffd700;">
-                        <button onclick="guardarJugador('rojo')">💾 Guardar</button>
-                    </div>
-                    <div class="config-azul">
-                        <h3>🔵 Messi</h3>
-                        <input type="text" id="nombre-azul-input" value="MESSI" placeholder="Nombre">
-                        <input type="file" id="imagen-azul-input" accept="image/*">
-                        <div style="display:flex;gap:10px;align-items:center;margin:8px 0;flex-wrap:wrap;">
-                            <label style="font-size:0.8rem;color:#aaa;">Calidad:</label>
-                            <select id="calidad-azul" style="padding:4px 10px;border-radius:8px;background:#1a1a2e;color:#fff;border:1px solid #333;">
-                                <option value="0.9">Alta (90%)</option>
-                                <option value="0.7" selected>Media (70%)</option>
-                                <option value="0.5">Baja (50%)</option>
-                            </select>
-                            <span id="tamano-azul" style="font-size:0.7rem;color:#666;">Sin imagen</span>
-                        </div>
-                        <img id="preview-azul" src="" alt="Vista previa" style="max-width:100px;max-height:100px;border-radius:50%;margin:10px auto;display:block;border:3px solid #ffd700;">
-                        <button onclick="guardarJugador('azul')">💾 Guardar</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Sección: Control de partida -->
-            <section id="seccion-partida">
-                <h2>🎯 Control de Partida</h2>
-                <div id="info-partida">
-                    <p><strong>Partida:</strong> <span id="partida-id">-</span></p>
-                    <p><strong>Modo:</strong> 
-                        <select id="select-modo" onchange="cambiarModo()">
-                            <option value="bolas">🎱 Bolas (primera en caer)</option>
-                            <option value="dados">🎲 Dados (suma de valores)</option>
-                            <option value="ruleta">🎡 Ruleta (giro aleatorio)</option>
+                <div class="settings-group">
+                    <label>
+                        Goles para ganar
+                        <input type="number" id="goals-to-win" value="5" min="1" max="10">
+                    </label>
+                    <label>
+                        Tamaño portería
+                        <select id="goal-size">
+                            <option value="large">Grande</option>
+                            <option value="medium" selected>Mediana</option>
+                            <option value="small">Pequeña</option>
+                            <option value="very-small">Muy Pequeña</option>
                         </select>
-                    </p>
-                    <p><strong>Estado:</strong> <span id="estado-partida-admin">-</span></p>
-                    <p><strong>Puntaje:</strong> 🔴 <span id="puntos-rojo-admin">0</span> | 🔵 <span id="puntos-azul-admin">0</span></p>
+                    </label>
                 </div>
+            </div>
+        </div>
 
-                <div id="controles-partida">
-                    <div class="control-grupo">
-                        <h4>➕ Añadir punto</h4>
-                        <button onclick="añadirPunto('rojo', 1)">Rojo +1</button>
-                        <button onclick="añadirPunto('rojo', 5)">Rojo +5</button>
-                        <button onclick="añadirPunto('azul', 1)">Azul +1</button>
-                        <button onclick="añadirPunto('azul', 5)">Azul +5</button>
-                    </div>
-                    <div class="control-grupo">
-                        <h4>🎲 Modos de azar</h4>
-                        <button onclick="lanzarBola()" class="btn-especial">🎱 Lanzar Bola</button>
-                        <button onclick="lanzarDados()" class="btn-especial">🎲 Lanzar Dados</button>
-                        <button onclick="lanzarRuleta()" class="btn-especial">🎡 Girar Ruleta</button>
-                    </div>
-                    <div class="control-grupo">
-                        <h4>⚙️ Acciones</h4>
-                        <button onclick="reiniciarPartida()">🔄 Reiniciar</button>
-                        <button onclick="finalizarPartida()">🏆 Finalizar</button>
+        <div class="grid">
+            <!-- Poderes RONALDO -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">🐐</span> Poderes RONALDO
+                </div>
+                <div class="power-section ronaldo">
+                    <div class="power-grid" id="poderes-ronaldo">
+                        <!-- Se llena con JavaScript -->
                     </div>
                 </div>
+            </div>
 
-                <div id="resultado-accion" style="margin-top:15px;padding:15px;background:rgba(255,255,255,0.05);border-radius:10px;min-height:40px;font-size:1.2rem;text-align:center;">
-                    🎯 Esperando acción...
+            <!-- Poderes MESSI -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">🐐</span> Poderes MESSI
                 </div>
-            </section>
+                <div class="power-section messi">
+                    <div class="power-grid" id="poderes-messi">
+                        <!-- Se llena con JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <!-- Sección: Historial de eventos -->
-            <section id="seccion-eventos">
-                <h2>📜 Historial de puntos</h2>
-                <ul id="lista-eventos"></ul>
-            </section>
+        <div class="grid">
+            <!-- Poderes NEUTRALES -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">⚡</span> Poderes Neutrales
+                </div>
+                <div class="power-section neutral">
+                    <div class="power-grid" id="poderes-neutrales">
+                        <!-- Se llena con JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuración de jugadores -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">🖼️</span> Imágenes de Jugadores
+                </div>
+                <div class="player-image-upload">
+                    <div class="image-group">
+                        <h4 style="color: #ff4444;">🇵🇹 Ronaldo</h4>
+                        <div class="image-preview" id="ronaldo-preview" style="background: linear-gradient(135deg, #ff4444, #cc0000);"></div>
+                        <button class="upload-btn" onclick="document.getElementById('ronaldo-upload').click()">📤 Subir imagen</button>
+                        <input type="file" id="ronaldo-upload" accept="image/*" onchange="uploadImage('ronaldo', this)">
+                    </div>
+                    <div class="image-group">
+                        <h4 style="color: #4444ff;">🇦🇷 Messi</h4>
+                        <div class="image-preview" id="messi-preview" style="background: linear-gradient(135deg, #4444ff, #0000cc);"></div>
+                        <button class="upload-btn" onclick="document.getElementById('messi-upload').click()">📤 Subir imagen</button>
+                        <input type="file" id="messi-upload" accept="image/*" onchange="uploadImage('messi', this)">
+                    </div>
+                </div>
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-primary btn-small" onclick="updatePlayerImages()">✅ Aplicar imágenes</button>
+                    <button class="btn btn-danger btn-small" onclick="resetPlayerImages()">🔄 Restaurar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Eventos -->
+        <div class="card" style="margin-top: 20px;">
+            <div class="card-title">
+                <span class="icon">📋</span> Eventos en Tiempo Real
+            </div>
+            <div id="event-log">
+                <div class="event-item" style="opacity: 0.5; text-align: center; justify-content: center;">
+                    Esperando eventos...
+                </div>
+            </div>
         </div>
     </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://qddfdisbnwnnlvkrnckd.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZGZkaXNibndubmx2a3JuY2tkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDQwMzcsImV4cCI6MjEwMjQyMDAzN30.9Jsgl0qepqjJ8oiiewyPZK3vOsqm49EnLCEtOar5MiQ';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentMatchId = null;
+        let playerImages = { ronaldo: null, messi: null };
+        let poderesData = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupRealtime();
+            getActiveMatch();
+            loadPoderes();
+            updateStatusBadge();
+        });
+
+        async function loadPoderes() {
+            const { data, error } = await supabase
+                .from('poderes_personalizados')
+                .select('*')
+                .eq('activo', true)
+                .order('nombre');
+
+            if (error) {
+                console.error('Error cargando poderes:', error);
+                return;
+            }
+
+            poderesData = data;
+            renderPoderes(data);
+        }
+
+        function renderPoderes(poderes) {
+            const ronaldoPoderes = poderes.filter(p => p.comando.includes('ronaldo'));
+            const messiPoderes = poderes.filter(p => p.comando.includes('messi'));
+            const neutrales = poderes.filter(p => !p.comando.includes('ronaldo') && !p.comando.includes('messi'));
+
+            renderPowerGrid('poderes-ronaldo', ronaldoPoderes, 'rojo');
+            renderPowerGrid('poderes-messi', messiPoderes, 'azul');
+            renderPowerGrid('poderes-neutrales', neutrales, 'neutral');
+        }
+
+        function renderPowerGrid(elementId, poderes, tipo) {
+            const container = document.getElementById(elementId);
+            if (!container) return;
+
+            if (poderes.length === 0) {
+                container.innerHTML = '<div style="opacity:0.5;font-size:0.8em;text-align:center;padding:10px;">Sin poderes</div>';
+                return;
+            }
+
+            container.innerHTML = poderes.map(p => `
+                <div class="power-card" data-power="${p.comando}">
+                    <div class="power-icon">${getPowerIcon(p.comando)}</div>
+                    <div class="power-name">${p.nombre}</div>
+                    <div class="power-cost">🎯 ${p.costo} pts · ${p.duracion}s</div>
+                    <div class="power-toggle">
+                        <button class="btn btn-primary btn-small" onclick="activatePower('${p.comando}')">Activar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getPowerIcon(comando) {
+            const icons = {
+                'velocidadronaldo': '🏃',
+                'velocidadmessi': '🏃',
+                'lentoronaldo': '🐢',
+                'lentomessi': '🐢',
+                'golronaldo': '⚽',
+                'golmessi': '⚽',
+                'caosronaldo': '🌀',
+                'caosmessi': '🌀',
+                'escudoronaldo': '🛡️',
+                'escudomessi': '🛡️',
+                'lluviaronaldo': '🌧️',
+                'lluviamessi': '🌧️',
+                'congelarronaldo': '❄️',
+                'congelarmessi': '❄️',
+                'doblepuntosronaldo': '💎',
+                'doblepuntosmessi': '💎',
+                'super': '⚡',
+                'campopequeno': '📐',
+                'invertir': '🔄'
+            };
+            return icons[comando] || '⭐';
+        }
+
+        function setupRealtime() {
+            supabase
+                .channel('partidas-admin-changes')
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'partidas' }, (payload) => {
+                    const p = payload.new;
+                    if (p.puntaje_rojo !== undefined && p.puntaje_azul !== undefined) {
+                        updateScoreUI(p.puntaje_rojo, p.puntaje_azul);
+                    }
+                })
+                .subscribe();
+
+            supabase
+                .channel('eventos-admin-changes')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'eventos' }, (payload) => {
+                    addEventToLog(payload.new);
+                })
+                .subscribe();
+
+            supabase
+                .channel('poderes-cambios')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'poderes' }, () => {
+                    // Actualizar estado visual de poderes activos
+                })
+                .subscribe();
+        }
+
+        async function getActiveMatch() {
+            const { data, error } = await supabase
+                .from('partidas')
+                .select('*')
+                .eq('estado', 'activa')
+                .order('creada_en', { ascending: false })
+                .limit(1);
+
+            if (error) {
+                console.error('Error obteniendo partida:', error);
+                return;
+            }
+
+            if (data && data.length > 0) {
+                currentMatchId = data[0].id;
+                updateScoreUI(data[0].puntaje_rojo || 0, data[0].puntaje_azul || 0);
+                showStatus('Partida activa encontrada', 'success');
+            } else {
+                showStatus('No hay partida activa. Inicia una nueva.', 'info');
+            }
+        }
+
+        function updateScoreUI(ronaldo, messi) {
+            document.getElementById('score-ronaldo').textContent = ronaldo;
+            document.getElementById('score-messi').textContent = messi;
+        }
+
+        function adjustScore(team, amount) {
+            if (!currentMatchId) {
+                showStatus('No hay partida activa', 'error');
+                return;
+            }
+
+            const field = team === 'ronaldo' ? 'puntaje_rojo' : 'puntaje_azul';
+            const currentScore = parseInt(document.getElementById(`score-${team}`).textContent);
+            const newScore = Math.max(0, currentScore + amount);
+
+            supabase
+                .from('partidas')
+                .update({ [field]: newScore })
+                .eq('id', currentMatchId)
+                .then(({ error }) => {
+                    if (error) {
+                        showStatus('Error actualizando marcador', 'error');
+                        console.error(error);
+                    } else {
+                        updateScoreUI(
+                            team === 'ronaldo' ? newScore : parseInt(document.getElementById('score-ronaldo').textContent),
+                            team === 'messi' ? newScore : parseInt(document.getElementById('score-messi').textContent)
+                        );
+                        showStatus(`Marcador actualizado: ${team} = ${newScore}`, 'success');
+                    }
+                });
+        }
+
+        async function startMatch() {
+            const goalsToWin = parseInt(document.getElementById('goals-to-win').value) || 5;
+            
+            const { data, error } = await supabase
+                .from('partidas')
+                .insert({
+                    estado: 'activa',
+                    puntaje_rojo: 0,
+                    puntaje_azul: 0,
+                    goles_para_ganar: goalsToWin,
+                    creada_en: new Date().toISOString()
+                })
+                .select()
+                .single();
+
+            if (error) {
+                showStatus('Error iniciando partida', 'error');
+                console.error(error);
+                return;
+            }
+
+            currentMatchId = data.id;
+            updateScoreUI(0, 0);
+            showStatus('Partida iniciada correctamente', 'success');
+            updateStatusBadge();
+            await logEvent('Partida iniciada', 'info');
+        }
+
+        async function endMatch() {
+            if (!currentMatchId) {
+                showStatus('No hay partida activa', 'error');
+                return;
+            }
+
+            const { error } = await supabase
+                .from('partidas')
+                .update({
+                    estado: 'finalizada',
+                    finalizada_en: new Date().toISOString()
+                })
+                .eq('id', currentMatchId);
+
+            if (error) {
+                showStatus('Error finalizando partida', 'error');
+                console.error(error);
+                return;
+            }
+
+            showStatus('Partida finalizada', 'success');
+            currentMatchId = null;
+            updateStatusBadge();
+            await logEvent('Partida finalizada', 'info');
+        }
+
+        async function resetMatch() {
+            if (!currentMatchId) {
+                showStatus('No hay partida activa', 'error');
+                return;
+            }
+
+            const { error } = await supabase
+                .from('partidas')
+                .update({ puntaje_rojo: 0, puntaje_azul: 0 })
+                .eq('id', currentMatchId);
+
+            if (error) {
+                showStatus('Error reiniciando partida', 'error');
+                console.error(error);
+                return;
+            }
+
+            updateScoreUI(0, 0);
+            showStatus('Partida reiniciada', 'success');
+            await logEvent('Partida reiniciada', 'info');
+        }
+
+        async function activatePower(comando) {
+            const power = poderesData.find(p => p.comando === comando);
+            if (!power) {
+                showStatus(`Poder ${comando} no encontrado`, 'error');
+                return;
+            }
+
+            // Verificar si ya está activo
+            const { data: existing } = await supabase
+                .from('poderes')
+                .select('*')
+                .eq('nombre', power.nombre)
+                .eq('activo', true)
+                .single();
+
+            if (existing) {
+                showStatus(`El poder ${power.nombre} ya está activo`, 'error');
+                return;
+            }
+
+            const expireTime = new Date();
+            expireTime.setSeconds(expireTime.getSeconds() + power.duracion);
+
+            const { data, error } = await supabase
+                .from('poderes')
+                .insert({
+                    nombre: power.nombre,
+                    usuario: 'Admin',
+                    channel: 'GolFinaLive',
+                    activo: true,
+                    expira_en: expireTime.toISOString(),
+                    creado_en: new Date().toISOString()
+                })
+                .select()
+                .single();
+
+            if (error) {
+                showStatus(`Error activando ${power.nombre}`, 'error');
+                console.error(error);
+                return;
+            }
+
+            showStatus(`✅ Poder ${power.nombre} activado (${power.duracion}s)`, 'success');
+            await logEvent(`Poder ${power.nombre} activado por Admin`, 'power');
+
+            // Desactivar automáticamente
+            setTimeout(async () => {
+                await supabase
+                    .from('poderes')
+                    .update({ activo: false })
+                    .eq('id', data.id);
+            }, power.duracion * 1000);
+        }
+
+        async function logEvent(detalle, tipo) {
+            if (!currentMatchId) return;
+
+            const { error } = await supabase
+                .from('eventos')
+                .insert({
+                    partida_id: currentMatchId,
+                    usuario: 'Admin',
+                    detalle: detalle,
+                    tipo: tipo,
+                    creado_en: new Date().toISOString()
+                });
+
+            if (error) console.error('Error registrando evento:', error);
+        }
+
+        function addEventToLog(event) {
+            const log = document.getElementById('event-log');
+            const item = document.createElement('div');
+            item.className = 'event-item';
+            
+            const time = new Date(event.creado_en);
+            const timeStr = time.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            let icon = '📝';
+            if (event.tipo === 'power') icon = '⚡';
+            else if (event.tipo === 'gol') icon = '⚽';
+            else if (event.tipo === 'info') icon = 'ℹ️';
+            
+            item.innerHTML = `
+                <span>${icon} ${event.detalle}</span>
+                <span class="time">${timeStr}</span>
+            `;
+            
+            const placeholder = log.querySelector('.event-item[style*="text-align: center"]');
+            if (placeholder) placeholder.remove();
+            
+            log.insertBefore(item, log.firstChild);
+            while (log.children.length > 50) log.removeChild(log.lastChild);
+        }
+
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status-message');
+            status.className = `status-message ${type}`;
+            status.textContent = message;
+            
+            clearTimeout(status._timeout);
+            status._timeout = setTimeout(() => {
+                status.className = 'status-message';
+            }, 5000);
+        }
+
+        function updateStatusBadge() {
+            const badge = document.getElementById('status-badge');
+            if (currentMatchId) {
+                badge.className = 'status-badge live';
+                badge.textContent = '🔴 En Vivo';
+            } else {
+                badge.className = 'status-badge';
+                badge.textContent = '⏹️ Offline';
+            }
+        }
+
+        function uploadImage(player, input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById(`${player}-preview`);
+                preview.style.backgroundImage = `url(${e.target.result})`;
+                preview.style.backgroundSize = 'cover';
+                playerImages[player] = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updatePlayerImages() {
+            const iframe = document.querySelector('iframe');
+            if (iframe && iframe.contentWindow) {
+                if (playerImages.ronaldo) {
+                    iframe.contentWindow.postMessage({
+                        type: 'updatePlayerImage',
+                        player: 'ronaldo',
+                        image: playerImages.ronaldo
+                    }, '*');
+                }
+                if (playerImages.messi) {
+                    iframe.contentWindow.postMessage({
+                        type: 'updatePlayerImage',
+                        player: 'messi',
+                        image: playerImages.messi
+                    }, '*');
+                }
+                showStatus('Imágenes aplicadas al stream', 'success');
+            } else {
+                showStatus('No se encontró el stream. Abre index.html', 'error');
+            }
+        }
+
+        function resetPlayerImages() {
+            document.getElementById('ronaldo-preview').style.background = 'linear-gradient(135deg, #ff4444, #cc0000)';
+            document.getElementById('messi-preview').style.background = 'linear-gradient(135deg, #4444ff, #0000cc)';
+            document.getElementById('ronaldo-preview').style.backgroundSize = 'auto';
+            document.getElementById('messi-preview').style.backgroundSize = 'auto';
+            playerImages.ronaldo = null;
+            playerImages.messi = null;
+            showStatus('Imágenes restauradas', 'info');
+        }
+
+        // Exponer funciones globales
+        window.adjustScore = adjustScore;
+        window.startMatch = startMatch;
+        window.endMatch = endMatch;
+        window.resetMatch = resetMatch;
+        window.activatePower = activatePower;
+        window.uploadImage = uploadImage;
+        window.updatePlayerImages = updatePlayerImages;
+        window.resetPlayerImages = resetPlayerImages;
+
+        setInterval(() => getActiveMatch(), 30000);
+    </script>
 </body>
 </html>

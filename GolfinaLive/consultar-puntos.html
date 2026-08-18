@@ -3,108 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consultar puntos</title>
+    <title>Consultar Puntos</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-            background: #1a1a2e;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #0a0a1a;
             color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .container {
-            text-align: center;
-            padding: 30px;
-            background: #16213e;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             max-width: 400px;
+            width: 100%;
         }
-        .puntos { font-size: 60px; color: #f5c842; margin: 10px 0; }
-        .nombre { font-size: 20px; }
-        .mensaje { margin-top: 15px; padding: 10px; border-radius: 10px; }
-        .info { background: #3498db; color: #fff; }
-        .error { background: #e74c3c; color: #fff; }
-        .loading { font-size: 30px; }
-        .volver {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 8px 20px;
-            background: #333;
-            color: #fff;
-            text-decoration: none;
+        .card {
+            background: rgba(255,255,255,0.05);
             border-radius: 20px;
-            font-size: 0.8rem;
-            border: none;
-            cursor: pointer;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid #ffd700;
+            box-shadow: 0 20px 60px rgba(255,215,0,0.1);
         }
-        .volver:hover { background: #555; }
-        .footer { color: #666; font-size: 0.7rem; margin-top: 10px; }
+        .icon {
+            font-size: 4em;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+        .points-value {
+            font-size: 4em;
+            font-weight: bold;
+            color: #ffd700;
+            margin: 20px 0;
+            text-shadow: 0 0 40px rgba(255,215,0,0.3);
+        }
+        .user-name {
+            font-size: 1.2em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        .detail {
+            font-size: 0.8em;
+            opacity: 0.5;
+            margin-top: 20px;
+        }
+        .team-badge {
+            display: inline-block;
+            padding: 4px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .team-badge.rojo {
+            background: rgba(255,68,68,0.3);
+            color: #ff4444;
+            border: 1px solid #ff4444;
+        }
+        .team-badge.azul {
+            background: rgba(68,68,255,0.3);
+            color: #4444ff;
+            border: 1px solid #4444ff;
+        }
+        .team-badge.neutral {
+            background: rgba(255,215,0,0.3);
+            color: #ffd700;
+            border: 1px solid #ffd700;
+        }
+        .error-card {
+            border-color: #ff4444;
+            box-shadow: 0 20px 60px rgba(255,68,68,0.1);
+        }
+        .error-card .title {
+            color: #ff4444;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .stat-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .stat-item .label {
+            font-size: 0.7em;
+            opacity: 0.5;
+            text-transform: uppercase;
+        }
+        .stat-item .value {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 3px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>🏦 Tus Puntos</h2>
-        <div id="contenido">
-            <div class="loading">⏳</div>
+    <div class="container" id="app">
+        <div class="card" id="resultCard">
+            <div class="icon">⏳</div>
+            <div class="title">Consultando...</div>
+            <div style="opacity:0.6;">Verificando tus puntos</div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // ============================================================
-        // CONFIGURACIÓN DE SUPABASE
-        // ============================================================
         const SUPABASE_URL = 'https://qddfdisbnwnnlvkrnckd.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZGZkaXNibndubmx2a3JuY2tkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDQwMzcsImV4cCI6MjEwMjQyMDAzN30.9Jsgl0qepqjJ8oiiewyPZK3vOsqm49EnLCEtOar5MiQ';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZGZkaXNibndubmx2a3JuY2tkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDQwMzcsImV4cCI6MjEwMjQyMDAzN30.9Jsgl0qepqjJ8oiiewyPZK3vOsqm49EnLCEtOar5MiQ';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // ============================================================
-        // OBTENER PARÁMETROS DE LA URL
-        // ============================================================
         const urlParams = new URLSearchParams(window.location.search);
-        const user = urlParams.get('user') || 'Anonimo';
-        const channel = urlParams.get('channel') || 'golfinalive';
+        const userName = urlParams.get('user') || 'Anónimo';
+        const resultCard = document.getElementById('resultCard');
 
-        // ============================================================
-        // CONSULTAR PUNTOS
-        // ============================================================
-        async function consultarPuntos() {
-            const contenido = document.getElementById('contenido');
-
+        async function getPoints() {
             try {
-                const response = await fetch(
-                    `${SUPABASE_URL}/rest/v1/jugadores?select=puntos&nombre=eq.${encodeURIComponent(user)}&channel=eq.${encodeURIComponent(channel)}&limit=1`,
-                    {
-                        headers: {
-                            'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                        }
-                    }
-                );
-                if (!response.ok) throw new Error('Error al consultar');
+                const { data, error } = await supabase
+                    .from('jugadores')
+                    .select('*')
+                    .eq('nombre', userName)
+                    .maybeSingle();
 
-                const data = await response.json();
-                const puntos = data.length > 0 ? data[0].puntos || 0 : 0;
+                if (error) {
+                    throw new Error(error.message);
+                }
 
-                contenido.innerHTML = `
-                    <div class="nombre">👤 ${user}</div>
-                    <div class="puntos">${puntos}</div>
-                    <div style="color: #aaa; font-size: 14px;">puntos</div>
-                    <div class="mensaje info">💡 Ganas 2 puntos por minuto en el directo</div>
-                    <button class="volver" onclick="window.close()">✖ Cerrar</button>
-                    <div class="footer">Usa !ayuda para ver todos los comandos</div>
+                const points = data?.puntos || 0;
+                const color = data?.color || 'neutral';
+                const partidasJugadas = data?.partidas_jugadas || 0;
+                const poderesUsados = data?.poderes_usados || 0;
+
+                const teamLabel = color === 'rojo' ? '🇵🇹 RONALDO' : 
+                                 color === 'azul' ? '🇦🇷 MESSI' : '⚡ SIN EQUIPO';
+                const teamClass = color === 'rojo' ? 'rojo' : color === 'azul' ? 'azul' : 'neutral';
+
+                resultCard.className = 'card';
+                resultCard.innerHTML = `
+                    <div class="icon">💰</div>
+                    <div class="title">Tus Puntos</div>
+                    <div class="user-name">${userName}</div>
+                    <div class="team-badge ${teamClass}">${teamLabel}</div>
+                    <div class="points-value">${points}</div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="label">Partidas Jugadas</div>
+                            <div class="value">${partidasJugadas}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="label">Poderes Usados</div>
+                            <div class="value">${poderesUsados}</div>
+                        </div>
+                    </div>
+                    <div class="detail">
+                        💡 Ganas 2 puntos por minuto viendo el directo
+                    </div>
                 `;
+
             } catch (error) {
-                contenido.innerHTML = `
-                    <div class="mensaje error">❌ Error al consultar puntos</div>
-                    <button class="volver" onclick="window.close()">✖ Cerrar</button>
+                resultCard.className = 'card error-card';
+                resultCard.innerHTML = `
+                    <div class="icon">⚠️</div>
+                    <div class="title">Error</div>
+                    <div style="color: #ff6b6b; margin: 10px 0;">${error.message}</div>
+                    <div class="detail" style="margin-top: 10px;">
+                        Usuario: <strong>${userName}</strong>
+                    </div>
                 `;
+                console.error('Error:', error);
             }
         }
 
-        window.onload = consultarPuntos;
+        getPoints();
     </script>
 </body>
 </html>
