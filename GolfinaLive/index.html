@@ -4,489 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GolFinaLive - Stream</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            font-family: 'Arial Black', 'Impact', sans-serif;
-            color: white;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            position: relative;
-        }
-
-        #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* HEADER DEL STREAM */
-        #stream-header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 10;
-            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            pointer-events: none;
-        }
-
-        #stream-header h1 {
-            font-size: 2.5em;
-            text-shadow: 0 0 20px rgba(255,215,0,0.5), 0 0 40px rgba(255,215,0,0.3);
-            background: linear-gradient(45deg, #ffd700, #ff6b35);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 3px;
-            margin-bottom: 5px;
-        }
-
-        #stream-header .subtitle {
-            font-size: 0.8em;
-            color: #ffd700;
-            text-shadow: 0 0 10px rgba(255,215,0,0.3);
-            -webkit-text-fill-color: #ffd700;
-            opacity: 0.8;
-        }
-
-        #timer-container {
-            background: rgba(0,0,0,0.7);
-            border: 2px solid #ffd700;
-            border-radius: 15px;
-            padding: 10px 25px;
-            font-size: 2em;
-            font-weight: bold;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 30px rgba(255,215,0,0.2);
-            color: #ffd700;
-            text-shadow: 0 0 20px rgba(255,215,0,0.5);
-        }
-
-        #timer-container span {
-            color: white;
-        }
-
-        /* CAMPO DE JUEGO */
-        #field {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(ellipse at center, #2d8a4e 0%, #1a6b3a 50%, #0d4a28 100%);
-            overflow: hidden;
-        }
-
-        /* LÍNEAS DEL CAMPO */
-        #field::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            height: 70%;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            box-shadow: 0 0 50px rgba(255,255,255,0.05);
-        }
-
-        #field::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 2px;
-            height: 70%;
-            background: rgba(255,255,255,0.2);
-        }
-
-        .circle-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 150px;
-            height: 150px;
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 50%;
-        }
-
-        /* PORTERÍAS */
-        .goal {
-            position: absolute;
-            width: 80px;
-            height: 200px;
-            border: 4px solid white;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.1);
-            box-shadow: 0 0 30px rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8em;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            backdrop-filter: blur(5px);
-        }
-
-        .goal::after {
-            content: '';
-            position: absolute;
-            width: 60%;
-            height: 60%;
-            border: 2px dashed rgba(255,255,255,0.2);
-            border-radius: 50%;
-        }
-
-        #goal-left {
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            border-color: #ff4444;
-            background: rgba(255,68,68,0.15);
-            box-shadow: 0 0 40px rgba(255,68,68,0.2);
-        }
-
-        #goal-right {
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            border-color: #4444ff;
-            background: rgba(68,68,255,0.15);
-            box-shadow: 0 0 40px rgba(68,68,255,0.2);
-        }
-
-        .goal-label {
-            position: absolute;
-            bottom: -30px;
-            font-size: 0.8em;
-            color: rgba(255,255,255,0.6);
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-
-        /* JUGADORES */
-        .player {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 4px solid rgba(255,255,255,0.8);
-            box-shadow: 0 0 40px rgba(255,215,0,0.3), inset 0 0 30px rgba(255,215,0,0.1);
-            background-size: cover;
-            background-position: center;
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            cursor: default;
-            z-index: 5;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .player::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 4px;
-            background: radial-gradient(ellipse, rgba(255,255,255,0.3) 0%, transparent 100%);
-            border-radius: 50%;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        #player-ronaldo {
-            left: 25%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            border-color: #ff4444;
-            box-shadow: 0 0 60px rgba(255,68,68,0.4);
-            animation-delay: 0s;
-        }
-
-        #player-messi {
-            right: 25%;
-            top: 50%;
-            transform: translate(50%, -50%);
-            border-color: #4444ff;
-            box-shadow: 0 0 60px rgba(68,68,255,0.4);
-            animation-delay: 1.5s;
-        }
-
-        .player-name {
-            position: absolute;
-            bottom: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 1em;
-            font-weight: bold;
-            text-shadow: 0 0 20px rgba(0,0,0,0.8);
-            background: rgba(0,0,0,0.6);
-            padding: 5px 15px;
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
-            white-space: nowrap;
-        }
-
-        /* BOLAS */
-        .ball {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #ffffff, #cccccc);
-            box-shadow: 0 0 30px rgba(255,255,255,0.3);
-            border: 2px solid rgba(0,0,0,0.2);
-            transition: all 0.05s linear;
-            z-index: 4;
-            animation: ballShine 2s ease-in-out infinite;
-        }
-
-        @keyframes ballShine {
-            0%, 100% { box-shadow: 0 0 30px rgba(255,255,255,0.3); }
-            50% { box-shadow: 0 0 50px rgba(255,255,255,0.6); }
-        }
-
-        /* MARCADOR */
-        #scoreboard {
-            position: absolute;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            border: 2px solid #ffd700;
-            border-radius: 20px;
-            padding: 15px 40px;
-            display: flex;
-            gap: 50px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 0 50px rgba(255,215,0,0.2);
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        .score-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .score-item .team {
-            font-size: 0.8em;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            opacity: 0.8;
-        }
-
-        .score-item .score {
-            font-size: 3em;
-            font-weight: bold;
-            text-shadow: 0 0 30px currentColor;
-        }
-
-        .score-item.ronaldo .score {
-            color: #ff4444;
-        }
-
-        .score-item.messi .score {
-            color: #4444ff;
-        }
-
-        /* BANNER DE PODERES */
-        #power-banner {
-            position: absolute;
-            top: 180px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.05));
-            backdrop-filter: blur(20px);
-            border: 2px solid #ffd700;
-            border-radius: 20px;
-            padding: 15px 30px;
-            color: #ffd700;
-            font-size: 1.2em;
-            text-shadow: 0 0 30px rgba(255,215,0,0.3);
-            z-index: 10;
-            pointer-events: none;
-            opacity: 0;
-            transition: all 0.5s ease;
-            text-align: center;
-            max-width: 80%;
-            box-shadow: 0 0 60px rgba(255,215,0,0.2);
-        }
-
-        #power-banner.active {
-            opacity: 1;
-            animation: bannerPulse 1s ease-in-out infinite;
-        }
-
-        @keyframes bannerPulse {
-            0%, 100% { box-shadow: 0 0 60px rgba(255,215,0,0.2); }
-            50% { box-shadow: 0 0 80px rgba(255,215,0,0.4); }
-        }
-
-        #power-banner .power-user {
-            color: white;
-            font-weight: bold;
-        }
-
-        #power-banner .power-name {
-            font-size: 1.4em;
-            font-weight: bold;
-            background: linear-gradient(45deg, #ffd700, #ff6b35);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        #power-timer {
-            position: absolute;
-            top: 250px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 1.5em;
-            color: #ffd700;
-            text-shadow: 0 0 30px rgba(255,215,0,0.5);
-            z-index: 10;
-            pointer-events: none;
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        #power-timer.active {
-            opacity: 1;
-        }
-
-        /* EFECTOS ESPECIALES */
-        .effect-particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: particleExplode 1.5s ease-out forwards;
-            z-index: 20;
-        }
-
-        @keyframes particleExplode {
-            0% {
-                transform: translate(0, 0) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(var(--x), var(--y)) scale(0);
-                opacity: 0;
-            }
-        }
-
-        .chaos-effect {
-            animation: chaosShake 0.5s ease-in-out infinite;
-        }
-
-        @keyframes chaosShake {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(-10px, -5px) rotate(-5deg); }
-            50% { transform: translate(10px, 5px) rotate(5deg); }
-            75% { transform: translate(-5px, 10px) rotate(-3deg); }
-        }
-
-        /* NOTIFICACIÓN DE GOL */
-        #goal-notification {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 5em;
-            font-weight: bold;
-            color: #ffd700;
-            text-shadow: 0 0 60px rgba(255,215,0,0.8), 0 0 120px rgba(255,215,0,0.4);
-            z-index: 30;
-            pointer-events: none;
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        #goal-notification.active {
-            opacity: 1;
-            animation: goalAnim 0.8s ease-out forwards;
-        }
-
-        @keyframes goalAnim {
-            0% {
-                transform: translate(-50%, -50%) scale(0.5);
-                opacity: 0;
-            }
-            50% {
-                transform: translate(-50%, -50%) scale(1.5);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* OVERLAY DE CAOS */
-        #chaos-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            z-index: 2;
-            opacity: 0;
-            transition: all 0.3s ease;
-            background: radial-gradient(circle, rgba(255,0,0,0.1), rgba(0,0,255,0.1));
-        }
-
-        #chaos-overlay.active {
-            opacity: 1;
-            animation: chaosOverlay 0.1s ease-in-out infinite;
-        }
-
-        @keyframes chaosOverlay {
-            0%, 100% { background: radial-gradient(circle, rgba(255,0,0,0.1), rgba(0,0,255,0.1)); }
-            50% { background: radial-gradient(circle, rgba(0,0,255,0.1), rgba(255,0,0,0.1)); }
-        }
-
-        @media (max-width: 768px) {
-            #stream-header h1 { font-size: 1.5em; }
-            #scoreboard { padding: 10px 20px; gap: 30px; top: 80px; }
-            .score-item .score { font-size: 2em; }
-            .player { width: 80px; height: 80px; }
-            .goal { width: 50px; height: 150px; }
-            #power-banner { font-size: 0.9em; padding: 10px 20px; top: 150px; }
-            #timer-container { font-size: 1.2em; padding: 5px 15px; }
-        }
-
-        @media (max-width: 480px) {
-            .player { width: 60px; height: 60px; }
-            .goal { width: 40px; height: 120px; }
-            #scoreboard { gap: 20px; padding: 8px 15px; top: 70px; }
-            .score-item .score { font-size: 1.5em; }
-        }
-    </style>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+    <!-- EFECTOS FUTURISTAS -->
+    <div class="particle-nebula" style="width:450px;height:450px;background:#b026ff;top:-10%;left:-8%;animation-delay:0s;"></div>
+    <div class="particle-nebula" style="width:550px;height:550px;background:#00f0ff;bottom:-10%;right:-8%;animation-delay:-8s;"></div>
+    <div class="particle-nebula" style="width:350px;height:350px;background:#ff2d95;top:50%;left:50%;animation-delay:-16s;"></div>
+    
+    <div id="stars-container"></div>
+    <div id="shooting-stars-container"></div>
+    <div id="sound-waves-container"></div>
+
     <div id="game-container">
+        <!-- HEADER -->
         <div id="stream-header">
             <div>
                 <h1>⚽ GOLFINALIVE</h1>
@@ -497,440 +29,272 @@
             </div>
         </div>
 
+        <!-- CAMPO -->
         <div id="field">
-            <div class="circle-center"></div>
-            
-            <div id="goal-left" class="goal">
-                <div class="goal-label">CR7</div>
-            </div>
-            <div id="goal-right" class="goal">
-                <div class="goal-label">MESSI</div>
+            <div id="campo-wrapper">
+                <canvas id="campo-canvas"></canvas>
+                <div id="ball-ronaldo" class="ball ball-ronaldo"></div>
+                <div id="ball-messi" class="ball ball-messi"></div>
             </div>
 
-            <div id="player-ronaldo" class="player">
-                <div class="player-name" style="color: #ff4444;">CRISTIANO</div>
-            </div>
-            <div id="player-messi" class="player">
-                <div class="player-name" style="color: #4444ff;">LIONEL</div>
+            <!-- CONTROLES DE FLECHAS PARA EL ESTADIO -->
+            <div id="controles-estadio">
+                <button class="btn-estadio" onclick="moverEstadio('arriba')" title="Mover estadio arriba">▲</button>
+                <button class="btn-estadio" onclick="moverEstadio('izquierda')" title="Mover estadio izquierda">◀</button>
+                <button class="btn-estadio" onclick="moverEstadio('centro')" title="Centrar estadio">●</button>
+                <button class="btn-estadio" onclick="moverEstadio('derecha')" title="Mover estadio derecha">▶</button>
+                <button class="btn-estadio" onclick="moverEstadio('abajo')" title="Mover estadio abajo">▼</button>
             </div>
 
-            <div id="ball1" class="ball" style="left: 50%; top: 50%;"></div>
-            <div id="ball2" class="ball" style="left: 40%; top: 45%;"></div>
-            <div id="ball3" class="ball" style="left: 60%; top: 55%;"></div>
-            <div id="ball4" class="ball" style="left: 35%; top: 60%;"></div>
-            <div id="ball5" class="ball" style="left: 65%; top: 40%;"></div>
-
-            <div id="scoreboard">
-                <div class="score-item ronaldo">
-                    <div class="team">🇵🇹 Ronaldo</div>
-                    <div class="score" id="score-ronaldo">0</div>
+            <!-- PANEL MARCADOR -->
+            <div id="panel-marcador" class="panel-flotante">
+                <div class="panel-header">
+                    <span class="panel-titulo">🏆 MARCADOR</span>
                 </div>
-                <div class="score-item messi">
-                    <div class="team">🇦🇷 Messi</div>
-                    <div class="score" id="score-messi">0</div>
+                <div class="panel-body">
+                    <div class="score-item ronaldo">
+                        <div class="player-img-container">
+                            <div class="player-img ronaldo-img" id="ronaldo-img"></div>
+                            <div class="player-name-label">RONALDO</div>
+                        </div>
+                        <div class="score neon-rojo" id="score-ronaldo">0</div>
+                    </div>
+                    <div class="score-vs neon-dorado">⚡</div>
+                    <div class="score-item messi">
+                        <div class="score neon-azul" id="score-messi">0</div>
+                        <div class="player-img-container">
+                            <div class="player-img messi-img" id="messi-img"></div>
+                            <div class="player-name-label">MESSI</div>
+                        </div>
+                    </div>
+                    <div class="meta-info">
+                        <div class="meta-label">🎯 META</div>
+                        <div class="meta-value neon-dorado" id="meta-goles-show">5</div>
+                    </div>
+                </div>
+                <!-- CONTROLES DE FLECHAS PARA MARCADOR -->
+                <div class="controles-flechas">
+                    <button class="btn-flecha" onclick="moverPanel('panel-marcador', 'arriba')">▲</button>
+                    <button class="btn-flecha" onclick="moverPanel('panel-marcador', 'izquierda')">◀</button>
+                    <button class="btn-flecha" onclick="moverPanel('panel-marcador', 'centro')">●</button>
+                    <button class="btn-flecha" onclick="moverPanel('panel-marcador', 'derecha')">▶</button>
+                    <button class="btn-flecha" onclick="moverPanel('panel-marcador', 'abajo')">▼</button>
                 </div>
             </div>
 
+            <!-- PANEL PODERES -->
+            <div id="panel-poderes" class="panel-flotante">
+                <div class="panel-header">
+                    <span class="panel-titulo">⚡ PODERES</span>
+                    <span class="poderes-contador" id="contador-poderes">0</span>
+                </div>
+                <div class="panel-body">
+                    <div id="lista-poderes-activos">
+                        <div class="sin-poderes">🔍 No hay poderes activos</div>
+                    </div>
+                </div>
+                <!-- CONTROLES DE FLECHAS PARA PODERES -->
+                <div class="controles-flechas">
+                    <button class="btn-flecha" onclick="moverPanel('panel-poderes', 'arriba')">▲</button>
+                    <button class="btn-flecha" onclick="moverPanel('panel-poderes', 'izquierda')">◀</button>
+                    <button class="btn-flecha" onclick="moverPanel('panel-poderes', 'centro')">●</button>
+                    <button class="btn-flecha" onclick="moverPanel('panel-poderes', 'derecha')">▶</button>
+                    <button class="btn-flecha" onclick="moverPanel('panel-poderes', 'abajo')">▼</button>
+                </div>
+            </div>
+
+            <!-- BANNER PODERES -->
             <div id="power-banner">
                 <div>⚡ <span class="power-name" id="power-name">Poder Activado</span></div>
-                <div style="font-size: 0.8em; margin-top: 5px;">
-                    por <span class="power-user" id="power-user">Usuario</span>
+                <div style="font-size:0.7em;margin-top:3px;">por <span class="power-user" id="power-user">Usuario</span></div>
+            </div>
+            <div id="power-timer">⏱️ <span id="power-time-left">60</span>s</div>
+            <div id="goal-notification">⚽ ¡GOL!</div>
+            <div id="chaos-overlay"></div>
+            <div id="recordatorio-timer">⏳ Próximo poder en <span id="recordatorio-segundos">30</span>s</div>
+
+            <!-- PANEL CONTROLES -->
+            <div id="panel-controles" class="panel-flotante">
+                <div class="panel-header">
+                    <span class="panel-titulo">🎮 CONTROLES</span>
+                </div>
+                <div class="panel-body">
+                    <span id="estado-partida" class="estado-detenido">⏹️ DETENIDO</span>
+                    <button id="btn-iniciar" class="btn-iniciar" onclick="iniciarPartida()">▶️ Iniciar</button>
+                    <button id="btn-detener" class="btn-detener" onclick="detenerPartida()" style="display:none;">⏹️ Detener</button>
+                    <button class="btn-reiniciar" onclick="reiniciarPartida()">🔄 Reiniciar</button>
+                    <div class="meta-input">
+                        <label>Meta:</label>
+                        <input type="number" id="meta-goles" value="50" min="1" max="999">
+                    </div>
+                    <a href="admin.html" target="_blank" class="btn-admin">⚙️ Admin</a>
+                    <button id="btn-toggle-audios" class="btn-audios" onclick="toggleAudios()">🔊 Audios</button>
+                    <button id="btn-toggle-config" class="btn-config" onclick="toggleConfiguracion()">⚙️ Config</button>
+                </div>
+                <!-- CONTROLES DE FLECHAS PARA CONTROLES -->
+                <div class="controles-flechas">
+                    <button class="btn-flecha" onclick="moverPanel('panel-controles', 'arriba')">▲</button>
+                    <button class="btn-flecha" onclick="moverPanel('panel-controles', 'izquierda')">◀</button>
+                    <button class="btn-flecha" onclick="moverPanel('panel-controles', 'centro')">●</button>
+                    <button class="btn-flecha" onclick="moverPanel('panel-controles', 'derecha')">▶</button>
+                    <button class="btn-flecha" onclick="moverPanel('panel-controles', 'abajo')">▼</button>
                 </div>
             </div>
 
-            <div id="power-timer">
-                ⏱️ <span id="power-time-left">60</span>s
+            <!-- PANEL AUDIOS -->
+            <div id="panel-audios" class="panel-flotante">
+                <div class="panel-header">
+                    <span class="panel-titulo">🔊 SONIDOS</span>
+                </div>
+                <div class="panel-body">
+                    <button class="btn-ronaldo" onclick="reproducirSonido('ronaldo')">🐐 Ronaldo</button>
+                    <button class="btn-messi" onclick="reproducirSonido('messi')">🐐 Messi</button>
+                    <button class="btn-bienvenida" onclick="reproducirSonido('bienvenida')">👋 Bienvenida</button>
+                    <button class="btn-suscribete" onclick="reproducirSonido('suscribete')">🔔 Suscríbete</button>
+                    <button class="btn-elige" onclick="reproducirSonido('elige')">🔥 Elige</button>
+                    <button class="btn-ayuda" onclick="reproducirSonido('ayuda')">💪 Ayuda</button>
+                    <button class="btn-mejor" onclick="reproducirSonido('mejor')">🏆 Mejor</button>
+                    <button class="btn-poder" onclick="reproducirSonido('poder')">⚡ Poder</button>
+                    <button class="btn-ambiente" onclick="toggleAudioEstadio()">🎧 OFF</button>
+                </div>
             </div>
 
-            <div id="goal-notification">⚽ ¡GOL!</div>
-            <div id="chaos-overlay"></div>
+            <!-- PANEL CONFIGURACIÓN -->
+            <div id="panel-configuracion">
+                <h3>⚙️ CONFIGURACIÓN</h3>
+                
+                <div class="config-grupo">
+                    <label>📐 Ancho del campo</label>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button class="btn-config-option" onclick="setCampoAncho(250)">Pequeño</button>
+                        <button class="btn-config-option" onclick="setCampoAncho(400)">Mediano</button>
+                        <button class="btn-config-option active" onclick="setCampoAncho(600)">Grande</button>
+                        <button class="btn-config-option" onclick="setCampoAncho(800)">Extra</button>
+                        <button class="btn-config-option" onclick="setCampoAncho(1000)">Mega</button>
+                    </div>
+                    <input type="range" id="campo-ancho-slider" min="150" max="1200" value="600" step="10" oninput="setCampoAncho(this.value)">
+                    <span id="campo-ancho-label">600px</span>
+                </div>
+
+                <div class="config-grupo">
+                    <label>📏 Alto del campo</label>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button class="btn-config-option" onclick="setCampoAlto(200)">Pequeño</button>
+                        <button class="btn-config-option" onclick="setCampoAlto(300)">Mediano</button>
+                        <button class="btn-config-option active" onclick="setCampoAlto(400)">Grande</button>
+                        <button class="btn-config-option" onclick="setCampoAlto(500)">Extra</button>
+                        <button class="btn-config-option" onclick="setCampoAlto(650)">Mega</button>
+                    </div>
+                    <input type="range" id="campo-alto-slider" min="100" max="800" value="400" step="10" oninput="setCampoAlto(this.value)">
+                    <span id="campo-alto-label">400px</span>
+                </div>
+
+                <div class="config-grupo">
+                    <label>🎨 Color del campo</label>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button class="btn-color-option" style="background:#1a6b3a;" onclick="setCampoColor('#1a6b3a')">Verde</button>
+                        <button class="btn-color-option" style="background:#2d8a4e;" onclick="setCampoColor('#2d8a4e')">Claro</button>
+                        <button class="btn-color-option" style="background:#0d4a28;" onclick="setCampoColor('#0d4a28')">Oscuro</button>
+                        <button class="btn-color-option" style="background:#4a7c59;" onclick="setCampoColor('#4a7c59')">Pasto</button>
+                    </div>
+                    <input type="color" id="campo-color-picker" value="#1a6b3a" onchange="setCampoColor(this.value)">
+                </div>
+
+                <div class="config-grupo">
+                    <label>🖼️ Tamaño jugadores</label>
+                    <input type="range" id="player-size-slider" min="30" max="200" value="80" step="5" oninput="setPlayerImageSize(this.value)">
+                    <span id="player-size-label">80px</span>
+                </div>
+
+                <div class="config-grupo">
+                    <label>🥅 Tamaño porterías</label>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button class="btn-config-option" onclick="setGoalSize(0.3)">Mini</button>
+                        <button class="btn-config-option" onclick="setGoalSize(0.6)">Pequeña</button>
+                        <button class="btn-config-option active" onclick="setGoalSize(1.0)">Normal</button>
+                        <button class="btn-config-option" onclick="setGoalSize(1.8)">Grande</button>
+                        <button class="btn-config-option" onclick="setGoalSize(3.0)">Gigante</button>
+                    </div>
+                    <input type="range" id="goal-size-slider" min="0.3" max="3.0" value="1.0" step="0.1" oninput="setGoalSize(this.value)">
+                    <span id="goal-size-label">1.0</span>
+                </div>
+
+                <div class="config-grupo">
+    <label>⚡ Velocidad bolas</label>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+        <button class="btn-config-option" onclick="setBallSpeed(0.1)">Muy lenta</button>
+        <button class="btn-config-option" onclick="setBallSpeed(0.5)">Lenta</button>
+        <button class="btn-config-option active" onclick="setBallSpeed(1.0)">Normal</button>
+        <button class="btn-config-option" onclick="setBallSpeed(3.0)">Rápida</button>
+        <button class="btn-config-option" onclick="setBallSpeed(6.0)">Muy rápida</button>
+        <button class="btn-config-option" onclick="setBallSpeed(10.0)">Turbo</button>
+    </div>
+    <input type="range" id="ball-speed-slider" min="0.1" max="10" value="1.0" step="0.1" oninput="setBallSpeed(this.value)">
+    <span id="ball-speed-label">1.0</span>
+</div>
+
+                <div class="config-grupo">
+                    <label>🎯 Precisión del gol</label>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button class="btn-config-option" onclick="setPrecisionGol(0.2)">Muy estricto</button>
+                        <button class="btn-config-option active" onclick="setPrecisionGol(0.6)">Normal</button>
+                        <button class="btn-config-option" onclick="setPrecisionGol(1.0)">Tolerante</button>
+                        <button class="btn-config-option" onclick="setPrecisionGol(1.5)">Muy tolerante</button>
+                    </div>
+                    <input type="range" id="precision-gol-slider" min="0.1" max="2.0" value="0.6" step="0.05" oninput="setPrecisionGol(this.value)">
+                    <span id="precision-gol-label">0.6</span>
+                </div>
+
+                <div class="config-grupo">
+                    <label>📏 Margen del campo</label>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button class="btn-config-option" onclick="setMargenCampo(0.02)">Estricto</button>
+                        <button class="btn-config-option active" onclick="setMargenCampo(0.04)">Normal</button>
+                        <button class="btn-config-option" onclick="setMargenCampo(0.06)">Tolerante</button>
+                        <button class="btn-config-option" onclick="setMargenCampo(0.08)">Muy tolerante</button>
+                    </div>
+                    <input type="range" id="margen-campo-slider" min="0.01" max="0.12" value="0.04" step="0.005" oninput="setMargenCampo(this.value)">
+                    <span id="margen-campo-label">0.04</span>
+                </div>
+
+                <div class="config-grupo">
+                    <label>📏 Líneas del campo</label>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button class="btn-config-option active" onclick="setCampoLineas(true)">✅ Mostrar</button>
+                        <button class="btn-config-option" onclick="setCampoLineas(false)">❌ Ocultar</button>
+                    </div>
+                </div>
+
+                <div class="config-grupo">
+                    <label>🔴 Color neón RONALDO</label>
+                    <input type="color" id="neon-rojo-picker" value="#ff1744" onchange="setNeonRojo(this.value)">
+                </div>
+
+                <div class="config-grupo">
+                    <label>🔵 Color neón MESSI</label>
+                    <input type="color" id="neon-azul-picker" value="#2979ff" onchange="setNeonAzul(this.value)">
+                </div>
+
+                <div class="config-grupo">
+                    <label>⭐ Color neón DORADO</label>
+                    <input type="color" id="neon-dorado-picker" value="#ffd700" onchange="setNeonDorado(this.value)">
+                </div>
+
+                <div class="config-grupo">
+                    <label>✨ Intensidad neón</label>
+                    <input type="range" id="neon-intensity-slider" min="0" max="100" value="60" step="5" oninput="setNeonIntensity(this.value)">
+                    <span id="neon-intensity-label">60%</span>
+                </div>
+
+                <div class="config-botones">
+                    <button class="btn-guardar" onclick="guardarConfiguracion()">💾 Guardar</button>
+                    <button class="btn-restaurar" onclick="restaurarConfiguracion()">↩️ Restaurar</button>
+                </div>
+                <div id="config-status" class="config-status"></div>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const SUPABASE_URL = 'https://qddfdisbnwnnlvkrnckd.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZGZkaXNibndubmx2a3JuY2tkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDQwMzcsImV4cCI6MjEwMjQyMDAzN30.9Jsgl0qepqjJ8oiiewyPZK3vOsqm49EnLCEtOar5MiQ';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        let gameState = {
-            scoreRonaldo: 0,
-            scoreMessi: 0,
-            powerActive: null,
-            powerTimer: null,
-            chaosActive: false,
-            matchTime: 0,
-            timerInterval: null,
-            balls: [],
-            ballInterval: null,
-            players: {
-                ronaldo: { x: 25, y: 50, speed: 1 },
-                messi: { x: 75, y: 50, speed: 1 }
-            },
-            goalSizes: {
-                left: 200,
-                right: 200
-            },
-            speedMultiplier: 1,
-            doublePoints: {
-                active: false,
-                team: null
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initGame();
-            setupRealtime();
-            startMatchTimer();
-            startBallsMovement();
-        });
-
-        function initGame() {
-            const playerRonaldo = document.getElementById('player-ronaldo');
-            const playerMessi = document.getElementById('player-messi');
-            
-            playerRonaldo.style.background = 'linear-gradient(135deg, #ff4444, #cc0000)';
-            playerMessi.style.background = 'linear-gradient(135deg, #4444ff, #0000cc)';
-            
-            const ballElements = document.querySelectorAll('.ball');
-            ballElements.forEach((ball, index) => {
-                const angle = (index / ballElements.length) * Math.PI * 2;
-                const distance = 150 + Math.random() * 200;
-                const x = 50 + Math.cos(angle) * distance / window.innerWidth * 100;
-                const y = 50 + Math.sin(angle) * distance / window.innerHeight * 100;
-                gameState.balls.push({
-                    element: ball,
-                    x: x,
-                    y: y,
-                    vx: (Math.random() - 0.5) * 0.5,
-                    vy: (Math.random() - 0.5) * 0.5,
-                    speed: 0.5 + Math.random() * 0.5
-                });
-            });
-        }
-
-        function setupRealtime() {
-            supabase
-                .channel('poderes-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'poderes' }, (payload) => {
-                    if (payload.eventType === 'INSERT' && payload.new.activo) {
-                        activatePower(payload.new);
-                    } else if (payload.eventType === 'UPDATE' && !payload.new.activo) {
-                        deactivatePower(payload.new.nombre);
-                    }
-                })
-                .subscribe();
-
-            supabase
-                .channel('partidas-changes')
-                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'partidas' }, (payload) => {
-                    const p = payload.new;
-                    if (p.puntaje_rojo !== undefined && p.puntaje_azul !== undefined) {
-                        updateScore(p.puntaje_rojo, p.puntaje_azul);
-                    }
-                })
-                .subscribe();
-
-            getActiveMatch();
-        }
-
-        async function getActiveMatch() {
-            const { data, error } = await supabase
-                .from('partidas')
-                .select('*')
-                .eq('estado', 'activa')
-                .order('creada_en', { ascending: false })
-                .limit(1);
-
-            if (data && data.length > 0) {
-                const match = data[0];
-                updateScore(match.puntaje_rojo || 0, match.puntaje_azul || 0);
-            }
-        }
-
-        function updateScore(ronaldo, messi) {
-            gameState.scoreRonaldo = ronaldo;
-            gameState.scoreMessi = messi;
-            document.getElementById('score-ronaldo').textContent = ronaldo;
-            document.getElementById('score-messi').textContent = messi;
-            
-            if (ronaldo > gameState._lastScoreRonaldo || messi > gameState._lastScoreMessi) {
-                showGoalNotification(ronaldo > gameState._lastScoreRonaldo ? 'CR7' : 'MESSI');
-            }
-            
-            gameState._lastScoreRonaldo = ronaldo;
-            gameState._lastScoreMessi = messi;
-        }
-
-        function activatePower(power) {
-            if (gameState.powerActive) deactivatePower(gameState.powerActive);
-
-            gameState.powerActive = power.nombre;
-            
-            const banner = document.getElementById('power-banner');
-            const powerName = document.getElementById('power-name');
-            const powerUser = document.getElementById('power-user');
-            
-            powerName.textContent = power.nombre.toUpperCase();
-            powerUser.textContent = power.usuario || 'Anónimo';
-            banner.classList.add('active');
-
-            const timer = document.getElementById('power-timer');
-            const timeLeft = document.getElementById('power-time-left');
-            
-            if (power.expira_en) {
-                const expireDate = new Date(power.expira_en);
-                const now = new Date();
-                const seconds = Math.max(0, Math.floor((expireDate - now) / 1000));
-                timeLeft.textContent = seconds;
-                timer.classList.add('active');
-                
-                if (gameState.powerTimer) clearInterval(gameState.powerTimer);
-                
-                gameState.powerTimer = setInterval(() => {
-                    const currentTime = parseInt(timeLeft.textContent);
-                    if (currentTime <= 0) {
-                        clearInterval(gameState.powerTimer);
-                        deactivatePower(power.nombre);
-                    } else {
-                        timeLeft.textContent = currentTime - 1;
-                    }
-                }, 1000);
-            }
-
-            applyPowerEffect(power.nombre, true);
-        }
-
-        function deactivatePower(powerName) {
-            gameState.powerActive = null;
-            document.getElementById('power-banner').classList.remove('active');
-            document.getElementById('power-timer').classList.remove('active');
-            
-            if (gameState.powerTimer) {
-                clearInterval(gameState.powerTimer);
-                gameState.powerTimer = null;
-            }
-
-            applyPowerEffect(powerName, false);
-        }
-
-        function applyPowerEffect(powerName, active) {
-            const p = powerName.toLowerCase();
-            
-            // Velocidad
-            if (p.includes('velocidadronaldo')) {
-                gameState.players.ronaldo.speed = active ? 2 : 1;
-            }
-            if (p.includes('velocidadmessi')) {
-                gameState.players.messi.speed = active ? 2 : 1;
-            }
-            
-            // Lento
-            if (p.includes('lento')) {
-                gameState.speedMultiplier = active ? 0.5 : 1;
-            }
-            
-            // Caos
-            if (p.includes('caos')) {
-                gameState.chaosActive = active;
-                const chaosOverlay = document.getElementById('chaos-overlay');
-                if (active) {
-                    chaosOverlay.classList.add('active');
-                    document.getElementById('field').classList.add('chaos-effect');
-                } else {
-                    chaosOverlay.classList.remove('active');
-                    document.getElementById('field').classList.remove('chaos-effect');
-                }
-            }
-            
-            // Escudo (reducir portería del jugador específico)
-            if (p.includes('escudoronaldo')) {
-                const goal = document.getElementById('goal-left');
-                goal.style.height = active ? '100px' : '200px';
-            }
-            if (p.includes('escudomessi')) {
-                const goal = document.getElementById('goal-right');
-                goal.style.height = active ? '100px' : '200px';
-            }
-            
-            // Gol
-            if (p.includes('golronaldo')) {
-                if (active) {
-                    showGoalNotification('⚽ GOL DE RONALDO!');
-                    setTimeout(() => deactivatePower('golronaldo'), 3000);
-                }
-            }
-            if (p.includes('golmessi')) {
-                if (active) {
-                    showGoalNotification('⚽ GOL DE MESSI!');
-                    setTimeout(() => deactivatePower('golmessi'), 3000);
-                }
-            }
-            
-            // Lluvia
-            if (p.includes('lluviaronaldo') && active) {
-                showGoalNotification('🌧️ 3 GOLES PARA RONALDO!');
-                setTimeout(() => deactivatePower('lluviaronaldo'), 3000);
-            }
-            if (p.includes('lluviamessi') && active) {
-                showGoalNotification('🌧️ 3 GOLES PARA MESSI!');
-                setTimeout(() => deactivatePower('lluviamessi'), 3000);
-            }
-            
-            // Congelar
-            if (p.includes('congelar')) {
-                gameState.speedMultiplier = active ? 0 : 1;
-            }
-            
-            // Doble puntos
-            if (p.includes('doblepuntosronaldo')) {
-                gameState.doublePoints.active = active;
-                gameState.doublePoints.team = active ? 'ronaldo' : null;
-            }
-            if (p.includes('doblepuntosmessi')) {
-                gameState.doublePoints.active = active;
-                gameState.doublePoints.team = active ? 'messi' : null;
-            }
-            
-            // Super (ambos)
-            if (p === 'super') {
-                gameState.players.ronaldo.speed = active ? 2 : 1;
-                gameState.players.messi.speed = active ? 2 : 1;
-            }
-        }
-
-        function showGoalNotification(scorer) {
-            const notification = document.getElementById('goal-notification');
-            notification.textContent = `⚽ ${scorer}`;
-            notification.classList.add('active');
-            createGoalParticles();
-            setTimeout(() => notification.classList.remove('active'), 2000);
-        }
-
-        function createGoalParticles() {
-            const field = document.getElementById('field');
-            const colors = ['#ffd700', '#ff6b35', '#ff4444', '#4444ff', '#00ff88', '#ff00ff'];
-            
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'effect-particle';
-                const x = Math.random() * window.innerWidth;
-                const y = Math.random() * window.innerHeight;
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                const size = 4 + Math.random() * 8;
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 100 + Math.random() * 300;
-                
-                particle.style.cssText = `
-                    left: ${x}px; top: ${y}px;
-                    width: ${size}px; height: ${size}px;
-                    background: ${color};
-                    --x: ${Math.cos(angle) * distance}px;
-                    --y: ${Math.sin(angle) * distance}px;
-                    box-shadow: 0 0 20px ${color};
-                `;
-                
-                field.appendChild(particle);
-                setTimeout(() => particle.remove(), 1500);
-            }
-        }
-
-        function startMatchTimer() {
-            const timerElement = document.getElementById('match-timer');
-            let seconds = 0;
-            
-            gameState.timerInterval = setInterval(() => {
-                seconds++;
-                const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
-                const secs = String(seconds % 60).padStart(2, '0');
-                timerElement.textContent = `${mins}:${secs}`;
-            }, 1000);
-        }
-
-        function startBallsMovement() {
-            const field = document.getElementById('field');
-            
-            gameState.ballInterval = setInterval(() => {
-                if (gameState.chaosActive) {
-                    gameState.balls.forEach(ball => {
-                        ball.vx += (Math.random() - 0.5) * 0.1;
-                        ball.vy += (Math.random() - 0.5) * 0.1;
-                    });
-                }
-                
-                gameState.balls.forEach(ball => {
-                    const speed = ball.speed * gameState.speedMultiplier;
-                    ball.x += ball.vx * speed;
-                    ball.y += ball.vy * speed;
-                    
-                    if (ball.x < 0 || ball.x > 100) {
-                        ball.vx *= -1;
-                        ball.x = Math.max(0, Math.min(100, ball.x));
-                    }
-                    if (ball.y < 0 || ball.y > 100) {
-                        ball.vy *= -1;
-                        ball.y = Math.max(0, Math.min(100, ball.y));
-                    }
-                    
-                    const rect = field.getBoundingClientRect();
-                    const xPos = (ball.x / 100) * rect.width;
-                    const yPos = (ball.y / 100) * rect.height;
-                    
-                    ball.element.style.left = `${xPos - 15}px`;
-                    ball.element.style.top = `${yPos - 15}px`;
-                    
-                    checkCollision(ball);
-                });
-            }, 50);
-        }
-
-        function checkCollision(ball) {
-            const ballCenterX = ball.x;
-            const ballCenterY = ball.y;
-            
-            const ronaldoX = 25;
-            const ronaldoY = 50;
-            const messiX = 75;
-            const messiY = 50;
-            
-            const distRonaldo = Math.sqrt(Math.pow(ballCenterX - ronaldoX, 2) + Math.pow(ballCenterY - ronaldoY, 2));
-            const distMessi = Math.sqrt(Math.pow(ballCenterX - messiX, 2) + Math.pow(ballCenterY - messiY, 2));
-            
-            const collisionDist = 8;
-            
-            if (distRonaldo < collisionDist) {
-                const angle = Math.atan2(ballCenterY - ronaldoY, ballCenterX - ronaldoX);
-                ball.vx = Math.cos(angle) * 0.8;
-                ball.vy = Math.sin(angle) * 0.8;
-                ball.x += ball.vx * 2;
-                ball.y += ball.vy * 2;
-            }
-            
-            if (distMessi < collisionDist) {
-                const angle = Math.atan2(ballCenterY - messiY, ballCenterX - messiX);
-                ball.vx = Math.cos(angle) * 0.8;
-                ball.vy = Math.sin(angle) * 0.8;
-                ball.x += ball.vx * 2;
-                ball.y += ball.vy * 2;
-            }
-        }
-
-        window.setPlayerImages = function(ronaldoUrl, messiUrl) {
-            if (ronaldoUrl) {
-                document.getElementById('player-ronaldo').style.backgroundImage = `url("${ronaldoUrl}")`;
-                document.getElementById('player-ronaldo').style.backgroundSize = 'cover';
-            }
-            if (messiUrl) {
-                document.getElementById('player-messi').style.backgroundImage = `url("${messiUrl}")`;
-                document.getElementById('player-messi').style.backgroundSize = 'cover';
-            }
-        };
-
-        window.addEventListener('beforeunload', () => {
-            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-            if (gameState.ballInterval) clearInterval(gameState.ballInterval);
-            if (gameState.powerTimer) clearInterval(gameState.powerTimer);
-        });
-    </script>
+    <script src="js/stream.js"></script>
 </body>
 </html>

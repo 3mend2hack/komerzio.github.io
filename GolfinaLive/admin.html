@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GolFinaLive - Admin Panel</title>
+    <title>⚽ GolFinaLive - Admin</title>
     <style>
         * {
             margin: 0;
@@ -185,26 +185,6 @@
             color: #0a0a1a;
         }
 
-        .btn-blue {
-            background: #4444ff;
-            color: white;
-        }
-
-        .btn-purple {
-            background: #9b59b6;
-            color: white;
-        }
-
-        .btn-orange {
-            background: #f39c12;
-            color: white;
-        }
-
-        .btn-red {
-            background: #e74c3c;
-            color: white;
-        }
-
         .btn-small {
             padding: 6px 15px;
             font-size: 0.8em;
@@ -252,12 +232,6 @@
             opacity: 0.7;
         }
 
-        .power-card.active {
-            border-color: #ffd700;
-            background: rgba(255,215,0,0.1);
-            box-shadow: 0 0 30px rgba(255,215,0,0.1);
-        }
-
         .power-card .power-toggle {
             margin-top: 8px;
             display: flex;
@@ -268,6 +242,12 @@
         .power-card .power-toggle .btn {
             padding: 4px 10px;
             font-size: 0.7em;
+        }
+
+        .power-card .power-active {
+            border-color: #ffd700;
+            background: rgba(255,215,0,0.1);
+            box-shadow: 0 0 20px rgba(255,215,0,0.2);
         }
 
         .status-message {
@@ -359,60 +339,132 @@
             font-size: 0.8em;
         }
 
-        #event-log .event-item .power-used {
+        #event-log .event-item .power-active {
             color: #ffd700;
             font-weight: bold;
         }
 
-        .config-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
         .player-image-upload {
             display: flex;
-            gap: 20px;
+            gap: 30px;
             flex-wrap: wrap;
+            justify-content: center;
         }
 
-        .player-image-upload .image-group {
+        .image-group {
             flex: 1;
-            min-width: 150px;
+            min-width: 250px;
             text-align: center;
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .player-image-upload .image-preview {
-            width: 100px;
-            height: 100px;
+        .image-group h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .image-group .image-preview {
+            width: 150px;
+            height: 150px;
             border-radius: 50%;
             margin: 10px auto;
             background: rgba(255,255,255,0.05);
-            border: 2px solid rgba(255,255,255,0.1);
+            border: 3px solid rgba(255,255,255,0.1);
             background-size: cover;
             background-position: center;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
-        .player-image-upload input[type="file"] {
+        .image-group .image-preview:hover {
+            border-color: #ffd700;
+            box-shadow: 0 0 30px rgba(255,215,0,0.2);
+        }
+
+        .image-group .image-preview .delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff4444;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(255,68,68,0.4);
+            transition: all 0.3s ease;
+        }
+
+        .image-group .image-preview:hover .delete-btn {
+            display: flex;
+        }
+
+        .image-group .image-preview .delete-btn:hover {
+            transform: scale(1.1);
+            background: #cc0000;
+        }
+
+        .image-group input[type="file"] {
             display: none;
         }
 
-        .player-image-upload .upload-btn {
-            padding: 6px 15px;
+        .image-group .upload-btn {
+            padding: 8px 20px;
             border-radius: 20px;
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
             color: white;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.8em;
+            font-size: 0.9em;
+            margin: 5px;
         }
 
-        .player-image-upload .upload-btn:hover {
+        .image-group .upload-btn:hover {
             background: rgba(255,255,255,0.2);
         }
 
-        /* Sección de poderes por jugador */
+        .image-group .image-status {
+            font-size: 0.8em;
+            opacity: 0.6;
+            margin-top: 8px;
+        }
+
+        .image-group .image-status.loaded {
+            color: #00ff88;
+            opacity: 1;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .image-actions .btn {
+            padding: 6px 18px;
+            font-size: 0.8em;
+        }
+
+        .image-actions .quality-select {
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: #1a1a2e;
+            color: #fff;
+            border: 1px solid #333;
+            font-size: 0.7rem;
+        }
+
         .power-section {
             margin-bottom: 15px;
         }
@@ -437,6 +489,173 @@
             color: #ffd700;
         }
 
+        #auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+        }
+
+        #auth-box {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 40px;
+            border-radius: 30px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 60px rgba(255,215,0,0.1);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        #auth-box h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffd700, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #auth-box p {
+            opacity: 0.6;
+            margin-bottom: 25px;
+        }
+
+        #auth-box input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        #auth-box input:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        #auth-box .btn {
+            width: 100%;
+            justify-content: center;
+            padding: 15px;
+            font-size: 1.1em;
+        }
+
+        #auth-error {
+            color: #ff4444;
+            margin-top: 10px;
+            display: none;
+        }
+
+        #auth-loading {
+            color: #ffd700;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Poderes activos en tiempo real */
+        #poderes-activos {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-top: 10px;
+            min-height: 40px;
+            border: 1px solid rgba(255,215,0,0.1);
+        }
+
+        #poderes-activos .poder-activo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.85em;
+        }
+
+        #poderes-activos .poder-activo-item:last-child {
+            border-bottom: none;
+        }
+
+        #poderes-activos .poder-nombre {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        #poderes-activos .poder-usuario {
+            color: #aaa;
+        }
+
+        #poderes-activos .poder-tiempo {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        #poderes-activos .sin-poderes {
+            color: #555;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 0.8em;
+        }
+
+        .meta-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.05);
+            padding: 8px 15px;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .meta-control label {
+            font-size: 0.8em;
+            color: #aaa;
+            font-weight: bold;
+        }
+
+        .meta-control input {
+            width: 60px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #1a1a2e;
+            color: #fff;
+            border: 1px solid #ffd700;
+            text-align: center;
+            font-size: 1em;
+        }
+
+        .meta-control .btn-meta {
+            padding: 6px 16px;
+            background: linear-gradient(135deg, #ffd700, #f5a623);
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+
+        .meta-control .btn-meta:hover {
+            transform: scale(1.05);
+        }
+
+        .meta-control .meta-actual {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffd700;
+            margin-left: 5px;
+        }
+
         @media (max-width: 768px) {
             .grid {
                 grid-template-columns: 1fr;
@@ -453,22 +672,51 @@
             .settings-group {
                 grid-template-columns: 1fr;
             }
+
+            .player-image-upload {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .image-group {
+                width: 100%;
+                max-width: 350px;
+            }
+
+            .meta-control {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- AUTH OVERLAY -->
+    <div id="auth-overlay">
+        <div id="auth-box">
+            <h2>⚽ GolFinaLive</h2>
+            <p>Panel de Administración</p>
+            <input type="email" id="auth-email" placeholder="Email">
+            <input type="password" id="auth-password" placeholder="Contraseña" onkeydown="if(event.key==='Enter') verificarPasswordSupabase()">
+            <button class="btn btn-primary" onclick="verificarPasswordSupabase()">🔐 Iniciar Sesión</button>
+            <div id="auth-error">❌ Email o contraseña incorrectos</div>
+            <div id="auth-loading">⏳ Verificando credenciales...</div>
+        </div>
+    </div>
+
+    <!-- CONTENIDO ADMIN -->
+    <div class="container" id="admin-content" style="display:none;">
         <header>
             <h1>⚽ GolFinaLive - Admin</h1>
-            <div class="status-badge" id="status-badge">
-                🟢 En Vivo
+            <div>
+                <span class="status-badge" id="status-badge">🟢 En Vivo</span>
+                <button onclick="cerrarSesionSupabase()" style="padding:8px 20px;background:#ff4444;border:none;border-radius:25px;font-weight:bold;color:#fff;cursor:pointer;margin-left:10px;">🚪 Salir</button>
             </div>
         </header>
 
         <div id="status-message" class="status-message"></div>
 
         <div class="grid">
-            <!-- Marcador -->
             <div class="card">
                 <div class="card-title">
                     <span class="icon">🏆</span> Marcador
@@ -496,7 +744,6 @@
                 </div>
             </div>
 
-            <!-- Control del partido -->
             <div class="card">
                 <div class="card-title">
                     <span class="icon">🎮</span> Control del Partido
@@ -508,10 +755,6 @@
                 </div>
                 <div class="settings-group">
                     <label>
-                        Goles para ganar
-                        <input type="number" id="goals-to-win" value="5" min="1" max="10">
-                    </label>
-                    <label>
                         Tamaño portería
                         <select id="goal-size">
                             <option value="large">Grande</option>
@@ -520,77 +763,109 @@
                             <option value="very-small">Muy Pequeña</option>
                         </select>
                     </label>
+                    <div class="meta-control">
+                        <label>🎯 Meta de Goles:</label>
+                        <input type="number" id="input-meta" value="5" min="1" max="100">
+                        <button class="btn-meta" onclick="actualizarMeta()">✅</button>
+                        <span class="meta-actual" id="meta-actual">5</span>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <div class="card" style="margin-bottom:20px;">
+            <div class="card-title">
+                <span class="icon">⚡</span> Poderes Activos en Tiempo Real
+            </div>
+            <div id="poderes-activos">
+                <div class="sin-poderes">🔍 No hay poderes activos en este momento</div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;">
+            <div class="card-title">
+                <span class="icon">🖼️</span> Imágenes de Jugadores
+            </div>
+            <div class="player-image-upload">
+                <div class="image-group">
+                    <h4 style="color: #ff4444;">🇵🇹 RONALDO</h4>
+                    <div class="image-preview" id="ronaldo-preview">
+                        <button class="delete-btn" onclick="eliminarImagen('RONALDO')" title="Eliminar imagen">✕</button>
+                    </div>
+                    <div class="image-status" id="ronaldo-status">📷 Sin imagen</div>
+                    <div class="image-actions">
+                        <button class="upload-btn" onclick="document.getElementById('ronaldo-upload').click()">📤 Subir imagen</button>
+                        <input type="file" id="ronaldo-upload" accept="image/*" onchange="subirImagen('RONALDO', this)">
+                        <select id="calidad-ronaldo" class="quality-select">
+                            <option value="0.9">Alta (90%)</option>
+                            <option value="0.7" selected>Media (70%)</option>
+                            <option value="0.5">Baja (50%)</option>
+                            <option value="0.3">Mínima (30%)</option>
+                        </select>
+                        <button class="btn btn-danger btn-small" onclick="eliminarImagen('RONALDO')">🗑️</button>
+                    </div>
+                    <div style="margin-top:8px;font-size:0.7rem;opacity:0.4;">
+                        Formatos: JPG, PNG, GIF, WEBP | Máx: 5MB
+                    </div>
+                </div>
+
+                <div class="image-group">
+                    <h4 style="color: #4444ff;">🇦🇷 MESSI</h4>
+                    <div class="image-preview" id="messi-preview">
+                        <button class="delete-btn" onclick="eliminarImagen('MESSI')" title="Eliminar imagen">✕</button>
+                    </div>
+                    <div class="image-status" id="messi-status">📷 Sin imagen</div>
+                    <div class="image-actions">
+                        <button class="upload-btn" onclick="document.getElementById('messi-upload').click()">📤 Subir imagen</button>
+                        <input type="file" id="messi-upload" accept="image/*" onchange="subirImagen('MESSI', this)">
+                        <select id="calidad-messi" class="quality-select">
+                            <option value="0.9">Alta (90%)</option>
+                            <option value="0.7" selected>Media (70%)</option>
+                            <option value="0.5">Baja (50%)</option>
+                            <option value="0.3">Mínima (30%)</option>
+                        </select>
+                        <button class="btn btn-danger btn-small" onclick="eliminarImagen('MESSI')">🗑️</button>
+                    </div>
+                    <div style="margin-top:8px;font-size:0.7rem;opacity:0.4;">
+                        Formatos: JPG, PNG, GIF, WEBP | Máx: 5MB
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:15px;">
+                <button class="btn btn-primary" onclick="aplicarImagenesAlStream()">✅ Aplicar imágenes al stream</button>
+            </div>
+        </div>
+
         <div class="grid">
-            <!-- Poderes RONALDO -->
             <div class="card">
                 <div class="card-title">
                     <span class="icon">🐐</span> Poderes RONALDO
                 </div>
                 <div class="power-section ronaldo">
-                    <div class="power-grid" id="poderes-ronaldo">
-                        <!-- Se llena con JavaScript -->
-                    </div>
+                    <div class="power-grid" id="poderes-ronaldo"></div>
                 </div>
             </div>
 
-            <!-- Poderes MESSI -->
             <div class="card">
                 <div class="card-title">
                     <span class="icon">🐐</span> Poderes MESSI
                 </div>
                 <div class="power-section messi">
-                    <div class="power-grid" id="poderes-messi">
-                        <!-- Se llena con JavaScript -->
-                    </div>
+                    <div class="power-grid" id="poderes-messi"></div>
                 </div>
             </div>
         </div>
 
-        <div class="grid">
-            <!-- Poderes NEUTRALES -->
-            <div class="card">
-                <div class="card-title">
-                    <span class="icon">⚡</span> Poderes Neutrales
-                </div>
-                <div class="power-section neutral">
-                    <div class="power-grid" id="poderes-neutrales">
-                        <!-- Se llena con JavaScript -->
-                    </div>
-                </div>
+        <div class="card" style="margin-bottom:20px;">
+            <div class="card-title">
+                <span class="icon">⚡</span> Poderes Neutrales
             </div>
-
-            <!-- Configuración de jugadores -->
-            <div class="card">
-                <div class="card-title">
-                    <span class="icon">🖼️</span> Imágenes de Jugadores
-                </div>
-                <div class="player-image-upload">
-                    <div class="image-group">
-                        <h4 style="color: #ff4444;">🇵🇹 Ronaldo</h4>
-                        <div class="image-preview" id="ronaldo-preview" style="background: linear-gradient(135deg, #ff4444, #cc0000);"></div>
-                        <button class="upload-btn" onclick="document.getElementById('ronaldo-upload').click()">📤 Subir imagen</button>
-                        <input type="file" id="ronaldo-upload" accept="image/*" onchange="uploadImage('ronaldo', this)">
-                    </div>
-                    <div class="image-group">
-                        <h4 style="color: #4444ff;">🇦🇷 Messi</h4>
-                        <div class="image-preview" id="messi-preview" style="background: linear-gradient(135deg, #4444ff, #0000cc);"></div>
-                        <button class="upload-btn" onclick="document.getElementById('messi-upload').click()">📤 Subir imagen</button>
-                        <input type="file" id="messi-upload" accept="image/*" onchange="uploadImage('messi', this)">
-                    </div>
-                </div>
-                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="btn btn-primary btn-small" onclick="updatePlayerImages()">✅ Aplicar imágenes</button>
-                    <button class="btn btn-danger btn-small" onclick="resetPlayerImages()">🔄 Restaurar</button>
-                </div>
+            <div class="power-section neutral">
+                <div class="power-grid" id="poderes-neutrales"></div>
             </div>
         </div>
 
-        <!-- Eventos -->
-        <div class="card" style="margin-top: 20px;">
+        <div class="card">
             <div class="card-title">
                 <span class="icon">📋</span> Eventos en Tiempo Real
             </div>
@@ -603,24 +878,329 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/browser-image-compression/2.0.2/browser-image-compression.min.js"></script>
     <script>
+        // ==================== CONFIGURACIÓN ====================
         const SUPABASE_URL = 'https://qddfdisbnwnnlvkrnckd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZGZkaXNibndubmx2a3JuY2tkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDQwMzcsImV4cCI6MjEwMjQyMDAzN30.9Jsgl0qepqjJ8oiiewyPZK3vOsqm49EnLCEtOar5MiQ';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentMatchId = null;
-        let playerImages = { ronaldo: null, messi: null };
         let poderesData = [];
+        let usuarioActual = null;
+        let poderesActivosInterval = null;
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // ==================== AUTENTICACIÓN CON SUPABASE ====================
+        async function verificarPasswordSupabase() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+
+            if (!email || !password) {
+                document.getElementById('auth-error').textContent = '❌ Ingresa email y contraseña';
+                document.getElementById('auth-error').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('auth-loading').style.display = 'block';
+            document.getElementById('auth-error').style.display = 'none';
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    document.getElementById('auth-error').textContent = '❌ ' + error.message;
+                    document.getElementById('auth-error').style.display = 'block';
+                    document.getElementById('auth-loading').style.display = 'none';
+                    return;
+                }
+
+                if (data && data.user) {
+                    usuarioActual = data.user;
+                    document.getElementById('auth-overlay').style.display = 'none';
+                    document.getElementById('admin-content').style.display = 'block';
+                    document.getElementById('auth-loading').style.display = 'none';
+                    initAdmin();
+                }
+
+            } catch (error) {
+                document.getElementById('auth-error').textContent = '❌ Error de conexión: ' + error.message;
+                document.getElementById('auth-error').style.display = 'block';
+                document.getElementById('auth-loading').style.display = 'none';
+            }
+        }
+
+        async function cerrarSesionSupabase() {
+            await supabaseClient.auth.signOut();
+            usuarioActual = null;
+            document.getElementById('auth-overlay').style.display = 'flex';
+            document.getElementById('admin-content').style.display = 'none';
+            document.getElementById('auth-password').value = '';
+            document.getElementById('auth-error').style.display = 'none';
+            document.getElementById('auth-loading').style.display = 'none';
+            
+            if (poderesActivosInterval) {
+                clearInterval(poderesActivosInterval);
+                poderesActivosInterval = null;
+            }
+        }
+
+        async function verificarSesionActiva() {
+            const { data } = await supabaseClient.auth.getSession();
+            if (data && data.session) {
+                usuarioActual = data.session.user;
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('admin-content').style.display = 'block';
+                initAdmin();
+            }
+        }
+
+        // ==================== IMÁGENES CON COMPRESIÓN ====================
+        async function subirImagen(jugador, input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const tiposValidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!tiposValidos.includes(file.type)) {
+                showStatus('Formato no válido. Usa JPG, PNG, GIF o WEBP', 'error');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                showStatus('La imagen es muy grande. Máximo 5MB', 'error');
+                return;
+            }
+
+            try {
+                showStatus(`📤 Comprimiendo y subiendo imagen de ${jugador}...`, 'info');
+
+                const qualityId = jugador === 'RONALDO' ? 'calidad-ronaldo' : 'calidad-messi';
+                const quality = parseFloat(document.getElementById(qualityId).value) || 0.7;
+
+                const options = {
+                    maxSizeMB: 0.5,
+                    maxWidthOrHeight: 800,
+                    useWebWorker: true,
+                    quality: quality
+                };
+
+                const compressedFile = await imageCompression(file, options);
+                
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const base64 = e.target.result;
+
+                    const { error } = await supabaseClient
+                        .from('jugadores')
+                        .update({ imagen_url: base64 })
+                        .eq('nombre', jugador);
+
+                    if (error) {
+                        showStatus(`Error al subir imagen: ${error.message}`, 'error');
+                        return;
+                    }
+
+                    const previewId = jugador === 'RONALDO' ? 'ronaldo-preview' : 'messi-preview';
+                    const statusId = jugador === 'RONALDO' ? 'ronaldo-status' : 'messi-status';
+                    
+                    document.getElementById(previewId).style.backgroundImage = `url(${base64})`;
+                    document.getElementById(previewId).style.backgroundSize = 'cover';
+                    document.getElementById(statusId).textContent = '✅ Imagen cargada (' + (compressedFile.size / 1024).toFixed(1) + 'KB)';
+                    document.getElementById(statusId).className = 'image-status loaded';
+
+                    showStatus(`✅ Imagen de ${jugador} subida correctamente (${(compressedFile.size / 1024).toFixed(1)}KB)`, 'success');
+                };
+
+                reader.readAsDataURL(compressedFile);
+
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function eliminarImagen(jugador) {
+            if (!confirm(`¿Eliminar la imagen de ${jugador}?`)) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('jugadores')
+                    .update({ imagen_url: null })
+                    .eq('nombre', jugador);
+
+                if (error) {
+                    showStatus(`Error al eliminar imagen: ${error.message}`, 'error');
+                    return;
+                }
+
+                const previewId = jugador === 'RONALDO' ? 'ronaldo-preview' : 'messi-preview';
+                const statusId = jugador === 'RONALDO' ? 'ronaldo-status' : 'messi-status';
+                
+                document.getElementById(previewId).style.backgroundImage = 'none';
+                document.getElementById(previewId).style.backgroundSize = 'auto';
+                document.getElementById(statusId).textContent = '📷 Sin imagen';
+                document.getElementById(statusId).className = 'image-status';
+
+                showStatus(`🗑️ Imagen de ${jugador} eliminada`, 'success');
+
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function cargarImagenes() {
+            const { data, error } = await supabaseClient
+                .from('jugadores')
+                .select('nombre, imagen_url')
+                .in('nombre', ['RONALDO', 'MESSI']);
+
+            if (error) {
+                console.error('Error cargando imágenes:', error);
+                return;
+            }
+
+            data.forEach(jugador => {
+                const previewId = jugador.nombre === 'RONALDO' ? 'ronaldo-preview' : 'messi-preview';
+                const statusId = jugador.nombre === 'RONALDO' ? 'ronaldo-status' : 'messi-status';
+
+                if (jugador.imagen_url) {
+                    document.getElementById(previewId).style.backgroundImage = `url(${jugador.imagen_url})`;
+                    document.getElementById(previewId).style.backgroundSize = 'cover';
+                    document.getElementById(statusId).textContent = '✅ Imagen cargada';
+                    document.getElementById(statusId).className = 'image-status loaded';
+                } else {
+                    document.getElementById(previewId).style.backgroundImage = 'none';
+                    document.getElementById(previewId).style.backgroundSize = 'auto';
+                    document.getElementById(statusId).textContent = '📷 Sin imagen';
+                    document.getElementById(statusId).className = 'image-status';
+                }
+            });
+        }
+
+        function aplicarImagenesAlStream() {
+            localStorage.setItem('actualizarImagenes', Date.now().toString());
+            showStatus('📤 Imágenes actualizadas en el stream', 'success');
+        }
+
+        // ==================== META DE GOLES ====================
+        async function actualizarMeta() {
+            const meta = parseInt(document.getElementById('input-meta').value) || 5;
+            
+            if (!currentMatchId) {
+                showStatus('No hay partida activa', 'error');
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from('partidas')
+                .update({ goles_para_ganar: meta })
+                .eq('id', currentMatchId);
+
+            if (error) {
+                showStatus('Error actualizando meta', 'error');
+                console.error(error);
+                return;
+            }
+
+            document.getElementById('meta-actual').textContent = meta;
+            showStatus(`✅ Meta actualizada a ${meta} goles`, 'success');
+        }
+
+        async function cargarMetaActual() {
+            if (!currentMatchId) return;
+
+            const { data, error } = await supabaseClient
+                .from('partidas')
+                .select('goles_para_ganar')
+                .eq('id', currentMatchId)
+                .single();
+
+            if (error) {
+                console.error('Error cargando meta:', error);
+                return;
+            }
+
+            if (data) {
+                const meta = data.goles_para_ganar || 5;
+                document.getElementById('input-meta').value = meta;
+                document.getElementById('meta-actual').textContent = meta;
+            }
+        }
+
+        // ==================== INICIALIZACIÓN ====================
+        function initAdmin() {
             setupRealtime();
             getActiveMatch();
             loadPoderes();
+            cargarImagenes();
             updateStatusBadge();
-        });
+            cargarPoderesActivos();
+            
+            // Actualizar poderes activos cada 1 segundo
+            if (poderesActivosInterval) {
+                clearInterval(poderesActivosInterval);
+            }
+            poderesActivosInterval = setInterval(cargarPoderesActivos, 1000);
+        }
 
+        // ==================== PODERES ACTIVOS EN TIEMPO REAL ====================
+        async function cargarPoderesActivos() {
+            const { data, error } = await supabaseClient
+                .from('poderes')
+                .select('*')
+                .eq('activo', true)
+                .order('creado_en', { ascending: false });
+
+            if (error) {
+                console.error('Error cargando poderes activos:', error);
+                return;
+            }
+
+            const container = document.getElementById('poderes-activos');
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="sin-poderes">🔍 No hay poderes activos en este momento</div>';
+                return;
+            }
+
+            let html = '';
+            const ahora = new Date();
+            
+            data.forEach(poder => {
+                const expira = new Date(poder.expira_en);
+                const tiempoRestante = Math.max(0, Math.floor((expira - ahora) / 1000));
+                
+                // Determinar color según el poder
+                let colorClase = '';
+                if (poder.nombre.toLowerCase().includes('ronaldo')) colorClase = 'color: #ff4444;';
+                else if (poder.nombre.toLowerCase().includes('messi')) colorClase = 'color: #4444ff;';
+                else if (poder.nombre.toLowerCase().includes('caos')) colorClase = 'color: #ff6b35;';
+                else if (poder.nombre.toLowerCase().includes('lento')) colorClase = 'color: #00bcd4;';
+                else colorClase = 'color: #ffd700;';
+
+                const minutos = Math.floor(tiempoRestante / 60);
+                const segundos = tiempoRestante % 60;
+                const tiempoStr = minutos > 0 ? `${minutos}m ${segundos}s` : `${segundos}s`;
+
+                html += `
+                    <div class="poder-activo-item">
+                        <span>
+                            <span class="poder-nombre" style="${colorClase}">⚡ ${poder.nombre}</span>
+                            <span class="poder-usuario">por <strong>${poder.usuario || 'Admin'}</strong></span>
+                        </span>
+                        <span class="poder-tiempo">⏱️ ${tiempoStr}</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ==================== PODERES ====================
         async function loadPoderes() {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('poderes_personalizados')
                 .select('*')
                 .eq('activo', true)
@@ -640,12 +1220,12 @@
             const messiPoderes = poderes.filter(p => p.comando.includes('messi'));
             const neutrales = poderes.filter(p => !p.comando.includes('ronaldo') && !p.comando.includes('messi'));
 
-            renderPowerGrid('poderes-ronaldo', ronaldoPoderes, 'rojo');
-            renderPowerGrid('poderes-messi', messiPoderes, 'azul');
-            renderPowerGrid('poderes-neutrales', neutrales, 'neutral');
+            renderPowerGrid('poderes-ronaldo', ronaldoPoderes);
+            renderPowerGrid('poderes-messi', messiPoderes);
+            renderPowerGrid('poderes-neutrales', neutrales);
         }
 
-        function renderPowerGrid(elementId, poderes, tipo) {
+        function renderPowerGrid(elementId, poderes) {
             const container = document.getElementById(elementId);
             if (!container) return;
 
@@ -655,7 +1235,7 @@
             }
 
             container.innerHTML = poderes.map(p => `
-                <div class="power-card" data-power="${p.comando}">
+                <div class="power-card" data-power="${p.comando}" id="power-card-${p.comando}">
                     <div class="power-icon">${getPowerIcon(p.comando)}</div>
                     <div class="power-name">${p.nombre}</div>
                     <div class="power-cost">🎯 ${p.costo} pts · ${p.duracion}s</div>
@@ -668,57 +1248,60 @@
 
         function getPowerIcon(comando) {
             const icons = {
-                'velocidadronaldo': '🏃',
-                'velocidadmessi': '🏃',
-                'lentoronaldo': '🐢',
-                'lentomessi': '🐢',
-                'golronaldo': '⚽',
-                'golmessi': '⚽',
-                'caosronaldo': '🌀',
-                'caosmessi': '🌀',
-                'escudoronaldo': '🛡️',
-                'escudomessi': '🛡️',
-                'lluviaronaldo': '🌧️',
-                'lluviamessi': '🌧️',
-                'congelarronaldo': '❄️',
-                'congelarmessi': '❄️',
-                'doblepuntosronaldo': '💎',
-                'doblepuntosmessi': '💎',
-                'super': '⚡',
-                'campopequeno': '📐',
-                'invertir': '🔄'
+                'velocidadronaldo': '🏃', 'velocidadmessi': '🏃',
+                'lentoronaldo': '🐢', 'lentomessi': '🐢',
+                'golronaldo': '⚽', 'golmessi': '⚽',
+                'caosronaldo': '🌀', 'caosmessi': '🌀',
+                'escudoronaldo': '🛡️', 'escudomessi': '🛡️',
+                'lluviaronaldo': '🌧️', 'lluviamessi': '🌧️',
+                'congelarronaldo': '❄️', 'congelarmessi': '❄️',
+                'doblepuntosronaldo': '💎', 'doblepuntosmessi': '💎',
+                'super': '⚡', 'campopequeno': '📐', 'invertir': '🔄'
             };
             return icons[comando] || '⭐';
         }
 
+        // ==================== PARTIDA ====================
         function setupRealtime() {
-            supabase
+            supabaseClient
                 .channel('partidas-admin-changes')
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'partidas' }, (payload) => {
                     const p = payload.new;
                     if (p.puntaje_rojo !== undefined && p.puntaje_azul !== undefined) {
                         updateScoreUI(p.puntaje_rojo, p.puntaje_azul);
                     }
+                    if (p.goles_para_ganar !== undefined) {
+                        document.getElementById('meta-actual').textContent = p.goles_para_ganar;
+                        document.getElementById('input-meta').value = p.goles_para_ganar;
+                    }
                 })
                 .subscribe();
 
-            supabase
+            supabaseClient
                 .channel('eventos-admin-changes')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'eventos' }, (payload) => {
                     addEventToLog(payload.new);
                 })
                 .subscribe();
 
-            supabase
-                .channel('poderes-cambios')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'poderes' }, () => {
-                    // Actualizar estado visual de poderes activos
+            supabaseClient
+                .channel('poderes-admin-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'poderes' }, (payload) => {
+                    cargarPoderesActivos();
+                    // Actualizar el estado visual de los botones de poder
+                    if (payload.eventType === 'INSERT' && payload.new.activo) {
+                        const card = document.getElementById(`power-card-${payload.new.nombre.toLowerCase()}`);
+                        if (card) card.classList.add('power-active');
+                    } else if (payload.eventType === 'UPDATE' && !payload.new.activo) {
+                        const card = document.getElementById(`power-card-${payload.new.nombre.toLowerCase()}`);
+                        if (card) card.classList.remove('power-active');
+                    }
                 })
                 .subscribe();
         }
 
         async function getActiveMatch() {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('partidas')
                 .select('*')
                 .eq('estado', 'activa')
@@ -733,6 +1316,8 @@
             if (data && data.length > 0) {
                 currentMatchId = data[0].id;
                 updateScoreUI(data[0].puntaje_rojo || 0, data[0].puntaje_azul || 0);
+                document.getElementById('meta-actual').textContent = data[0].goles_para_ganar || 5;
+                document.getElementById('input-meta').value = data[0].goles_para_ganar || 5;
                 showStatus('Partida activa encontrada', 'success');
             } else {
                 showStatus('No hay partida activa. Inicia una nueva.', 'info');
@@ -754,7 +1339,7 @@
             const currentScore = parseInt(document.getElementById(`score-${team}`).textContent);
             const newScore = Math.max(0, currentScore + amount);
 
-            supabase
+            supabaseClient
                 .from('partidas')
                 .update({ [field]: newScore })
                 .eq('id', currentMatchId)
@@ -773,9 +1358,9 @@
         }
 
         async function startMatch() {
-            const goalsToWin = parseInt(document.getElementById('goals-to-win').value) || 5;
+            const goalsToWin = parseInt(document.getElementById('input-meta').value) || 5;
             
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('partidas')
                 .insert({
                     estado: 'activa',
@@ -795,6 +1380,8 @@
 
             currentMatchId = data.id;
             updateScoreUI(0, 0);
+            document.getElementById('meta-actual').textContent = goalsToWin;
+            document.getElementById('input-meta').value = goalsToWin;
             showStatus('Partida iniciada correctamente', 'success');
             updateStatusBadge();
             await logEvent('Partida iniciada', 'info');
@@ -806,7 +1393,7 @@
                 return;
             }
 
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('partidas')
                 .update({
                     estado: 'finalizada',
@@ -824,6 +1411,9 @@
             currentMatchId = null;
             updateStatusBadge();
             await logEvent('Partida finalizada', 'info');
+            
+            // Limpiar poderes activos
+            document.getElementById('poderes-activos').innerHTML = '<div class="sin-poderes">🔍 No hay poderes activos en este momento</div>';
         }
 
         async function resetMatch() {
@@ -832,7 +1422,7 @@
                 return;
             }
 
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('partidas')
                 .update({ puntaje_rojo: 0, puntaje_azul: 0 })
                 .eq('id', currentMatchId);
@@ -856,7 +1446,7 @@
             }
 
             // Verificar si ya está activo
-            const { data: existing } = await supabase
+            const { data: existing } = await supabaseClient
                 .from('poderes')
                 .select('*')
                 .eq('nombre', power.nombre)
@@ -871,7 +1461,7 @@
             const expireTime = new Date();
             expireTime.setSeconds(expireTime.getSeconds() + power.duracion);
 
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('poderes')
                 .insert({
                     nombre: power.nombre,
@@ -892,20 +1482,27 @@
 
             showStatus(`✅ Poder ${power.nombre} activado (${power.duracion}s)`, 'success');
             await logEvent(`Poder ${power.nombre} activado por Admin`, 'power');
+            
+            // Marcar el botón como activo
+            const card = document.getElementById(`power-card-${comando}`);
+            if (card) card.classList.add('power-active');
 
-            // Desactivar automáticamente
+            // Desactivar automáticamente después de la duración
             setTimeout(async () => {
-                await supabase
+                await supabaseClient
                     .from('poderes')
                     .update({ activo: false })
                     .eq('id', data.id);
+                const card2 = document.getElementById(`power-card-${comando}`);
+                if (card2) card2.classList.remove('power-active');
             }, power.duracion * 1000);
         }
 
+        // ==================== EVENTOS ====================
         async function logEvent(detalle, tipo) {
             if (!currentMatchId) return;
 
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('eventos')
                 .insert({
                     partida_id: currentMatchId,
@@ -931,8 +1528,14 @@
             else if (event.tipo === 'gol') icon = '⚽';
             else if (event.tipo === 'info') icon = 'ℹ️';
             
+            // Resaltar eventos de poder
+            let powerClass = '';
+            if (event.tipo === 'power') {
+                powerClass = 'power-active';
+            }
+            
             item.innerHTML = `
-                <span>${icon} ${event.detalle}</span>
+                <span class="${powerClass}">${icon} ${event.detalle}</span>
                 <span class="time">${timeStr}</span>
             `;
             
@@ -943,6 +1546,7 @@
             while (log.children.length > 50) log.removeChild(log.lastChild);
         }
 
+        // ==================== UTILIDADES ====================
         function showStatus(message, type = 'info') {
             const status = document.getElementById('status-message');
             status.className = `status-message ${type}`;
@@ -965,63 +1569,21 @@
             }
         }
 
-        function uploadImage(player, input) {
-            const file = input.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById(`${player}-preview`);
-                preview.style.backgroundImage = `url(${e.target.result})`;
-                preview.style.backgroundSize = 'cover';
-                playerImages[player] = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function updatePlayerImages() {
-            const iframe = document.querySelector('iframe');
-            if (iframe && iframe.contentWindow) {
-                if (playerImages.ronaldo) {
-                    iframe.contentWindow.postMessage({
-                        type: 'updatePlayerImage',
-                        player: 'ronaldo',
-                        image: playerImages.ronaldo
-                    }, '*');
-                }
-                if (playerImages.messi) {
-                    iframe.contentWindow.postMessage({
-                        type: 'updatePlayerImage',
-                        player: 'messi',
-                        image: playerImages.messi
-                    }, '*');
-                }
-                showStatus('Imágenes aplicadas al stream', 'success');
-            } else {
-                showStatus('No se encontró el stream. Abre index.html', 'error');
-            }
-        }
-
-        function resetPlayerImages() {
-            document.getElementById('ronaldo-preview').style.background = 'linear-gradient(135deg, #ff4444, #cc0000)';
-            document.getElementById('messi-preview').style.background = 'linear-gradient(135deg, #4444ff, #0000cc)';
-            document.getElementById('ronaldo-preview').style.backgroundSize = 'auto';
-            document.getElementById('messi-preview').style.backgroundSize = 'auto';
-            playerImages.ronaldo = null;
-            playerImages.messi = null;
-            showStatus('Imágenes restauradas', 'info');
-        }
-
-        // Exponer funciones globales
+        // ==================== EXPORTAR FUNCIONES ====================
+        window.verificarPasswordSupabase = verificarPasswordSupabase;
+        window.cerrarSesionSupabase = cerrarSesionSupabase;
         window.adjustScore = adjustScore;
         window.startMatch = startMatch;
         window.endMatch = endMatch;
         window.resetMatch = resetMatch;
         window.activatePower = activatePower;
-        window.uploadImage = uploadImage;
-        window.updatePlayerImages = updatePlayerImages;
-        window.resetPlayerImages = resetPlayerImages;
+        window.subirImagen = subirImagen;
+        window.eliminarImagen = eliminarImagen;
+        window.aplicarImagenesAlStream = aplicarImagenesAlStream;
+        window.actualizarMeta = actualizarMeta;
 
+        // Verificar sesión al cargar
+        document.addEventListener('DOMContentLoaded', verificarSesionActiva);
         setInterval(() => getActiveMatch(), 30000);
     </script>
 </body>

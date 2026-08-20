@@ -55,29 +55,6 @@
             opacity: 0.5;
             margin-top: 20px;
         }
-        .team-badge {
-            display: inline-block;
-            padding: 4px 15px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-        .team-badge.rojo {
-            background: rgba(255,68,68,0.3);
-            color: #ff4444;
-            border: 1px solid #ff4444;
-        }
-        .team-badge.azul {
-            background: rgba(68,68,255,0.3);
-            color: #4444ff;
-            border: 1px solid #4444ff;
-        }
-        .team-badge.neutral {
-            background: rgba(255,215,0,0.3);
-            color: #ffd700;
-            border: 1px solid #ffd700;
-        }
         .error-card {
             border-color: #ff4444;
             box-shadow: 0 20px 60px rgba(255,68,68,0.1);
@@ -85,31 +62,13 @@
         .error-card .title {
             color: #ff4444;
         }
-        .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .stat-item {
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            padding: 10px;
-        }
-        .stat-item .label {
-            font-size: 0.7em;
-            opacity: 0.5;
-            text-transform: uppercase;
-        }
-        .stat-item .value {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-top: 3px;
+        .loading {
+            border-color: #ffd700;
         }
     </style>
 </head>
 <body>
-    <div class="container" id="app">
+    <div class="container">
         <div class="card" id="resultCard">
             <div class="icon">⏳</div>
             <div class="title">Consultando...</div>
@@ -119,58 +78,68 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // Configuración
         const SUPABASE_URL = 'https://qddfdisbnwnnlvkrnckd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkZGZkaXNibndubmx2a3JuY2tkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4NDQwMzcsImV4cCI6MjEwMjQyMDAzN30.9Jsgl0qepqjJ8oiiewyPZK3vOsqm49EnLCEtOar5MiQ';
+        
+        // Crear cliente
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Obtener usuario
         const urlParams = new URLSearchParams(window.location.search);
         const userName = urlParams.get('user') || 'Anónimo';
         const resultCard = document.getElementById('resultCard');
 
         async function getPoints() {
             try {
+                // Consultar jugador
                 const { data, error } = await supabase
                     .from('jugadores')
                     .select('*')
                     .eq('nombre', userName)
                     .maybeSingle();
 
+                // Si hay error, mostrarlo
                 if (error) {
-                    throw new Error(error.message);
+                    throw new Error('Error en la consulta: ' + error.message);
                 }
 
+                // Datos del usuario
                 const points = data?.puntos || 0;
                 const color = data?.color || 'neutral';
                 const partidasJugadas = data?.partidas_jugadas || 0;
                 const poderesUsados = data?.poderes_usados || 0;
 
+                // Equipo
                 const teamLabel = color === 'rojo' ? '🇵🇹 RONALDO' : 
                                  color === 'azul' ? '🇦🇷 MESSI' : '⚡ SIN EQUIPO';
                 const teamClass = color === 'rojo' ? 'rojo' : color === 'azul' ? 'azul' : 'neutral';
 
+                // Mostrar resultados
                 resultCard.className = 'card';
                 resultCard.innerHTML = `
                     <div class="icon">💰</div>
                     <div class="title">Tus Puntos</div>
                     <div class="user-name">${userName}</div>
-                    <div class="team-badge ${teamClass}">${teamLabel}</div>
+                    <div style="display:inline-block;padding:4px 15px;border-radius:20px;font-size:0.8em;font-weight:bold;margin-top:5px;background:rgba(255,215,0,0.2);color:#ffd700;border:1px solid #ffd700;">
+                        ${teamLabel}
+                    </div>
                     <div class="points-value">${points}</div>
-                    <div class="stats">
-                        <div class="stat-item">
-                            <div class="label">Partidas Jugadas</div>
-                            <div class="value">${partidasJugadas}</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;">
+                        <div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:10px;">
+                            <div style="font-size:0.7em;opacity:0.5;text-transform:uppercase;">Partidas</div>
+                            <div style="font-size:1.2em;font-weight:bold;margin-top:3px;">${partidasJugadas}</div>
                         </div>
-                        <div class="stat-item">
-                            <div class="label">Poderes Usados</div>
-                            <div class="value">${poderesUsados}</div>
+                        <div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:10px;">
+                            <div style="font-size:0.7em;opacity:0.5;text-transform:uppercase;">Poderes Usados</div>
+                            <div style="font-size:1.2em;font-weight:bold;margin-top:3px;">${poderesUsados}</div>
                         </div>
                     </div>
-                    <div class="detail">
-                        💡 Ganas 2 puntos por minuto viendo el directo
-                    </div>
+                    <div class="detail">💡 Ganas 2 puntos por minuto viendo el directo</div>
                 `;
 
             } catch (error) {
+                // Mostrar error
                 resultCard.className = 'card error-card';
                 resultCard.innerHTML = `
                     <div class="icon">⚠️</div>
@@ -184,6 +153,7 @@
             }
         }
 
+        // Ejecutar
         getPoints();
     </script>
 </body>
