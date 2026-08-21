@@ -1,300 +1,99 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GolFinaLive - Stream</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Fútbol Horizontal Interactivo</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!-- EFECTOS FUTURISTAS -->
-    <div class="particle-nebula" style="width:450px;height:450px;background:#b026ff;top:-10%;left:-8%;animation-delay:0s;"></div>
-    <div class="particle-nebula" style="width:550px;height:550px;background:#00f0ff;bottom:-10%;right:-8%;animation-delay:-8s;"></div>
-    <div class="particle-nebula" style="width:350px;height:350px;background:#ff2d95;top:50%;left:50%;animation-delay:-16s;"></div>
-    
-    <div id="stars-container"></div>
-    <div id="shooting-stars-container"></div>
-    <div id="sound-waves-container"></div>
-
-    <div id="game-container">
-        <!-- HEADER -->
-        <div id="stream-header">
-            <div>
-                <h1>⚽ GOLFINALIVE</h1>
-                <div class="subtitle">🎮 Interactivo · 19 Poderes</div>
-            </div>
-            <div id="timer-container">
-                <span id="match-timer">00:00</span>
-            </div>
-        </div>
-
-        <!-- CAMPO -->
-        <div id="field">
-            <div id="campo-wrapper">
-                <canvas id="campo-canvas"></canvas>
-                <div id="ball-ronaldo" class="ball ball-ronaldo"></div>
-                <div id="ball-messi" class="ball ball-messi"></div>
-            </div>
-
-            <!-- CONTROLES DE FLECHAS PARA EL ESTADIO -->
-            <div id="controles-estadio">
-                <button class="btn-estadio" onclick="moverEstadio('arriba')" title="Mover estadio arriba">▲</button>
-                <button class="btn-estadio" onclick="moverEstadio('izquierda')" title="Mover estadio izquierda">◀</button>
-                <button class="btn-estadio" onclick="moverEstadio('centro')" title="Centrar estadio">●</button>
-                <button class="btn-estadio" onclick="moverEstadio('derecha')" title="Mover estadio derecha">▶</button>
-                <button class="btn-estadio" onclick="moverEstadio('abajo')" title="Mover estadio abajo">▼</button>
-            </div>
-
-            <!-- PANEL MARCADOR -->
-            <div id="panel-marcador" class="panel-flotante">
-                <div class="panel-header">
-                    <span class="panel-titulo">🏆 MARCADOR</span>
-                </div>
-                <div class="panel-body">
-                    <div class="score-item ronaldo">
-                        <div class="player-img-container">
-                            <div class="player-img ronaldo-img" id="ronaldo-img"></div>
-                            <div class="player-name-label">RONALDO</div>
-                        </div>
-                        <div class="score neon-rojo" id="score-ronaldo">0</div>
-                    </div>
-                    <div class="score-vs neon-dorado">⚡</div>
-                    <div class="score-item messi">
-                        <div class="score neon-azul" id="score-messi">0</div>
-                        <div class="player-img-container">
-                            <div class="player-img messi-img" id="messi-img"></div>
-                            <div class="player-name-label">MESSI</div>
-                        </div>
-                    </div>
-                    <div class="meta-info">
-                        <div class="meta-label">🎯 META</div>
-                        <div class="meta-value neon-dorado" id="meta-goles-show">5</div>
-                    </div>
-                </div>
-                <!-- CONTROLES DE FLECHAS PARA MARCADOR -->
-                <div class="controles-flechas">
-                    <button class="btn-flecha" onclick="moverPanel('panel-marcador', 'arriba')">▲</button>
-                    <button class="btn-flecha" onclick="moverPanel('panel-marcador', 'izquierda')">◀</button>
-                    <button class="btn-flecha" onclick="moverPanel('panel-marcador', 'centro')">●</button>
-                    <button class="btn-flecha" onclick="moverPanel('panel-marcador', 'derecha')">▶</button>
-                    <button class="btn-flecha" onclick="moverPanel('panel-marcador', 'abajo')">▼</button>
-                </div>
-            </div>
-
-            <!-- PANEL PODERES -->
-            <div id="panel-poderes" class="panel-flotante">
-                <div class="panel-header">
-                    <span class="panel-titulo">⚡ PODERES</span>
-                    <span class="poderes-contador" id="contador-poderes">0</span>
-                </div>
-                <div class="panel-body">
-                    <div id="lista-poderes-activos">
-                        <div class="sin-poderes">🔍 No hay poderes activos</div>
-                    </div>
-                </div>
-                <!-- CONTROLES DE FLECHAS PARA PODERES -->
-                <div class="controles-flechas">
-                    <button class="btn-flecha" onclick="moverPanel('panel-poderes', 'arriba')">▲</button>
-                    <button class="btn-flecha" onclick="moverPanel('panel-poderes', 'izquierda')">◀</button>
-                    <button class="btn-flecha" onclick="moverPanel('panel-poderes', 'centro')">●</button>
-                    <button class="btn-flecha" onclick="moverPanel('panel-poderes', 'derecha')">▶</button>
-                    <button class="btn-flecha" onclick="moverPanel('panel-poderes', 'abajo')">▼</button>
-                </div>
-            </div>
-
-            <!-- BANNER PODERES -->
-            <div id="power-banner">
-                <div>⚡ <span class="power-name" id="power-name">Poder Activado</span></div>
-                <div style="font-size:0.7em;margin-top:3px;">por <span class="power-user" id="power-user">Usuario</span></div>
-            </div>
-            <div id="power-timer">⏱️ <span id="power-time-left">60</span>s</div>
-            <div id="goal-notification">⚽ ¡GOL!</div>
-            <div id="chaos-overlay"></div>
-            <div id="recordatorio-timer">⏳ Próximo poder en <span id="recordatorio-segundos">30</span>s</div>
-
-            <!-- PANEL CONTROLES -->
-            <div id="panel-controles" class="panel-flotante">
-                <div class="panel-header">
-                    <span class="panel-titulo">🎮 CONTROLES</span>
-                </div>
-                <div class="panel-body">
-                    <span id="estado-partida" class="estado-detenido">⏹️ DETENIDO</span>
-                    <button id="btn-iniciar" class="btn-iniciar" onclick="iniciarPartida()">▶️ Iniciar</button>
-                    <button id="btn-detener" class="btn-detener" onclick="detenerPartida()" style="display:none;">⏹️ Detener</button>
-                    <button class="btn-reiniciar" onclick="reiniciarPartida()">🔄 Reiniciar</button>
-                    <div class="meta-input">
-                        <label>Meta:</label>
-                        <input type="number" id="meta-goles" value="50" min="1" max="999">
-                    </div>
-                    <a href="admin.html" target="_blank" class="btn-admin">⚙️ Admin</a>
-                    <button id="btn-toggle-audios" class="btn-audios" onclick="toggleAudios()">🔊 Audios</button>
-                    <button id="btn-toggle-config" class="btn-config" onclick="toggleConfiguracion()">⚙️ Config</button>
-                </div>
-                <!-- CONTROLES DE FLECHAS PARA CONTROLES -->
-                <div class="controles-flechas">
-                    <button class="btn-flecha" onclick="moverPanel('panel-controles', 'arriba')">▲</button>
-                    <button class="btn-flecha" onclick="moverPanel('panel-controles', 'izquierda')">◀</button>
-                    <button class="btn-flecha" onclick="moverPanel('panel-controles', 'centro')">●</button>
-                    <button class="btn-flecha" onclick="moverPanel('panel-controles', 'derecha')">▶</button>
-                    <button class="btn-flecha" onclick="moverPanel('panel-controles', 'abajo')">▼</button>
-                </div>
-            </div>
-
-            <!-- PANEL AUDIOS -->
-            <div id="panel-audios" class="panel-flotante">
-                <div class="panel-header">
-                    <span class="panel-titulo">🔊 SONIDOS</span>
-                </div>
-                <div class="panel-body">
-                    <button class="btn-ronaldo" onclick="reproducirSonido('ronaldo')">🐐 Ronaldo</button>
-                    <button class="btn-messi" onclick="reproducirSonido('messi')">🐐 Messi</button>
-                    <button class="btn-bienvenida" onclick="reproducirSonido('bienvenida')">👋 Bienvenida</button>
-                    <button class="btn-suscribete" onclick="reproducirSonido('suscribete')">🔔 Suscríbete</button>
-                    <button class="btn-elige" onclick="reproducirSonido('elige')">🔥 Elige</button>
-                    <button class="btn-ayuda" onclick="reproducirSonido('ayuda')">💪 Ayuda</button>
-                    <button class="btn-mejor" onclick="reproducirSonido('mejor')">🏆 Mejor</button>
-                    <button class="btn-poder" onclick="reproducirSonido('poder')">⚡ Poder</button>
-                    <button class="btn-ambiente" onclick="toggleAudioEstadio()">🎧 OFF</button>
-                </div>
-            </div>
-
-            <!-- PANEL CONFIGURACIÓN -->
-            <div id="panel-configuracion">
-                <h3>⚙️ CONFIGURACIÓN</h3>
-                
-                <div class="config-grupo">
-                    <label>📐 Ancho del campo</label>
-                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                        <button class="btn-config-option" onclick="setCampoAncho(250)">Pequeño</button>
-                        <button class="btn-config-option" onclick="setCampoAncho(400)">Mediano</button>
-                        <button class="btn-config-option active" onclick="setCampoAncho(600)">Grande</button>
-                        <button class="btn-config-option" onclick="setCampoAncho(800)">Extra</button>
-                        <button class="btn-config-option" onclick="setCampoAncho(1000)">Mega</button>
-                    </div>
-                    <input type="range" id="campo-ancho-slider" min="150" max="1200" value="600" step="10" oninput="setCampoAncho(this.value)">
-                    <span id="campo-ancho-label">600px</span>
-                </div>
-
-                <div class="config-grupo">
-                    <label>📏 Alto del campo</label>
-                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                        <button class="btn-config-option" onclick="setCampoAlto(200)">Pequeño</button>
-                        <button class="btn-config-option" onclick="setCampoAlto(300)">Mediano</button>
-                        <button class="btn-config-option active" onclick="setCampoAlto(400)">Grande</button>
-                        <button class="btn-config-option" onclick="setCampoAlto(500)">Extra</button>
-                        <button class="btn-config-option" onclick="setCampoAlto(650)">Mega</button>
-                    </div>
-                    <input type="range" id="campo-alto-slider" min="100" max="800" value="400" step="10" oninput="setCampoAlto(this.value)">
-                    <span id="campo-alto-label">400px</span>
-                </div>
-
-                <div class="config-grupo">
-                    <label>🎨 Color del campo</label>
-                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                        <button class="btn-color-option" style="background:#1a6b3a;" onclick="setCampoColor('#1a6b3a')">Verde</button>
-                        <button class="btn-color-option" style="background:#2d8a4e;" onclick="setCampoColor('#2d8a4e')">Claro</button>
-                        <button class="btn-color-option" style="background:#0d4a28;" onclick="setCampoColor('#0d4a28')">Oscuro</button>
-                        <button class="btn-color-option" style="background:#4a7c59;" onclick="setCampoColor('#4a7c59')">Pasto</button>
-                    </div>
-                    <input type="color" id="campo-color-picker" value="#1a6b3a" onchange="setCampoColor(this.value)">
-                </div>
-
-                <div class="config-grupo">
-                    <label>🖼️ Tamaño jugadores</label>
-                    <input type="range" id="player-size-slider" min="30" max="200" value="80" step="5" oninput="setPlayerImageSize(this.value)">
-                    <span id="player-size-label">80px</span>
-                </div>
-
-                <div class="config-grupo">
-                    <label>🥅 Tamaño porterías</label>
-                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                        <button class="btn-config-option" onclick="setGoalSize(0.3)">Mini</button>
-                        <button class="btn-config-option" onclick="setGoalSize(0.6)">Pequeña</button>
-                        <button class="btn-config-option active" onclick="setGoalSize(1.0)">Normal</button>
-                        <button class="btn-config-option" onclick="setGoalSize(1.8)">Grande</button>
-                        <button class="btn-config-option" onclick="setGoalSize(3.0)">Gigante</button>
-                    </div>
-                    <input type="range" id="goal-size-slider" min="0.3" max="3.0" value="1.0" step="0.1" oninput="setGoalSize(this.value)">
-                    <span id="goal-size-label">1.0</span>
-                </div>
-
-                <div class="config-grupo">
-    <label>⚡ Velocidad bolas</label>
-    <div style="display:flex;gap:4px;flex-wrap:wrap;">
-        <button class="btn-config-option" onclick="setBallSpeed(0.1)">Muy lenta</button>
-        <button class="btn-config-option" onclick="setBallSpeed(0.5)">Lenta</button>
-        <button class="btn-config-option active" onclick="setBallSpeed(1.0)">Normal</button>
-        <button class="btn-config-option" onclick="setBallSpeed(3.0)">Rápida</button>
-        <button class="btn-config-option" onclick="setBallSpeed(6.0)">Muy rápida</button>
-        <button class="btn-config-option" onclick="setBallSpeed(10.0)">Turbo</button>
-    </div>
-    <input type="range" id="ball-speed-slider" min="0.1" max="10" value="1.0" step="0.1" oninput="setBallSpeed(this.value)">
-    <span id="ball-speed-label">1.0</span>
-</div>
-
-                <div class="config-grupo">
-                    <label>🎯 Precisión del gol</label>
-                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                        <button class="btn-config-option" onclick="setPrecisionGol(0.2)">Muy estricto</button>
-                        <button class="btn-config-option active" onclick="setPrecisionGol(0.6)">Normal</button>
-                        <button class="btn-config-option" onclick="setPrecisionGol(1.0)">Tolerante</button>
-                        <button class="btn-config-option" onclick="setPrecisionGol(1.5)">Muy tolerante</button>
-                    </div>
-                    <input type="range" id="precision-gol-slider" min="0.1" max="2.0" value="0.6" step="0.05" oninput="setPrecisionGol(this.value)">
-                    <span id="precision-gol-label">0.6</span>
-                </div>
-
-                <div class="config-grupo">
-                    <label>📏 Margen del campo</label>
-                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                        <button class="btn-config-option" onclick="setMargenCampo(0.02)">Estricto</button>
-                        <button class="btn-config-option active" onclick="setMargenCampo(0.04)">Normal</button>
-                        <button class="btn-config-option" onclick="setMargenCampo(0.06)">Tolerante</button>
-                        <button class="btn-config-option" onclick="setMargenCampo(0.08)">Muy tolerante</button>
-                    </div>
-                    <input type="range" id="margen-campo-slider" min="0.01" max="0.12" value="0.04" step="0.005" oninput="setMargenCampo(this.value)">
-                    <span id="margen-campo-label">0.04</span>
-                </div>
-
-                <div class="config-grupo">
-                    <label>📏 Líneas del campo</label>
-                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                        <button class="btn-config-option active" onclick="setCampoLineas(true)">✅ Mostrar</button>
-                        <button class="btn-config-option" onclick="setCampoLineas(false)">❌ Ocultar</button>
-                    </div>
-                </div>
-
-                <div class="config-grupo">
-                    <label>🔴 Color neón RONALDO</label>
-                    <input type="color" id="neon-rojo-picker" value="#ff1744" onchange="setNeonRojo(this.value)">
-                </div>
-
-                <div class="config-grupo">
-                    <label>🔵 Color neón MESSI</label>
-                    <input type="color" id="neon-azul-picker" value="#2979ff" onchange="setNeonAzul(this.value)">
-                </div>
-
-                <div class="config-grupo">
-                    <label>⭐ Color neón DORADO</label>
-                    <input type="color" id="neon-dorado-picker" value="#ffd700" onchange="setNeonDorado(this.value)">
-                </div>
-
-                <div class="config-grupo">
-                    <label>✨ Intensidad neón</label>
-                    <input type="range" id="neon-intensity-slider" min="0" max="100" value="60" step="5" oninput="setNeonIntensity(this.value)">
-                    <span id="neon-intensity-label">60%</span>
-                </div>
-
-                <div class="config-botones">
-                    <button class="btn-guardar" onclick="guardarConfiguracion()">💾 Guardar</button>
-                    <button class="btn-restaurar" onclick="restaurarConfiguracion()">↩️ Restaurar</button>
-                </div>
-                <div id="config-status" class="config-status"></div>
-            </div>
-        </div>
+  <!-- ===================== MARCADOR SUPERIOR ===================== -->
+  <header class="scoreboard" id="scoreboard">
+    <div class="team team-red">
+      <div class="player-image" id="player-image-red">
+        <img src="https://via.placeholder.com/150/ff4444/ffffff?text=Rojo" alt="Jugador Rojo">
+      </div>
+      <span class="player-name" id="player-name-red">Rojo</span>
+      <span class="score" id="score-red">0</span>
     </div>
 
-    <script src="js/stream.js"></script>
+    <div class="goal-target">
+      <div class="trophy-icon">🏆</div>
+      <div class="goal-number" id="goal-target">5</div>
+      <div class="goal-label">Goles para ganar</div>
+    </div>
+
+    <div class="team team-blue">
+      <div class="player-image" id="player-image-blue">
+        <img src="https://via.placeholder.com/150/4444ff/ffffff?text=Azul" alt="Jugador Azul">
+      </div>
+      <span class="player-name" id="player-name-blue">Azul</span>
+      <span class="score" id="score-blue">0</span>
+    </div>
+  </header>
+
+  <!-- ===================== ESTADIO (CANVAS) ===================== -->
+  <main class="stadium-container" id="stadium-container">
+    <canvas id="game-canvas" width="1200" height="700"></canvas>
+    <div id="message-overlay" class="message-overlay">
+      <div id="message-text"></div>
+    </div>
+  </main>
+
+  <!-- ===================== CONTROLES Y AJUSTES ===================== -->
+  <section class="controls">
+    <div class="control-buttons">
+      <button id="btn-start">Iniciar</button>
+      <button id="btn-pause">Pausar</button>
+      <button id="btn-resume">Reanudar</button>
+      <button id="btn-reset">Reiniciar</button>
+    </div>
+
+    <div class="audio-buttons">
+      <button class="audio-btn" data-audio="bienvenida">Bienvenida</button>
+      <button class="audio-btn" data-audio="gol_rojo">Gol Rojo</button>
+      <button class="audio-btn" data-audio="gol_azul">Gol Azul</button>
+      <button class="audio-btn" data-audio="suscribete">Suscríbete</button>
+      <button class="audio-btn" data-audio="apoya_estrella">Apoya Estrella</button>
+      <button class="audio-btn" data-audio="extra1">Extra 1</button>
+      <button class="audio-btn" data-audio="extra2">Extra 2</button>
+    </div>
+
+    <button id="toggle-settings" aria-expanded="false">Ajustes de Campo</button>
+    <button id="btn-player-names">Configurar Jugadores</button>
+    <div class="settings-panel" id="settings-panel">
+      <label>Largo del estadio (ancho): <input type="range" id="field-width" min="300" max="1150" value="700"></label>
+      <label>Alto del estadio: <input type="range" id="field-height" min="150" max="650" value="400"></label>
+      <label>Tamaño imágenes: <input type="range" id="image-size" min="60" max="400" value="160"></label>
+      <label>Velocidad de las pelotas: <input type="range" id="ball-speed" min="50" max="500" value="200"></label>
+      <label>Tamaño de portería: <input type="range" id="goal-size" min="0.2" max="0.8" step="0.05" value="0.4"></label>
+      <label>Goles para ganar: <input type="number" id="goal-target-input" min="1" max="20" value="5"></label>
+      <div class="direction-controls">
+        <button id="move-up">↑</button>
+        <button id="move-down">↓</button>
+        <button id="move-left">←</button>
+        <button id="move-right">→</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MODAL PARA NOMBRES DE JUGADORES ===================== -->
+  <div id="player-name-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-content">
+      <h2 id="modal-title">Configurar Nombres de Jugadores</h2>
+      <label for="input-name-red">Nombre del jugador rojo:</label>
+      <input type="text" id="input-name-red" placeholder="Ej: Lionel Messi">
+      <label for="input-name-blue">Nombre del jugador azul:</label>
+      <input type="text" id="input-name-blue" placeholder="Ej: Cristiano Ronaldo">
+      <div class="modal-buttons">
+        <button id="btn-save-names">Guardar</button>
+        <button id="btn-close-modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Librería de Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
