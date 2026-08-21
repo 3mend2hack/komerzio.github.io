@@ -1,1322 +1,347 @@
-/* ============================================
-   GOLFINALIVE - VERSIÓN FULLSCREEN
-   ============================================ */
+:root {
+  --rojo: #ff4444;
+  --azul: #4444ff;
+  --fondo: #1a1a2e;
+  --panel: #16213e;
+  --texto: #ffffff;
+  --dorado: #ffd700;
+  --dorado-oscuro: #b8860b;
+}
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #0a0a12;
-    font-family: 'Arial Black', 'Impact', sans-serif;
-    color: white;
+body {
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #1a1a2e, #0f3460);
+  color: var(--texto);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 10px;
 }
 
-#game-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
+/* ===================== MARCADOR ===================== */
+.scoreboard {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+  background: var(--panel);
+  border-radius: 15px;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
-/* ============================================
-   HEADER - COMPACTO EN LA PARTE SUPERIOR
-   ============================================ */
-#stream-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 3px 12px;
-    height: 36px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
-    pointer-events: none;
+.team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
-#stream-header h1 {
-    font-size: clamp(0.7rem, 2vw, 1.1rem);
-    background: linear-gradient(45deg, #ffd700, #ff6b35);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.player-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 3px solid var(--rojo);
+  transition: width 0.3s, height 0.3s;
 }
 
-#stream-header .subtitle {
-    font-size: clamp(0.25rem, 0.7vw, 0.45rem);
-    color: #ffd700;
-    opacity: 0.6;
-    -webkit-text-fill-color: #ffd700;
+.team-blue .player-image {
+  border-color: var(--azul);
 }
 
-#timer-container {
-    background: rgba(0,0,0,0.7);
-    border: 1.5px solid #ffd700;
-    border-radius: 5px;
-    padding: 1px 10px;
-    font-size: clamp(0.6rem, 1.5vw, 0.9rem);
-    font-weight: bold;
-    color: #ffd700;
+.player-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* ============================================
-   CAMPO - OCUPA TODO EL ESPACIO DISPONIBLE
-   ============================================ */
-#field {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 36px 5px 5px 5px;
+.player-name {
+  font-weight: bold;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-#campo-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 5;
-    width: auto;
-    height: auto;
+.score {
+  font-size: 2rem;
+  font-weight: bold;
 }
 
-#campo-canvas {
-    border-radius: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
-    display: block;
-    background: #1a6b3a;
-    image-rendering: auto;
-    image-rendering: crisp-edges;
-    max-width: 95vw;
-    max-height: calc(100vh - 120px);
+/* ===================== CENTRO DEL MARCADOR: COPA Y GOLES ===================== */
+.goal-target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 15px;
+  background: linear-gradient(145deg, #2a1f00, #3d2b00);
+  border: 2px solid var(--dorado);
+  border-radius: 20px;
+  padding: 8px 20px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
 }
 
-/* ============================================
-   BOLAS - TAMAÑO PROPORCIONAL AL CAMPO
-   ============================================ */
-.ball {
-    position: absolute;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.3);
-    z-index: 10;
-    pointer-events: none;
+.trophy-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
 }
 
-.ball.ball-ronaldo {
-    background: radial-gradient(circle at 35% 35%, #ff6666, #cc0000);
-    border-color: #ff1744;
-    box-shadow: 0 0 20px rgba(255,23,68,0.4);
+.goal-number {
+  font-size: 2.8rem;
+  font-weight: bold;
+  color: var(--dorado);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  line-height: 1;
+  margin-top: 2px;
 }
 
-.ball.ball-messi {
-    background: radial-gradient(circle at 35% 35%, #6666ff, #0000cc);
-    border-color: #2979ff;
-    box-shadow: 0 0 20px rgba(41,121,255,0.4);
+.goal-label {
+  font-size: 0.8rem;
+  color: var(--dorado-oscuro);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-/* ============================================
-   CONTROLES DE FLECHAS PARA EL ESTADIO
-   ============================================ */
-#controles-estadio {
-    position: absolute;
-    bottom: 75px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 999;
-    display: flex;
-    gap: 5px;
-    background: rgba(0, 0, 0, 0.85);
-    padding: 6px 12px;
-    border-radius: 10px;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 215, 0, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+/* ===================== ESTADIO ===================== */
+.stadium-container {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  background: #000;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
-#controles-estadio .btn-estadio {
-    width: 32px;
-    height: 32px;
-    border: 1px solid rgba(255, 215, 0, 0.1);
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #1a1a2e;
 }
 
-#controles-estadio .btn-estadio:hover {
-    background: rgba(255, 215, 0, 0.2);
-    color: #ffd700;
-    border-color: #ffd700;
-    transform: scale(1.1);
+/* ===================== OVERLAY DE MENSAJES ===================== */
+.message-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  pointer-events: none;
 }
 
-#controles-estadio .btn-estadio:active {
-    transform: scale(0.9);
+.message-overlay.active {
+  display: flex;
 }
 
-#controles-estadio .btn-estadio:nth-child(3) {
-    background: rgba(255, 68, 68, 0.15);
-    color: #ff6666;
-    border-color: rgba(255, 68, 68, 0.3);
-    font-size: 0.6rem;
-}
-
-#controles-estadio .btn-estadio:nth-child(3):hover {
-    background: rgba(255, 68, 68, 0.3);
-    color: #ff1744;
-}
-
-@media (max-width: 768px) {
-    #controles-estadio {
-        bottom: 55px;
-        padding: 4px 8px;
-        gap: 3px;
-    }
-    
-    #controles-estadio .btn-estadio {
-        width: 26px;
-        height: 26px;
-        font-size: 0.6rem;
-    }
-}
-
-@media (max-width: 480px) {
-    #controles-estadio {
-        bottom: 45px;
-        padding: 3px 6px;
-        gap: 2px;
-    }
-    
-    #controles-estadio .btn-estadio {
-        width: 22px;
-        height: 22px;
-        font-size: 0.5rem;
-    }
-}
-
-/* ============================================
-   PANEL MARCADOR - ARRIBA CENTRO
-   ============================================ */
-#panel-marcador {
-    position: absolute !important;
-    top: 40px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    z-index: 50 !important;
-    background: rgba(0, 0, 0, 0.8) !important;
-    border-radius: 10px !important;
-    padding: 4px 14px !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255,215,0,0.12) !important;
-    box-shadow: 0 4px 30px rgba(0,0,0,0.5) !important;
-    min-width: 160px !important;
-    max-width: 450px !important;
-    cursor: move;
-    user-select: none;
-}
-
-#panel-marcador .panel-header {
-    display: none !important;
-}
-
-#panel-marcador .panel-body {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 10px !important;
-    padding: 2px 0 !important;
-}
-
-#panel-marcador .score-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-#panel-marcador .player-img {
-    width: clamp(24px, 4vw, 38px);
-    height: clamp(32px, 5vw, 50px);
-    border-radius: 6px;
-    background-size: cover;
-    background-position: center;
-    border: 2px solid rgba(255,255,255,0.15);
-}
-
-#panel-marcador .player-img.ronaldo-img {
-    border-color: #ff1744;
-}
-
-#panel-marcador .player-img.messi-img {
-    border-color: #2979ff;
-}
-
-#panel-marcador .player-name-label {
-    font-size: clamp(0.3rem, 0.7vw, 0.5rem);
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-#panel-marcador .score {
-    font-size: clamp(1.2rem, 3.5vw, 2rem);
-    font-weight: bold;
-    line-height: 1;
-}
-
-#panel-marcador .score-vs {
-    font-size: clamp(0.5rem, 1.2vw, 0.8rem);
-    opacity: 0.3;
-}
-
-#panel-marcador .meta-info {
-    text-align: center;
-    padding: 0 5px;
-}
-
-#panel-marcador .meta-label {
-    font-size: clamp(0.25rem, 0.5vw, 0.4rem);
-    color: #666;
-    text-transform: uppercase;
-}
-
-#panel-marcador .meta-value {
-    font-size: clamp(0.8rem, 2vw, 1.2rem);
-    font-weight: bold;
-    color: #ffd700;
-}
-
-/* CONTROLES DE FLECHAS PARA MARCADOR */
-#panel-marcador .controles-flechas {
-    display: flex !important;
-    flex-wrap: wrap;
-    gap: 3px;
-    justify-content: center;
-    padding: 4px 0;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    margin-top: 4px;
-}
-
-#panel-marcador .controles-flechas .btn-flecha {
-    width: 28px;
-    height: 28px;
-    border: none;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.06);
-    color: #aaa;
-    font-size: 0.7rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#panel-marcador .controles-flechas .btn-flecha:hover {
-    background: rgba(255, 215, 0, 0.15);
-    color: #ffd700;
-}
-
-#panel-marcador .controles-flechas .btn-flecha:active {
-    transform: scale(0.9);
-}
-
-/* ============================================
-   PANEL CONTROLES - ABAJO CENTRO
-   ============================================ */
-#panel-controles {
-    position: absolute !important;
-    bottom: 8px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    z-index: 50 !important;
-    background: rgba(0, 0, 0, 0.8) !important;
-    border-radius: 10px !important;
-    padding: 4px 12px !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255,215,0,0.08) !important;
-    box-shadow: 0 4px 30px rgba(0,0,0,0.5) !important;
-    min-width: 180px !important;
-    max-width: 650px !important;
-    cursor: move;
-    user-select: none;
-}
-
-#panel-controles .panel-header {
-    display: none !important;
-}
-
-#panel-controles .panel-body {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 4px !important;
-    padding: 2px 0 !important;
-}
-
-#panel-controles .estado-detenido {
-    color: #ff1744;
-    font-size: clamp(0.4rem, 0.9vw, 0.6rem);
-    font-weight: bold;
-    min-width: 35px;
-}
-
-#panel-controles .estado-vivo {
-    color: #00e676;
-    font-size: clamp(0.4rem, 0.9vw, 0.6rem);
-    font-weight: bold;
-    min-width: 35px;
-    animation: pulse 1s infinite;
+#message-text {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+  text-align: center;
+  animation: pulse 1s infinite;
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
-#panel-controles button {
-    padding: 2px 10px;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: clamp(0.35rem, 0.8vw, 0.55rem);
-    transition: all 0.2s;
-    white-space: nowrap;
+/* ===================== CONTROLES ===================== */
+.controls {
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-#panel-controles button:hover {
-    transform: scale(1.05);
+.control-buttons, .audio-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
 }
 
-#panel-controles .btn-iniciar {
-    background: linear-gradient(135deg, #00e676, #00c853);
-    color: #000;
+button {
+  background: var(--panel);
+  color: var(--texto);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s, transform 0.2s;
 }
 
-#panel-controles .btn-detener {
-    background: linear-gradient(135deg, #ff1744, #d50000);
-    color: #fff;
+button:hover {
+  background: #1f4068;
+  transform: translateY(-2px);
 }
 
-#panel-controles .btn-reiniciar {
-    background: #333;
-    color: #fff;
+button:active {
+  transform: translateY(0);
 }
 
-#panel-controles .btn-admin {
-    background: linear-gradient(135deg, #ffd700, #f5a623);
-    color: #000;
-    text-decoration: none;
-    padding: 2px 10px;
-    border-radius: 6px;
-    font-size: clamp(0.35rem, 0.8vw, 0.55rem);
-    font-weight: bold;
+.audio-btn {
+  background: #0f3460;
 }
 
-#panel-controles .btn-audios {
-    background: linear-gradient(135deg, #9c27b0, #4a148c);
-    color: #fff;
-    padding: 2px 10px;
-    border: none;
-    border-radius: 6px;
-    font-size: clamp(0.35rem, 0.8vw, 0.55rem);
-    cursor: pointer;
+#toggle-settings, #btn-player-names {
+  align-self: center;
+  background: #e94560;
 }
 
-#panel-controles .btn-config {
-    background: linear-gradient(135deg, #ff6b35, #e65100);
-    color: #fff;
-    padding: 2px 10px;
-    border: none;
-    border-radius: 6px;
-    font-size: clamp(0.35rem, 0.8vw, 0.55rem);
-    cursor: pointer;
+#btn-player-names {
+  background: #6a4c93;
 }
 
-#panel-controles .meta-input {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    background: rgba(255,255,255,0.05);
-    padding: 1px 5px;
-    border-radius: 4px;
+.settings-panel {
+  display: none;
+  background: var(--panel);
+  border-radius: 10px;
+  padding: 15px;
+  flex-direction: column;
+  gap: 10px;
 }
 
-#panel-controles .meta-input label {
-    font-size: clamp(0.3rem, 0.5vw, 0.4rem);
-    color: #888;
+.settings-panel.open {
+  display: flex;
 }
 
-#panel-controles .meta-input input {
-    width: clamp(18px, 2.5vw, 28px);
-    padding: 1px;
-    border-radius: 3px;
-    background: #1a1a2e;
-    color: #fff;
-    border: 1px solid #ffd700;
-    text-align: center;
-    font-size: clamp(0.35rem, 0.7vw, 0.5rem);
+.settings-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-/* CONTROLES DE FLECHAS PARA CONTROLES */
-#panel-controles .controles-flechas {
-    display: flex !important;
-    flex-wrap: wrap;
-    gap: 3px;
-    justify-content: center;
-    padding: 4px 0;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    margin-top: 4px;
+.direction-controls {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
 }
 
-#panel-controles .controles-flechas .btn-flecha {
-    width: 28px;
-    height: 28px;
-    border: none;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.06);
-    color: #aaa;
-    font-size: 0.7rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.direction-controls button {
+  width: 50px;
+  height: 50px;
+  font-size: 1.5rem;
 }
 
-#panel-controles .controles-flechas .btn-flecha:hover {
-    background: rgba(255, 215, 0, 0.15);
-    color: #ffd700;
+/* ===================== MODAL ===================== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
 }
 
-#panel-controles .controles-flechas .btn-flecha:active {
-    transform: scale(0.9);
+.modal-overlay.open {
+  display: flex;
 }
 
-/* ============================================
-   PANEL PODERES - IZQUIERDA
-   ============================================ */
-#panel-poderes {
-    position: absolute !important;
-    bottom: 50px !important;
-    left: 8px !important;
-    z-index: 50 !important;
-    background: rgba(0, 0, 0, 0.8) !important;
-    border-radius: 8px !important;
-    padding: 3px 8px !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255,215,0,0.08) !important;
-    box-shadow: 0 4px 30px rgba(0,0,0,0.5) !important;
-    min-width: 80px !important;
-    max-width: 200px !important;
-    cursor: move;
-    user-select: none;
+.modal-content {
+  background: var(--panel);
+  border-radius: 15px;
+  padding: 20px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
 }
 
-#panel-poderes .panel-header {
-    display: none !important;
+.modal-content h2 {
+  margin-bottom: 15px;
+  text-align: center;
+  color: #ffdd57;
 }
 
-#panel-poderes .panel-body {
-    padding: 2px 0 !important;
-    max-height: 70px;
-    overflow-y: auto;
+.modal-content label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
 }
 
-#panel-poderes .poderes-contador {
-    font-size: clamp(0.4rem, 0.8vw, 0.6rem);
-    color: #ffd700;
-    font-weight: bold;
-    background: rgba(255,215,0,0.1);
-    padding: 0 5px;
-    border-radius: 4px;
+.modal-content input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: none;
+  background: #0f3460;
+  color: white;
+  font-size: 1rem;
 }
 
-#panel-poderes .sin-poderes {
-    text-align: center;
-    color: #555;
-    font-size: clamp(0.3rem, 0.6vw, 0.5rem);
-    padding: 2px 0;
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
 }
 
-#lista-poderes-activos .poder-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: clamp(0.3rem, 0.6vw, 0.5rem);
-    padding: 1px 4px;
-    border-radius: 3px;
-    background: rgba(255,255,255,0.03);
-    border-left: 2px solid #ffd700;
+.modal-buttons button {
+  flex: 1;
+  padding: 10px;
 }
 
-#lista-poderes-activos .poder-item .poder-nombre {
-    font-weight: bold;
-    font-size: clamp(0.3rem, 0.6vw, 0.5rem);
+#btn-save-names {
+  background: #4caf50;
 }
 
-#lista-poderes-activos .poder-item .poder-usuario {
-    color: #666;
-    font-size: clamp(0.25rem, 0.5vw, 0.4rem);
+#btn-close-modal {
+  background: #f44336;
 }
 
-#lista-poderes-activos .poder-item .poder-tiempo {
-    color: #00ff88;
-    font-size: clamp(0.25rem, 0.5vw, 0.4rem);
-    min-width: 18px;
-    text-align: right;
-}
-
-#lista-poderes-activos .poder-item.ronaldo { border-left-color: #ff1744; }
-#lista-poderes-activos .poder-item.messi { border-left-color: #2979ff; }
-#lista-poderes-activos .poder-item.caos { border-left-color: #ff6b35; }
-#lista-poderes-activos .poder-item.neutral { border-left-color: #ffd700; }
-
-/* CONTROLES DE FLECHAS PARA PODERES */
-#panel-poderes .controles-flechas {
-    display: flex !important;
-    flex-wrap: wrap;
-    gap: 3px;
-    justify-content: center;
-    padding: 4px 0;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    margin-top: 4px;
-}
-
-#panel-poderes .controles-flechas .btn-flecha {
-    width: 28px;
-    height: 28px;
-    border: none;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.06);
-    color: #aaa;
-    font-size: 0.7rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#panel-poderes .controles-flechas .btn-flecha:hover {
-    background: rgba(255, 215, 0, 0.15);
-    color: #ffd700;
-}
-
-#panel-poderes .controles-flechas .btn-flecha:active {
-    transform: scale(0.9);
-}
-
-/* ============================================
-   PANEL AUDIOS - CORREGIDO
-   ============================================ */
-#panel-audios {
-    position: absolute !important;
-    bottom: 80px !important;
-    right: 15px !important;
-    z-index: 999 !important;
-    background: rgba(10, 14, 30, 0.92) !important;
-    border-radius: 14px !important;
-    padding: 10px 12px !important;
-    backdrop-filter: blur(20px) !important;
-    border: 2px solid rgba(255, 215, 0, 0.15) !important;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8) !important;
-    min-width: 120px !important;
-    max-width: 200px !important;
-    max-height: 300px !important;
-    overflow-y: auto !important;
-    display: none !important;
-    cursor: default;
-    user-select: none;
-}
-
-#panel-audios.visible {
-    display: flex !important;
-    flex-direction: column !important;
-    animation: slideInRight 0.3s ease-out !important;
-}
-
-@keyframes slideInRight {
-    from { opacity: 0; transform: translateX(20px) scale(0.95); }
-    to { opacity: 1; transform: translateX(0) scale(1); }
-}
-
-#panel-audios .panel-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 4px 4px 8px 4px !important;
-    border-bottom: 1px solid rgba(255, 215, 0, 0.08) !important;
-    margin-bottom: 6px !important;
-    flex-shrink: 0 !important;
-}
-
-#panel-audios .panel-titulo {
-    font-size: 0.55rem !important;
-    color: #ffd700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 2px !important;
-    font-weight: bold !important;
-}
-
-#panel-audios .panel-body {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 4px !important;
-    justify-content: center !important;
-    padding: 2px 0 !important;
-}
-
-#panel-audios .panel-body button {
-    padding: 3px 8px !important;
-    border: none !important;
-    border-radius: 6px !important;
-    font-weight: bold !important;
-    cursor: pointer !important;
-    font-size: 0.45rem !important;
-    transition: all 0.2s ease !important;
-    white-space: nowrap !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
-    min-height: 24px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 3px !important;
-    flex: 0 1 auto !important;
-}
-
-#panel-audios .panel-body button:hover {
-    transform: translateY(-2px) scale(1.05) !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;
-}
-
-#panel-audios .panel-body button:active {
-    transform: scale(0.95) !important;
-}
-
-#panel-audios .btn-ronaldo { 
-    background: linear-gradient(135deg, #ff1744, #cc0000) !important; 
-    color: #fff !important;
-}
-#panel-audios .btn-ronaldo:hover {
-    box-shadow: 0 0 20px rgba(255,23,68,0.4) !important;
-}
-
-#panel-audios .btn-messi { 
-    background: linear-gradient(135deg, #2979ff, #0d47a1) !important; 
-    color: #fff !important;
-}
-#panel-audios .btn-messi:hover {
-    box-shadow: 0 0 20px rgba(41,121,255,0.4) !important;
-}
-
-#panel-audios .btn-bienvenida { 
-    background: linear-gradient(135deg, #2979ff, #0d47a1) !important; 
-    color: #fff !important;
-}
-#panel-audios .btn-bienvenida:hover {
-    box-shadow: 0 0 20px rgba(41,121,255,0.4) !important;
-}
-
-#panel-audios .btn-suscribete { 
-    background: linear-gradient(135deg, #ff1744, #d50000) !important; 
-    color: #fff !important;
-}
-#panel-audios .btn-suscribete:hover {
-    box-shadow: 0 0 20px rgba(255,23,68,0.4) !important;
-}
-
-#panel-audios .btn-elige { 
-    background: linear-gradient(135deg, #ff6d00, #e65100) !important; 
-    color: #fff !important;
-}
-#panel-audios .btn-elige:hover {
-    box-shadow: 0 0 20px rgba(255,109,0,0.4) !important;
-}
-
-#panel-audios .btn-ayuda { 
-    background: linear-gradient(135deg, #4caf50, #2e7d32) !important; 
-    color: #fff !important;
-}
-#panel-audios .btn-ayuda:hover {
-    box-shadow: 0 0 20px rgba(76,175,80,0.4) !important;
-}
-
-#panel-audios .btn-mejor { 
-    background: linear-gradient(135deg, #ffd700, #f5a623) !important; 
-    color: #000 !important;
-}
-#panel-audios .btn-mejor:hover {
-    box-shadow: 0 0 20px rgba(255,215,0,0.4) !important;
-}
-
-#panel-audios .btn-poder { 
-    background: linear-gradient(135deg, #9c27b0, #4a148c) !important; 
-    color: #fff !important;
-}
-#panel-audios .btn-poder:hover {
-    box-shadow: 0 0 20px rgba(156,39,176,0.4) !important;
-}
-
-#panel-audios .btn-ambiente { 
-    background: linear-gradient(135deg, #00bcd4, #006064) !important; 
-    color: #fff !important;
-}
-#panel-audios .btn-ambiente:hover {
-    box-shadow: 0 0 20px rgba(0,188,212,0.4) !important;
-}
-#panel-audios .btn-ambiente.activo { 
-    background: linear-gradient(135deg, #00e676, #00c853) !important; 
-    color: #000 !important;
-}
-#panel-audios .btn-ambiente.activo:hover {
-    box-shadow: 0 0 20px rgba(0,230,118,0.4) !important;
-}
-
-#panel-audios::-webkit-scrollbar { width: 3px; }
-#panel-audios::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 2px; }
-#panel-audios::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 2px; }
-
-/* ============================================
-   BANNER DE PODERES
-   ============================================ */
-#power-banner {
-    position: absolute;
-    top: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 20;
-    background: rgba(0,0,0,0.8);
-    border: 2px solid rgba(255,215,0,0.2);
-    border-radius: 8px;
-    padding: 3px 16px;
-    color: #ffd700;
-    font-size: clamp(0.5rem, 1.2vw, 0.8rem);
-    text-align: center;
-    opacity: 0;
-    transition: all 0.5s ease;
-    pointer-events: none;
-    backdrop-filter: blur(10px);
-    max-width: 80%;
-    white-space: nowrap;
-}
-
-#power-banner.active {
-    opacity: 1;
-    animation: bannerPulse 1s infinite;
-}
-
-@keyframes bannerPulse {
-    0%, 100% { box-shadow: 0 0 20px rgba(255,215,0,0.05); }
-    50% { box-shadow: 0 0 40px rgba(255,215,0,0.15); }
-}
-
-#power-timer {
-    position: absolute;
-    top: 115px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 20;
-    color: #ffd700;
-    font-size: clamp(0.5rem, 1vw, 0.8rem);
-    opacity: 0;
-    transition: all 0.3s ease;
-    pointer-events: none;
-}
-
-#power-timer.active { opacity: 1; }
-
-/* ============================================
-   GOAL NOTIFICATION
-   ============================================ */
-#goal-notification {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 30;
-    font-size: clamp(1.5rem, 5vw, 3.5rem);
-    font-weight: bold;
-    color: #ffd700;
-    text-shadow: 0 0 60px rgba(255,215,0,0.6);
-    background: rgba(0,0,0,0.7);
-    padding: 8px 24px;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255,215,0,0.15);
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.3s ease;
-    text-align: center;
-}
-
-#goal-notification.active {
-    opacity: 1;
-    animation: goalAnim 0.8s ease-out forwards;
-}
-
-@keyframes goalAnim {
-    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-}
-
-/* ============================================
-   CHAOS OVERLAY
-   ============================================ */
-#chaos-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    z-index: 2;
-    opacity: 0;
-    transition: all 0.3s ease;
-    border-radius: 12px;
-}
-
-#chaos-overlay.active {
-    opacity: 1;
-    animation: chaosOverlay 0.1s infinite;
-}
-
-@keyframes chaosOverlay {
-    0%, 100% { background: radial-gradient(circle, rgba(255,23,68,0.08), rgba(41,121,255,0.08)); }
-    50% { background: radial-gradient(circle, rgba(41,121,255,0.08), rgba(255,23,68,0.08)); }
-}
-
-/* ============================================
-   RECORDATORIO
-   ============================================ */
-#recordatorio-timer {
-    position: absolute;
-    bottom: 45px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 15;
-    background: rgba(0,0,0,0.7);
-    border: 1px solid rgba(255,215,0,0.15);
-    border-radius: 6px;
-    padding: 1px 10px;
-    font-size: clamp(0.35rem, 0.7vw, 0.55rem);
-    color: #ffd700;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    pointer-events: none;
-    white-space: nowrap;
-}
-
-#recordatorio-timer.active { opacity: 1; }
-
-/* ============================================
-   CONFIGURACIÓN
-   ============================================ */
-#panel-configuracion {
-    position: absolute;
-    bottom: 60px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 60;
-    display: none;
-    flex-direction: column;
-    gap: 4px;
-    background: rgba(0,0,0,0.95);
-    padding: 8px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,215,0,0.1);
-    max-width: min(500px, 92vw);
-    max-height: min(50vh, 350px);
-    overflow-y: auto;
-    width: min(420px, 90vw);
-    min-width: 180px;
-    backdrop-filter: blur(10px);
-}
-
-#panel-configuracion::-webkit-scrollbar { width: 3px; }
-#panel-configuracion::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 2px; }
-
-#panel-configuracion h3 {
-    color: #ffd700;
-    font-size: clamp(0.5rem, 1.2vw, 0.7rem);
-    text-align: center;
-    margin-bottom: 2px;
-}
-
-#panel-configuracion .config-grupo {
-    background: rgba(255,255,255,0.03);
-    padding: 3px 8px;
-    border-radius: 5px;
-}
-
-#panel-configuracion .config-grupo label {
-    display: block;
-    font-size: clamp(0.3rem, 0.6vw, 0.5rem);
-    color: #888;
-    margin-bottom: 1px;
-    text-transform: uppercase;
-}
-
-#panel-configuracion .btn-config-option {
-    padding: 1px 6px;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 4px;
-    background: rgba(255,255,255,0.03);
-    color: #ccc;
-    cursor: pointer;
-    font-size: clamp(0.3rem, 0.5vw, 0.45rem);
-    transition: all 0.2s;
-}
-
-#panel-configuracion .btn-config-option:hover {
-    border-color: #ffd700;
-    color: #fff;
-}
-
-#panel-configuracion .btn-config-option.active {
-    border-color: #ffd700;
-    background: rgba(255,215,0,0.08);
-    color: #ffd700;
-}
-
-#panel-configuracion .btn-color-option {
-    width: clamp(18px, 2.5vw, 24px);
-    height: clamp(18px, 2.5vw, 24px);
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.08);
-    cursor: pointer;
-}
-
-#panel-configuracion input[type="color"] {
-    width: clamp(24px, 3vw, 32px);
-    height: clamp(18px, 2.5vw, 22px);
-    border: 2px solid rgba(255,255,255,0.08);
-    border-radius: 4px;
-    cursor: pointer;
-    background: transparent;
-}
-
-#panel-configuracion input[type="range"] {
-    width: 100%;
-    height: 2px;
-    -webkit-appearance: none;
-    background: linear-gradient(90deg, #ffd700, #ff6b35);
-    border-radius: 2px;
-    outline: none;
-}
-
-#panel-configuracion input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: clamp(10px, 1.5vw, 14px);
-    height: clamp(10px, 1.5vw, 14px);
-    border-radius: 50%;
-    background: #ffd700;
-    cursor: pointer;
-}
-
-#panel-configuracion .config-grupo span {
-    font-size: clamp(0.3rem, 0.5vw, 0.45rem);
-    color: #ffd700;
-    text-align: center;
-    display: block;
-}
-
-#panel-configuracion .config-botones {
-    display: flex;
-    gap: 3px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-#panel-configuracion .config-botones button {
-    padding: 2px 8px;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: clamp(0.3rem, 0.5vw, 0.45rem);
-    transition: all 0.2s;
-}
-
-#panel-configuracion .config-botones button:hover {
-    transform: scale(1.05);
-}
-
-#panel-configuracion .btn-guardar { background: #00e676; color: #000; }
-#panel-configuracion .btn-restaurar { background: #ff1744; color: #fff; }
-#panel-configuracion .btn-exportar { background: #2979ff; color: #fff; }
-#panel-configuracion .btn-importar { background: #ffd700; color: #000; }
-
-#panel-configuracion .config-status {
-    text-align: center;
-    font-size: clamp(0.3rem, 0.5vw, 0.45rem);
-    color: #00e676;
-    min-height: 10px;
-}
-
-/* ============================================
-   SWITCH - OCULTO
-   ============================================ */
-.switch-label {
-    display: none !important;
-}
-
-.panel-flotante .controles-flechas,
-.panel-flotante .controles-tamano {
-    display: none !important;
-}
-
-/* ============================================
-   NEÓN
-   ============================================ */
-.neon-rojo {
-    color: #ff1744;
-    text-shadow: 0 0 10px rgba(255,23,68,0.3);
-}
-
-.neon-azul {
-    color: #2979ff;
-    text-shadow: 0 0 10px rgba(41,121,255,0.3);
-}
-
-.neon-dorado {
-    color: #ffd700;
-    text-shadow: 0 0 10px rgba(255,215,0,0.3);
-}
-
-/* ============================================
-   EFECTOS FUTURISTAS
-   ============================================ */
-:root {
-    --neon-cyan: #00f0ff;
-    --neon-purple: #b026ff;
-    --neon-pink: #ff2d95;
-}
-
-.particle-nebula {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.08;
-    pointer-events: none;
-    z-index: 0;
-    animation: nebulaDrift 25s infinite alternate;
-}
-
-@keyframes nebulaDrift {
-    0% { transform: translate(0,0) scale(1); }
-    50% { transform: translate(30px,-20px) scale(1.1); }
-    100% { transform: translate(-20px,20px) scale(0.9); }
-}
-
-#stars-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.star {
-    position: absolute;
-    background: white;
-    border-radius: 50%;
-    animation: starTwinkle var(--duration) infinite;
-    animation-delay: var(--delay);
-}
-
-@keyframes starTwinkle {
-    0%, 100% { opacity: var(--min-opacity); }
-    50% { opacity: 1; }
-}
-
-#shooting-stars-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.shooting-star {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    background: white;
-    border-radius: 50%;
-    animation: shootingStar var(--duration) infinite;
-    animation-delay: var(--delay);
-}
-
-.shooting-star::after {
-    content: '';
-    position: absolute;
-    right: 0;
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 850px) {
+  .scoreboard {
+    padding: 8px;
+    gap: 10px;
+  }
+  .player-image {
     width: 60px;
-    height: 1px;
-    background: linear-gradient(to left, rgba(255,255,255,0.6), transparent);
-}
-
-@keyframes shootingStar {
-    0% { transform: translate(0,0) rotate(-35deg) scale(0); opacity: 0; }
-    10% { opacity: 1; }
-    30% { transform: translate(-150px, 100px) rotate(-35deg) scale(1); opacity: 1; }
-    40% { opacity: 0; transform: translate(-250px, 160px) rotate(-35deg) scale(0); }
-    100% { opacity: 0; }
-}
-
-#sound-waves-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 9998;
-}
-
-.sound-wave {
-    position: absolute;
-    border-radius: 50%;
-    border: 2px solid rgba(0,240,255,0.3);
-    animation: soundWaveAnim 0.8s ease-out forwards;
-}
-
-@keyframes soundWaveAnim {
-    0% { transform: scale(0.5); opacity: 0.8; }
-    100% { transform: scale(3); opacity: 0; }
-}
-
-.ripple {
-    position: fixed;
-    border-radius: 50%;
-    background: rgba(0,240,255,0.12);
-    animation: clickRipple 0.8s ease-out forwards;
-    pointer-events: none;
-    z-index: 9999;
-}
-
-@keyframes clickRipple {
-    from { width: 0; height: 0; opacity: 0.5; }
-    to { width: 150px; height: 150px; opacity: 0; }
-}
-
-.gol-effect {
-    animation: scoreGlitch 0.5s ease-out 3;
-}
-
-@keyframes scoreGlitch {
-    0% { transform: translate(0); }
-    20% { transform: translate(-2px,1px); }
-    40% { transform: translate(2px,-1px); }
-    60% { transform: translate(-1px,2px); }
-    80% { transform: translate(1px,-2px); }
-    100% { transform: translate(0); }
-}
-
-.portal-effect {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 3px solid rgba(0,240,255,0.3);
-    background: radial-gradient(circle, rgba(0,240,255,0.1), transparent);
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    z-index: 50;
-    animation: portalOpen 1s ease-out forwards;
-}
-
-@keyframes portalOpen {
-    0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
-    50% { transform: translate(-50%, -50%) scale(1.5) rotate(180deg); opacity: 0.8; }
-    100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); opacity: 1; }
-}
-
-.firework-particle {
-    position: fixed;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 100;
-    animation: fireworkAnim 1.5s ease-out forwards;
-}
-
-@keyframes fireworkAnim {
-    0% { transform: translate(0,0) scale(1); opacity: 1; }
-    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
-}
-
-.confetti {
-    position: fixed;
-    pointer-events: none;
-    z-index: 100;
-    animation: confettiFall linear forwards;
-}
-
-@keyframes confettiFall {
-    0% { transform: translateY(-100vh) rotate(0deg) scale(1); opacity: 1; }
-    100% { transform: translateY(100vh) rotate(720deg) scale(0.5); opacity: 0; }
-}
-
-#game-container.iniciando {
-    animation: powerOnAnim 1.5s ease-out;
-}
-
-@keyframes powerOnAnim {
-    0% { filter: brightness(0); background: rgba(0,240,255,0.2); }
-    50% { filter: brightness(1.5); }
-    100% { filter: brightness(1); background: transparent; }
-}
-
-#game-container.deteniendo {
-    animation: powerOffAnim 1s ease-in forwards;
-}
-
-@keyframes powerOffAnim {
-    0% { filter: brightness(1); }
-    50% { filter: brightness(0.3); background: rgba(255,23,68,0.2); }
-    100% { filter: brightness(0.1); }
-}
-
-.player-img.hologram {
-    animation: hologramGlow 2s infinite;
-}
-
-@keyframes hologramGlow {
-    0%, 100% { box-shadow: 0 0 15px rgba(0,240,255,0.15); }
-    50% { box-shadow: 0 0 30px rgba(0,240,255,0.4); }
-}
-
-.ball {
-    animation: ballShine 2s ease-in-out infinite;
-}
-
-@keyframes ballShine {
-    0%, 100% { box-shadow: 0 0 15px rgba(255,255,255,0.15); }
-    50% { box-shadow: 0 0 30px rgba(255,255,255,0.3); }
+    height: 60px;
+  }
+  .player-name {
+    font-size: 0.8rem;
+  }
+  .score {
+    font-size: 1.5rem;
+  }
+  .trophy-icon {
+    font-size: 1.8rem;
+  }
+  .goal-number {
+    font-size: 2rem;
+  }
+  .goal-label {
+    font-size: 0.7rem;
+  }
+  button {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
 }
