@@ -1,4 +1,8 @@
-import { createClient } from '@supabase/supabase-js';
+// js/supabase.js
+
+// Usamos la variable global 'supabase' que se cargó con <script> en index.html
+const { createClient } = window.supabase;
+
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 
 // Inicializar cliente de Supabase
@@ -16,7 +20,6 @@ export function initSupabase({ onPoderRecibido, onPartidaFinalizada }) {
       { event: 'INSERT', schema: 'public', table: 'poderes' }, 
       (payload) => {
         const poder = payload.new;
-        // Solo actuar si el poder está activo y es para el canal golfinalive
         if (poder.activo && poder.channel === 'golfinalive') {
           onPoderRecibido(poder.nombre, poder.channel);
         }
