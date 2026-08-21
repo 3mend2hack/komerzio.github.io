@@ -1,5 +1,5 @@
 // ============================================
-// GOLFINALIVE - STREAM JS (VERSIÓN COMPLETA CORREGIDA)
+// GOLFINALIVE - STREAM JS (VERSIÓN CORREGIDA - RESPONSIVE)
 // ============================================
 
 var SUPABASE_URL = 'https://qddfdisbnwnnlvkrnckd.supabase.co';
@@ -61,7 +61,8 @@ var gameState = {
     ballInterval: null,
     autoGuardadoInterval: null,
     _lastScoreRonaldo: 0,
-    _lastScoreMessi: 0
+    _lastScoreMessi: 0,
+    animFrameId: null
 };
 
 var recordatorioInterval = null;
@@ -101,7 +102,7 @@ function generarDireccionAleatoria() {
 }
 
 // ============================================
-// CONFIGURACIÓN
+// CONFIGURACIÓN - CORREGIDA PARA RESPONSIVE
 // ============================================
 function cargarConfiguracion() {
     var saved = localStorage.getItem('golfinalive_config');
@@ -109,9 +110,10 @@ function cargarConfiguracion() {
         try {
             var parsed = JSON.parse(saved);
             CONFIG = { ...CONFIG, ...parsed };
-            aplicarConfiguracion();
         } catch(e) { console.warn('Error cargando configuración:', e); }
     }
+    // Aplicar configuración después de cargar
+    setTimeout(aplicarConfiguracion, 100);
 }
 
 function guardarConfiguracion() {
@@ -124,39 +126,61 @@ function guardarConfiguracion() {
     }
 }
 
+// ============================================
+// APLICAR CONFIGURACIÓN - CORREGIDO
+// ============================================
 function aplicarConfiguracion() {
     var canvas = document.getElementById('campo-canvas');
-    if (!canvas) return;
+    var wrapper = document.getElementById('campo-wrapper');
+    if (!canvas || !wrapper) return;
     
-    canvas.width = CONFIG.campoAncho;
-    canvas.height = CONFIG.campoAlto;
-    canvas.style.width = CONFIG.campoAncho + 'px';
-    canvas.style.height = CONFIG.campoAlto + 'px';
+    // Obtener tamaño REAL del wrapper
+    var w = wrapper.clientWidth;
+    var h = wrapper.clientHeight;
     
+    // Asegurar tamaño mínimo
+    if (w < 100) w = 600;
+    if (h < 100) h = 400;
+    
+    // Guardar en CONFIG
+    CONFIG.campoAncho = w;
+    CONFIG.campoAlto = h;
+    
+    // Aplicar al canvas - USAR 100% EN VEZ DE PX FIJOS
+    canvas.width = w;
+    canvas.height = h;
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    
+    // Redibujar campo
     dibujarCampo();
     
+    // Actualizar UI de configuración
+    var anchoLabel = document.getElementById('campo-ancho-label');
+    if (anchoLabel) anchoLabel.textContent = w + 'px';
+    var altoLabel = document.getElementById('campo-alto-label');
+    if (altoLabel) altoLabel.textContent = h + 'px';
+    
+    var anchoSlider = document.getElementById('campo-ancho-slider');
+    if (anchoSlider) anchoSlider.value = w;
+    var altoSlider = document.getElementById('campo-alto-slider');
+    if (altoSlider) altoSlider.value = h;
+    
+    // Tamaño de imágenes de jugadores
     var imagenes = document.querySelectorAll('.player-img');
     imagenes.forEach(function(img) {
         img.style.width = CONFIG.playerImageSize + 'px';
         img.style.height = (CONFIG.playerImageSize * 1.3) + 'px';
     });
     
+    // Aplicar neones
     aplicarNeones();
     
+    // Actualizar controles de configuración
     var speedSlider = document.getElementById('ball-speed-slider');
     if (speedSlider) speedSlider.value = CONFIG.ballSpeed;
     var speedLabel = document.getElementById('ball-speed-label');
     if (speedLabel) speedLabel.textContent = CONFIG.ballSpeed.toFixed(2);
-    
-    var anchoSlider = document.getElementById('campo-ancho-slider');
-    if (anchoSlider) anchoSlider.value = CONFIG.campoAncho;
-    var anchoLabel = document.getElementById('campo-ancho-label');
-    if (anchoLabel) anchoLabel.textContent = CONFIG.campoAncho + 'px';
-    
-    var altoSlider = document.getElementById('campo-alto-slider');
-    if (altoSlider) altoSlider.value = CONFIG.campoAlto;
-    var altoLabel = document.getElementById('campo-alto-label');
-    if (altoLabel) altoLabel.textContent = CONFIG.campoAlto + 'px';
     
     var playerSlider = document.getElementById('player-size-slider');
     if (playerSlider) playerSlider.value = CONFIG.playerImageSize;
@@ -198,6 +222,11 @@ function aplicarConfiguracion() {
     
     var colorPicker = document.getElementById('campo-color-picker');
     if (colorPicker) colorPicker.value = CONFIG.campoColor;
+    
+    // Iniciar bolas si no hay partida activa
+    if (!gameState.partidaActiva) {
+        iniciarBolas();
+    }
 }
 
 function aplicarNeones() {
@@ -235,6 +264,18 @@ function aplicarNeones() {
 }
 
 // ============================================
+// FUNCIÓN PARA REDIMENSIONAR EL CANVAS
+// ============================================
+function resizeCanvas() {
+    var wrapper = document.getElementById('campo-wrapper');
+    if (!wrapper) return;
+    aplicarConfiguracion();
+    if (!gameState.partidaActiva) {
+        iniciarBolas();
+    }
+}
+
+// ============================================
 // DIBUJAR CAMPO - COMPLETO Y CORREGIDO
 // ============================================
 function dibujarCampo() {
@@ -244,16 +285,17 @@ function dibujarCampo() {
     var w = CONFIG.campoAncho || 600;
     var h = CONFIG.campoAlto || 400;
     
-    canvas.width = w;
-    canvas.height = h;
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
+    // Asegurar que el canvas tenga el tamaño correcto
+    if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+    }
     
     var ctx = canvas.getContext('2d');
     
-    // ============================================
     // FONDO DEL CAMPO
-    // ============================================
     var grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
     grad.addColorStop(0, '#66bb6a');
     grad.addColorStop(0.25, '#4caf50');
@@ -273,7 +315,10 @@ function dibujarCampo() {
         ctx.stroke();
     }
     
-    if (CONFIG.mostrarLineas === false) return;
+    if (CONFIG.mostrarLineas === false) {
+        dibujarBolasEnCanvas(ctx);
+        return;
+    }
     
     var color = 'rgba(255,255,255,0.15)';
     var colorFuerte = 'rgba(255,255,255,0.08)';
@@ -312,9 +357,7 @@ function dibujarCampo() {
     ctx.lineWidth = 1.5;
     ctx.strokeRect(w - areaX - areaAncho, areaY, areaAncho, areaAlto);
     
-    // ============================================
-    // PORTERÍAS CORREGIDAS (MIRAN AL CENTRO)
-    // ============================================
+    // PORTERÍAS
     var goalSize = CONFIG.goalSize || 1.0;
     var goalAncho = Math.max(w * 0.08 * goalSize, 35);
     var goalProfundidad = Math.max(w * 0.035 * goalSize, 18);
@@ -324,7 +367,7 @@ function dibujarCampo() {
     var goalAnchoM = goalState.messiReducida ? goalAncho * 0.5 : goalAncho;
     var goalProfM = goalState.messiReducida ? goalProfundidad * 0.5 : goalProfundidad;
     
-    // --- PORTERÍA RONALDO (IZQUIERDA - ROJA) ---
+    // PORTERÍA RONALDO (IZQUIERDA)
     var gX_R = w * 0.01;
     var gY_R = (h - goalAnchoR) / 2;
     
@@ -334,7 +377,6 @@ function dibujarCampo() {
     ctx.shadowColor = CONFIG.neonRojo || '#ff1744';
     ctx.shadowBlur = 20;
     
-    // Poste delantero (derecho - más cerca del centro)
     ctx.strokeStyle = 'rgba(255,23,68,0.9)';
     ctx.lineWidth = 5;
     ctx.beginPath();
@@ -342,7 +384,6 @@ function dibujarCampo() {
     ctx.lineTo(gX_R + goalProfR, gY_R + goalAnchoR);
     ctx.stroke();
     
-    // Poste trasero (izquierdo - más lejos)
     ctx.strokeStyle = 'rgba(255,23,68,0.4)';
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -350,7 +391,6 @@ function dibujarCampo() {
     ctx.lineTo(gX_R, gY_R + goalAnchoR);
     ctx.stroke();
     
-    // Larguero delantero
     ctx.strokeStyle = 'rgba(255,23,68,0.9)';
     ctx.lineWidth = 5;
     ctx.beginPath();
@@ -358,71 +398,24 @@ function dibujarCampo() {
     ctx.lineTo(gX_R + goalProfR, gY_R);
     ctx.stroke();
     
-    // Larguero trasero
-    ctx.strokeStyle = 'rgba(255,23,68,0.3)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(gX_R, gY_R + 3);
-    ctx.lineTo(gX_R + goalProfR, gY_R + 3);
-    ctx.stroke();
-    
-    // Suelo
-    ctx.strokeStyle = 'rgba(255,23,68,0.3)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(gX_R, gY_R + goalAnchoR);
-    ctx.lineTo(gX_R + goalProfR, gY_R + goalAnchoR);
-    ctx.stroke();
-    
     ctx.shadowBlur = 0;
     
-    // Malla de la portería
+    // Malla
     ctx.strokeStyle = 'rgba(255,23,68,0.1)';
     ctx.lineWidth = 0.8;
     var rows = 8;
     var cellH = goalAnchoR / rows;
     for (var j = 1; j < rows; j++) {
-        ctx.beginPath();
         var yPos = gY_R + j * cellH;
         var alpha = 0.05 + 0.1 * (1 - j / rows);
         ctx.strokeStyle = 'rgba(255,23,68,' + alpha + ')';
+        ctx.beginPath();
         ctx.moveTo(gX_R, yPos);
         ctx.lineTo(gX_R + goalProfR, yPos);
         ctx.stroke();
     }
     
-    var cols = 6;
-    var cellW = goalProfR / cols;
-    for (var i = 1; i < cols; i++) {
-        ctx.beginPath();
-        var xPos = gX_R + i * cellW;
-        var alpha = 0.05 + 0.1 * (1 - i / cols);
-        ctx.strokeStyle = 'rgba(255,23,68,' + alpha + ')';
-        ctx.moveTo(xPos, gY_R);
-        ctx.lineTo(xPos, gY_R + goalAnchoR);
-        ctx.stroke();
-    }
-    
-    // Brillo en el larguero
-    ctx.fillStyle = 'rgba(255,255,255,0.12)';
-    ctx.fillRect(gX_R + 2, gY_R + 1, goalProfR - 4, 2);
-    
-    // Sombra interior
-    var shadowGrad = ctx.createLinearGradient(gX_R, 0, gX_R + goalProfR, 0);
-    shadowGrad.addColorStop(0, 'rgba(0,0,0,0.15)');
-    shadowGrad.addColorStop(0.5, 'rgba(0,0,0,0)');
-    shadowGrad.addColorStop(1, 'rgba(0,0,0,0.1)');
-    ctx.fillStyle = shadowGrad;
-    ctx.fillRect(gX_R, gY_R, goalProfR, goalAnchoR);
-    
-    // Texto CR7
-    ctx.fillStyle = 'rgba(255,255,255,0.12)';
-    ctx.font = 'bold ' + Math.min(w, h) * 0.02 + 'px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('CR7', gX_R + goalProfR / 2, gY_R + goalAnchoR / 2);
-    
-    // --- PORTERÍA MESSI (DERECHA - AZUL) ---
+    // PORTERÍA MESSI (DERECHA)
     var gX_M = w - w * 0.01 - goalProfM;
     var gY_M = (h - goalAnchoM) / 2;
     
@@ -432,7 +425,6 @@ function dibujarCampo() {
     ctx.shadowColor = CONFIG.neonAzul || '#2979ff';
     ctx.shadowBlur = 20;
     
-    // Poste delantero (izquierdo - más cerca del centro)
     ctx.strokeStyle = 'rgba(41,121,255,0.9)';
     ctx.lineWidth = 5;
     ctx.beginPath();
@@ -440,7 +432,6 @@ function dibujarCampo() {
     ctx.lineTo(gX_M, gY_M + goalAnchoM);
     ctx.stroke();
     
-    // Poste trasero (derecho - más lejos)
     ctx.strokeStyle = 'rgba(41,121,255,0.4)';
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -448,7 +439,6 @@ function dibujarCampo() {
     ctx.lineTo(gX_M + goalProfM, gY_M + goalAnchoM);
     ctx.stroke();
     
-    // Larguero delantero
     ctx.strokeStyle = 'rgba(41,121,255,0.9)';
     ctx.lineWidth = 5;
     ctx.beginPath();
@@ -456,82 +446,89 @@ function dibujarCampo() {
     ctx.lineTo(gX_M + goalProfM, gY_M);
     ctx.stroke();
     
-    // Larguero trasero
-    ctx.strokeStyle = 'rgba(41,121,255,0.3)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(gX_M, gY_M + 3);
-    ctx.lineTo(gX_M + goalProfM, gY_M + 3);
-    ctx.stroke();
-    
-    // Suelo
-    ctx.strokeStyle = 'rgba(41,121,255,0.3)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(gX_M, gY_M + goalAnchoM);
-    ctx.lineTo(gX_M + goalProfM, gY_M + goalAnchoM);
-    ctx.stroke();
-    
     ctx.shadowBlur = 0;
     
-    // Malla de la portería
+    // Malla
     ctx.strokeStyle = 'rgba(41,121,255,0.1)';
     ctx.lineWidth = 0.8;
-    var rowsM = 8;
-    var cellHM = goalAnchoM / rowsM;
-    for (var jM = 1; jM < rowsM; jM++) {
-        ctx.beginPath();
-        var yPosM = gY_M + jM * cellHM;
-        var alphaM = 0.05 + 0.1 * (1 - jM / rowsM);
+    for (var jM = 1; jM < rows; jM++) {
+        var yPosM = gY_M + jM * cellH;
+        var alphaM = 0.05 + 0.1 * (1 - jM / rows);
         ctx.strokeStyle = 'rgba(41,121,255,' + alphaM + ')';
+        ctx.beginPath();
         ctx.moveTo(gX_M, yPosM);
         ctx.lineTo(gX_M + goalProfM, yPosM);
         ctx.stroke();
     }
     
-    var colsM = 6;
-    var cellWM = goalProfM / colsM;
-    for (var iM = 1; iM < colsM; iM++) {
-        ctx.beginPath();
-        var xPosM = gX_M + iM * cellWM;
-        var alphaM2 = 0.05 + 0.1 * (1 - iM / colsM);
-        ctx.strokeStyle = 'rgba(41,121,255,' + alphaM2 + ')';
-        ctx.moveTo(xPosM, gY_M);
-        ctx.lineTo(xPosM, gY_M + goalAnchoM);
-        ctx.stroke();
-    }
+    // DIBUJAR BOLAS EN EL CANVAS
+    dibujarBolasEnCanvas(ctx);
+}
+
+// ============================================
+// DIBUJAR SOLO LAS BOLAS (PARA OPTIMIZACIÓN)
+// ============================================
+function dibujarSoloBolas() {
+    var canvas = document.getElementById('campo-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    // Limpiar solo el área de las bolas (usar un rectángulo pequeño)
+    // O mejor, limpiar todo y redibujar solo las bolas
+    dibujarBolasEnCanvas(ctx);
+}
+
+// ============================================
+// DIBUJAR BOLAS EN CANVAS
+// ============================================
+function dibujarBolasEnCanvas(ctx) {
+    var limites = getLimitesCampo();
+    var radio = limites.radio || 12;
     
-    // Brillo en el larguero
-    ctx.fillStyle = 'rgba(255,255,255,0.12)';
-    ctx.fillRect(gX_M + 2, gY_M + 1, goalProfM - 4, 2);
+    // Bola Ronaldo
+    var gradR = ctx.createRadialGradient(
+        ballState.ronaldo.x - 4, ballState.ronaldo.y - 4, 2,
+        ballState.ronaldo.x, ballState.ronaldo.y, radio
+    );
+    gradR.addColorStop(0, '#ff6666');
+    gradR.addColorStop(0.7, '#ff1744');
+    gradR.addColorStop(1, '#cc0000');
     
-    // Sombra interior
-    var shadowGradM = ctx.createLinearGradient(gX_M, 0, gX_M + goalProfM, 0);
-    shadowGradM.addColorStop(0, 'rgba(0,0,0,0.1)');
-    shadowGradM.addColorStop(0.5, 'rgba(0,0,0,0)');
-    shadowGradM.addColorStop(1, 'rgba(0,0,0,0.15)');
-    ctx.fillStyle = shadowGradM;
-    ctx.fillRect(gX_M, gY_M, goalProfM, goalAnchoM);
-    
-    // Texto MESSI
-    ctx.fillStyle = 'rgba(255,255,255,0.12)';
-    ctx.font = 'bold ' + Math.min(w, h) * 0.02 + 'px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('MESSI', gX_M + goalProfM / 2, gY_M + goalAnchoM / 2);
-    
-    // Círculos laterales
+    ctx.shadowColor = 'rgba(255,23,68,0.4)';
+    ctx.shadowBlur = 20;
     ctx.beginPath();
-    ctx.arc(w * 0.15, h / 2, Math.min(w, h) * 0.04, 0, Math.PI * 2);
-    ctx.strokeStyle = colorFuerte;
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.arc(ballState.ronaldo.x, ballState.ronaldo.y, radio, 0, Math.PI * 2);
+    ctx.fillStyle = gradR;
+    ctx.fill();
+    ctx.shadowBlur = 0;
     
+    // Brillo de la bola Ronaldo
     ctx.beginPath();
-    ctx.arc(w * 0.85, h / 2, Math.min(w, h) * 0.04, 0, Math.PI * 2);
-    ctx.strokeStyle = colorFuerte;
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.arc(ballState.ronaldo.x - 4, ballState.ronaldo.y - 4, 4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fill();
+    
+    // Bola Messi
+    var gradM = ctx.createRadialGradient(
+        ballState.messi.x - 4, ballState.messi.y - 4, 2,
+        ballState.messi.x, ballState.messi.y, radio
+    );
+    gradM.addColorStop(0, '#6666ff');
+    gradM.addColorStop(0.7, '#2979ff');
+    gradM.addColorStop(1, '#0d47a1');
+    
+    ctx.shadowColor = 'rgba(41,121,255,0.4)';
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(ballState.messi.x, ballState.messi.y, radio, 0, Math.PI * 2);
+    ctx.fillStyle = gradM;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    
+    // Brillo de la bola Messi
+    ctx.beginPath();
+    ctx.arc(ballState.messi.x - 4, ballState.messi.y - 4, 4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fill();
 }
 
 // ============================================
@@ -564,19 +561,23 @@ function moverBolas() {
     var maxX = limites.maxX;
     var minY = limites.minY;
     var maxY = limites.maxY;
-    var speed = gameState.chaosActive ? CONFIG.ballSpeed * 2.5 : CONFIG.ballSpeed; // <--- CAMBIADO DE 1.8 a 2.5
-    var ballSize = limites.ballSize;
+    var speed = gameState.chaosActive ? CONFIG.ballSpeed * 2.5 : CONFIG.ballSpeed;
     var radio = limites.radio;
+    
     var bR = ballState.ronaldo;
     bR.x += bR.vx * speed;
     bR.y += bR.vy * speed;
+    
     var bM = ballState.messi;
     bM.x += bM.vx * speed;
     bM.y += bM.vy * speed;
+    
+    // Colisiones entre bolas
     var dx = bM.x - bR.x;
     var dy = bM.y - bR.y;
     var distancia = Math.sqrt(dx * dx + dy * dy);
     var distanciaMinima = radio * 2;
+    
     if (distancia < distanciaMinima && distancia > 0) {
         var nx = dx / distancia;
         var ny = dy / distancia;
@@ -585,6 +586,7 @@ function moverBolas() {
         bR.y -= ny * overlap;
         bM.x += nx * overlap;
         bM.y += ny * overlap;
+        
         var dvx = bR.vx - bM.vx;
         var dvy = bR.vy - bM.vy;
         var dvn = dvx * nx + dvy * ny;
@@ -594,6 +596,7 @@ function moverBolas() {
             bM.vx += dvn * nx;
             bM.vy += dvn * ny;
         }
+        
         var rapidezR = Math.sqrt(bR.vx * bR.vx + bR.vy * bR.vy);
         var rapidezM = Math.sqrt(bM.vx * bM.vx + bM.vy * bM.vy);
         var rapidezPromedio = (rapidezR + rapidezM) / 2;
@@ -606,6 +609,8 @@ function moverBolas() {
             bM.vy = (bM.vy / rapidezM) * rapidezPromedio;
         }
     }
+    
+    // Rebotes en bordes
     if (bR.x < minX) { bR.x = minX; bR.vx *= -1; }
     if (bR.x > maxX) { bR.x = maxX; bR.vx *= -1; }
     if (bR.y < minY) { bR.y = minY; bR.vy *= -1; }
@@ -614,20 +619,24 @@ function moverBolas() {
     if (bM.x > maxX) { bM.x = maxX; bM.vx *= -1; }
     if (bM.y < minY) { bM.y = minY; bM.vy *= -1; }
     if (bM.y > maxY) { bM.y = maxY; bM.vy *= -1; }
-    var ballR = document.getElementById('ball-ronaldo');
-    var ballM = document.getElementById('ball-messi');
-    if (ballR) {
-        ballR.style.width = ballSize + 'px';
-        ballR.style.height = ballSize + 'px';
-        ballR.style.left = (bR.x - radio) + 'px';
-        ballR.style.top = (bR.y - radio) + 'px';
+}
+
+// ============================================
+// BUCLE DEL JUEGO CON REQUESTANIMATIONFRAME
+// ============================================
+function gameLoop() {
+    if (!gameState.partidaActiva) {
+        gameState.animFrameId = requestAnimationFrame(gameLoop);
+        return;
     }
-    if (ballM) {
-        ballM.style.width = ballSize + 'px';
-        ballM.style.height = ballSize + 'px';
-        ballM.style.left = (bM.x - radio) + 'px';
-        ballM.style.top = (bM.y - radio) + 'px';
-    }
+    
+    moverBolas();
+    detectarGoles();
+    
+    // Redibujar solo las bolas (más eficiente)
+    dibujarSoloBolas();
+    
+    gameState.animFrameId = requestAnimationFrame(gameLoop);
 }
 
 // ============================================
@@ -635,6 +644,7 @@ function moverBolas() {
 // ============================================
 function detectarGoles() {
     var canvas = document.getElementById('campo-canvas');
+    if (!canvas) return;
     var w = canvas.width || CONFIG.campoAncho || 600;
     var h = canvas.height || CONFIG.campoAlto || 400;
     var bR = ballState.ronaldo;
@@ -661,28 +671,7 @@ function detectarGoles() {
     var gX_M_End = gX_M + goalProfM;
     var gY_M_End = gY_M + goalAnchoM;
     
-    var bR_centroX = bR.x;
-    var bR_centroY = bR.y;
-    
-    if (bR_centroX + margenGol > gX_M && bR_centroX - margenGol < gX_M_End &&
-        bR_centroY + margenGol > gY_M && bR_centroY - margenGol < gY_M_End) {
-        if (bR_centroX > gX_M + radio && bR_centroX < gX_M_End - radio &&
-            bR_centroY > gY_M + radio && bR_centroY < gY_M_End - radio) {
-            gameState.scoreRonaldo++;
-            actualizarMarcador();
-            showGoalNotification('⚽ GOL DE RONALDO!');
-            reproducirSonido('ronaldo');
-            bR.x = w * 0.1 + Math.random() * w * 0.2;
-            bR.y = Math.random() * (h - 40) + 20;
-            var dirR = generarDireccionAleatoria();
-            bR.vx = dirR.vx * 1.5;
-            bR.vy = dirR.vy * 1.5;
-            if (verificarGanador()) return;
-            guardarEstadoCompleto();
-            return;
-        }
-    }
-    
+    // Gol de Ronaldo (bola de Messi entra en portería de Ronaldo)
     var bM_centroX = bM.x;
     var bM_centroY = bM.y;
     
@@ -690,15 +679,38 @@ function detectarGoles() {
         bM_centroY + margenGol > gY_R && bM_centroY - margenGol < gY_R_End) {
         if (bM_centroX > gX_R + radio && bM_centroX < gX_R_End - radio &&
             bM_centroY > gY_R + radio && bM_centroY < gY_R_End - radio) {
-            gameState.scoreMessi++;
+            gameState.scoreRonaldo++;
             actualizarMarcador();
-            showGoalNotification('⚽ GOL DE MESSI!');
-            reproducirSonido('messi');
+            showGoalNotification('⚽ GOL DE RONALDO!');
+            reproducirSonido('ronaldo');
             bM.x = w * 0.7 + Math.random() * w * 0.2;
             bM.y = Math.random() * (h - 40) + 20;
             var dirM = generarDireccionAleatoria();
             bM.vx = dirM.vx * 1.5;
             bM.vy = dirM.vy * 1.5;
+            if (verificarGanador()) return;
+            guardarEstadoCompleto();
+            return;
+        }
+    }
+    
+    // Gol de Messi (bola de Ronaldo entra en portería de Messi)
+    var bR_centroX = bR.x;
+    var bR_centroY = bR.y;
+    
+    if (bR_centroX + margenGol > gX_M && bR_centroX - margenGol < gX_M_End &&
+        bR_centroY + margenGol > gY_M && bR_centroY - margenGol < gY_M_End) {
+        if (bR_centroX > gX_M + radio && bR_centroX < gX_M_End - radio &&
+            bR_centroY > gY_M + radio && bR_centroY < gY_M_End - radio) {
+            gameState.scoreMessi++;
+            actualizarMarcador();
+            showGoalNotification('⚽ GOL DE MESSI!');
+            reproducirSonido('messi');
+            bR.x = w * 0.1 + Math.random() * w * 0.2;
+            bR.y = Math.random() * (h - 40) + 20;
+            var dirR = generarDireccionAleatoria();
+            bR.vx = dirR.vx * 1.5;
+            bR.vy = dirR.vy * 1.5;
             if (verificarGanador()) return;
             guardarEstadoCompleto();
             return;
@@ -963,26 +975,10 @@ function applyPowerEffect(powerName, active) {
             setTimeout(function() { goalState.messiReducida = false; dibujarCampo(); }, 60000);
         }
     }
-    if (p.includes('golronaldo') && active) {
-        showGoalNotification('⚽ GOL DE RONALDO!');
-        setTimeout(function() { deactivatePower('golronaldo'); }, 3000);
-    }
-    if (p.includes('golmessi') && active) {
-        showGoalNotification('⚽ GOL DE MESSI!');
-        setTimeout(function() { deactivatePower('golmessi'); }, 3000);
-    }
-    if (p.includes('lluviaronaldo') && active) {
-        showGoalNotification('🌧️ 3 GOLES PARA RONALDO!');
-        setTimeout(function() { deactivatePower('lluviaronaldo'); }, 3000);
-    }
-    if (p.includes('lluviamessi') && active) {
-        showGoalNotification('🌧️ 3 GOLES PARA MESSI!');
-        setTimeout(function() { deactivatePower('lluviamessi'); }, 3000);
-    }
 }
 
 // ============================================
-// EFECTOS VISUALES ESENCIALES
+// EFECTOS VISUALES
 // ============================================
 function createShockwave(x, y) {
     var el = document.createElement('div');
@@ -1266,82 +1262,22 @@ function mostrarRecordatorio(segundos) {
 }
 
 // ============================================
-// CONTROL DE POSICIÓN DE PANELES
+// CONTROL DE POSICIÓN DE PANELES - DESACTIVADO
 // ============================================
-var velocidadFlechas = 10;
-
-function actualizarVelocidadFlechas(valor) {
-    velocidadFlechas = parseInt(valor);
-    var labels = document.querySelectorAll('.velocidad-flechas-label');
-    labels.forEach(function(label) {
-        label.textContent = valor;
-    });
-}
-
 function moverPanel(panelId, direccion) {
-    var panel = document.getElementById(panelId);
-    if (!panel) return;
-    
-    var paso = 10;
-    var rect = panel.getBoundingClientRect();
-    var left = rect.left;
-    var top = rect.top;
-    
-    switch (direccion) {
-        case 'arriba': top -= paso; break;
-        case 'abajo': top += paso; break;
-        case 'izquierda': left -= paso; break;
-        case 'derecha': left += paso; break;
-        case 'centro':
-            left = (window.innerWidth - rect.width) / 2;
-            top = (window.innerHeight - rect.height) / 2;
-            break;
-    }
-    
-    left = Math.max(0, Math.min(window.innerWidth - rect.width, left));
-    top = Math.max(0, Math.min(window.innerHeight - rect.height, top));
-    
-    panel.style.left = left + 'px';
-    panel.style.top = top + 'px';
-    panel.style.transform = 'none';
-    
-    guardarPosicionesPaneles();
+    console.log('Los paneles son estáticos, no se pueden mover');
 }
 
 function guardarPosicionesPaneles() {
-    try {
-        var posiciones = {};
-        document.querySelectorAll('.panel-flotante').forEach(function(panel) {
-            var id = panel.id;
-            var rect = panel.getBoundingClientRect();
-            posiciones[id] = {
-                left: rect.left,
-                top: rect.top
-            };
-        });
-        localStorage.setItem('golfinalive_paneles', JSON.stringify(posiciones));
-    } catch(e) {
-        console.warn('Error guardando posiciones:', e);
-    }
+    return;
 }
 
 function cargarPosicionesPaneles() {
-    try {
-        var saved = localStorage.getItem('golfinalive_paneles');
-        if (saved) {
-            var posiciones = JSON.parse(saved);
-            document.querySelectorAll('.panel-flotante').forEach(function(panel) {
-                var id = panel.id;
-                if (posiciones[id]) {
-                    panel.style.left = posiciones[id].left + 'px';
-                    panel.style.top = posiciones[id].top + 'px';
-                    panel.style.transform = 'none';
-                }
-            });
-        }
-    } catch(e) {
-        console.warn('Error cargando posiciones:', e);
-    }
+    return;
+}
+
+function actualizarVelocidadFlechas(valor) {
+    return;
 }
 
 // ============================================
@@ -1425,8 +1361,17 @@ function iniciarPartida() {
         gameContainer.classList.add('iniciando');
         setTimeout(function() { gameContainer.classList.remove('iniciando'); }, 1500);
     }
-    if (gameState.ballInterval) clearInterval(gameState.ballInterval);
-    gameState.ballInterval = setInterval(function() { if (gameState.partidaActiva) { moverBolas(); detectarGoles(); } }, 16);
+    
+    // Usar requestAnimationFrame en lugar de setInterval
+    if (gameState.ballInterval) {
+        clearInterval(gameState.ballInterval);
+        gameState.ballInterval = null;
+    }
+    if (gameState.animFrameId) {
+        cancelAnimationFrame(gameState.animFrameId);
+    }
+    gameLoop();
+    
     crearPartidaEnSupabase();
     iniciarAutoGuardado();
     guardarEstadoCompleto();
@@ -1438,6 +1383,7 @@ function iniciarPartida() {
 function detenerPartida() {
     gameState.partidaActiva = false;
     if (gameState.ballInterval) { clearInterval(gameState.ballInterval); gameState.ballInterval = null; }
+    if (gameState.animFrameId) { cancelAnimationFrame(gameState.animFrameId); gameState.animFrameId = null; }
     if (gameState.autoGuardadoInterval) { clearInterval(gameState.autoGuardadoInterval); gameState.autoGuardadoInterval = null; }
     if (poderesInterval) { clearInterval(poderesInterval); poderesInterval = null; }
     var btnIniciar = document.getElementById('btn-iniciar');
@@ -1597,7 +1543,6 @@ function cargarImagenesJugadores() {
 document.addEventListener('DOMContentLoaded', function() {
     cargarAudios();
     cargarConfiguracion();
-    cargarPosicionesPaneles();
     cargarPosicionEstadio();
     var panelConfig = document.getElementById('panel-configuracion');
     if (panelConfig) panelConfig.style.display = 'none';
@@ -1609,11 +1554,22 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btnIniciar) btnIniciar.style.display = 'inline-block';
     var btnDetener = document.getElementById('btn-detener');
     if (btnDetener) btnDetener.style.display = 'none';
-    setTimeout(function() { dibujarCampo(); }, 500);
+    
+    // Aplicar configuración después de cargar
+    setTimeout(aplicarConfiguracion, 300);
 });
 
 window.addEventListener('load', function() {
-    setTimeout(function() { cargarImagenesJugadores(); dibujarCampo(); }, 500);
+    setTimeout(function() { 
+        cargarImagenesJugadores(); 
+        aplicarConfiguracion();
+    }, 500);
+});
+
+// Redimensionar el canvas cuando cambia el tamaño de la pantalla
+window.addEventListener('resize', function() {
+    clearTimeout(window._resizeTimer);
+    window._resizeTimer = setTimeout(resizeCanvas, 300);
 });
 
 window.addEventListener('beforeunload', function() {
@@ -1624,15 +1580,21 @@ window.addEventListener('beforeunload', function() {
     if (gameState.ballInterval) clearInterval(gameState.ballInterval);
     if (gameState.autoGuardadoInterval) clearInterval(gameState.autoGuardadoInterval);
     if (poderesInterval) clearInterval(poderesInterval);
+    if (gameState.animFrameId) cancelAnimationFrame(gameState.animFrameId);
     detenerAudioEstadio();
 });
 
 // ============================================
-// CONTROL DE MOVIMIENTO DEL ESTADIO
+// CONTROL DE MOVIMIENTO DEL ESTADIO - DESACTIVADO PARA PRUEBAS
 // ============================================
 var velocidadEstadio = 5;
 
 function moverEstadio(direccion) {
+    // DESACTIVADO - El estadio ya no se mueve para evitar problemas de posicionamiento
+    console.log('Movimiento del estadio desactivado para pruebas');
+    return;
+    
+    /* CÓDIGO ORIGINAL COMENTADO
     var wrapper = document.getElementById('campo-wrapper');
     if (!wrapper) return;
     
@@ -1656,6 +1618,7 @@ function moverEstadio(direccion) {
     wrapper.style.top = currentTop + 'px';
     
     guardarPosicionEstadio(currentLeft, currentTop);
+    */
 }
 
 function guardarPosicionEstadio(left, top) {
@@ -1711,6 +1674,7 @@ window.guardarConfiguracion = guardarConfiguracion;
 window.restaurarConfiguracion = restaurarConfiguracion;
 window.actualizarVelocidadFlechas = actualizarVelocidadFlechas;
 window.moverPanel = moverPanel;
+window.moverEstadio = moverEstadio;
 window.setPlayerImages = function(ronaldoUrl, messiUrl) {
     if (ronaldoUrl) {
         var img = document.getElementById('ronaldo-img');
