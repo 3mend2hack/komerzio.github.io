@@ -7,6 +7,20 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <!-- ===================== MODAL DE LOGIN ===================== -->
+  <div id="login-overlay" class="modal-overlay open">
+    <div class="modal-content login-modal">
+      <h2>Acceso Restringido</h2>
+      <p>Ingresa tu contraseña para continuar</p>
+      <label for="password-input">Contraseña:</label>
+      <input type="password" id="password-input" placeholder="Contraseña">
+      <div class="modal-buttons">
+        <button id="btn-login">Iniciar sesión</button>
+      </div>
+      <p id="login-error" class="error-message"></p>
+    </div>
+  </div>
+
   <!-- ===================== MARCADOR SUPERIOR ===================== -->
   <header class="scoreboard" id="scoreboard">
     <div class="team team-red">
@@ -47,6 +61,7 @@
       <button id="btn-pause">Pausar</button>
       <button id="btn-resume">Reanudar</button>
       <button id="btn-reset">Reiniciar</button>
+      <button id="btn-continue">Continuar partida</button>
     </div>
 
     <div class="audio-buttons">
