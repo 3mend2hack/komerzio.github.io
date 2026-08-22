@@ -1,5 +1,3 @@
-// js/supabase.js
-
 // Usamos la variable global 'supabase' que se cargó con <script> en index.html
 const { createClient } = window.supabase;
 

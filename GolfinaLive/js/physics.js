@@ -33,6 +33,7 @@ export class Ball {
     this.x += this.vx * deltaTime;
     this.y += this.vy * deltaTime;
     
+    // Rebote con paredes
     if (this.y - this.radius < 0) {
       this.y = this.radius;
       this.vy = Math.abs(this.vy);
@@ -88,15 +89,13 @@ export class Ball {
       const dvx = this.vx - other.vx;
       const dvy = this.vy - other.vy;
       const dvn = dvx * nx + dvy * ny;
-      if (dvn > 0) return;
+      if (dvn > 0) return; // se están separando
       
+      // Intercambio de componente normal (colisión elástica con masas iguales)
       this.vx -= dvn * nx;
       this.vy -= dvn * ny;
       other.vx += dvn * nx;
       other.vy += dvn * ny;
-      
-      this.setSpeed(this.speed);
-      other.setSpeed(other.speed);
     }
   }
   
