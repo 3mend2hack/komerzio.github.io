@@ -80,11 +80,22 @@
   <!-- ===================== MODAL PARA NOMBRES DE JUGADORES ===================== -->
   <div id="player-name-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-content">
-      <h2 id="modal-title">Configurar Nombres de Jugadores</h2>
+      <h2 id="modal-title">Configurar Jugadores</h2>
+
       <label for="input-name-red">Nombre del jugador rojo:</label>
       <input type="text" id="input-name-red" placeholder="Ej: Lionel Messi">
+
+      <label for="input-file-red">Imagen del jugador rojo:</label>
+      <input type="file" id="input-file-red" accept="image/*">
+      <img id="player-image-red-preview" class="image-preview" src="" alt="Previsualización roja">
+
       <label for="input-name-blue">Nombre del jugador azul:</label>
       <input type="text" id="input-name-blue" placeholder="Ej: Cristiano Ronaldo">
+
+      <label for="input-file-blue">Imagen del jugador azul:</label>
+      <input type="file" id="input-file-blue" accept="image/*">
+      <img id="player-image-blue-preview" class="image-preview" src="" alt="Previsualización azul">
+
       <div class="modal-buttons">
         <button id="btn-save-names">Guardar</button>
         <button id="btn-close-modal">Cancelar</button>
