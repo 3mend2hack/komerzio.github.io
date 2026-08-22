@@ -62,6 +62,7 @@ const loginOverlay = document.getElementById('login-overlay');
 const passwordInput = document.getElementById('password-input');
 const btnLogin = document.getElementById('btn-login');
 const loginError = document.getElementById('login-error');
+const btnLogout = document.getElementById('btn-logout');
 
 // ===================== AUTENTICACIÓN =====================
 async function checkSession() {
@@ -93,6 +94,23 @@ btnLogin.addEventListener('click', async () => {
     await initGame();
   } catch (error) {
     loginError.textContent = 'Contraseña incorrecta';
+  }
+});
+
+// Cerrar sesión
+btnLogout.addEventListener('click', async () => {
+  try {
+    await signOut();
+    loginOverlay.classList.add('open');
+    passwordInput.value = '';
+    loginError.textContent = '';
+    // Detener juego y limpiar
+    isRunning = false;
+    goalPause = false;
+    audioManager.stopAll();
+    hideMessage();
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error);
   }
 });
 
@@ -369,7 +387,7 @@ function startCountdown(seconds) {
   setTimeout(() => startCountdown(seconds - 1), 1000);
 }
 
-// ===================== FUNCIÓN PARA APLICAR PODERES (ahora recibe usuario) =====================
+// ===================== FUNCIÓN PARA APLICAR PODERES =====================
 function aplicarPoder(nombrePoder, canal, usuario) {
   console.log('Aplicando poder:', nombrePoder);
   const comando = nombrePoder.toLowerCase();
@@ -419,7 +437,6 @@ function aplicarPoder(nombrePoder, canal, usuario) {
     showMessage(`¡Goles de Ronaldo valen doble! (por ${quien})`);
     setTimeout(() => { doublePoints.red = false; }, 60000);
   }
-  // Poderes de Messi
   else if (comando === 'velocidadmessi') {
     ballBlue.setSpeed(ballBlue.speed * 1.5);
     showMessage(`¡Velocidad aumentada para Messi! (por ${quien})`);
@@ -464,7 +481,6 @@ function aplicarPoder(nombrePoder, canal, usuario) {
     showMessage(`¡Goles de Messi valen doble! (por ${quien})`);
     setTimeout(() => { doublePoints.blue = false; }, 60000);
   }
-  // Poderes neutrales
   else if (comando === 'super') {
     ballRed.setSpeed(ballRed.speed * 2);
     ballBlue.setSpeed(ballBlue.speed * 2);
