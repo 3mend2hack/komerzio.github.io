@@ -111,6 +111,54 @@ export class UIManager {
   }
 
   /**
+   * Comprime una imagen a un tamaño máximo y la devuelve como Blob JPEG.
+   * @param {File} file - Archivo original
+   * @param {number} maxSize - Tamaño máximo en píxeles (ancho/alto)
+   * @param {number} quality - Calidad de compresión (0 a 1)
+   * @returns {Promise<Blob>} - Imagen comprimida
+   */
+  async compressImage(file, maxSize = 300, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > height && width > maxSize) {
+            height = Math.round((height * maxSize) / width);
+            width = maxSize;
+          } else if (height >= width && height > maxSize) {
+            width = Math.round((width * maxSize) / height);
+            height = maxSize;
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error('No se pudo comprimir la imagen'));
+              }
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        img.onerror = () => reject(new Error('Error al cargar la imagen para comprimir'));
+        img.src = event.target.result;
+      };
+      reader.onerror = () => reject(new Error('Error al leer el archivo'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /**
    * Maneja la subida de imagen de un jugador a Supabase Storage.
    * @param {Event} event - Evento change del input file
    * @param {string} team - 'red' o 'blue'
@@ -119,33 +167,36 @@ export class UIManager {
     const file = event.target.files[0];
     if (!file) return;
 
-    const bucketName = 'jugadores'; // ⚠️ Cambia si tu bucket tiene otro nombre
-    const path = `${team}/${Date.now()}-${file.name}`; // carpeta por equipo
-
     try {
-      // Subir archivo a Supabase Storage
+      // 1. Comprimir la imagen antes de subir
+      const compressedBlob = await this.compressImage(file, 300, 0.8);
+      const fileExt = 'jpg'; // Siempre JPEG tras comprimir
+      const fileName = `${Date.now()}.${fileExt}`;
+      const bucketName = 'jugadores'; // ⚠️ CAMBIA ESTO por el nombre real de tu bucket
+
+      // 2. Subir a Supabase Storage
       const { data, error } = await supabase.storage
         .from(bucketName)
-        .upload(path, file, {
+        .upload(`${team}/${fileName}`, compressedBlob, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true
         });
 
       if (error) throw error;
 
-      // Obtener URL pública del archivo subido
+      // 3. Obtener URL pública
       const { data: publicUrlData } = supabase.storage
         .from(bucketName)
-        .getPublicUrl(path);
+        .getPublicUrl(`${team}/${fileName}`);
 
       const publicUrl = publicUrlData.publicUrl;
 
-      // Actualizar imagen en la interfaz y en los datos
+      // 4. Actualizar interfaz y guardar
       this.playerImages[team] = publicUrl;
       this.updatePlayerImagesDisplay();
       this.saveSettings();
 
-      // Mostrar preview en el modal
+      // 5. Mostrar preview en el modal
       if (team === 'red') {
         document.getElementById('player-image-red-preview').src = publicUrl;
       } else {
