@@ -27,8 +27,9 @@ const audioFiles = {
   gol_azul: 'assets/audio/gol_azul.mp3',
   suscribete: 'assets/audio/suscribete.mp3',
   apoya_estrella: 'assets/audio/apoya_estrella.mp3',
-  extra1: 'assets/audio/extra1.mp3',
-  extra2: 'assets/audio/extra2.mp3'
+  poder: 'assets/audio/poder.mp3',          // antes extra1
+  tulike: 'assets/audio/tulike.mp3',        // antes extra2
+  estadio_completo: 'assets/audio/estadio_completo.mp3'  // nuevo bucle
 };
 
 const stadium = new Stadium(canvas);
@@ -63,7 +64,6 @@ const uiManager = new UIManager({
   canvasWidth: CANVAS_WIDTH,
   canvasHeight: CANVAS_HEIGHT,
   onFieldChange: () => {
-    // Si el usuario cambia el tamaño manualmente, actualizamos originales
     originalFieldWidth = field.width;
     originalFieldHeight = field.height;
     ballRed.reset(field.width, field.height);
@@ -99,16 +99,19 @@ function handleControlAction(action) {
     case 'start':
       if (!isRunning && !goalPause) {
         isRunning = true;
+        audioManager.playLoop('estadio_completo'); // Iniciar sonido de fondo
         lastTime = performance.now();
         requestAnimationFrame(loop);
       }
       break;
     case 'pause':
       isRunning = false;
+      audioManager.stopLoop(); // Detener sonido de fondo
       break;
     case 'resume':
       if (!isRunning && !goalPause) {
         isRunning = true;
+        audioManager.playLoop('estadio_completo'); // Reanudar sonido de fondo
         lastTime = performance.now();
         requestAnimationFrame(loop);
       }
@@ -119,13 +122,14 @@ function handleControlAction(action) {
       if (invertTimeout) clearTimeout(invertTimeout);
       goalPause = false;
       isRunning = false;
+      audioManager.stopLoop(); // Detener sonido de fondo
       scores.red = 0;
       scores.blue = 0;
       doublePoints.red = false;
       doublePoints.blue = false;
       field.width = originalFieldWidth;
       field.height = originalFieldHeight;
-      field.goalMouthRatio = 0.4; // Valor por defecto
+      field.goalMouthRatio = 0.4;
       updateScoreboard();
       ballRed.reset(field.width, field.height);
       ballBlue.reset(field.width, field.height);
@@ -233,12 +237,14 @@ function startCountdown(seconds) {
       showMessage(`¡${winner} gana el partido!`);
       goalPause = false;
       isRunning = false;
+      audioManager.stopLoop(); // Detener sonido de fondo al finalizar
       // Aquí se podría llamar a saveMatchResult
     } else {
       hideMessage();
       goalPause = false;
       isRunning = true;
       lastTime = performance.now();
+      audioManager.playLoop('estadio_completo'); // Reanudar bucle tras el gol
       requestAnimationFrame(loop);
     }
     return;
@@ -265,20 +271,18 @@ function aplicarPoder(nombrePoder) {
     ballBlue.setSpeed(ballBlue.speed * 0.5);
     showMessage('¡Messi ralentizado!');
     setTimeout(() => {
-      ballBlue.setSpeed(ballBlue.speed * 2); // restaurar velocidad original
+      ballBlue.setSpeed(ballBlue.speed * 2);
     }, 30000);
   }
   else if (comando === 'golronaldo') {
     handleGoal('red');
   }
   else if (comando === 'caosronaldo') {
-    // Caos: invertir dirección de la pelota de Messi
     ballBlue.vx = -ballBlue.vx;
     ballBlue.vy = -ballBlue.vy;
     showMessage('¡Caos para Messi!');
   }
   else if (comando === 'escudoronaldo') {
-    // Reducir la portería de Messi (lado izquierdo)
     field.goalMouthRatio = field.goalMouthRatio * 0.7;
     showMessage('¡Escudo para Ronaldo!');
     setTimeout(() => {
@@ -288,10 +292,9 @@ function aplicarPoder(nombrePoder) {
     drawFrame();
   }
   else if (comando === 'lluviaronaldo') {
-    // Añadir 3 goles automáticos para Ronaldo
     for (let i = 0; i < 3; i++) {
       scores.red += 1;
-      if (doublePoints.red) scores.red += 1; // Si doble puntos activo, cada gol vale 2
+      if (doublePoints.red) scores.red += 1;
     }
     updateScoreboard();
     showMessage('¡Lluvia de goles para Ronaldo!');
@@ -301,7 +304,7 @@ function aplicarPoder(nombrePoder) {
     ballBlue.setSpeed(0);
     showMessage('¡Messi congelado!');
     setTimeout(() => {
-      ballBlue.setSpeed(ballRed.speed); // restaurar velocidad original (ambas deberían ser iguales)
+      ballBlue.setSpeed(ballRed.speed);
     }, 10000);
   }
   else if (comando === 'doblepuntosronaldo') {
@@ -377,7 +380,6 @@ function aplicarPoder(nombrePoder) {
     }, 30000);
   }
   else if (comando === 'campopequeno') {
-    // Reducir tamaño del campo temporalmente
     originalFieldWidth = field.width;
     originalFieldHeight = field.height;
     field.width = field.width * 0.7;
@@ -400,7 +402,6 @@ function aplicarPoder(nombrePoder) {
     }, 60000);
   }
   else if (comando === 'invertir') {
-    // Invertir direcciones de ambas pelotas
     ballRed.vx = -ballRed.vx;
     ballRed.vy = -ballRed.vy;
     ballBlue.vx = -ballBlue.vx;
@@ -425,19 +426,25 @@ function checkWinnerAfterAutoGoal() {
     const winner = scores.red >= goalTarget ? uiManager.playerNames.red : uiManager.playerNames.blue;
     showMessage(`¡${winner} gana el partido!`);
     goalPause = false;
+    audioManager.stopLoop();
   }
 }
 
 // ===================== INICIALIZAR SUPABASE =====================
-initSupabase({
-  onPoderRecibido: (nombrePoder, canal) => {
-    console.log(`Poder recibido: ${nombrePoder} (canal: ${canal})`);
-    aplicarPoder(nombrePoder);
-  },
-  onPartidaFinalizada: (ganador) => {
-    showMessage(`¡Fin del partido! Ganador: ${ganador}`);
-  }
-});
+try {
+  initSupabase({
+    onPoderRecibido: (nombrePoder, canal) => {
+      console.log(`Poder recibido: ${nombrePoder} (canal: ${canal})`);
+      aplicarPoder(nombrePoder);
+    },
+    onPartidaFinalizada: (ganador) => {
+      showMessage(`¡Fin del partido! Ganador: ${ganador}`);
+      audioManager.stopLoop();
+    }
+  });
+} catch (error) {
+  console.warn('No se pudo conectar con Supabase:', error);
+}
 
 // ===================== DIBUJO INICIAL =====================
 drawFrame();
