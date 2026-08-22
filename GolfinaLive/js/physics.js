@@ -1,10 +1,13 @@
 export class Ball {
-  constructor(width, height, radius, color, speed, targetGoal) {
+  constructor(width, height, radius, color, speed, targetGoal, team) {
     this.radius = radius;
     this.color = color;
     this.speed = speed;
-    this.targetGoal = targetGoal;
-    this.mass = 1; // masa unitaria para colisión elástica
+    this.targetGoal = targetGoal; // 'left' o 'right'
+    this.team = team; // 'red' o 'blue'
+    this.mass = 1;
+    this.isClone = false; // Indica si es una pelota extra
+    this.expireTime = null; // Si es clon, cuando expira
     this.reset(width, height);
   }
   
@@ -43,6 +46,7 @@ export class Ball {
       this.vy = -Math.abs(this.vy);
     }
     
+    // Gol solo si es pelota original (o todas cuentan)
     if (this.x - this.radius < 0) {
       if (this.isInsideGoalLeft(field)) {
         if (this.targetGoal === 'left') {
@@ -78,14 +82,8 @@ export class Ball {
     const minDist = this.radius + other.radius;
     
     if (dist < minDist && dist > 0) {
-      // Vector normal unitario (de this a other)
       const nx = dx / dist;
       const ny = dy / dist;
-      // Vector tangente unitario
-      const tx = -ny;
-      const ty = nx;
-      
-      // Separar las pelotas para evitar superposición
       const overlap = minDist - dist;
       const totalMass = this.mass + other.mass;
       this.x -= (overlap * (other.mass / totalMass)) * nx;
@@ -93,28 +91,17 @@ export class Ball {
       other.x += (overlap * (this.mass / totalMass)) * nx;
       other.y += (overlap * (this.mass / totalMass)) * ny;
       
-      // Descomponer velocidades en componente normal y tangencial
-      const v1n = this.vx * nx + this.vy * ny;
-      const v1t = this.vx * tx + this.vy * ty;
-      const v2n = other.vx * nx + other.vy * ny;
-      const v2t = other.vx * tx + other.vy * ty;
+      const dvx = this.vx - other.vx;
+      const dvy = this.vy - other.vy;
+      const dvn = dvx * nx + dvy * ny;
+      if (dvn > 0) return;
       
-      // Solo aplicar impulso si se están acercando (v1n - v2n > 0)
-      if (v1n - v2n <= 0) return;
+      this.vx -= dvn * nx;
+      this.vy -= dvn * ny;
+      other.vx += dvn * nx;
+      other.vy += dvn * ny;
       
-      // Colisión elástica entre masas iguales:
-      // Intercambiar las componentes normales
-      const newV1n = v2n;
-      const newV2n = v1n;
-      
-      // Reconstruir vectores de velocidad
-      this.vx = newV1n * nx + v1t * tx;
-      this.vy = newV1n * ny + v1t * ty;
-      other.vx = newV2n * nx + v2t * tx;
-      other.vy = newV2n * ny + v2t * ty;
-      
-      // Normalizar las velocidades a la rapidez original de cada pelota
-      // para mantener constante su velocidad (regla del juego)
+      // Mantener rapidez constante
       const mag1 = Math.hypot(this.vx, this.vy);
       if (mag1 > 0) {
         this.vx = (this.vx / mag1) * this.speed;
@@ -129,12 +116,14 @@ export class Ball {
   }
   
   isInsideGoalLeft(field) {
-    const goalHeight = field.height * field.goalMouthRatio;
+    const goalHeight = field.height * field.goalMouthRatioLeft;
     const goalTop = (field.height - goalHeight) / 2;
     return this.y > goalTop && this.y < goalTop + goalHeight;
   }
   
   isInsideGoalRight(field) {
-    return this.isInsideGoalLeft(field);
+    const goalHeight = field.height * field.goalMouthRatioRight;
+    const goalTop = (field.height - goalHeight) / 2;
+    return this.y > goalTop && this.y < goalTop + goalHeight;
   }
 }

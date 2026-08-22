@@ -14,6 +14,7 @@ export class Stadium {
   }
   
   drawField(ctx, field) {
+    // ... (código existente sin cambios hasta las porterías)
     const grassGradient = ctx.createLinearGradient(0, 0, field.width, 0);
     grassGradient.addColorStop(0, '#2e8b57');
     grassGradient.addColorStop(0.5, '#3cb371');
@@ -68,18 +69,18 @@ export class Stadium {
     ctx.arc(field.width, field.height, cornerRadius, Math.PI / 2, Math.PI);
     ctx.stroke();
     
-    this.drawGoal(ctx, field, 'left');
-    this.drawGoal(ctx, field, 'right');
+    // Ahora usamos ratios separados
+    this.drawGoal(ctx, field, 'left', field.goalMouthRatioLeft);
+    this.drawGoal(ctx, field, 'right', field.goalMouthRatioRight);
   }
   
-  drawGoal(ctx, field, side) {
+  drawGoal(ctx, field, side, goalMouthRatio) {
     const goalWidth = Math.min(20, field.width * 0.05);
-    const goalHeight = field.height * field.goalMouthRatio;
+    const goalHeight = field.height * goalMouthRatio;
     const top = (field.height - goalHeight) / 2;
     const left = side === 'left' ? -goalWidth : field.width;
     const right = side === 'left' ? 0 : field.width + goalWidth;
-    
-    const goalColor = side === 'left' ? '#ff0000' : '#0000ff';
+    const goalColor = side === 'left' ? '#0000ff' : '#ff0000'; // Azul izquierda, Roja derecha
     
     ctx.strokeStyle = goalColor;
     ctx.lineWidth = 4;

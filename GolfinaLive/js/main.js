@@ -18,7 +18,8 @@ const field = {
   height: 400,
   offsetX: (CANVAS_WIDTH - 700) / 2,
   offsetY: (CANVAS_HEIGHT - 400) / 2,
-  goalMouthRatio: 0.4
+  goalMouthRatioLeft: 0.4,
+  goalMouthRatioRight: 0.4,
 };
 
 const audioFiles = {
@@ -36,8 +37,10 @@ const stadium = new Stadium(canvas);
 const audioManager = new AudioManager(audioFiles);
 
 const BALL_RADIUS = 16;
-const ballRed = new Ball(field.width, field.height, BALL_RADIUS, '#ff0000', 200, 'right');
-const ballBlue = new Ball(field.width, field.height, BALL_RADIUS, '#0000ff', 200, 'left');
+const ballRed = new Ball(field.width, field.height, BALL_RADIUS, '#ff0000', 200, 'right', 'red');
+const ballBlue = new Ball(field.width, field.height, BALL_RADIUS, '#0000ff', 200, 'left', 'blue');
+
+let balls = [ballRed, ballBlue]; // Array de pelotas activas
 
 let isRunning = false;
 let lastTime = 0;
@@ -50,8 +53,12 @@ let partidaId = null;
 let doublePoints = { red: false, blue: false };
 let originalFieldWidth = field.width;
 let originalFieldHeight = field.height;
+let originalGoalMouthRatioLeft = field.goalMouthRatioLeft;
+let originalGoalMouthRatioRight = field.goalMouthRatioRight;
 let fieldResizeTimeout = null;
 let invertTimeout = null;
+let giantBallTimeout = null;
+let cloneTimeouts = [];
 
 const scoreRedEl = document.getElementById('score-red');
 const scoreBlueEl = document.getElementById('score-blue');
@@ -97,14 +104,12 @@ btnLogin.addEventListener('click', async () => {
   }
 });
 
-// Cerrar sesión
 btnLogout.addEventListener('click', async () => {
   try {
     await signOut();
     loginOverlay.classList.add('open');
     passwordInput.value = '';
     loginError.textContent = '';
-    // Detener juego y limpiar
     isRunning = false;
     goalPause = false;
     audioManager.stopAll();
@@ -154,7 +159,10 @@ async function initGame() {
       ballBlue.setSpeed(speed);
     },
     onGoalSizeChange: (ratio) => {
-      field.goalMouthRatio = ratio;
+      field.goalMouthRatioLeft = ratio;
+      field.goalMouthRatioRight = ratio;
+      originalGoalMouthRatioLeft = ratio;
+      originalGoalMouthRatioRight = ratio;
       drawFrame();
     },
     onGoalTargetChange: (target) => {
@@ -212,6 +220,9 @@ function handleControlAction(action) {
       if (goalTimeout) clearTimeout(goalTimeout);
       if (fieldResizeTimeout) clearTimeout(fieldResizeTimeout);
       if (invertTimeout) clearTimeout(invertTimeout);
+      if (giantBallTimeout) clearTimeout(giantBallTimeout);
+      cloneTimeouts.forEach(t => clearTimeout(t));
+      cloneTimeouts = [];
       goalPause = false;
       isRunning = false;
       audioManager.stopLoop();
@@ -221,8 +232,10 @@ function handleControlAction(action) {
       doublePoints.blue = false;
       field.width = originalFieldWidth;
       field.height = originalFieldHeight;
-      field.goalMouthRatio = 0.4;
+      field.goalMouthRatioLeft = originalGoalMouthRatioLeft;
+      field.goalMouthRatioRight = originalGoalMouthRatioRight;
       updateScoreboard();
+      balls = [ballRed, ballBlue];
       ballRed.reset(field.width, field.height);
       ballBlue.reset(field.width, field.height);
       hideMessage();
@@ -292,18 +305,31 @@ function loop(timestamp) {
   lastTime = timestamp;
   if (deltaTime > 0.1) deltaTime = 0.1;
 
-  const resultRed = ballRed.update(deltaTime, field);
-  if (resultRed === 'goal') {
-    handleGoal('red');
-    return;
-  }
-  const resultBlue = ballBlue.update(deltaTime, field);
-  if (resultBlue === 'goal') {
-    handleGoal('blue');
-    return;
+  // Actualizar todas las pelotas y detectar goles
+  for (let i = 0; i < balls.length; i++) {
+    const ball = balls[i];
+    const result = ball.update(deltaTime, field);
+    if (result === 'goal') {
+      handleGoal(ball.team);
+      return; // Salir del bucle tras gol
+    }
   }
 
-  ballRed.collide(ballBlue);
+  // Colisiones entre todas las pelotas
+  for (let i = 0; i < balls.length; i++) {
+    for (let j = i + 1; j < balls.length; j++) {
+      balls[i].collide(balls[j]);
+    }
+  }
+
+  // Eliminar clones expirados
+  const now = performance.now();
+  balls = balls.filter(ball => {
+    if (ball.isClone && ball.expireTime && now > ball.expireTime) {
+      return false;
+    }
+    return true;
+  });
 
   drawFrame();
   requestAnimationFrame(loop);
@@ -311,8 +337,7 @@ function loop(timestamp) {
 
 function drawFrame() {
   stadium.draw(field);
-  drawBall(ballRed);
-  drawBall(ballBlue);
+  balls.forEach(ball => drawBall(ball));
 }
 
 function drawBall(ball) {
@@ -361,8 +386,9 @@ function handleGoal(team) {
 
 function startCountdown(seconds) {
   if (seconds <= 0) {
-    ballRed.reset(field.width, field.height);
-    ballBlue.reset(field.width, field.height);
+    balls.forEach(ball => {
+      if (!ball.isClone) ball.reset(field.width, field.height);
+    });
     drawFrame();
 
     if (scores.red >= goalTarget || scores.blue >= goalTarget) {
@@ -393,29 +419,36 @@ function aplicarPoder(nombrePoder, canal, usuario) {
   const comando = nombrePoder.toLowerCase();
   const quien = usuario ? `@${usuario}` : 'alguien';
 
+  // Poderes de Ronaldo (equipo rojo)
   if (comando === 'velocidadronaldo') {
     ballRed.setSpeed(ballRed.speed * 1.5);
     showMessage(`¡Velocidad aumentada para Ronaldo! (por ${quien})`);
     setTimeout(() => { ballRed.setSpeed(ballRed.speed / 1.5); }, 60000);
   }
   else if (comando === 'lentoronaldo') {
-    ballBlue.setSpeed(ballBlue.speed * 0.5);
-    showMessage(`¡Messi ralentizado! (por ${quien})`);
-    setTimeout(() => { ballBlue.setSpeed(ballBlue.speed * 2); }, 30000);
+    ballRed.setSpeed(ballRed.speed * 0.3);
+    showMessage(`¡Ronaldo ralentizado! (por ${quien})`);
+    setTimeout(() => { ballRed.setSpeed(ballRed.speed / 0.3); }, 30000);
   }
   else if (comando === 'golronaldo') {
     handleGoal('red');
-    showMessage(`¡Gol automático de Ronaldo! (por ${quien})`);
   }
   else if (comando === 'caosronaldo') {
-    ballBlue.vx = -ballBlue.vx;
-    ballBlue.vy = -ballBlue.vy;
+    // Invertir dirección de la pelota de Messi varias veces
+    const interval = setInterval(() => {
+      ballBlue.vx = -ballBlue.vx;
+      ballBlue.vy = (Math.random() > 0.5 ? 1 : -1) * ballBlue.vy;
+    }, 2000);
     showMessage(`¡Caos para Messi! (por ${quien})`);
+    setTimeout(() => clearInterval(interval), 20000);
   }
   else if (comando === 'escudoronaldo') {
-    field.goalMouthRatio = field.goalMouthRatio * 0.7;
+    field.goalMouthRatioRight = field.goalMouthRatioRight * 0.5;
     showMessage(`¡Escudo para Ronaldo! (por ${quien})`);
-    setTimeout(() => { field.goalMouthRatio = field.goalMouthRatio / 0.7; drawFrame(); }, 60000);
+    setTimeout(() => {
+      field.goalMouthRatioRight = originalGoalMouthRatioRight;
+      drawFrame();
+    }, 60000);
     drawFrame();
   }
   else if (comando === 'lluviaronaldo') {
@@ -437,29 +470,35 @@ function aplicarPoder(nombrePoder, canal, usuario) {
     showMessage(`¡Goles de Ronaldo valen doble! (por ${quien})`);
     setTimeout(() => { doublePoints.red = false; }, 60000);
   }
+  // Poderes de Messi (equipo azul)
   else if (comando === 'velocidadmessi') {
     ballBlue.setSpeed(ballBlue.speed * 1.5);
     showMessage(`¡Velocidad aumentada para Messi! (por ${quien})`);
     setTimeout(() => { ballBlue.setSpeed(ballBlue.speed / 1.5); }, 60000);
   }
   else if (comando === 'lentomessi') {
-    ballRed.setSpeed(ballRed.speed * 0.5);
-    showMessage(`¡Ronaldo ralentizado! (por ${quien})`);
-    setTimeout(() => { ballRed.setSpeed(ballRed.speed * 2); }, 30000);
+    ballBlue.setSpeed(ballBlue.speed * 0.3);
+    showMessage(`¡Messi ralentizado! (por ${quien})`);
+    setTimeout(() => { ballBlue.setSpeed(ballBlue.speed / 0.3); }, 30000);
   }
   else if (comando === 'golmessi') {
     handleGoal('blue');
-    showMessage(`¡Gol automático de Messi! (por ${quien})`);
   }
   else if (comando === 'caosmessi') {
-    ballRed.vx = -ballRed.vx;
-    ballRed.vy = -ballRed.vy;
+    const interval = setInterval(() => {
+      ballRed.vx = -ballRed.vx;
+      ballRed.vy = (Math.random() > 0.5 ? 1 : -1) * ballRed.vy;
+    }, 2000);
     showMessage(`¡Caos para Ronaldo! (por ${quien})`);
+    setTimeout(() => clearInterval(interval), 20000);
   }
   else if (comando === 'escudomessi') {
-    field.goalMouthRatio = field.goalMouthRatio * 0.7;
+    field.goalMouthRatioLeft = field.goalMouthRatioLeft * 0.5;
     showMessage(`¡Escudo para Messi! (por ${quien})`);
-    setTimeout(() => { field.goalMouthRatio = field.goalMouthRatio / 0.7; drawFrame(); }, 60000);
+    setTimeout(() => {
+      field.goalMouthRatioLeft = originalGoalMouthRatioLeft;
+      drawFrame();
+    }, 60000);
     drawFrame();
   }
   else if (comando === 'lluviamessi') {
@@ -481,6 +520,7 @@ function aplicarPoder(nombrePoder, canal, usuario) {
     showMessage(`¡Goles de Messi valen doble! (por ${quien})`);
     setTimeout(() => { doublePoints.blue = false; }, 60000);
   }
+  // Poderes neutrales
   else if (comando === 'super') {
     ballRed.setSpeed(ballRed.speed * 2);
     ballBlue.setSpeed(ballBlue.speed * 2);
@@ -490,44 +530,65 @@ function aplicarPoder(nombrePoder, canal, usuario) {
       ballBlue.setSpeed(ballBlue.speed / 2);
     }, 30000);
   }
-  else if (comando === 'campopequeno') {
-    originalFieldWidth = field.width;
-    originalFieldHeight = field.height;
-    field.width = field.width * 0.7;
-    field.height = field.height * 0.7;
-    field.offsetX = (CANVAS_WIDTH - field.width) / 2;
-    field.offsetY = (CANVAS_HEIGHT - field.height) / 2;
-    ballRed.reset(field.width, field.height);
-    ballBlue.reset(field.width, field.height);
-    drawFrame();
-    showMessage(`¡Campo reducido! (por ${quien})`);
-    if (fieldResizeTimeout) clearTimeout(fieldResizeTimeout);
-    fieldResizeTimeout = setTimeout(() => {
-      field.width = originalFieldWidth;
-      field.height = originalFieldHeight;
-      field.offsetX = (CANVAS_WIDTH - field.width) / 2;
-      field.offsetY = (CANVAS_HEIGHT - field.height) / 2;
-      ballRed.reset(field.width, field.height);
-      ballBlue.reset(field.width, field.height);
-      drawFrame();
-    }, 60000);
-  }
   else if (comando === 'invertir') {
-    ballRed.vx = -ballRed.vx;
-    ballRed.vy = -ballRed.vy;
-    ballBlue.vx = -ballBlue.vx;
-    ballBlue.vy = -ballBlue.vy;
+    balls.forEach(ball => {
+      ball.vx = -ball.vx;
+      ball.vy = -ball.vy;
+    });
     showMessage(`¡Direcciones invertidas! (por ${quien})`);
     if (invertTimeout) clearTimeout(invertTimeout);
     invertTimeout = setTimeout(() => {
-      ballRed.vx = -ballRed.vx;
-      ballRed.vy = -ballRed.vy;
-      ballBlue.vx = -ballBlue.vx;
-      ballBlue.vy = -ballBlue.vy;
+      balls.forEach(ball => {
+        ball.vx = -ball.vx;
+        ball.vy = -ball.vy;
+      });
     }, 15000);
+  }
+  // Nuevos poderes
+  else if (comando === 'multiplicarronaldo') {
+    addClone('red', 2); // 2 clones adicionales, total 3 pelotas rojas
+    showMessage(`¡Ronaldo multiplicado! 3 bolas rojas (por ${quien})`);
+  }
+  else if (comando === 'multiplicarmessi') {
+    addClone('blue', 2);
+    showMessage(`¡Messi multiplicado! 3 bolas azules (por ${quien})`);
+  }
+  else if (comando === 'pelotagigante') {
+    // Pelota gigante para el equipo que lo active
+    const targetBall = (usuario?.toLowerCase().includes('messi')) ? ballBlue : ballRed; // No es fiable; mejor usar equipo
+    // Asumimos que es para el equipo del usuario según el comando; pero no tenemos el equipo del usuario.
+    // Por defecto, pelota gigante para ambos
+    ballRed.radius = 25;
+    ballBlue.radius = 25;
+    showMessage(`¡Pelotas gigantes! (por ${quien})`);
+    if (giantBallTimeout) clearTimeout(giantBallTimeout);
+    giantBallTimeout = setTimeout(() => {
+      ballRed.radius = BALL_RADIUS;
+      ballBlue.radius = BALL_RADIUS;
+      drawFrame();
+    }, 30000);
+    drawFrame();
+  }
+  else if (comando === 'teletransportar') {
+    ballBlue.reset(field.width, field.height);
+    showMessage(`¡Messi teletransportado! (por ${quien})`);
   }
   else {
     console.warn('Poder no implementado:', nombrePoder);
+  }
+}
+
+function addClone(team, count) {
+  const baseBall = team === 'red' ? ballRed : ballBlue;
+  const color = baseBall.color;
+  const targetGoal = baseBall.targetGoal;
+  const speed = baseBall.speed;
+  for (let i = 0; i < count; i++) {
+    const clone = new Ball(field.width, field.height, BALL_RADIUS, color, speed, targetGoal, team);
+    clone.isClone = true;
+    clone.expireTime = performance.now() + 30000; // 30 segundos
+    clone.reset(field.width, field.height);
+    balls.push(clone);
   }
 }
 
