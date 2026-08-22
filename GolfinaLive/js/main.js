@@ -35,7 +35,6 @@ const audioFiles = {
 const stadium = new Stadium(canvas);
 const audioManager = new AudioManager(audioFiles);
 
-// Tamaño de las pelotas
 const BALL_RADIUS = 16;
 const ballRed = new Ball(field.width, field.height, BALL_RADIUS, '#ff0000', 200, 'right');
 const ballBlue = new Ball(field.width, field.height, BALL_RADIUS, '#0000ff', 200, 'left');
@@ -48,7 +47,6 @@ let goalPause = false;
 let goalTimeout = null;
 let partidaId = null;
 
-// Variables para efectos temporales de poderes
 let doublePoints = { red: false, blue: false };
 let originalFieldWidth = field.width;
 let originalFieldHeight = field.height;
@@ -102,7 +100,6 @@ btnLogin.addEventListener('click', async () => {
 let uiManager;
 
 async function initGame() {
-  // Cargar partida activa si existe
   try {
     const partida = await loadPartidaActiva();
     if (partida) {
@@ -110,15 +107,13 @@ async function initGame() {
       scores.red = partida.puntaje_rojo || 0;
       scores.blue = partida.puntaje_azul || 0;
       goalTarget = partida.goles_para_ganar || 5;
-      const goalTargetInput = document.getElementById('goal-target-input');
-      goalTargetInput.value = goalTarget;
+      document.getElementById('goal-target-input').value = goalTarget;
       goalTargetEl.textContent = goalTarget;
     }
   } catch (error) {
     console.warn('No se pudo cargar partida:', error);
   }
 
-  // Inicializar UI
   uiManager = new UIManager({
     field,
     canvasWidth: CANVAS_WIDTH,
@@ -150,12 +145,11 @@ async function initGame() {
     }
   });
 
-  // Inicializar Supabase para poderes
   try {
     initSupabase({
-      onPoderRecibido: (nombrePoder, canal) => {
-        console.log(`Poder recibido: ${nombrePoder} (canal: ${canal})`);
-        aplicarPoder(nombrePoder);
+      onPoderRecibido: (nombrePoder, canal, usuario) => {
+        console.log(`Poder recibido: ${nombrePoder} (canal: ${canal}) activado por: ${usuario || 'desconocido'}`);
+        aplicarPoder(nombrePoder, canal, usuario);
       },
       onPartidaFinalizada: (ganador) => {
         showMessage(`¡Fin del partido! Ganador: ${ganador}`);
@@ -166,7 +160,6 @@ async function initGame() {
     console.warn('No se pudo conectar con Supabase:', error);
   }
 
-  // Dibujar el campo inicial
   drawFrame();
   updateScoreboard();
 }
@@ -376,41 +369,35 @@ function startCountdown(seconds) {
   setTimeout(() => startCountdown(seconds - 1), 1000);
 }
 
-// ===================== FUNCIÓN PARA APLICAR PODERES =====================
-function aplicarPoder(nombrePoder) {
+// ===================== FUNCIÓN PARA APLICAR PODERES (ahora recibe usuario) =====================
+function aplicarPoder(nombrePoder, canal, usuario) {
   console.log('Aplicando poder:', nombrePoder);
   const comando = nombrePoder.toLowerCase();
+  const quien = usuario ? `@${usuario}` : 'alguien';
 
-  // Poderes de Ronaldo (equipo rojo)
   if (comando === 'velocidadronaldo') {
     ballRed.setSpeed(ballRed.speed * 1.5);
-    showMessage('¡Velocidad aumentada para Ronaldo!');
-    setTimeout(() => {
-      ballRed.setSpeed(ballRed.speed / 1.5);
-    }, 60000);
+    showMessage(`¡Velocidad aumentada para Ronaldo! (por ${quien})`);
+    setTimeout(() => { ballRed.setSpeed(ballRed.speed / 1.5); }, 60000);
   }
   else if (comando === 'lentoronaldo') {
     ballBlue.setSpeed(ballBlue.speed * 0.5);
-    showMessage('¡Messi ralentizado!');
-    setTimeout(() => {
-      ballBlue.setSpeed(ballBlue.speed * 2);
-    }, 30000);
+    showMessage(`¡Messi ralentizado! (por ${quien})`);
+    setTimeout(() => { ballBlue.setSpeed(ballBlue.speed * 2); }, 30000);
   }
   else if (comando === 'golronaldo') {
     handleGoal('red');
+    showMessage(`¡Gol automático de Ronaldo! (por ${quien})`);
   }
   else if (comando === 'caosronaldo') {
     ballBlue.vx = -ballBlue.vx;
     ballBlue.vy = -ballBlue.vy;
-    showMessage('¡Caos para Messi!');
+    showMessage(`¡Caos para Messi! (por ${quien})`);
   }
   else if (comando === 'escudoronaldo') {
     field.goalMouthRatio = field.goalMouthRatio * 0.7;
-    showMessage('¡Escudo para Ronaldo!');
-    setTimeout(() => {
-      field.goalMouthRatio = field.goalMouthRatio / 0.7;
-      drawFrame();
-    }, 60000);
+    showMessage(`¡Escudo para Ronaldo! (por ${quien})`);
+    setTimeout(() => { field.goalMouthRatio = field.goalMouthRatio / 0.7; drawFrame(); }, 60000);
     drawFrame();
   }
   else if (comando === 'lluviaronaldo') {
@@ -419,53 +406,43 @@ function aplicarPoder(nombrePoder) {
       if (doublePoints.red) scores.red += 1;
     }
     updateScoreboard();
-    showMessage('¡Lluvia de goles para Ronaldo!');
+    showMessage(`¡Lluvia de goles para Ronaldo! (por ${quien})`);
     checkWinnerAfterAutoGoal();
   }
   else if (comando === 'congelarronaldo') {
     ballBlue.setSpeed(0);
-    showMessage('¡Messi congelado!');
-    setTimeout(() => {
-      ballBlue.setSpeed(ballRed.speed);
-    }, 10000);
+    showMessage(`¡Messi congelado! (por ${quien})`);
+    setTimeout(() => { ballBlue.setSpeed(ballRed.speed); }, 10000);
   }
   else if (comando === 'doblepuntosronaldo') {
     doublePoints.red = true;
-    showMessage('¡Goles de Ronaldo valen doble!');
-    setTimeout(() => {
-      doublePoints.red = false;
-    }, 60000);
+    showMessage(`¡Goles de Ronaldo valen doble! (por ${quien})`);
+    setTimeout(() => { doublePoints.red = false; }, 60000);
   }
-  // Poderes de Messi (equipo azul)
+  // Poderes de Messi
   else if (comando === 'velocidadmessi') {
     ballBlue.setSpeed(ballBlue.speed * 1.5);
-    showMessage('¡Velocidad aumentada para Messi!');
-    setTimeout(() => {
-      ballBlue.setSpeed(ballBlue.speed / 1.5);
-    }, 60000);
+    showMessage(`¡Velocidad aumentada para Messi! (por ${quien})`);
+    setTimeout(() => { ballBlue.setSpeed(ballBlue.speed / 1.5); }, 60000);
   }
   else if (comando === 'lentomessi') {
     ballRed.setSpeed(ballRed.speed * 0.5);
-    showMessage('¡Ronaldo ralentizado!');
-    setTimeout(() => {
-      ballRed.setSpeed(ballRed.speed * 2);
-    }, 30000);
+    showMessage(`¡Ronaldo ralentizado! (por ${quien})`);
+    setTimeout(() => { ballRed.setSpeed(ballRed.speed * 2); }, 30000);
   }
   else if (comando === 'golmessi') {
     handleGoal('blue');
+    showMessage(`¡Gol automático de Messi! (por ${quien})`);
   }
   else if (comando === 'caosmessi') {
     ballRed.vx = -ballRed.vx;
     ballRed.vy = -ballRed.vy;
-    showMessage('¡Caos para Ronaldo!');
+    showMessage(`¡Caos para Ronaldo! (por ${quien})`);
   }
   else if (comando === 'escudomessi') {
     field.goalMouthRatio = field.goalMouthRatio * 0.7;
-    showMessage('¡Escudo para Messi!');
-    setTimeout(() => {
-      field.goalMouthRatio = field.goalMouthRatio / 0.7;
-      drawFrame();
-    }, 60000);
+    showMessage(`¡Escudo para Messi! (por ${quien})`);
+    setTimeout(() => { field.goalMouthRatio = field.goalMouthRatio / 0.7; drawFrame(); }, 60000);
     drawFrame();
   }
   else if (comando === 'lluviamessi') {
@@ -474,28 +451,24 @@ function aplicarPoder(nombrePoder) {
       if (doublePoints.blue) scores.blue += 1;
     }
     updateScoreboard();
-    showMessage('¡Lluvia de goles para Messi!');
+    showMessage(`¡Lluvia de goles para Messi! (por ${quien})`);
     checkWinnerAfterAutoGoal();
   }
   else if (comando === 'congelarmessi') {
     ballRed.setSpeed(0);
-    showMessage('¡Ronaldo congelado!');
-    setTimeout(() => {
-      ballRed.setSpeed(ballBlue.speed);
-    }, 10000);
+    showMessage(`¡Ronaldo congelado! (por ${quien})`);
+    setTimeout(() => { ballRed.setSpeed(ballBlue.speed); }, 10000);
   }
   else if (comando === 'doblepuntosmessi') {
     doublePoints.blue = true;
-    showMessage('¡Goles de Messi valen doble!');
-    setTimeout(() => {
-      doublePoints.blue = false;
-    }, 60000);
+    showMessage(`¡Goles de Messi valen doble! (por ${quien})`);
+    setTimeout(() => { doublePoints.blue = false; }, 60000);
   }
   // Poderes neutrales
   else if (comando === 'super') {
     ballRed.setSpeed(ballRed.speed * 2);
     ballBlue.setSpeed(ballBlue.speed * 2);
-    showMessage('¡Súper velocidad para ambos!');
+    showMessage(`¡Súper velocidad para ambos! (por ${quien})`);
     setTimeout(() => {
       ballRed.setSpeed(ballRed.speed / 2);
       ballBlue.setSpeed(ballBlue.speed / 2);
@@ -511,7 +484,7 @@ function aplicarPoder(nombrePoder) {
     ballRed.reset(field.width, field.height);
     ballBlue.reset(field.width, field.height);
     drawFrame();
-    showMessage('¡Campo reducido!');
+    showMessage(`¡Campo reducido! (por ${quien})`);
     if (fieldResizeTimeout) clearTimeout(fieldResizeTimeout);
     fieldResizeTimeout = setTimeout(() => {
       field.width = originalFieldWidth;
@@ -528,7 +501,7 @@ function aplicarPoder(nombrePoder) {
     ballRed.vy = -ballRed.vy;
     ballBlue.vx = -ballBlue.vx;
     ballBlue.vy = -ballBlue.vy;
-    showMessage('¡Direcciones invertidas!');
+    showMessage(`¡Direcciones invertidas! (por ${quien})`);
     if (invertTimeout) clearTimeout(invertTimeout);
     invertTimeout = setTimeout(() => {
       ballRed.vx = -ballRed.vx;
