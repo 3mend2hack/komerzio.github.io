@@ -296,6 +296,22 @@ button:active {
   font-size: 1rem;
 }
 
+/* Estilo para los inputs de archivo */
+.modal-content input[type="file"] {
+  padding: 5px;
+  background: transparent;
+  color: white;
+}
+
+.image-preview {
+  max-width: 100px;
+  max-height: 100px;
+  margin: 5px 0 15px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  display: block;
+}
+
 .modal-buttons {
   display: flex;
   justify-content: space-between;
