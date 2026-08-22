@@ -2,7 +2,7 @@ import { Ball } from './physics.js';
 import { Stadium } from './stadium.js';
 import { AudioManager } from './audio.js';
 import { UIManager } from './ui.js';
-import { initSupabase } from './supabase.js';
+import { signIn, signOut, getSession, initSupabase, savePartida, loadPartidaActiva, finalizarPartida } from './supabase.js';
 
 // ===================== CONFIGURACIÓN INICIAL =====================
 const canvas = document.getElementById('game-canvas');
@@ -27,15 +27,16 @@ const audioFiles = {
   gol_azul: 'assets/audio/gol_azul.mp3',
   suscribete: 'assets/audio/suscribete.mp3',
   apoya_estrella: 'assets/audio/apoya_estrella.mp3',
-  poder: 'assets/audio/poder.mp3',          // antes extra1
-  tulike: 'assets/audio/tulike.mp3',        // antes extra2
-  estadio_completo: 'assets/audio/estadio_completo.mp3'  // nuevo bucle
+  poder: 'assets/audio/poder.mp3',
+  tulike: 'assets/audio/tulike.mp3',
+  estadio_completo: 'assets/audio/estadio_completo.mp3'
 };
 
 const stadium = new Stadium(canvas);
 const audioManager = new AudioManager(audioFiles);
 
-const BALL_RADIUS = 12;
+// Tamaño de las pelotas
+const BALL_RADIUS = 16;
 const ballRed = new Ball(field.width, field.height, BALL_RADIUS, '#ff0000', 200, 'right');
 const ballBlue = new Ball(field.width, field.height, BALL_RADIUS, '#0000ff', 200, 'left');
 
@@ -45,6 +46,7 @@ let scores = { red: 0, blue: 0 };
 let goalTarget = 5;
 let goalPause = false;
 let goalTimeout = null;
+let partidaId = null;
 
 // Variables para efectos temporales de poderes
 let doublePoints = { red: false, blue: false };
@@ -58,62 +60,141 @@ const scoreBlueEl = document.getElementById('score-blue');
 const goalTargetEl = document.getElementById('goal-target');
 const messageOverlay = document.getElementById('message-overlay');
 const messageText = document.getElementById('message-text');
+const loginOverlay = document.getElementById('login-overlay');
+const passwordInput = document.getElementById('password-input');
+const btnLogin = document.getElementById('btn-login');
+const loginError = document.getElementById('login-error');
 
-const uiManager = new UIManager({
-  field,
-  canvasWidth: CANVAS_WIDTH,
-  canvasHeight: CANVAS_HEIGHT,
-  onFieldChange: () => {
-    originalFieldWidth = field.width;
-    originalFieldHeight = field.height;
-    ballRed.reset(field.width, field.height);
-    ballBlue.reset(field.width, field.height);
-    drawFrame();
-  },
-  onOffsetChange: () => {
-    drawFrame();
-  },
-  onImageSizeChange: (size) => {},
-  onControlAction: (action) => {
-    handleControlAction(action);
-  },
-  onAudioAction: (key) => {
-    audioManager.play(key);
-  },
-  onBallSpeedChange: (speed) => {
-    ballRed.setSpeed(speed);
-    ballBlue.setSpeed(speed);
-  },
-  onGoalSizeChange: (ratio) => {
-    field.goalMouthRatio = ratio;
-    drawFrame();
-  },
-  onGoalTargetChange: (target) => {
-    goalTarget = target;
-    goalTargetEl.textContent = target;
+// ===================== AUTENTICACIÓN =====================
+async function checkSession() {
+  try {
+    const session = await getSession();
+    if (session) {
+      loginOverlay.classList.remove('open');
+      await initGame();
+    } else {
+      loginOverlay.classList.add('open');
+    }
+  } catch (error) {
+    console.error('Error al verificar sesión:', error);
+    loginOverlay.classList.add('open');
+  }
+}
+
+btnLogin.addEventListener('click', async () => {
+  const password = passwordInput.value;
+  if (!password) {
+    loginError.textContent = 'Ingresa tu contraseña';
+    return;
+  }
+  try {
+    await signIn(password);
+    loginOverlay.classList.remove('open');
+    passwordInput.value = '';
+    loginError.textContent = '';
+    await initGame();
+  } catch (error) {
+    loginError.textContent = 'Contraseña incorrecta';
   }
 });
 
+// ===================== INICIALIZACIÓN DEL JUEGO =====================
+let uiManager;
+
+async function initGame() {
+  // Cargar partida activa si existe
+  try {
+    const partida = await loadPartidaActiva();
+    if (partida) {
+      partidaId = partida.id;
+      scores.red = partida.puntaje_rojo || 0;
+      scores.blue = partida.puntaje_azul || 0;
+      goalTarget = partida.goles_para_ganar || 5;
+      const goalTargetInput = document.getElementById('goal-target-input');
+      goalTargetInput.value = goalTarget;
+      goalTargetEl.textContent = goalTarget;
+    }
+  } catch (error) {
+    console.warn('No se pudo cargar partida:', error);
+  }
+
+  // Inicializar UI
+  uiManager = new UIManager({
+    field,
+    canvasWidth: CANVAS_WIDTH,
+    canvasHeight: CANVAS_HEIGHT,
+    onFieldChange: () => {
+      originalFieldWidth = field.width;
+      originalFieldHeight = field.height;
+      ballRed.reset(field.width, field.height);
+      ballBlue.reset(field.width, field.height);
+      drawFrame();
+    },
+    onOffsetChange: () => {
+      drawFrame();
+    },
+    onImageSizeChange: (size) => {},
+    onControlAction: (action) => handleControlAction(action),
+    onAudioAction: (key) => audioManager.play(key),
+    onBallSpeedChange: (speed) => {
+      ballRed.setSpeed(speed);
+      ballBlue.setSpeed(speed);
+    },
+    onGoalSizeChange: (ratio) => {
+      field.goalMouthRatio = ratio;
+      drawFrame();
+    },
+    onGoalTargetChange: (target) => {
+      goalTarget = target;
+      goalTargetEl.textContent = target;
+    }
+  });
+
+  // Inicializar Supabase para poderes
+  try {
+    initSupabase({
+      onPoderRecibido: (nombrePoder, canal) => {
+        console.log(`Poder recibido: ${nombrePoder} (canal: ${canal})`);
+        aplicarPoder(nombrePoder);
+      },
+      onPartidaFinalizada: (ganador) => {
+        showMessage(`¡Fin del partido! Ganador: ${ganador}`);
+        audioManager.stopLoop();
+      }
+    });
+  } catch (error) {
+    console.warn('No se pudo conectar con Supabase:', error);
+  }
+
+  // Dibujar el campo inicial
+  drawFrame();
+  updateScoreboard();
+}
+
+// ===================== MANEJO DE CONTROLES =====================
 function handleControlAction(action) {
   switch (action) {
     case 'start':
       if (!isRunning && !goalPause) {
         isRunning = true;
-        audioManager.playLoop('estadio_completo'); // Iniciar sonido de fondo
+        audioManager.playLoop('estadio_completo');
         lastTime = performance.now();
         requestAnimationFrame(loop);
+        saveCurrentPartida();
       }
       break;
     case 'pause':
       isRunning = false;
-      audioManager.stopLoop(); // Detener sonido de fondo
+      audioManager.stopLoop();
+      saveCurrentPartida();
       break;
     case 'resume':
       if (!isRunning && !goalPause) {
         isRunning = true;
-        audioManager.playLoop('estadio_completo'); // Reanudar sonido de fondo
+        audioManager.playLoop('estadio_completo');
         lastTime = performance.now();
         requestAnimationFrame(loop);
+        saveCurrentPartida();
       }
       break;
     case 'reset':
@@ -122,7 +203,7 @@ function handleControlAction(action) {
       if (invertTimeout) clearTimeout(invertTimeout);
       goalPause = false;
       isRunning = false;
-      audioManager.stopLoop(); // Detener sonido de fondo
+      audioManager.stopLoop();
       scores.red = 0;
       scores.blue = 0;
       doublePoints.red = false;
@@ -135,10 +216,50 @@ function handleControlAction(action) {
       ballBlue.reset(field.width, field.height);
       hideMessage();
       drawFrame();
+      saveCurrentPartida();
+      break;
+    case 'continue':
+      loadAndRestorePartida();
       break;
   }
 }
 
+async function loadAndRestorePartida() {
+  try {
+    const partida = await loadPartidaActiva();
+    if (partida) {
+      partidaId = partida.id;
+      scores.red = partida.puntaje_rojo || 0;
+      scores.blue = partida.puntaje_azul || 0;
+      goalTarget = partida.goles_para_ganar || 5;
+      document.getElementById('goal-target-input').value = goalTarget;
+      goalTargetEl.textContent = goalTarget;
+      updateScoreboard();
+      drawFrame();
+      showMessage('Partida restaurada');
+    } else {
+      showMessage('No hay partida guardada');
+    }
+  } catch (error) {
+    console.error('Error al continuar partida:', error);
+    showMessage('Error al cargar la partida');
+  }
+}
+
+async function saveCurrentPartida() {
+  try {
+    await savePartida({
+      puntaje_rojo: scores.red,
+      puntaje_azul: scores.blue,
+      goles_para_ganar: goalTarget,
+      velocidad_bolas: ballRed.speed
+    });
+  } catch (error) {
+    console.warn('No se pudo guardar la partida:', error);
+  }
+}
+
+// ===================== LÓGICA DEL JUEGO =====================
 function updateScoreboard() {
   scoreRedEl.textContent = scores.red;
   scoreBlueEl.textContent = scores.blue;
@@ -217,6 +338,7 @@ function handleGoal(team) {
     audioManager.play('gol_azul');
   }
   updateScoreboard();
+  saveCurrentPartida();
 
   const scorer = team === 'red' ? uiManager.playerNames.red : uiManager.playerNames.blue;
   showMessage(`¡Gol de ${scorer}! (${points} punto${points !== 1 ? 's' : ''})`);
@@ -237,14 +359,14 @@ function startCountdown(seconds) {
       showMessage(`¡${winner} gana el partido!`);
       goalPause = false;
       isRunning = false;
-      audioManager.stopLoop(); // Detener sonido de fondo al finalizar
-      // Aquí se podría llamar a saveMatchResult
+      audioManager.stopLoop();
+      finalizarPartida(winner);
     } else {
       hideMessage();
       goalPause = false;
       isRunning = true;
       lastTime = performance.now();
-      audioManager.playLoop('estadio_completo'); // Reanudar bucle tras el gol
+      audioManager.playLoop('estadio_completo');
       requestAnimationFrame(loop);
     }
     return;
@@ -427,33 +549,9 @@ function checkWinnerAfterAutoGoal() {
     showMessage(`¡${winner} gana el partido!`);
     goalPause = false;
     audioManager.stopLoop();
+    finalizarPartida(winner);
   }
 }
 
-// ===================== INICIALIZAR SUPABASE =====================
-try {
-  initSupabase({
-    onPoderRecibido: (nombrePoder, canal) => {
-      console.log(`Poder recibido: ${nombrePoder} (canal: ${canal})`);
-      aplicarPoder(nombrePoder);
-    },
-    onPartidaFinalizada: (ganador) => {
-      showMessage(`¡Fin del partido! Ganador: ${ganador}`);
-      audioManager.stopLoop();
-    }
-  });
-} catch (error) {
-  console.warn('No se pudo conectar con Supabase:', error);
-}
-
-// ===================== DIBUJO INICIAL =====================
-drawFrame();
-
-// ===================== INTEGRACIÓN FUTURA CON SUPABASE (guardado de partidas) =====================
-async function saveMatchResult(winner, goalsRed, goalsBlue, duration) {
-  console.log('Guardar partido:', { winner, goalsRed, goalsBlue, duration });
-}
-
-async function saveUserStats(userId, points, favoriteTeam) {
-  console.log('Guardar usuario:', { userId, points, favoriteTeam });
-}
+// ===================== ARRANQUE =====================
+checkSession();
