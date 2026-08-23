@@ -27,7 +27,7 @@ export class UIManager {
   async init() {
     this.bindEvents();
     this.loadSettings();
-    await this.loadImagesFromStorage(); // Carga imágenes fijas desde Supabase Storage
+    await this.loadImagesFromStorage(); // Siempre carga desde Supabase
     this.applySettings();
     this.updatePlayerNamesDisplay();
     this.updatePlayerImagesDisplay();
@@ -84,9 +84,6 @@ export class UIManager {
     document.getElementById('btn-delete-blue').addEventListener('click', () => this.deleteImage('blue'));
   }
 
-  /**
-   * Abre el modal y carga los nombres e imágenes actuales.
-   */
   openNamesModal() {
     document.getElementById('input-name-red').value = this.playerNames.red;
     document.getElementById('input-name-blue').value = this.playerNames.blue;
@@ -95,16 +92,10 @@ export class UIManager {
     document.getElementById('player-name-modal').classList.add('open');
   }
 
-  /**
-   * Cierra el modal.
-   */
   closeNamesModal() {
     document.getElementById('player-name-modal').classList.remove('open');
   }
 
-  /**
-   * Guarda los nombres ingresados, actualiza el marcador y persiste.
-   */
   savePlayerNames() {
     const redName = document.getElementById('input-name-red').value.trim() || 'Rojo';
     const blueName = document.getElementById('input-name-blue').value.trim() || 'Azul';
@@ -115,13 +106,6 @@ export class UIManager {
     this.closeNamesModal();
   }
 
-  /**
-   * Comprime una imagen a un tamaño máximo y la devuelve como Blob JPEG.
-   * @param {File} file - Archivo original
-   * @param {number} maxSize - Tamaño máximo en píxeles (ancho/alto)
-   * @param {number} quality - Calidad de compresión (0 a 1)
-   * @returns {Promise<Blob>} - Imagen comprimida
-   */
   async compressImage(file, maxSize = 300, quality = 0.8) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -163,9 +147,6 @@ export class UIManager {
     });
   }
 
-  /**
-   * Carga las imágenes fijas desde Supabase Storage (URLs directas).
-   */
   async loadImagesFromStorage() {
     const bucketName = 'jugadores';
 
@@ -173,14 +154,8 @@ export class UIManager {
     this.playerImages.blue = `https://qddfdisbnwnnlvkrnckd.supabase.co/storage/v1/object/public/${bucketName}/blue/1787368514576.jpg`;
 
     this.updatePlayerImagesDisplay();
-    this.saveSettings();
   }
 
-  /**
-   * Maneja la subida de imagen de un jugador a Supabase Storage.
-   * @param {Event} event - Evento change del input file
-   * @param {string} team - 'red' o 'blue'
-   */
   async handleImageUpload(event, team) {
     const file = event.target.files[0];
     if (!file) return;
@@ -223,10 +198,6 @@ export class UIManager {
     }
   }
 
-  /**
-   * Elimina la imagen actual de un jugador en Supabase Storage.
-   * @param {string} team - 'red' o 'blue'
-   */
   async deleteImage(team) {
     const currentUrl = this.playerImages[team];
     if (!currentUrl || currentUrl.startsWith('https://via.placeholder.com')) {
@@ -305,10 +276,7 @@ export class UIManager {
           this.playerNames.red = settings.playerNames.red || 'Rojo';
           this.playerNames.blue = settings.playerNames.blue || 'Azul';
         }
-        if (settings.playerImages) {
-          this.playerImages.red = settings.playerImages.red || this.playerImages.red;
-          this.playerImages.blue = settings.playerImages.blue || this.playerImages.blue;
-        }
+        // No cargamos playerImages desde localStorage para evitar conflictos
       } catch (e) {
         console.warn('Error cargando settings:', e);
       }
@@ -393,11 +361,8 @@ export class UIManager {
       playerNames: {
         red: this.playerNames.red,
         blue: this.playerNames.blue
-      },
-      playerImages: {
-        red: this.playerImages.red,
-        blue: this.playerImages.blue
       }
+      // Nota: no guardamos playerImages para que siempre se carguen desde Supabase
     };
     localStorage.setItem('football-settings-horizontal', JSON.stringify(settings));
   }
