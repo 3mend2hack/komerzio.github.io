@@ -3,11 +3,11 @@ export class Ball {
     this.radius = radius;
     this.color = color;
     this.speed = speed;
-    this.targetGoal = targetGoal; // 'left' o 'right'
-    this.team = team; // 'red' o 'blue'
+    this.targetGoal = targetGoal;
+    this.team = team; // Añadido para identificar 'red' o 'blue'
     this.mass = 1;
-    this.isClone = false; // Indica si es una pelota extra
-    this.expireTime = null; // Si es clon, cuando expira
+    this.isClone = false;
+    this.expireTime = null;
     this.reset(width, height);
   }
   
@@ -46,7 +46,6 @@ export class Ball {
       this.vy = -Math.abs(this.vy);
     }
     
-    // Gol solo si es pelota original (o todas cuentan)
     if (this.x - this.radius < 0) {
       if (this.isInsideGoalLeft(field)) {
         if (this.targetGoal === 'left') {
@@ -82,8 +81,14 @@ export class Ball {
     const minDist = this.radius + other.radius;
     
     if (dist < minDist && dist > 0) {
+      // Vector normal unitario
       const nx = dx / dist;
       const ny = dy / dist;
+      // Vector tangente unitario
+      const tx = -ny;
+      const ty = nx;
+      
+      // Separar las pelotas para evitar superposición
       const overlap = minDist - dist;
       const totalMass = this.mass + other.mass;
       this.x -= (overlap * (other.mass / totalMass)) * nx;
@@ -91,17 +96,26 @@ export class Ball {
       other.x += (overlap * (this.mass / totalMass)) * nx;
       other.y += (overlap * (this.mass / totalMass)) * ny;
       
-      const dvx = this.vx - other.vx;
-      const dvy = this.vy - other.vy;
-      const dvn = dvx * nx + dvy * ny;
-      if (dvn > 0) return;
+      // Descomponer velocidades en componente normal y tangencial
+      const v1n = this.vx * nx + this.vy * ny;
+      const v1t = this.vx * tx + this.vy * ty;
+      const v2n = other.vx * nx + other.vy * ny;
+      const v2t = other.vx * tx + other.vy * ty;
       
-      this.vx -= dvn * nx;
-      this.vy -= dvn * ny;
-      other.vx += dvn * nx;
-      other.vy += dvn * ny;
+      // Solo colisionar si se acercan
+      if (v1n - v2n <= 0) return;
       
-      // Mantener rapidez constante
+      // Colisión elástica entre masas iguales: intercambiar componentes normales
+      const newV1n = v2n;
+      const newV2n = v1n;
+      
+      // Reconstruir vectores de velocidad
+      this.vx = newV1n * nx + v1t * tx;
+      this.vy = newV1n * ny + v1t * ty;
+      other.vx = newV2n * nx + v2t * tx;
+      other.vy = newV2n * ny + v2t * ty;
+      
+      // Normalizar velocidades para mantener la rapidez original de cada pelota
       const mag1 = Math.hypot(this.vx, this.vy);
       if (mag1 > 0) {
         this.vx = (this.vx / mag1) * this.speed;

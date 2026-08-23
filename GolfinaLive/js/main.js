@@ -37,6 +37,9 @@ const stadium = new Stadium(canvas);
 const audioManager = new AudioManager(audioFiles);
 
 const BALL_RADIUS = 16;
+
+// ✅ CORRECCIÓN: Pelota roja (Ronaldo) marca en portería derecha (azul)
+// Pelota azul (Messi) marca en portería izquierda (roja)
 const ballRed = new Ball(field.width, field.height, BALL_RADIUS, '#ff0000', 200, 'right', 'red');
 const ballBlue = new Ball(field.width, field.height, BALL_RADIUS, '#0000ff', 200, 'left', 'blue');
 
@@ -209,11 +212,14 @@ function handleControlAction(action) {
       break;
     case 'resume':
       if (!isRunning && !goalPause) {
-        isRunning = true;
-        audioManager.playLoop('estadio_completo');
-        lastTime = performance.now();
-        requestAnimationFrame(loop);
-        saveCurrentPartida();
+        // Cargar partida desde Supabase antes de reanudar
+        loadAndRestorePartida().then(() => {
+          isRunning = true;
+          audioManager.playLoop('estadio_completo');
+          lastTime = performance.now();
+          requestAnimationFrame(loop);
+          saveCurrentPartida();
+        });
       }
       break;
     case 'reset':
@@ -434,7 +440,6 @@ function aplicarPoder(nombrePoder, canal, usuario) {
     handleGoal('red');
   }
   else if (comando === 'caosronaldo') {
-    // Invertir dirección de la pelota de Messi varias veces
     const interval = setInterval(() => {
       ballBlue.vx = -ballBlue.vx;
       ballBlue.vy = (Math.random() > 0.5 ? 1 : -1) * ballBlue.vy;
@@ -544,9 +549,8 @@ function aplicarPoder(nombrePoder, canal, usuario) {
       });
     }, 15000);
   }
-  // Nuevos poderes
   else if (comando === 'multiplicarronaldo') {
-    addClone('red', 2); // 2 clones adicionales, total 3 pelotas rojas
+    addClone('red', 2);
     showMessage(`¡Ronaldo multiplicado! 3 bolas rojas (por ${quien})`);
   }
   else if (comando === 'multiplicarmessi') {
@@ -554,10 +558,6 @@ function aplicarPoder(nombrePoder, canal, usuario) {
     showMessage(`¡Messi multiplicado! 3 bolas azules (por ${quien})`);
   }
   else if (comando === 'pelotagigante') {
-    // Pelota gigante para el equipo que lo active
-    const targetBall = (usuario?.toLowerCase().includes('messi')) ? ballBlue : ballRed; // No es fiable; mejor usar equipo
-    // Asumimos que es para el equipo del usuario según el comando; pero no tenemos el equipo del usuario.
-    // Por defecto, pelota gigante para ambos
     ballRed.radius = 25;
     ballBlue.radius = 25;
     showMessage(`¡Pelotas gigantes! (por ${quien})`);
