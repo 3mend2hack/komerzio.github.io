@@ -25,7 +25,7 @@
   <header class="scoreboard" id="scoreboard">
     <div class="team team-red">
       <div class="player-image" id="player-image-red">
-        <img src="https://via.placeholder.com/150/ff4444/ffffff?text=Rojo" alt="Jugador Rojo">
+        <img src="" alt="Jugador Rojo" id="img-red">
       </div>
       <span class="player-name" id="player-name-red">Rojo</span>
       <span class="score" id="score-red">0</span>
@@ -39,7 +39,7 @@
 
     <div class="team team-blue">
       <div class="player-image" id="player-image-blue">
-        <img src="https://via.placeholder.com/150/4444ff/ffffff?text=Azul" alt="Jugador Azul">
+        <img src="" alt="Jugador Azul" id="img-blue">
       </div>
       <span class="player-name" id="player-name-blue">Azul</span>
       <span class="score" id="score-blue">0</span>
@@ -104,6 +104,7 @@
       <label for="input-file-red">Imagen del jugador rojo:</label>
       <input type="file" id="input-file-red" accept="image/*">
       <img id="player-image-red-preview" class="image-preview" src="" alt="Previsualización roja">
+      <button id="btn-delete-red" type="button" style="background:#e74c3c; margin-bottom:10px;">Eliminar imagen roja</button>
 
       <label for="input-name-blue">Nombre del jugador azul:</label>
       <input type="text" id="input-name-blue" placeholder="Ej: Cristiano Ronaldo">
@@ -111,6 +112,7 @@
       <label for="input-file-blue">Imagen del jugador azul:</label>
       <input type="file" id="input-file-blue" accept="image/*">
       <img id="player-image-blue-preview" class="image-preview" src="" alt="Previsualización azul">
+      <button id="btn-delete-blue" type="button" style="background:#e74c3c; margin-bottom:10px;">Eliminar imagen azul</button>
 
       <div class="modal-buttons">
         <button id="btn-save-names">Guardar</button>
