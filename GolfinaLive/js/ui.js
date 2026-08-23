@@ -24,9 +24,10 @@ export class UIManager {
     this.init();
   }
 
-  init() {
+  async init() {
     this.bindEvents();
     this.loadSettings();
+    await this.loadImagesFromStorage(); // Carga imágenes fijas desde Supabase Storage
     this.applySettings();
     this.updatePlayerNamesDisplay();
     this.updatePlayerImagesDisplay();
@@ -77,6 +78,10 @@ export class UIManager {
     // Subida de imágenes
     document.getElementById('input-file-red').addEventListener('change', (e) => this.handleImageUpload(e, 'red'));
     document.getElementById('input-file-blue').addEventListener('change', (e) => this.handleImageUpload(e, 'blue'));
+
+    // Eliminar imágenes
+    document.getElementById('btn-delete-red').addEventListener('click', () => this.deleteImage('red'));
+    document.getElementById('btn-delete-blue').addEventListener('click', () => this.deleteImage('blue'));
   }
 
   /**
@@ -159,6 +164,19 @@ export class UIManager {
   }
 
   /**
+   * Carga las imágenes fijas desde Supabase Storage (URLs directas).
+   */
+  async loadImagesFromStorage() {
+    const bucketName = 'jugadores';
+
+    this.playerImages.red = `https://qddfdisbnwnnlvkrnckd.supabase.co/storage/v1/object/public/${bucketName}/red/1787368290429.jpg`;
+    this.playerImages.blue = `https://qddfdisbnwnnlvkrnckd.supabase.co/storage/v1/object/public/${bucketName}/blue/1787368514576.jpg`;
+
+    this.updatePlayerImagesDisplay();
+    this.saveSettings();
+  }
+
+  /**
    * Maneja la subida de imagen de un jugador a Supabase Storage.
    * @param {Event} event - Evento change del input file
    * @param {string} team - 'red' o 'blue'
@@ -168,13 +186,11 @@ export class UIManager {
     if (!file) return;
 
     try {
-      // 1. Comprimir la imagen antes de subir
       const compressedBlob = await this.compressImage(file, 300, 0.8);
-      const fileExt = 'jpg'; // Siempre JPEG tras comprimir
+      const fileExt = 'jpg';
       const fileName = `${Date.now()}.${fileExt}`;
-      const bucketName = 'jugadores'; // ⚠️ CAMBIA ESTO por el nombre real de tu bucket
+      const bucketName = 'jugadores';
 
-      // 2. Subir a Supabase Storage
       const { data, error } = await supabase.storage
         .from(bucketName)
         .upload(`${team}/${fileName}`, compressedBlob, {
@@ -184,19 +200,16 @@ export class UIManager {
 
       if (error) throw error;
 
-      // 3. Obtener URL pública
       const { data: publicUrlData } = supabase.storage
         .from(bucketName)
         .getPublicUrl(`${team}/${fileName}`);
 
       const publicUrl = publicUrlData.publicUrl;
 
-      // 4. Actualizar interfaz y guardar
       this.playerImages[team] = publicUrl;
       this.updatePlayerImagesDisplay();
       this.saveSettings();
 
-      // 5. Mostrar preview en el modal
       if (team === 'red') {
         document.getElementById('player-image-red-preview').src = publicUrl;
       } else {
@@ -211,38 +224,66 @@ export class UIManager {
   }
 
   /**
-   * Actualiza los nombres mostrados en el marcador.
+   * Elimina la imagen actual de un jugador en Supabase Storage.
+   * @param {string} team - 'red' o 'blue'
    */
+  async deleteImage(team) {
+    const currentUrl = this.playerImages[team];
+    if (!currentUrl || currentUrl.startsWith('https://via.placeholder.com')) {
+      alert('No hay imagen personalizada para eliminar.');
+      return;
+    }
+
+    try {
+      const bucketName = 'jugadores';
+      const urlParts = currentUrl.split('/');
+      const filePath = `${team}/${urlParts[urlParts.length - 1]}`;
+
+      const { error } = await supabase.storage
+        .from(bucketName)
+        .remove([filePath]);
+
+      if (error) throw error;
+
+      const placeholder = team === 'red'
+        ? 'https://via.placeholder.com/150/ff4444/ffffff?text=Rojo'
+        : 'https://via.placeholder.com/150/4444ff/ffffff?text=Azul';
+
+      this.playerImages[team] = placeholder;
+      this.updatePlayerImagesDisplay();
+      this.saveSettings();
+
+      if (team === 'red') {
+        document.getElementById('player-image-red-preview').src = placeholder;
+      } else {
+        document.getElementById('player-image-blue-preview').src = placeholder;
+      }
+
+      console.log(`Imagen de ${team} eliminada correctamente.`);
+    } catch (error) {
+      console.error('Error eliminando imagen:', error);
+      alert('Error al eliminar la imagen. Revisa la consola.');
+    }
+  }
+
   updatePlayerNamesDisplay() {
     document.getElementById('player-name-red').textContent = this.playerNames.red;
     document.getElementById('player-name-blue').textContent = this.playerNames.blue;
   }
 
-  /**
-   * Actualiza las imágenes mostradas en el marcador.
-   */
   updatePlayerImagesDisplay() {
     document.getElementById('player-image-red').querySelector('img').src = this.playerImages.red;
     document.getElementById('player-image-blue').querySelector('img').src = this.playerImages.blue;
   }
 
-  /**
-   * Actualiza la visualización de la meta de goles en el marcador.
-   */
   updateGoalTargetDisplay() {
     document.getElementById('goal-target').textContent = this.goalTarget;
   }
 
-  /**
-   * Actualiza el input numérico con la meta de goles actual.
-   */
   updateGoalTargetInput() {
     document.getElementById('goal-target-input').value = this.goalTarget;
   }
 
-  /**
-   * Carga la configuración guardada en localStorage, incluyendo nombres e imágenes.
-   */
   loadSettings() {
     const saved = localStorage.getItem('football-settings-horizontal');
     if (saved) {
@@ -274,9 +315,6 @@ export class UIManager {
     }
   }
 
-  /**
-   * Aplica los valores actuales de los sliders y del campo.
-   */
   applySettings() {
     this.field.width = Number(document.getElementById('field-width').value);
     this.field.height = Number(document.getElementById('field-height').value);
