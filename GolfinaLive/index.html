@@ -63,6 +63,7 @@
       <button id="btn-reset">Reiniciar</button>
       <button id="btn-continue">Continuar partida</button>
       <button id="btn-logout" style="background:#e74c3c;">Cerrar sesión</button>
+      <button id="btn-admin" style="background:#f39c12;">Admin Poderes</button>
     </div>
 
     <div class="audio-buttons">
@@ -117,6 +118,29 @@
       <div class="modal-buttons">
         <button id="btn-save-names">Guardar</button>
         <button id="btn-close-modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL DE ADMINISTRACIÓN DE PODERES ===================== -->
+  <div id="admin-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-title">
+    <div class="modal-content" style="max-width: 600px;">
+      <h2 id="admin-title">Administración de Poderes</h2>
+      <div id="admin-poderes-list" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;"></div>
+      <h3>Añadir o editar poder</h3>
+      <input type="hidden" id="admin-id" value="">
+      <input type="text" id="admin-nombre" placeholder="Nombre visible">
+      <input type="text" id="admin-comando" placeholder="Comando (sin !)">
+      <input type="number" id="admin-costo" placeholder="Costo en puntos">
+      <input type="number" id="admin-duracion" placeholder="Duración (segundos)">
+      <select id="admin-bando">
+        <option value="rojo">Rojo</option>
+        <option value="azul">Azul</option>
+        <option value="neutral">Neutral</option>
+      </select>
+      <button id="btn-add-poder" style="background:#2ecc71;">Añadir / Guardar</button>
+      <div class="modal-buttons" style="margin-top:10px;">
+        <button id="btn-close-admin" style="background:#e74c3c;">Cerrar</button>
       </div>
     </div>
   </div>
