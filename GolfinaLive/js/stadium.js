@@ -4,24 +4,25 @@ export class Stadium {
     this.ctx = canvas.getContext('2d');
   }
   
-  draw(field) {
+  draw(field, neonMode = false) {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.save();
     ctx.translate(field.offsetX, field.offsetY);
-    this.drawField(ctx, field);
+    this.drawField(ctx, field, neonMode);
     ctx.restore();
   }
   
-  drawField(ctx, field) {
+  drawField(ctx, field, neonMode = false) {
     const grassGradient = ctx.createLinearGradient(0, 0, field.width, 0);
-    grassGradient.addColorStop(0, '#2e8b57');
-    grassGradient.addColorStop(0.5, '#3cb371');
-    grassGradient.addColorStop(1, '#2e8b57');
+    grassGradient.addColorStop(0, neonMode ? '#0a1a0a' : '#2e8b57');
+    grassGradient.addColorStop(0.5, neonMode ? '#0a2a0a' : '#3cb371');
+    grassGradient.addColorStop(1, neonMode ? '#0a1a0a' : '#2e8b57');
     ctx.fillStyle = grassGradient;
     ctx.fillRect(0, 0, field.width, field.height);
     
-    ctx.strokeStyle = '#ffffff';
+    // Líneas blancas o neón según modo
+    ctx.strokeStyle = neonMode ? '#aaaaaa' : '#ffffff';
     ctx.lineWidth = 2;
     ctx.strokeRect(0, 0, field.width, field.height);
     
@@ -46,7 +47,7 @@ export class Stadium {
     ctx.strokeRect(field.width - penaltyAreaWidth, (field.height - penaltyAreaHeight) / 2, penaltyAreaWidth, penaltyAreaHeight);
     ctx.strokeRect(field.width - goalAreaWidth, (field.height - goalAreaHeight) / 2, goalAreaWidth, goalAreaHeight);
     
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = neonMode ? '#ffffff' : '#ffffff';
     ctx.beginPath();
     ctx.arc(penaltyAreaWidth * 0.7, field.height / 2, 3, 0, Math.PI * 2);
     ctx.fill();
@@ -68,26 +69,36 @@ export class Stadium {
     ctx.arc(field.width, field.height, cornerRadius, Math.PI / 2, Math.PI);
     ctx.stroke();
     
-    // Ahora usamos ratios separados
-    this.drawGoal(ctx, field, 'left', field.goalMouthRatioLeft);
-    this.drawGoal(ctx, field, 'right', field.goalMouthRatioRight);
+    // Porterías
+    this.drawGoal(ctx, field, 'left', field.goalMouthRatioLeft, neonMode);
+    this.drawGoal(ctx, field, 'right', field.goalMouthRatioRight, neonMode);
   }
   
-  drawGoal(ctx, field, side, goalMouthRatio) {
+  drawGoal(ctx, field, side, goalMouthRatio, neonMode = false) {
     const goalWidth = Math.min(20, field.width * 0.05);
     const goalHeight = field.height * goalMouthRatio;
     const top = (field.height - goalHeight) / 2;
     const left = side === 'left' ? -goalWidth : field.width;
     const right = side === 'left' ? 0 : field.width + goalWidth;
     
-    // CORRECCIÓN: izquierda roja, derecha azul
-    const goalColor = side === 'left' ? '#ff0000' : '#0000ff';
+    // Color normal o neón
+    let goalColor;
+    if (neonMode) {
+      goalColor = side === 'left' ? '#ff00ff' : '#00ffff'; // Neón rojo / azul brillante
+    } else {
+      goalColor = side === 'left' ? '#ff0000' : '#0000ff'; // Normal
+    }
     
     ctx.strokeStyle = goalColor;
-    ctx.lineWidth = 4;
+    ctx.lineWidth = neonMode ? 5 : 4;
+    if (neonMode) {
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = goalColor;
+    }
     ctx.strokeRect(left, top, goalWidth, goalHeight);
     
-    ctx.strokeStyle = 'rgba(200,200,200,0.7)';
+    // Red
+    ctx.strokeStyle = neonMode ? goalColor : 'rgba(200,200,200,0.7)';
     ctx.lineWidth = 1;
     const spacing = 6;
     for (let y = top; y <= top + goalHeight; y += spacing) {
@@ -101,6 +112,12 @@ export class Stadium {
       ctx.moveTo(x, top);
       ctx.lineTo(x, top + goalHeight);
       ctx.stroke();
+    }
+    
+    // Resetear sombra
+    if (neonMode) {
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
     }
   }
 }

@@ -13,6 +13,7 @@ export class AudioManager {
       audio.preload = 'auto';
       if (key === 'estadio_completo') {
         audio.loop = true; // activar bucle para este audio
+        audio.volume = 0.3; // ✅ Volumen bajo para el ambiente del estadio
       }
       this.audioElements[key] = audio;
     }
@@ -28,6 +29,7 @@ export class AudioManager {
       }
       this.currentAudio = this.audioElements[key];
       this.currentAudio.currentTime = 0;
+      this.currentAudio.volume = 1.0; // Aseguramos volumen normal para efectos
       await this.currentAudio.play();
     } catch (error) {
       console.warn('Error reproduciendo audio:', error);
@@ -43,6 +45,7 @@ export class AudioManager {
     }
     this.loopAudio = this.audioElements[key];
     this.loopAudio.loop = true;
+    this.loopAudio.volume = 0.3; // ✅ Volumen bajo para el bucle de fondo
     this.loopAudio.currentTime = 0;
     this.loopAudio.play().catch(e => console.warn('Error iniciando bucle:', e));
   }

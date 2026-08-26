@@ -3,6 +3,7 @@ import { Stadium } from './stadium.js';
 import { AudioManager } from './audio.js';
 import { UIManager } from './ui.js';
 import { signIn, signOut, getSession, initSupabase, savePartida, loadPartidaActiva, finalizarPartida } from './supabase.js';
+import { supabase } from './supabase.js';
 
 // ===================== CONFIGURACIÓN INICIAL =====================
 const canvas = document.getElementById('game-canvas');
@@ -26,6 +27,8 @@ const audioFiles = {
   bienvenida: 'assets/audio/bienvenida.mp3',
   gol_rojo: 'assets/audio/gol_rojo.mp3',
   gol_azul: 'assets/audio/gol_azul.mp3',
+  audioronaldo: 'assets/audio/audioronaldo.mp3',
+  audiomessi: 'assets/audio/audiomessi.mp3',
   suscribete: 'assets/audio/suscribete.mp3',
   apoya_estrella: 'assets/audio/apoya_estrella.mp3',
   poder: 'assets/audio/poder.mp3',
@@ -38,12 +41,10 @@ const audioManager = new AudioManager(audioFiles);
 
 const BALL_RADIUS = 16;
 
-// ✅ CORRECCIÓN: Pelota roja (Ronaldo) marca en portería derecha (azul)
-// Pelota azul (Messi) marca en portería izquierda (roja)
 const ballRed = new Ball(field.width, field.height, BALL_RADIUS, '#ff0000', 200, 'right', 'red');
 const ballBlue = new Ball(field.width, field.height, BALL_RADIUS, '#0000ff', 200, 'left', 'blue');
 
-let balls = [ballRed, ballBlue]; // Array de pelotas activas
+let balls = [ballRed, ballBlue];
 
 let isRunning = false;
 let lastTime = 0;
@@ -63,6 +64,17 @@ let invertTimeout = null;
 let giantBallTimeout = null;
 let cloneTimeouts = [];
 
+let goalkeeper = {
+  active: false,
+  team: null,
+  x: 0,
+  y: 0,
+  radius: 20,
+  speed: 150
+};
+
+let neonMode = false;
+
 const scoreRedEl = document.getElementById('score-red');
 const scoreBlueEl = document.getElementById('score-blue');
 const goalTargetEl = document.getElementById('goal-target');
@@ -73,6 +85,15 @@ const passwordInput = document.getElementById('password-input');
 const btnLogin = document.getElementById('btn-login');
 const loginError = document.getElementById('login-error');
 const btnLogout = document.getElementById('btn-logout');
+
+// ===================== FUNCIÓN PARA DESBLOQUEAR AUDIO =====================
+function unlockAudio() {
+  const audio = new Audio();
+  audio.volume = 0;
+  audio.play().then(() => {
+    audio.pause();
+  }).catch(() => {});
+}
 
 // ===================== AUTENTICACIÓN =====================
 async function checkSession() {
@@ -101,6 +122,7 @@ btnLogin.addEventListener('click', async () => {
     loginOverlay.classList.remove('open');
     passwordInput.value = '';
     loginError.textContent = '';
+    unlockAudio(); // Desbloquear audio tras login
     await initGame();
   } catch (error) {
     loginError.textContent = 'Contraseña incorrecta';
@@ -198,6 +220,7 @@ function handleControlAction(action) {
   switch (action) {
     case 'start':
       if (!isRunning && !goalPause) {
+        unlockAudio(); // Desbloquear audio al iniciar partido
         isRunning = true;
         audioManager.playLoop('estadio_completo');
         lastTime = performance.now();
@@ -212,7 +235,7 @@ function handleControlAction(action) {
       break;
     case 'resume':
       if (!isRunning && !goalPause) {
-        // Cargar partida desde Supabase antes de reanudar
+        unlockAudio(); // También al reanudar
         loadAndRestorePartida().then(() => {
           isRunning = true;
           audioManager.playLoop('estadio_completo');
@@ -240,6 +263,8 @@ function handleControlAction(action) {
       field.height = originalFieldHeight;
       field.goalMouthRatioLeft = originalGoalMouthRatioLeft;
       field.goalMouthRatioRight = originalGoalMouthRatioRight;
+      goalkeeper.active = false;
+      neonMode = false;
       updateScoreboard();
       balls = [ballRed, ballBlue];
       ballRed.reset(field.width, field.height);
@@ -311,24 +336,25 @@ function loop(timestamp) {
   lastTime = timestamp;
   if (deltaTime > 0.1) deltaTime = 0.1;
 
-  // Actualizar todas las pelotas y detectar goles
   for (let i = 0; i < balls.length; i++) {
     const ball = balls[i];
     const result = ball.update(deltaTime, field);
     if (result === 'goal') {
       handleGoal(ball.team);
-      return; // Salir del bucle tras gol
+      return;
     }
   }
 
-  // Colisiones entre todas las pelotas
+  if (goalkeeper.active) {
+    updateGoalkeeper(deltaTime);
+  }
+
   for (let i = 0; i < balls.length; i++) {
     for (let j = i + 1; j < balls.length; j++) {
       balls[i].collide(balls[j]);
     }
   }
 
-  // Eliminar clones expirados
   const now = performance.now();
   balls = balls.filter(ball => {
     if (ball.isClone && ball.expireTime && now > ball.expireTime) {
@@ -342,8 +368,30 @@ function loop(timestamp) {
 }
 
 function drawFrame() {
-  stadium.draw(field);
+  stadium.draw(field, neonMode);
+
+  if (neonMode) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+  }
+
+  if (neonMode) {
+    ctx.save();
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = '#ffffff';
+  }
+
   balls.forEach(ball => drawBall(ball));
+
+  if (goalkeeper.active) {
+    drawGoalkeeper();
+  }
+
+  if (neonMode) {
+    ctx.restore();
+  }
 }
 
 function drawBall(ball) {
@@ -355,13 +403,83 @@ function drawBall(ball) {
   ctx.fill();
   ctx.beginPath();
   ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-  ctx.fillStyle = ball.color;
+  if (neonMode) {
+    ctx.fillStyle = ball.color === '#ff0000' ? '#ff00ff' : '#00ffff';
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = ball.color === '#ff0000' ? '#ff0000' : '#0000ff';
+  } else {
+    ctx.fillStyle = ball.color;
+  }
   ctx.fill();
   ctx.beginPath();
   ctx.arc(ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, ball.radius * 0.3, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
   ctx.fill();
   ctx.restore();
+}
+
+function drawGoalkeeper() {
+  ctx.save();
+  ctx.translate(field.offsetX, field.offsetY);
+  ctx.beginPath();
+  ctx.arc(goalkeeper.x, goalkeeper.y, goalkeeper.radius, 0, Math.PI * 2);
+  ctx.fillStyle = goalkeeper.team === 'red' ? '#ff4444' : '#4444ff';
+  ctx.fill();
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(goalkeeper.x - 8, goalkeeper.y - 8, 6, 0, Math.PI * 2);
+  ctx.arc(goalkeeper.x + 8, goalkeeper.y - 8, 6, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.restore();
+}
+
+function updateGoalkeeper(deltaTime) {
+  const targetBall = goalkeeper.team === 'red' ? ballBlue : ballRed;
+  if (!targetBall) return;
+
+  const targetGoalX = goalkeeper.team === 'red' ? 20 : field.width - 20;
+  const targetGoalY = field.height / 2;
+
+  const rangeX = 60;
+  const rangeY = 80;
+
+  const ballDistToGoal = Math.hypot(targetBall.x - targetGoalX, targetBall.y - targetGoalY);
+
+  if (ballDistToGoal < 150) {
+    const dx = targetBall.x - goalkeeper.x;
+    const dy = targetBall.y - goalkeeper.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist > 5) {
+      const moveX = (dx / dist) * goalkeeper.speed * deltaTime;
+      const moveY = (dy / dist) * goalkeeper.speed * deltaTime;
+      goalkeeper.x += moveX;
+      goalkeeper.y += moveY;
+    }
+  } else {
+    const dx = targetGoalX - goalkeeper.x;
+    const dy = targetGoalY - goalkeeper.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist > 5) {
+      const moveX = (dx / dist) * goalkeeper.speed * deltaTime;
+      const moveY = (dy / dist) * goalkeeper.speed * deltaTime;
+      goalkeeper.x += moveX;
+      goalkeeper.y += moveY;
+    }
+  }
+
+  goalkeeper.x = Math.max(targetGoalX - rangeX, Math.min(targetGoalX + rangeX, goalkeeper.x));
+  goalkeeper.y = Math.max(targetGoalY - rangeY, Math.min(targetGoalY + rangeY, goalkeeper.y));
+
+  if (Math.hypot(targetBall.x - goalkeeper.x, targetBall.y - goalkeeper.y) < goalkeeper.radius + targetBall.radius) {
+    const angle = Math.atan2(targetBall.y - goalkeeper.y, targetBall.x - goalkeeper.x);
+    targetBall.vx = Math.cos(angle) * targetBall.speed;
+    targetBall.vy = Math.sin(angle) * targetBall.speed;
+    targetBall.x += Math.cos(angle) * (goalkeeper.radius + targetBall.radius);
+    targetBall.y += Math.sin(angle) * (goalkeeper.radius + targetBall.radius);
+  }
 }
 
 function handleGoal(team) {
@@ -369,15 +487,22 @@ function handleGoal(team) {
   goalPause = true;
   isRunning = false;
 
+  const indexClone = balls.findIndex(ball => ball.isClone && ball.team === team);
+  if (indexClone !== -1) {
+    balls.splice(indexClone, 1);
+  }
+
   let points = 1;
   if (doublePoints[team]) points = 2;
 
   if (team === 'red') {
     scores.red += points;
-    audioManager.play('gol_rojo');
+    const audioRed = Math.random() < 0.5 ? 'gol_rojo' : 'audioronaldo';
+    audioManager.play(audioRed);
   } else {
     scores.blue += points;
-    audioManager.play('gol_azul');
+    const audioBlue = Math.random() < 0.5 ? 'gol_azul' : 'audiomessi';
+    audioManager.play(audioBlue);
   }
   updateScoreboard();
   saveCurrentPartida();
@@ -392,9 +517,7 @@ function handleGoal(team) {
 
 function startCountdown(seconds) {
   if (seconds <= 0) {
-    balls.forEach(ball => {
-      if (!ball.isClone) ball.reset(field.width, field.height);
-    });
+    balls.forEach(ball => ball.reset(field.width, field.height));
     drawFrame();
 
     if (scores.red >= goalTarget || scores.blue >= goalTarget) {
@@ -425,7 +548,6 @@ function aplicarPoder(nombrePoder, canal, usuario) {
   const comando = nombrePoder.toLowerCase();
   const quien = usuario ? `@${usuario}` : 'alguien';
 
-  // Poderes de Ronaldo (equipo rojo)
   if (comando === 'velocidadronaldo') {
     ballRed.setSpeed(ballRed.speed * 1.5);
     showMessage(`¡Velocidad aumentada para Ronaldo! (por ${quien})`);
@@ -448,10 +570,10 @@ function aplicarPoder(nombrePoder, canal, usuario) {
     setTimeout(() => clearInterval(interval), 20000);
   }
   else if (comando === 'escudoronaldo') {
-    field.goalMouthRatioRight = field.goalMouthRatioRight * 0.5;
+    field.goalMouthRatioLeft = field.goalMouthRatioLeft * 0.5;
     showMessage(`¡Escudo para Ronaldo! (por ${quien})`);
     setTimeout(() => {
-      field.goalMouthRatioRight = originalGoalMouthRatioRight;
+      field.goalMouthRatioLeft = originalGoalMouthRatioLeft;
       drawFrame();
     }, 60000);
     drawFrame();
@@ -475,7 +597,6 @@ function aplicarPoder(nombrePoder, canal, usuario) {
     showMessage(`¡Goles de Ronaldo valen doble! (por ${quien})`);
     setTimeout(() => { doublePoints.red = false; }, 60000);
   }
-  // Poderes de Messi (equipo azul)
   else if (comando === 'velocidadmessi') {
     ballBlue.setSpeed(ballBlue.speed * 1.5);
     showMessage(`¡Velocidad aumentada para Messi! (por ${quien})`);
@@ -498,10 +619,10 @@ function aplicarPoder(nombrePoder, canal, usuario) {
     setTimeout(() => clearInterval(interval), 20000);
   }
   else if (comando === 'escudomessi') {
-    field.goalMouthRatioLeft = field.goalMouthRatioLeft * 0.5;
+    field.goalMouthRatioRight = field.goalMouthRatioRight * 0.5;
     showMessage(`¡Escudo para Messi! (por ${quien})`);
     setTimeout(() => {
-      field.goalMouthRatioLeft = originalGoalMouthRatioLeft;
+      field.goalMouthRatioRight = originalGoalMouthRatioRight;
       drawFrame();
     }, 60000);
     drawFrame();
@@ -525,7 +646,6 @@ function aplicarPoder(nombrePoder, canal, usuario) {
     showMessage(`¡Goles de Messi valen doble! (por ${quien})`);
     setTimeout(() => { doublePoints.blue = false; }, 60000);
   }
-  // Poderes neutrales
   else if (comando === 'super') {
     ballRed.setSpeed(ballRed.speed * 2);
     ballBlue.setSpeed(ballBlue.speed * 2);
@@ -573,9 +693,40 @@ function aplicarPoder(nombrePoder, canal, usuario) {
     ballBlue.reset(field.width, field.height);
     showMessage(`¡Messi teletransportado! (por ${quien})`);
   }
+  else if (comando === 'porteroronaldo') {
+    activateGoalkeeper('red');
+    showMessage(`¡Portero para Ronaldo activado! (por ${quien})`);
+    setTimeout(() => {
+      goalkeeper.active = false;
+      drawFrame();
+    }, 15000);
+  }
+  else if (comando === 'porteromessi') {
+    activateGoalkeeper('blue');
+    showMessage(`¡Portero para Messi activado! (por ${quien})`);
+    setTimeout(() => {
+      goalkeeper.active = false;
+      drawFrame();
+    }, 15000);
+  }
+  else if (comando === 'camponeon') {
+    neonMode = true;
+    showMessage(`¡Modo neón activado! (por ${quien})`);
+    setTimeout(() => {
+      neonMode = false;
+      drawFrame();
+    }, 10000);
+  }
   else {
     console.warn('Poder no implementado:', nombrePoder);
   }
+}
+
+function activateGoalkeeper(team) {
+  goalkeeper.active = true;
+  goalkeeper.team = team;
+  goalkeeper.x = team === 'red' ? 30 : field.width - 30;
+  goalkeeper.y = field.height / 2;
 }
 
 function addClone(team, count) {
@@ -586,7 +737,7 @@ function addClone(team, count) {
   for (let i = 0; i < count; i++) {
     const clone = new Ball(field.width, field.height, BALL_RADIUS, color, speed, targetGoal, team);
     clone.isClone = true;
-    clone.expireTime = performance.now() + 30000; // 30 segundos
+    clone.expireTime = performance.now() + 30000;
     clone.reset(field.width, field.height);
     balls.push(clone);
   }
@@ -601,6 +752,125 @@ function checkWinnerAfterAutoGoal() {
     audioManager.stopLoop();
     finalizarPartida(winner);
   }
+}
+
+// ===================== ADMINISTRACIÓN DE PODERES =====================
+document.getElementById('btn-admin').addEventListener('click', openAdminModal);
+document.getElementById('btn-close-admin').addEventListener('click', () => {
+  document.getElementById('admin-modal').classList.remove('open');
+});
+document.getElementById('btn-add-poder').addEventListener('click', addOrUpdatePoder);
+
+async function openAdminModal() {
+  const { data, error } = await supabase
+    .from('poderes_personalizados')
+    .select('*')
+    .order('bando', { ascending: true });
+
+  if (error) {
+    console.error('Error cargando poderes:', error);
+    return;
+  }
+
+  const container = document.getElementById('admin-poderes-list');
+  container.innerHTML = '';
+
+  const grupos = { rojo: [], azul: [], neutral: [] };
+  data.forEach(poder => {
+    if (grupos[poder.bando]) {
+      grupos[poder.bando].push(poder);
+    }
+  });
+
+  for (const bando in grupos) {
+    const titulo = document.createElement('h4');
+    titulo.textContent = bando.toUpperCase();
+    titulo.style.color = bando === 'rojo' ? '#ff4444' : bando === 'azul' ? '#4444ff' : '#cccccc';
+    container.appendChild(titulo);
+
+    grupos[bando].forEach(poder => {
+      const div = document.createElement('div');
+      div.style.display = 'flex';
+      div.style.justifyContent = 'space-between';
+      div.style.alignItems = 'center';
+      div.style.marginBottom = '5px';
+      div.innerHTML = `
+        <span>${poder.nombre} (${poder.comando}) - ${poder.costo} pts</span>
+        <span>
+          <button onclick="editPoder('${poder.id}', '${poder.nombre}', '${poder.comando}', ${poder.costo}, ${poder.duracion}, '${poder.bando}')" style="background:#3498db; margin-right:5px;">Editar</button>
+          <button onclick="deletePoder('${poder.id}')" style="background:#e74c3c;">Eliminar</button>
+        </span>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  document.getElementById('admin-modal').classList.add('open');
+}
+
+window.editPoder = function(id, nombre, comando, costo, duracion, bando) {
+  document.getElementById('admin-id').value = id;
+  document.getElementById('admin-nombre').value = nombre;
+  document.getElementById('admin-comando').value = comando;
+  document.getElementById('admin-costo').value = costo;
+  document.getElementById('admin-duracion').value = duracion;
+  document.getElementById('admin-bando').value = bando;
+};
+
+window.deletePoder = async function(id) {
+  if (!confirm('¿Seguro que deseas eliminar este poder?')) return;
+
+  const { error } = await supabase
+    .from('poderes_personalizados')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error eliminando poder:', error);
+    alert('Error al eliminar');
+    return;
+  }
+
+  openAdminModal();
+};
+
+async function addOrUpdatePoder() {
+  const id = document.getElementById('admin-id').value;
+  const nombre = document.getElementById('admin-nombre').value.trim();
+  const comando = document.getElementById('admin-comando').value.trim();
+  const costo = Number(document.getElementById('admin-costo').value);
+  const duracion = Number(document.getElementById('admin-duracion').value);
+  const bando = document.getElementById('admin-bando').value;
+
+  if (!nombre || !comando || !costo || !duracion) {
+    alert('Completa todos los campos');
+    return;
+  }
+
+  let error;
+  if (id) {
+    ({ error } = await supabase
+      .from('poderes_personalizados')
+      .update({ nombre, comando, costo, duracion, bando })
+      .eq('id', id));
+  } else {
+    ({ error } = await supabase
+      .from('poderes_personalizados')
+      .insert({ nombre, comando, costo, duracion, bando, activo: true }));
+  }
+
+  if (error) {
+    console.error('Error guardando poder:', error);
+    alert('Error al guardar');
+    return;
+  }
+
+  document.getElementById('admin-id').value = '';
+  document.getElementById('admin-nombre').value = '';
+  document.getElementById('admin-comando').value = '';
+  document.getElementById('admin-costo').value = '';
+  document.getElementById('admin-duracion').value = '';
+  openAdminModal();
 }
 
 // ===================== ARRANQUE =====================
