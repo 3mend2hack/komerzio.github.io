@@ -1,11 +1,10 @@
 // ============================================
-// API DE AUTENTICACIÓN PARA CLOUDFLARE PAGES
+// API DE AUTENTICACIÓN - Cloudflare Pages
 // ============================================
 
 export async function onRequest(context) {
     const { request } = context;
     
-    // Solo aceptar POST
     if (request.method !== 'POST') {
         return new Response(JSON.stringify({ error: 'Método no permitido' }), {
             status: 405,
@@ -23,12 +22,12 @@ export async function onRequest(context) {
             });
         }
         
-        // Decodificar el token de Google
         const payload = JSON.parse(atob(credential.split('.')[1]));
         const email = payload.email;
-        const AUTH_EMAIL = 'cubazon.oficial@gmail.com';
         
-        // Verificar que sea el email autorizado
+        // ===== EMAIL AUTORIZADO =====
+        const AUTH_EMAIL = 'josuealexander.perez01@gmail.com';
+        
         if (email !== AUTH_EMAIL) {
             return new Response(JSON.stringify({ 
                 error: 'Acceso denegado. Solo el administrador puede entrar.' 
@@ -38,7 +37,6 @@ export async function onRequest(context) {
             });
         }
         
-        // Respuesta exitosa
         return new Response(JSON.stringify({
             success: true,
             user: {
@@ -48,7 +46,10 @@ export async function onRequest(context) {
             }
         }), {
             status: 200,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            }
         });
         
     } catch (error) {
