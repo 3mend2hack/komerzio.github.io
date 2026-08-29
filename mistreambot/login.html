@@ -160,12 +160,12 @@
 
         <hr class="divider">
 
-        <!-- ===== CLIENT ID CORRECTO ===== -->
+        <!-- ===== CLIENT ID CORRECTO + WORKER URL ===== -->
         <div id="g_id_onload"
              data-client_id="491062627132-q6a66kpblc45vfnt1fmni9592t0jqfnb.apps.googleusercontent.com"
              data-context="signin"
              data-ux_mode="redirect"
-             data-login_uri="/mistreambot/api/auth"
+             data-login_uri="https://activar-poder.cubazon-oficial.workers.dev/auth"
              data-auto_prompt="false">
         </div>
 
@@ -204,6 +204,7 @@
         // CONFIGURACIÓN
         // ============================================
         const AUTH_EMAIL = 'josuealexander.perez01@gmail.com';
+        const WORKER_URL = 'https://activar-poder.cubazon-oficial.workers.dev/auth';
 
         // ============================================
         // VERIFICAR SESIÓN EXISTENTE
@@ -214,6 +215,7 @@
                 const data = JSON.parse(session);
                 if (data.email === AUTH_EMAIL) {
                     window.location.href = '/mistreambot/dashboard.html';
+                    return;
                 }
             } catch (e) {
                 localStorage.removeItem('bot_session');
@@ -223,7 +225,7 @@
         // ============================================
         // MANEJAR RESPUESTA DE GOOGLE
         // ============================================
-        window.handleCredentialResponse = function(response) {
+        window.handleCredentialResponse = async function(response) {
             const errorDiv = document.getElementById('error-message');
             const loadingDiv = document.getElementById('loading');
 
@@ -231,27 +233,33 @@
             errorDiv.style.display = 'none';
 
             try {
-                const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                const email = payload.email;
+                // Enviar token al Worker
+                const resp = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ credential: response.credential })
+                });
 
-                if (email !== AUTH_EMAIL) {
-                    errorDiv.textContent = '❌ Acceso denegado. Solo el administrador puede entrar.';
+                const data = await resp.json();
+
+                if (data.success) {
+                    localStorage.setItem('bot_session', JSON.stringify({
+                        email: data.user.email,
+                        name: data.user.name || 'Administrador',
+                        picture: data.user.picture || '',
+                        timestamp: Date.now()
+                    }));
+                    window.location.href = '/mistreambot/dashboard.html';
+                } else {
+                    errorDiv.textContent = '❌ ' + (data.error || 'Acceso denegado');
                     errorDiv.style.display = 'block';
                     loadingDiv.style.display = 'none';
-                    return;
                 }
 
-                localStorage.setItem('bot_session', JSON.stringify({
-                    email: payload.email,
-                    name: payload.name || 'Administrador',
-                    picture: payload.picture || '',
-                    timestamp: Date.now()
-                }));
-
-                window.location.href = '/mistreambot/dashboard.html';
-
             } catch (error) {
-                errorDiv.textContent = '❌ Error al iniciar sesión: ' + error.message;
+                errorDiv.textContent = '❌ Error al conectar con el servidor: ' + error.message;
                 errorDiv.style.display = 'block';
                 loadingDiv.style.display = 'none';
             }
