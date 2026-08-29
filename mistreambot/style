@@ -1,0 +1,557 @@
+/* ============================================
+   ESTILOS GLOBALES
+   ============================================ */
+
+:root {
+    --bg: #0f0e17;
+    --card: #1a1a2e;
+    --border: #0f3460;
+    --primary: #e94560;
+    --success: #2ecc71;
+    --danger: #e74c3c;
+    --warning: #f39c12;
+    --text: #fffffe;
+    --text-sec: #a7a9be;
+    --radius: 12px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* ============================================
+   LOGIN
+   ============================================ */
+
+.login-container {
+    background: var(--card);
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    margin: 40px auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.login-container h1 {
+    color: var(--primary);
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.login-container .subtitle {
+    color: var(--text-sec);
+    font-size: 14px;
+    margin-bottom: 30px;
+}
+
+.login-container .icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.error-message {
+    color: var(--danger);
+    font-size: 14px;
+    margin-top: 12px;
+    display: none;
+}
+
+.loading {
+    color: var(--text-sec);
+    font-size: 14px;
+    margin-top: 12px;
+    display: none;
+}
+
+.footer {
+    color: #6a6a8e;
+    font-size: 12px;
+    margin-top: 20px;
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 220px;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.sidebar .logo {
+    font-size: 20px;
+    color: var(--primary);
+    font-weight: bold;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: var(--text-sec);
+    cursor: pointer;
+    transition: 0.3s;
+    margin-bottom: 4px;
+    text-decoration: none;
+    border: none;
+    background: none;
+    width: 100%;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.sidebar .nav-item:hover,
+.sidebar .nav-item.active {
+    background: var(--border);
+    color: var(--text);
+}
+
+.sidebar .nav-item.active {
+    border-left: 3px solid var(--primary);
+}
+
+.sidebar .user-info {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar .user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+}
+
+.sidebar .user-name {
+    font-size: 13px;
+    color: var(--text);
+}
+
+.sidebar .user-email {
+    font-size: 11px;
+    color: var(--text-sec);
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+
+.main-content {
+    margin-left: 220px;
+    padding: 20px 30px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+}
+
+.header h1 {
+    font-size: 24px;
+    color: var(--primary);
+}
+
+.header .status-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.status-badge.on {
+    background: var(--success);
+    color: #000;
+}
+
+.status-badge.off {
+    background: var(--danger);
+    color: #fff;
+}
+
+/* ============================================
+   PANELS
+   ============================================ */
+
+.panel {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.panel.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   CARDS
+   ============================================ */
+
+.card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.card h2 {
+    color: var(--primary);
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.card h3 {
+    color: var(--text-sec);
+    font-size: 16px;
+    margin: 16px 0 8px 0;
+}
+
+/* ============================================
+   GRIDS
+   ============================================ */
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+}
+
+/* ============================================
+   FORMS
+   ============================================ */
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    color: var(--text-sec);
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    background: #0a0a12;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.form-group input[type="number"] {
+    max-width: 120px;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    opacity: 0.85;
+    transform: scale(1.02);
+}
+
+.btn-success {
+    background: var(--success);
+    color: #000;
+}
+
+.btn-danger {
+    background: var(--danger);
+}
+
+.btn-warning {
+    background: var(--warning);
+    color: #000;
+}
+
+.btn-sm {
+    padding: 4px 12px;
+    font-size: 12px;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th {
+    background: var(--border);
+    padding: 10px;
+    text-align: left;
+}
+
+td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+tr:hover {
+    background: #16213e;
+}
+
+/* ============================================
+   STATS CARDS
+   ============================================ */
+
+.stats-card {
+    text-align: center;
+    padding: 16px;
+    background: #0a0a12;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.stats-card .number {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.stats-card .label {
+    color: var(--text-sec);
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+/* ============================================
+   HELP TEXT
+   ============================================ */
+
+.help-text {
+    color: #6a6a8e;
+    font-size: 12px;
+    padding: 8px 12px;
+    background: #0a0a12;
+    border-radius: 6px;
+    border-left: 3px solid var(--primary);
+    margin: 8px 0;
+}
+
+/* ============================================
+   MODAL
+   ============================================ */
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--card);
+    padding: 24px;
+    border-radius: var(--radius);
+    max-width: 500px;
+    width: 100%;
+    border: 1px solid var(--border);
+}
+
+.modal-close {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--text-sec);
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    color: var(--primary);
+}
+
+/* ============================================
+   LOGS
+   ============================================ */
+
+.logs-container {
+    background: #0a0a12;
+    border-radius: 8px;
+    padding: 10px;
+    max-height: 250px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.log-entry {
+    padding: 3px 0;
+    border-bottom: 1px solid #1a1a2e;
+}
+
+.log-time {
+    color: var(--primary);
+}
+
+.log-success {
+    color: var(--success);
+}
+
+.log-error {
+    color: var(--danger);
+}
+
+.log-info {
+    color: var(--warning);
+}
+
+/* ============================================
+   BOT CONTROLS
+   ============================================ */
+
+.bot-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+}
+
+/* ============================================
+   COMANDOS ACTIVOS
+   ============================================ */
+
+.comandos-activos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.comando-card {
+    background: #0a0a12;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+}
+
+.comando-card .usuario {
+    font-weight: bold;
+    color: var(--text);
+}
+
+.comando-card .poder {
+    color: var(--primary);
+}
+
+.comando-card .tiempo {
+    color: var(--text-sec);
+    font-size: 12px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 12px;
+    }
+    
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
