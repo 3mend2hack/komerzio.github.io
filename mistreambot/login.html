@@ -92,11 +92,12 @@
         <div class="admin-badge">🔐 ADMIN</div>
         <hr class="divider">
 
+        <!-- USAMOS POPUP PARA TENER CONTROL TOTAL -->
         <div id="g_id_onload"
              data-client_id="491062627132-q6a66kpblc45vfnt1fmni9592t0jqfnb.apps.googleusercontent.com"
              data-context="signin"
-             data-ux_mode="redirect"
-             data-login_uri="https://activar-poder.cubazon-oficial.workers.dev/auth"
+             data-ux_mode="popup"
+             data-callback="handleCredentialResponse"
              data-auto_prompt="false">
         </div>
 
@@ -152,7 +153,7 @@
         }
 
         // ============================================
-        // MANEJAR RESPUESTA DE GOOGLE
+        // MANEJAR RESPUESTA DE GOOGLE (POPUP)
         // ============================================
         window.handleCredentialResponse = async function(response) {
             const errorDiv = document.getElementById('error-message');
@@ -162,6 +163,7 @@
             errorDiv.style.display = 'none';
 
             try {
+                // Enviar el token al Worker
                 const resp = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -170,9 +172,8 @@
 
                 const data = await resp.json();
 
-                // ✅ SI LA AUTENTICACIÓN ES EXITOSA
                 if (data.success === true) {
-                    // Guardar en localStorage
+                    // Guardar sesión
                     localStorage.setItem('bot_session', JSON.stringify({
                         email: data.user.email,
                         name: data.user.name || 'Administrador',
@@ -180,15 +181,13 @@
                         timestamp: Date.now()
                     }));
 
-                    // ✅ REDIRIGIR AL DASHBOARD
+                    // Redirigir al dashboard
                     window.location.href = '/mistreambot/dashboard.html';
-                    return;
+                } else {
+                    errorDiv.textContent = '❌ ' + (data.error || 'Acceso denegado');
+                    errorDiv.style.display = 'block';
+                    loadingDiv.style.display = 'none';
                 }
-
-                // ❌ SI HUBO ERROR
-                errorDiv.textContent = '❌ ' + (data.error || 'Acceso denegado');
-                errorDiv.style.display = 'block';
-                loadingDiv.style.display = 'none';
 
             } catch (error) {
                 errorDiv.textContent = '❌ Error al conectar con el servidor: ' + error.message;
