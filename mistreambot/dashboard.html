@@ -6,9 +6,6 @@
     <title>📊 MiStreamBot - Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ============================================
-           ESTILOS COMPLETOS - Dashboard
-           ============================================ */
         * {
             margin: 0;
             padding: 0;
@@ -35,7 +32,6 @@
             min-height: 100vh;
         }
 
-        /* ===== SIDEBAR ===== */
         .sidebar {
             position: fixed;
             left: 0;
@@ -74,7 +70,6 @@
             width: 100%;
             font-size: 14px;
             font-family: inherit;
-            color: var(--text-sec);
         }
 
         .sidebar .nav-item:hover,
@@ -118,7 +113,6 @@
             color: var(--text-sec);
         }
 
-        /* ===== MAIN ===== */
         .main-content {
             margin-left: 220px;
             padding: 20px 30px;
@@ -155,7 +149,6 @@
             color: #fff;
         }
 
-        /* ===== PANELS ===== */
         .panel {
             display: none;
             animation: fadeIn 0.3s ease;
@@ -166,11 +159,16 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        /* ===== CARDS ===== */
         .card {
             background: var(--card);
             border-radius: var(--radius);
@@ -191,7 +189,6 @@
             margin: 16px 0 8px 0;
         }
 
-        /* ===== GRIDS ===== */
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -204,7 +201,6 @@
             gap: 16px;
         }
 
-        /* ===== FORMS ===== */
         .form-group {
             margin-bottom: 12px;
         }
@@ -238,7 +234,6 @@
             max-width: 120px;
         }
 
-        /* ===== BUTTONS ===== */
         .btn {
             background: var(--primary);
             color: white;
@@ -282,7 +277,6 @@
             margin: 12px 0;
         }
 
-        /* ===== TABLES ===== */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -304,7 +298,6 @@
             background: #16213e;
         }
 
-        /* ===== STATS ===== */
         .stats-card {
             text-align: center;
             padding: 16px;
@@ -325,7 +318,6 @@
             margin-top: 4px;
         }
 
-        /* ===== HELP TEXT ===== */
         .help-text {
             color: #6a6a8e;
             font-size: 12px;
@@ -336,7 +328,6 @@
             margin: 8px 0;
         }
 
-        /* ===== MODAL ===== */
         .modal {
             display: none;
             position: fixed;
@@ -377,7 +368,6 @@
             color: var(--primary);
         }
 
-        /* ===== LOGS ===== */
         .logs-container {
             background: #0a0a12;
             border-radius: 8px;
@@ -409,7 +399,6 @@
             color: var(--warning);
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .sidebar {
                 display: none;
@@ -431,13 +420,13 @@
     <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="logo">🎮 MiStreamBot</div>
-        
+
         <button class="nav-item active" onclick="mostrarPanel('dashboard')">📊 Dashboard</button>
         <button class="nav-item" onclick="mostrarPanel('config')">⚙️ Configuración</button>
         <button class="nav-item" onclick="mostrarPanel('poderes')">⚡ Poderes</button>
         <button class="nav-item" onclick="mostrarPanel('usuarios')">👥 Usuarios</button>
         <button class="nav-item" onclick="mostrarPanel('logs')">📝 Logs</button>
-        
+
         <div class="user-info" id="userInfo">
             <div class="user-avatar" id="userAvatar">U</div>
             <div>
@@ -447,7 +436,7 @@
         </div>
         <button class="btn btn-danger btn-sm" onclick="cerrarSesion()" style="margin-top:12px; width:100%;">🚪 Cerrar Sesión</button>
     </div>
-    
+
     <!-- MAIN CONTENT -->
     <div class="main-content">
         <div class="header">
@@ -456,7 +445,7 @@
                 <span class="status-badge off" id="botStatus">🔴 Detenido</span>
             </div>
         </div>
-        
+
         <!-- PANEL: DASHBOARD -->
         <div class="panel active" id="panel-dashboard">
             <div class="grid-3">
@@ -473,7 +462,7 @@
                     <div class="label">⭐ Puntos Totales</div>
                 </div>
             </div>
-            
+
             <div class="card">
                 <h2>🎮 Control del Bot</h2>
                 <div class="bot-controls">
@@ -485,7 +474,7 @@
                     📌 Estado: <strong>Desconectado</strong>
                 </div>
             </div>
-            
+
             <div class="card">
                 <h2>📊 Estadísticas en Vivo</h2>
                 <div class="grid-3">
@@ -504,7 +493,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- PANEL: CONFIGURACIÓN -->
         <div class="panel" id="panel-config">
             <div class="card">
@@ -521,14 +510,14 @@
                         </div>
                         <div class="form-group">
                             <label>🔗 URL del Worker</label>
-                            <input type="text" name="worker_url" id="worker_url" placeholder="https://tu-worker.workers.dev">
+                            <input type="text" name="worker_url" id="worker_url" placeholder="https://activar-poder.cubazon-oficial.workers.dev">
                         </div>
                         <div class="form-group">
                             <label>🔑 Token del Worker</label>
                             <input type="text" name="worker_token" id="worker_token" placeholder="prueba123">
                         </div>
                     </div>
-                    
+
                     <h3>💰 Configuración de Puntos</h3>
                     <div class="grid-2">
                         <div class="form-group">
@@ -552,7 +541,7 @@
                             <input type="number" name="tiempo_reclamar" id="tiempo_reclamar" min="60" value="600">
                         </div>
                     </div>
-                    
+
                     <h3>🛡️ Control Anti-Spam</h3>
                     <div class="grid-2">
                         <div class="form-group">
@@ -564,12 +553,12 @@
                             <input type="number" name="tiempo_entre_comandos" id="tiempo_entre_comandos" min="1" max="60" value="3">
                         </div>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-success">💾 Guardar Configuración</button>
                 </form>
             </div>
         </div>
-        
+
         <!-- PANEL: PODERES -->
         <div class="panel" id="panel-poderes">
             <div class="card">
@@ -593,7 +582,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- PANEL: USUARIOS -->
         <div class="panel" id="panel-usuarios">
             <div class="card">
@@ -615,7 +604,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- PANEL: LOGS -->
         <div class="panel" id="panel-logs">
             <div class="card">
@@ -627,7 +616,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- MODAL: PODER -->
     <div class="modal" id="modalPoder">
         <div class="modal-content">
@@ -663,18 +652,15 @@
             </form>
         </div>
     </div>
-    
+
     <script type="module">
         // ============================================
         // IMPORTAR CONFIGURACIÓN
         // ============================================
         import { SUPABASE_URL, SUPABASE_ANON_KEY, AUTH_EMAIL } from './supabase.js';
-        
-        // ============================================
-        // INICIALIZAR SUPABASE
-        // ============================================
+
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
+
         // ============================================
         // VERIFICAR SESIÓN
         // ============================================
@@ -683,7 +669,7 @@
             window.location.href = '/mistreambot/login.html';
             return;
         }
-        
+
         let userData;
         try {
             userData = JSON.parse(session);
@@ -692,50 +678,34 @@
                 window.location.href = '/mistreambot/login.html';
                 return;
             }
-        } catch(e) {
+        } catch (e) {
             localStorage.removeItem('bot_session');
             window.location.href = '/mistreambot/login.html';
             return;
         }
-        
-        // ============================================
-        // MOSTRAR DATOS DEL USUARIO
-        // ============================================
+
         document.getElementById('userName').textContent = userData.name || 'Administrador';
         document.getElementById('userEmail').textContent = userData.email;
         document.getElementById('userAvatar').textContent = (userData.name || 'A')[0].toUpperCase();
-        
-        // ============================================
-        // VARIABLES GLOBALES
-        // ============================================
+
         let poderes = [];
         let usuarios = [];
         let botActivo = false;
-        
-        // ============================================
-        // FUNCIONES DE NAVEGACIÓN
-        // ============================================
+
         window.mostrarPanel = function(id) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById('panel-' + id).classList.add('active');
             document.querySelector(`.nav-item[onclick="mostrarPanel('${id}')"]`).classList.add('active');
-            
             if (id === 'usuarios') cargarUsuarios();
             if (id === 'poderes') cargarPoderes();
         };
-        
-        // ============================================
-        // CERRAR SESIÓN
-        // ============================================
+
         window.cerrarSesion = function() {
             localStorage.removeItem('bot_session');
             window.location.href = '/mistreambot/';
         };
-        
-        // ============================================
-        // CARGAR CONFIGURACIÓN
-        // ============================================
+
         async function cargarConfig() {
             try {
                 const { data, error } = await supabase
@@ -743,14 +713,14 @@
                     .select('*')
                     .eq('email', AUTH_EMAIL)
                     .single();
-                
+
                 if (error) throw error;
-                
+
                 if (data) {
                     document.getElementById('youtube_api_key').value = data.youtube_api_key || '';
                     document.getElementById('channel_id').value = data.channel_id || '';
-                    document.getElementById('worker_url').value = data.worker_url || '';
-                    document.getElementById('worker_token').value = data.worker_token || '';
+                    document.getElementById('worker_url').value = data.worker_url || 'https://activar-poder.cubazon-oficial.workers.dev';
+                    document.getElementById('worker_token').value = data.worker_token || 'prueba123';
                     document.getElementById('puntos_por_tiempo').value = data.puntos_por_tiempo || 100;
                     document.getElementById('puntos_por_mensaje').value = data.puntos_por_mensaje || 5;
                     document.getElementById('puntos_iniciales').value = data.puntos_iniciales || 100;
@@ -759,17 +729,14 @@
                     document.getElementById('max_comandos_activos').value = data.max_comandos_activos || 2;
                     document.getElementById('tiempo_entre_comandos').value = data.tiempo_entre_comandos || 3;
                 }
-            } catch(error) {
+            } catch (error) {
                 console.error('Error cargando configuración:', error);
             }
         }
-        
-        // ============================================
-        // GUARDAR CONFIGURACIÓN
-        // ============================================
+
         document.getElementById('configForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const config = {
                 youtube_api_key: document.getElementById('youtube_api_key').value,
                 channel_id: document.getElementById('channel_id').value,
@@ -783,39 +750,36 @@
                 max_comandos_activos: parseInt(document.getElementById('max_comandos_activos').value) || 2,
                 tiempo_entre_comandos: parseInt(document.getElementById('tiempo_entre_comandos').value) || 3
             };
-            
+
             try {
                 const { error } = await supabase
                     .from('bot_config')
                     .update(config)
                     .eq('email', AUTH_EMAIL);
-                
+
                 if (error) throw error;
                 alert('✅ Configuración guardada correctamente');
-            } catch(error) {
+            } catch (error) {
                 alert('❌ Error al guardar: ' + error.message);
             }
         });
-        
-        // ============================================
-        // CARGAR PODERES
-        // ============================================
+
         window.cargarPoderes = async function() {
             try {
                 const { data, error } = await supabase
                     .from('poderes')
                     .select('*')
                     .order('nombre');
-                
+
                 if (error) throw error;
                 poderes = data || [];
-                
+
                 const tbody = document.getElementById('poderesTableBody');
                 if (poderes.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-sec);">No hay poderes configurados</td></tr>`;
                     return;
                 }
-                
+
                 tbody.innerHTML = poderes.map((p, i) => `
                     <tr>
                         <td><strong>${p.nombre}</strong></td>
@@ -828,16 +792,13 @@
                         </td>
                     </tr>
                 `).join('');
-                
+
                 document.getElementById('totalPoderes').textContent = poderes.length;
-            } catch(error) {
+            } catch (error) {
                 console.error('Error cargando poderes:', error);
             }
         };
-        
-        // ============================================
-        // MODAL: PODER
-        // ============================================
+
         window.abrirModalPoder = function() {
             document.getElementById('modalPoderTitle').textContent = '➕ Añadir Poder';
             document.getElementById('poderIndex').value = '';
@@ -848,7 +809,7 @@
             document.getElementById('poderMensaje').value = '';
             document.getElementById('modalPoder').classList.add('active');
         };
-        
+
         window.editarPoder = function(index) {
             const p = poderes[index];
             document.getElementById('modalPoderTitle').textContent = '✏️ Editar Poder';
@@ -860,14 +821,14 @@
             document.getElementById('poderMensaje').value = p.mensaje || '';
             document.getElementById('modalPoder').classList.add('active');
         };
-        
+
         window.cerrarModal = function() {
             document.getElementById('modalPoder').classList.remove('active');
         };
-        
+
         document.getElementById('poderForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const index = document.getElementById('poderIndex').value;
             const poder = {
                 nombre: document.getElementById('poderNombre').value.toLowerCase().trim(),
@@ -876,7 +837,7 @@
                 cooldown_usuario: parseInt(document.getElementById('poderUsuario').value) || 60,
                 mensaje: document.getElementById('poderMensaje').value || `{usuario} activó ${document.getElementById('poderNombre').value} ⚡`
             };
-            
+
             try {
                 if (index !== '') {
                     const { error } = await supabase
@@ -890,52 +851,49 @@
                         .insert([poder]);
                     if (error) throw error;
                 }
-                
+
                 cerrarModal();
                 cargarPoderes();
                 alert('✅ Poder guardado correctamente');
-            } catch(error) {
+            } catch (error) {
                 alert('❌ Error: ' + error.message);
             }
         });
-        
+
         window.eliminarPoder = async function(index) {
             if (!confirm('¿Eliminar este poder?')) return;
-            
+
             try {
                 const { error } = await supabase
                     .from('poderes')
                     .delete()
                     .eq('id', poderes[index].id);
-                
+
                 if (error) throw error;
                 cerrarModal();
                 cargarPoderes();
                 alert('✅ Poder eliminado');
-            } catch(error) {
+            } catch (error) {
                 alert('❌ Error: ' + error.message);
             }
         };
-        
-        // ============================================
-        // CARGAR USUARIOS
-        // ============================================
+
         window.cargarUsuarios = async function() {
             try {
                 const { data, error } = await supabase
                     .from('usuarios')
                     .select('*')
                     .order('puntos', { ascending: false });
-                
+
                 if (error) throw error;
                 usuarios = data || [];
-                
+
                 const tbody = document.getElementById('usuariosTableBody');
                 if (usuarios.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-sec);">No hay usuarios registrados</td></tr>`;
                     return;
                 }
-                
+
                 tbody.innerHTML = usuarios.map((u, i) => `
                     <tr>
                         <td>${i + 1}</td>
@@ -950,71 +908,65 @@
                         </td>
                     </tr>
                 `).join('');
-                
+
                 document.getElementById('totalUsers').textContent = usuarios.length;
                 const totalPuntos = usuarios.reduce((sum, u) => sum + u.puntos, 0);
                 document.getElementById('totalPuntos').textContent = totalPuntos;
-            } catch(error) {
+            } catch (error) {
                 console.error('Error cargando usuarios:', error);
             }
         };
-        
-        // ============================================
-        // FUNCIONES DE USUARIOS
-        // ============================================
+
         window.darPuntos = async function(usuario, cantidad) {
             try {
                 const u = usuarios.find(item => item.nombre === usuario);
                 if (!u) return alert('Usuario no encontrado');
-                
+
                 const nuevosPuntos = Math.max(0, u.puntos + cantidad);
                 const { error } = await supabase
                     .from('usuarios')
                     .update({ puntos: nuevosPuntos })
                     .eq('id', u.id);
-                
+
                 if (error) throw error;
                 cargarUsuarios();
-            } catch(error) {
+            } catch (error) {
                 alert('❌ Error: ' + error.message);
             }
         };
-        
+
         window.editarUsuario = async function(usuario) {
             const u = usuarios.find(item => item.nombre === usuario);
             if (!u) return alert('Usuario no encontrado');
-            
+
             const nuevos = prompt(`✏️ Editar puntos de ${usuario}:`, u.puntos);
             if (nuevos === null || isNaN(nuevos)) return;
-            
+
             try {
                 const { error } = await supabase
                     .from('usuarios')
                     .update({ puntos: parseInt(nuevos) })
                     .eq('id', u.id);
-                
+
                 if (error) throw error;
                 cargarUsuarios();
-            } catch(error) {
+            } catch (error) {
                 alert('❌ Error: ' + error.message);
             }
         };
-        
-        // ============================================
-        // CONTROL DEL BOT
-        // ============================================
+
         window.iniciarBot = function() {
             botActivo = true;
             actualizarEstadoBot();
             agregarLog('🚀 Bot iniciado desde el panel', 'success');
         };
-        
+
         window.detenerBot = function() {
             botActivo = false;
             actualizarEstadoBot();
             agregarLog('⏹️ Bot detenido desde el panel', 'info');
         };
-        
+
         window.reiniciarBot = function() {
             botActivo = false;
             actualizarEstadoBot();
@@ -1025,7 +977,7 @@
             }, 2000);
             agregarLog('🔄 Reiniciando bot...', 'info');
         };
-        
+
         function actualizarEstadoBot() {
             const status = document.getElementById('botStatus');
             const detail = document.getElementById('botDetail');
@@ -1039,10 +991,7 @@
                 detail.innerHTML = '📌 Estado: <strong style="color:var(--danger);">Desconectado</strong>';
             }
         }
-        
-        // ============================================
-        // LOGS
-        // ============================================
+
         function agregarLog(mensaje, tipo = 'info') {
             const container = document.getElementById('logsContainer');
             const time = new Date().toLocaleTimeString();
@@ -1050,25 +999,22 @@
             entry.className = 'log-entry';
             entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${tipo}">${mensaje}</span>`;
             container.prepend(entry);
-            
+
             while (container.children.length > 50) {
                 container.removeChild(container.lastChild);
             }
         }
-        
+
         window.limpiarLogs = function() {
             const container = document.getElementById('logsContainer');
             container.innerHTML = '<div class="log-entry" style="color:var(--text-sec);">Logs limpiados</div>';
         };
-        
-        // ============================================
-        // INICIALIZAR
-        // ============================================
+
         cargarConfig();
         cargarPoderes();
         cargarUsuarios();
         agregarLog('📊 Dashboard cargado correctamente', 'success');
-        
+
         setInterval(cargarUsuarios, 30000);
         setInterval(cargarPoderes, 60000);
     </script>
