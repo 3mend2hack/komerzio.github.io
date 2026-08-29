@@ -160,7 +160,7 @@
 
         <hr class="divider">
 
-        <!-- ===== CLIENT ID CORRECTO + WORKER URL ===== -->
+        <!-- ===== CONFIGURACIÓN CORRECTA ===== -->
         <div id="g_id_onload"
              data-client_id="491062627132-q6a66kpblc45vfnt1fmni9592t0jqfnb.apps.googleusercontent.com"
              data-context="signin"
@@ -195,7 +195,7 @@
 
         <p class="footer-text">
             Solo el administrador puede acceder<br>
-            <a href="/">← Volver al inicio</a>
+            <a href="/mistreambot/">← Volver al inicio</a>
         </p>
     </div>
 
@@ -233,7 +233,6 @@
             errorDiv.style.display = 'none';
 
             try {
-                // Enviar token al Worker
                 const resp = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: {
