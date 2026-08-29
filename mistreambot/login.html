@@ -160,7 +160,6 @@
 
         <hr class="divider">
 
-        <!-- ===== CONFIGURACIÓN CORRECTA ===== -->
         <div id="g_id_onload"
              data-client_id="491062627132-q6a66kpblc45vfnt1fmni9592t0jqfnb.apps.googleusercontent.com"
              data-context="signin"
@@ -244,12 +243,15 @@
                 const data = await resp.json();
 
                 if (data.success) {
+                    // Guardar sesión
                     localStorage.setItem('bot_session', JSON.stringify({
                         email: data.user.email,
                         name: data.user.name || 'Administrador',
                         picture: data.user.picture || '',
                         timestamp: Date.now()
                     }));
+                    
+                    // REDIRIGIR AL DASHBOARD
                     window.location.href = '/mistreambot/dashboard.html';
                 } else {
                     errorDiv.textContent = '❌ ' + (data.error || 'Acceso denegado');
