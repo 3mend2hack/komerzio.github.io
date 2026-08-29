@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 MiStreamBot - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="logo">🎮 MiStreamBot</div>
+        
+        <button class="nav-item active" onclick="mostrarPanel('dashboard')">📊 Dashboard</button>
+        <button class="nav-item" onclick="mostrarPanel('config')">⚙️ Configuración</button>
+        <button class="nav-item" onclick="mostrarPanel('poderes')">⚡ Poderes</button>
+        <button class="nav-item" onclick="mostrarPanel('usuarios')">👥 Usuarios</button>
+        <button class="nav-item" onclick="mostrarPanel('logs')">📝 Logs</button>
+        
+        <div class="user-info" id="userInfo">
+            <div class="user-avatar" id="userAvatar">U</div>
+            <div>
+                <div class="user-name" id="userName">Usuario</div>
+                <div class="user-email" id="userEmail">email@ejemplo.com</div>
+            </div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="cerrarSesion()" style="margin-top:12px; width:100%;">🚪 Cerrar Sesión</button>
+    </div>
+    
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Panel de Control</h1>
+            <div>
+                <span class="status-badge off" id="botStatus">🔴 Detenido</span>
+            </div>
+        </div>
+        
+        <!-- PANEL: DASHBOARD -->
+        <div class="panel active" id="panel-dashboard">
+            <div class="grid-3">
+                <div class="stats-card">
+                    <div class="number" id="totalUsers">0</div>
+                    <div class="label">👥 Usuarios</div>
+                </div>
+                <div class="stats-card">
+                    <div class="number" id="totalPoderes">0</div>
+                    <div class="label">⚡ Poderes</div>
+                </div>
+                <div class="stats-card">
+                    <div class="number" id="totalPuntos">0</div>
+                    <div class="label">⭐ Puntos Totales</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>🎮 Control del Bot</h2>
+                <div class="bot-controls">
+                    <button class="btn btn-success" onclick="iniciarBot()">▶️ Iniciar Bot</button>
+                    <button class="btn btn-danger" onclick="detenerBot()">⏹️ Detener Bot</button>
+                    <button class="btn btn-warning" onclick="reiniciarBot()">🔄 Reiniciar</button>
+                </div>
+                <div class="help-text" id="botDetail">
+                    📌 Estado: <strong>Desconectado</strong>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>📊 Estadísticas en Vivo</h2>
+                <div class="grid-3">
+                    <div class="stats-card">
+                        <div class="number" id="liveUsers">0</div>
+                        <div class="label">🟢 Usuarios Activos</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="number" id="liveMessages">0</div>
+                        <div class="label">💬 Mensajes</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="number" id="liveComandos">0</div>
+                        <div class="label">⚡ Comandos Activos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PANEL: CONFIGURACIÓN -->
+        <div class="panel" id="panel-config">
+            <div class="card">
+                <h2>⚙️ Configuración General</h2>
+                <form id="configForm">
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>🔑 API Key de YouTube</label>
+                            <input type="text" name="youtube_api_key" id="youtube_api_key" placeholder="AIzaSy...">
+                        </div>
+                        <div class="form-group">
+                            <label>📺 Channel ID</label>
+                            <input type="text" name="channel_id" id="channel_id" placeholder="UC...">
+                        </div>
+                        <div class="form-group">
+                            <label>🔗 URL del Worker</label>
+                            <input type="text" name="worker_url" id="worker_url" placeholder="https://tu-worker.workers.dev">
+                        </div>
+                        <div class="form-group">
+                            <label>🔑 Token del Worker</label>
+                            <input type="text" name="worker_token" id="worker_token" placeholder="prueba123">
+                        </div>
+                    </div>
+                    
+                    <h3>💰 Configuración de Puntos</h3>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>⏰ Puntos por minuto en vivo</label>
+                            <input type="number" name="puntos_por_tiempo" id="puntos_por_tiempo" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>💬 Puntos por mensaje</label>
+                            <input type="number" name="puntos_por_mensaje" id="puntos_por_mensaje" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>🌟 Puntos iniciales</label>
+                            <input type="number" name="puntos_iniciales" id="puntos_iniciales" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>🎁 Puntos por !reclamar</label>
+                            <input type="number" name="puntos_reclamar" id="puntos_reclamar" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>⏱️ Tiempo entre reclamos (segundos)</label>
+                            <input type="number" name="tiempo_reclamar" id="tiempo_reclamar" min="60">
+                        </div>
+                    </div>
+                    
+                    <h3>🛡️ Control Anti-Spam</h3>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>📊 Máximo comandos activos por usuario</label>
+                            <input type="number" name="max_comandos_activos" id="max_comandos_activos" min="1" max="10">
+                        </div>
+                        <div class="form-group">
+                            <label>⏱️ Tiempo entre comandos (segundos)</label>
+                            <input type="number" name="tiempo_entre_comandos" id="tiempo_entre_comandos" min="1" max="60">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">💾 Guardar Configuración</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- PANEL: PODERES -->
+        <div class="panel" id="panel-poderes">
+            <div class="card">
+                <h2>⚡ Gestión de Poderes</h2>
+                <button class="btn btn-success" onclick="abrirModalPoder()" style="margin-bottom:12px;">➕ Añadir Poder</button>
+                <div id="poderesList">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Poder</th>
+                                <th>Costo</th>
+                                <th>🌍 Global (s)</th>
+                                <th>👤 Usuario (s)</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="poderesTableBody">
+                            <tr><td colspan="5" style="text-align:center; color:var(--text-sec);">Cargando poderes...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PANEL: USUARIOS -->
+        <div class="panel" id="panel-usuarios">
+            <div class="card">
+                <h2>👥 Usuarios y Puntos</h2>
+                <div id="usuariosList">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Usuario</th>
+                                <th>Puntos</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usuariosTableBody">
+                            <tr><td colspan="4" style="text-align:center; color:var(--text-sec);">Cargando usuarios...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PANEL: LOGS -->
+        <div class="panel" id="panel-logs">
+            <div class="card">
+                <h2>📝 Logs</h2>
+                <div class="logs-container" id="logsContainer">
+                    <div class="log-entry" style="color:var(--text-sec);">Esperando logs...</div>
+                </div>
+                <button class="btn btn-warning" onclick="limpiarLogs()" style="margin-top:10px;">🧹 Limpiar Logs</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL: PODER -->
+    <div class="modal" id="modalPoder">
+        <div class="modal-content">
+            <button class="modal-close" onclick="cerrarModal()">&times;</button>
+            <h2 id="modalPoderTitle">✏️ Editar Poder</h2>
+            <form id="poderForm">
+                <input type="hidden" id="poderIndex" value="">
+                <div class="form-group">
+                    <label>📛 Nombre</label>
+                    <input type="text" id="poderNombre" required>
+                </div>
+                <div class="form-group">
+                    <label>💰 Costo</label>
+                    <input type="number" id="poderCosto" required>
+                </div>
+                <div class="form-group">
+                    <label>🌍 Cooldown Global (segundos)</label>
+                    <input type="number" id="poderGlobal" required>
+                </div>
+                <div class="form-group">
+                    <label>👤 Cooldown Usuario (segundos)</label>
+                    <input type="number" id="poderUsuario" required>
+                </div>
+                <div class="form-group">
+                    <label>💬 Mensaje personalizado</label>
+                    <input type="text" id="poderMensaje" placeholder="{usuario} activó {poder} ⚡">
+                </div>
+                <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+                    <button type="submit" class="btn btn-success">💾 Guardar</button>
+                    <button type="button" class="btn btn-warning" onclick="cerrarModal()">❌ Cancelar</button>
+                    <button type="button" class="btn btn-danger" onclick="eliminarPoder()">🗑️ Eliminar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script type="module">
+        // ============================================
+        // IMPORTAR CONFIGURACIÓN
+        // ============================================
+        import { SUPABASE_URL, SUPABASE_ANON_KEY, AUTH_EMAIL } from './supabase.js';
+        
+        // ============================================
+        // INICIALIZAR SUPABASE
+        // ============================================
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // ============================================
+        // VERIFICAR SESIÓN
+        // ============================================
+        const session = localStorage.getItem('bot_session');
+        if (!session) {
+            window.location.href = '/mistreambot/login.html';
+            return;
+        }
+        
+        let userData;
+        try {
+            userData = JSON.parse(session);
+            if (userData.email !== AUTH_EMAIL) {
+                localStorage.removeItem('bot_session');
+                window.location.href = '/mistreambot/login.html';
+                return;
+            }
+        } catch(e) {
+            localStorage.removeItem('bot_session');
+            window.location.href = '/mistreambot/login.html';
+            return;
+        }
+        
+        // ============================================
+        // MOSTRAR DATOS DEL USUARIO
+        // ============================================
+        document.getElementById('userName').textContent = userData.name || 'Administrador';
+        document.getElementById('userEmail').textContent = userData.email;
+        document.getElementById('userAvatar').textContent = (userData.name || 'A')[0].toUpperCase();
+        
+        // ============================================
+        // VARIABLES GLOBALES
+        // ============================================
+        let poderes = [];
+        let usuarios = [];
+        let botActivo = false;
+        
+        // ============================================
+        // FUNCIONES DE NAVEGACIÓN
+        // ============================================
+        window.mostrarPanel = function(id) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('panel-' + id).classList.add('active');
+            document.querySelector(`.nav-item[onclick="mostrarPanel('${id}')"]`).classList.add('active');
+            
+            if (id === 'usuarios') cargarUsuarios();
+            if (id === 'poderes') cargarPoderes();
+        };
+        
+        // ============================================
+        // CERRAR SESIÓN
+        // ============================================
+        window.cerrarSesion = function() {
+            localStorage.removeItem('bot_session');
+            window.location.href = '/mistreambot/';
+        };
+        
+        // ============================================
+        // CARGAR CONFIGURACIÓN
+        // ============================================
+        async function cargarConfig() {
+            try {
+                const { data, error } = await supabase
+                    .from('bot_config')
+                    .select('*')
+                    .eq('email', AUTH_EMAIL)
+                    .single();
+                
+                if (error) throw error;
+                
+                if (data) {
+                    document.getElementById('youtube_api_key').value = data.youtube_api_key || '';
+                    document.getElementById('channel_id').value = data.channel_id || '';
+                    document.getElementById('worker_url').value = data.worker_url || '';
+                    document.getElementById('worker_token').value = data.worker_token || '';
+                    document.getElementById('puntos_por_tiempo').value = data.puntos_por_tiempo || 100;
+                    document.getElementById('puntos_por_mensaje').value = data.puntos_por_mensaje || 5;
+                    document.getElementById('puntos_iniciales').value = data.puntos_iniciales || 100;
+                    document.getElementById('puntos_reclamar').value = data.puntos_reclamar || 5;
+                    document.getElementById('tiempo_reclamar').value = data.tiempo_reclamar || 600;
+                    document.getElementById('max_comandos_activos').value = data.max_comandos_activos || 2;
+                    document.getElementById('tiempo_entre_comandos').value = data.tiempo_entre_comandos || 3;
+                }
+            } catch(error) {
+                console.error('Error cargando configuración:', error);
+            }
+        }
+        
+        // ============================================
+        // GUARDAR CONFIGURACIÓN
+        // ============================================
+        document.getElementById('configForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const config = {
+                youtube_api_key: document.getElementById('youtube_api_key').value,
+                channel_id: document.getElementById('channel_id').value,
+                worker_url: document.getElementById('worker_url').value,
+                worker_token: document.getElementById('worker_token').value,
+                puntos_por_tiempo: parseInt(document.getElementById('puntos_por_tiempo').value) || 100,
+                puntos_por_mensaje: parseInt(document.getElementById('puntos_por_mensaje').value) || 5,
+                puntos_iniciales: parseInt(document.getElementById('puntos_iniciales').value) || 100,
+                puntos_reclamar: parseInt(document.getElementById('puntos_reclamar').value) || 5,
+                tiempo_reclamar: parseInt(document.getElementById('tiempo_reclamar').value) || 600,
+                max_comandos_activos: parseInt(document.getElementById('max_comandos_activos').value) || 2,
+                tiempo_entre_comandos: parseInt(document.getElementById('tiempo_entre_comandos').value) || 3
+            };
+            
+            try {
+                const { error } = await supabase
+                    .from('bot_config')
+                    .update(config)
+                    .eq('email', AUTH_EMAIL);
+                
+                if (error) throw error;
+                alert('✅ Configuración guardada correctamente');
+            } catch(error) {
+                alert('❌ Error al guardar: ' + error.message);
+            }
+        });
+        
+        // ============================================
+        // CARGAR PODERES
+        // ============================================
+        window.cargarPoderes = async function() {
+            try {
+                const { data, error } = await supabase
+                    .from('poderes')
+                    .select('*')
+                    .order('nombre');
+                
+                if (error) throw error;
+                poderes = data || [];
+                
+                const tbody = document.getElementById('poderesTableBody');
+                if (poderes.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-sec);">No hay poderes configurados</td></tr>`;
+                    return;
+                }
+                
+                tbody.innerHTML = poderes.map((p, i) => `
+                    <tr>
+                        <td><strong>${p.nombre}</strong></td>
+                        <td>${p.costo}</td>
+                        <td>${p.cooldown_global}</td>
+                        <td>${p.cooldown_usuario}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="editarPoder(${i})">✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarPoder(${i})">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('totalPoderes').textContent = poderes.length;
+            } catch(error) {
+                console.error('Error cargando poderes:', error);
+            }
+        };
+        
+        // ============================================
+        // MODAL: PODER
+        // ============================================
+        window.abrirModalPoder = function() {
+            document.getElementById('modalPoderTitle').textContent = '➕ Añadir Poder';
+            document.getElementById('poderIndex').value = '';
+            document.getElementById('poderNombre').value = '';
+            document.getElementById('poderCosto').value = '';
+            document.getElementById('poderGlobal').value = '';
+            document.getElementById('poderUsuario').value = '';
+            document.getElementById('poderMensaje').value = '';
+            document.getElementById('modalPoder').classList.add('active');
+        };
+        
+        window.editarPoder = function(index) {
+            const p = poderes[index];
+            document.getElementById('modalPoderTitle').textContent = '✏️ Editar Poder';
+            document.getElementById('poderIndex').value = index;
+            document.getElementById('poderNombre').value = p.nombre;
+            document.getElementById('poderCosto').value = p.costo;
+            document.getElementById('poderGlobal').value = p.cooldown_global;
+            document.getElementById('poderUsuario').value = p.cooldown_usuario;
+            document.getElementById('poderMensaje').value = p.mensaje || '';
+            document.getElementById('modalPoder').classList.add('active');
+        };
+        
+        window.cerrarModal = function() {
+            document.getElementById('modalPoder').classList.remove('active');
+        };
+        
+        document.getElementById('poderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const index = document.getElementById('poderIndex').value;
+            const poder = {
+                nombre: document.getElementById('poderNombre').value.toLowerCase().trim(),
+                costo: parseInt(document.getElementById('poderCosto').value) || 10,
+                cooldown_global: parseInt(document.getElementById('poderGlobal').value) || 30,
+                cooldown_usuario: parseInt(document.getElementById('poderUsuario').value) || 60,
+                mensaje: document.getElementById('poderMensaje').value || `{usuario} activó ${document.getElementById('poderNombre').value} ⚡`
+            };
+            
+            try {
+                if (index !== '') {
+                    // Actualizar
+                    const { error } = await supabase
+                        .from('poderes')
+                        .update(poder)
+                        .eq('id', poderes[index].id);
+                    if (error) throw error;
+                } else {
+                    // Insertar
+                    const { error } = await supabase
+                        .from('poderes')
+                        .insert([poder]);
+                    if (error) throw error;
+                }
+                
+                cerrarModal();
+                cargarPoderes();
+                alert('✅ Poder guardado correctamente');
+            } catch(error) {
+                alert('❌ Error: ' + error.message);
+            }
+        });
+        
+        window.eliminarPoder = async function(index) {
+            if (!confirm('¿Eliminar este poder?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('poderes')
+                    .delete()
+                    .eq('id', poderes[index].id);
+                
+                if (error) throw error;
+                cerrarModal();
+                cargarPoderes();
+                alert('✅ Poder eliminado');
+            } catch(error) {
+                alert('❌ Error: ' + error.message);
+            }
+        };
+        
+        // ============================================
+        // CARGAR USUARIOS
+        // ============================================
+        window.cargarUsuarios = async function() {
+            try {
+                const { data, error } = await supabase
+                    .from('usuarios')
+                    .select('*')
+                    .order('puntos', { ascending: false });
+                
+                if (error) throw error;
+                usuarios = data || [];
+                
+                const tbody = document.getElementById('usuariosTableBody');
+                if (usuarios.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-sec);">No hay usuarios registrados</td></tr>`;
+                    return;
+                }
+                
+                tbody.innerHTML = usuarios.map((u, i) => `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td><strong>${u.nombre}</strong></td>
+                        <td><strong style="color:var(--success);">${u.puntos}</strong></td>
+                        <td>
+                            <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                                <button class="btn btn-success btn-sm" onclick="darPuntos('${u.nombre}', 10)">+10</button>
+                                <button class="btn btn-danger btn-sm" onclick="darPuntos('${u.nombre}', -10)">-10</button>
+                                <button class="btn btn-warning btn-sm" onclick="editarUsuario('${u.nombre}')">✏️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('totalUsers').textContent = usuarios.length;
+                const totalPuntos = usuarios.reduce((sum, u) => sum + u.puntos, 0);
+                document.getElementById('totalPuntos').textContent = totalPuntos;
+            } catch(error) {
+                console.error('Error cargando usuarios:', error);
+            }
+        };
+        
+        // ============================================
+        // FUNCIONES DE USUARIOS
+        // ============================================
+        window.darPuntos = async function(usuario, cantidad) {
+            try {
+                const u = usuarios.find(item => item.nombre === usuario);
+                if (!u) return alert('Usuario no encontrado');
+                
+                const nuevosPuntos = Math.max(0, u.puntos + cantidad);
+                const { error } = await supabase
+                    .from('usuarios')
+                    .update({ puntos: nuevosPuntos })
+                    .eq('id', u.id);
+                
+                if (error) throw error;
+                cargarUsuarios();
+            } catch(error) {
+                alert('❌ Error: ' + error.message);
+            }
+        };
+        
+        window.editarUsuario = async function(usuario) {
+            const u = usuarios.find(item => item.nombre === usuario);
+            if (!u) return alert('Usuario no encontrado');
+            
+            const nuevos = prompt(`✏️ Editar puntos de ${usuario}:`, u.puntos);
+            if (nuevos === null || isNaN(nuevos)) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('usuarios')
+                    .update({ puntos: parseInt(nuevos) })
+                    .eq('id', u.id);
+                
+                if (error) throw error;
+                cargarUsuarios();
+            } catch(error) {
+                alert('❌ Error: ' + error.message);
+            }
+        };
+        
+        // ============================================
+        // CONTROL DEL BOT
+        // ============================================
+        window.iniciarBot = function() {
+            // Aquí va la lógica para iniciar el bot
+            // Por ahora solo cambiamos el estado visual
+            botActivo = true;
+            actualizarEstadoBot();
+            agregarLog('🚀 Bot iniciado desde el panel', 'success');
+        };
+        
+        window.detenerBot = function() {
+            botActivo = false;
+            actualizarEstadoBot();
+            agregarLog('⏹️ Bot detenido desde el panel', 'info');
+        };
+        
+        window.reiniciarBot = function() {
+            botActivo = false;
+            actualizarEstadoBot();
+            setTimeout(() => {
+                botActivo = true;
+                actualizarEstadoBot();
+                agregarLog('🔄 Bot reiniciado', 'success');
+            }, 2000);
+            agregarLog('🔄 Reiniciando bot...', 'info');
+        };
+        
+        function actualizarEstadoBot() {
+            const status = document.getElementById('botStatus');
+            const detail = document.getElementById('botDetail');
+            if (botActivo) {
+                status.textContent = '🟢 En Vivo';
+                status.className = 'status-badge on';
+                detail.innerHTML = '📌 Estado: <strong style="color:var(--success);">Conectado</strong>';
+            } else {
+                status.textContent = '🔴 Detenido';
+                status.className = 'status-badge off';
+                detail.innerHTML = '📌 Estado: <strong style="color:var(--danger);">Desconectado</strong>';
+            }
+        }
+        
+        // ============================================
+        // LOGS
+        // ============================================
+        function agregarLog(mensaje, tipo = 'info') {
+            const container = document.getElementById('logsContainer');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${tipo}">${mensaje}</span>`;
+            container.prepend(entry);
+            
+            // Limitar cantidad de logs
+            while (container.children.length > 50) {
+                container.removeChild(container.lastChild);
+            }
+        }
+        
+        window.limpiarLogs = function() {
+            const container = document.getElementById('logsContainer');
+            container.innerHTML = '<div class="log-entry" style="color:var(--text-sec);">Logs limpiados</div>';
+        };
+        
+        // ============================================
+        // INICIALIZAR
+        // ============================================
+        cargarConfig();
+        cargarPoderes();
+        cargarUsuarios();
+        agregarLog('📊 Dashboard cargado correctamente', 'success');
+        
+        // Actualizar cada 30 segundos
+        setInterval(cargarUsuarios, 30000);
+        setInterval(cargarPoderes, 60000);
+    </script>
+</body>
+</html>

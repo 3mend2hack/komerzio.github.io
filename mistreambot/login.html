@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 MiStreamBot - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="icon">🎮</div>
+        <h1>MiStreamBot</h1>
+        <p class="subtitle">Inicia sesión con tu cuenta de Google</p>
+        
+        <div id="g_id_onload"
+             data-client_id="491062627132-6mmc3ge796jkgdj9556aqv6mjjhll8ge.apps.googleusercontent.com"
+             data-context="signin"
+             data-ux_mode="redirect"
+             data-login_uri="/mistreambot/api/auth"
+             data-auto_prompt="false">
+        </div>
+        
+        <div class="g_id_signin"
+             data-type="standard"
+             data-shape="rectangular"
+             data-theme="outline"
+             data-text="signin_with"
+             data-size="large"
+             data-logo_alignment="left">
+        </div>
+        
+        <div id="error-message" class="error-message"></div>
+        <div id="loading" class="loading">Cargando...</div>
+        
+        <p class="footer">🔐 Solo el administrador puede acceder</p>
+    </div>
+    
+    <script type="module">
+        // ============================================
+        // IMPORTAR CONFIGURACIÓN
+        // ============================================
+        import { AUTH_EMAIL } from './supabase.js';
+        
+        // ============================================
+        // VERIFICAR SESIÓN EXISTENTE
+        // ============================================
+        const session = localStorage.getItem('bot_session');
+        if (session) {
+            try {
+                const data = JSON.parse(session);
+                if (data.email === AUTH_EMAIL) {
+                    window.location.href = '/mistreambot/dashboard.html';
+                    return;
+                }
+            } catch(e) {
+                localStorage.removeItem('bot_session');
+            }
+        }
+        
+        // ============================================
+        // MANEJAR RESPUESTA DE GOOGLE
+        // ============================================
+        window.handleCredentialResponse = function(response) {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error-message').style.display = 'none';
+            
+            try {
+                // Decodificar el token de Google
+                const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                
+                // Verificar que sea el email autorizado
+                if (payload.email !== AUTH_EMAIL) {
+                    document.getElementById('error-message').textContent = 
+                        '❌ Acceso denegado. Solo el administrador puede entrar.';
+                    document.getElementById('error-message').style.display = 'block';
+                    document.getElementById('loading').style.display = 'none';
+                    return;
+                }
+                
+                // Guardar sesión
+                localStorage.setItem('bot_session', JSON.stringify({
+                    email: payload.email,
+                    name: payload.name,
+                    picture: payload.picture,
+                    timestamp: Date.now()
+                }));
+                
+                // Redirigir al dashboard
+                window.location.href = '/mistreambot/dashboard.html';
+                
+            } catch(error) {
+                document.getElementById('error-message').textContent = '❌ Error al iniciar sesión: ' + error.message;
+                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>
