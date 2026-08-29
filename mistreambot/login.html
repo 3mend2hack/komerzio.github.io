@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🔐 MiStreamBot - Login</title>
-    <script src="https://accounts.google.com/gsi/client"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -31,7 +30,6 @@
         .login-container .subtitle { color: #a7a9be; font-size: 14px; margin-bottom: 28px; }
         .login-container .divider { border: none; border-top: 1px solid #0f3460; margin: 20px 0; }
         .login-container .footer-text { color: #6a6a8e; font-size: 12px; margin-top: 20px; }
-        .login-container .footer-text a { color: #e94560; text-decoration: none; }
         .admin-badge {
             display: inline-block;
             background: #e94560;
@@ -42,6 +40,41 @@
             font-weight: 600;
             margin-bottom: 16px;
         }
+        .form-group { margin-bottom: 16px; text-align: left; }
+        .form-group label { display: block; color: #a7a9be; font-size: 13px; margin-bottom: 4px; }
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            background: #0a0a12;
+            border: 1px solid #0f3460;
+            color: #fffffe;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .form-group input:focus { outline: none; border-color: #e94560; }
+        .btn {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .btn:hover { opacity: 0.85; transform: scale(1.02); }
+        .btn-google {
+            background: #4285f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .btn-google:hover { background: #357abd; }
         .error-message {
             color: #e74c3c;
             font-size: 14px;
@@ -70,8 +103,6 @@
             margin-right: 8px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .g_id_signin { display: flex; justify-content: center; margin: 12px 0; }
-        .g_id_signin>div { width: 100% !important; max-width: 280px !important; }
         .features-mini {
             display: flex;
             justify-content: center;
@@ -92,6 +123,23 @@
         <div class="admin-badge">🔐 ADMIN</div>
         <hr class="divider">
 
+        <!-- ===== LOGIN CON USUARIO Y CONTRASEÑA ===== -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label>📧 Correo electrónico</label>
+                <input type="email" id="email" placeholder="tu@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>🔑 Contraseña</label>
+                <input type="password" id="password" placeholder="Tu contraseña" required>
+            </div>
+            <button type="submit" class="btn">🚀 Iniciar Sesión</button>
+        </form>
+
+        <hr class="divider">
+        <p style="color:#6a6a8e; font-size:13px;">O inicia con Google</p>
+
+        <!-- ===== BOTÓN DE GOOGLE (alternativo) ===== -->
         <div id="g_id_onload"
              data-client_id="491062627132-q6a66kpblc45vfnt1fmni9592t0jqfnb.apps.googleusercontent.com"
              data-context="signin"
@@ -99,7 +147,6 @@
              data-login_uri="https://activar-poder.cubazon-oficial.workers.dev/auth"
              data-auto_prompt="false">
         </div>
-
         <div class="g_id_signin"
              data-type="standard"
              data-shape="rectangular"
@@ -123,9 +170,75 @@
             <span>🛡️ Anti-Spam</span>
         </div>
         <p class="footer-text">
-            Solo el administrador puede acceder<br>
             <a href="/mistreambot/">← Volver al inicio</a>
         </p>
     </div>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
+        const WORKER_URL = 'https://activar-poder.cubazon-oficial.workers.dev/login';
+
+        // ============================================
+        // VERIFICAR SESIÓN EXISTENTE
+        // ============================================
+        const session = localStorage.getItem('bot_session');
+        if (session) {
+            try {
+                const data = JSON.parse(session);
+                if (data.email) {
+                    window.location.href = '/mistreambot/dashboard.html';
+                    return;
+                }
+            } catch (e) {
+                localStorage.removeItem('bot_session');
+            }
+        }
+
+        // ============================================
+        // LOGIN CON USUARIO Y CONTRASEÑA
+        // ============================================
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error-message');
+            const loadingDiv = document.getElementById('loading');
+
+            loadingDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+
+            try {
+                const resp = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await resp.json();
+
+                if (data.success) {
+                    localStorage.setItem('bot_session', JSON.stringify({
+                        email: data.user.email,
+                        name: data.user.name || 'Administrador',
+                        timestamp: Date.now()
+                    }));
+                    window.location.href = '/mistreambot/dashboard.html';
+                } else {
+                    errorDiv.textContent = '❌ ' + (data.error || 'Credenciales incorrectas');
+                    errorDiv.style.display = 'block';
+                    loadingDiv.style.display = 'none';
+                }
+
+            } catch (error) {
+                errorDiv.textContent = '❌ Error al conectar con el servidor: ' + error.message;
+                errorDiv.style.display = 'block';
+                loadingDiv.style.display = 'none';
+            }
+        });
+    </script>
+    <script src="https://accounts.google.com/gsi/client"></script>
 </body>
 </html>
