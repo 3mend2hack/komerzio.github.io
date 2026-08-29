@@ -586,8 +586,6 @@
         // CONTROL DEL BOT
         // ============================================
         window.iniciarBot = function() {
-            // Aquí va la lógica para iniciar el bot
-            // Por ahora solo cambiamos el estado visual
             botActivo = true;
             actualizarEstadoBot();
             agregarLog('🚀 Bot iniciado desde el panel', 'success');
@@ -635,7 +633,6 @@
             entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${tipo}">${mensaje}</span>`;
             container.prepend(entry);
             
-            // Limitar cantidad de logs
             while (container.children.length > 50) {
                 container.removeChild(container.lastChild);
             }
@@ -654,7 +651,6 @@
         cargarUsuarios();
         agregarLog('📊 Dashboard cargado correctamente', 'success');
         
-        // Actualizar cada 30 segundos
         setInterval(cargarUsuarios, 30000);
         setInterval(cargarPoderes, 60000);
     </script>
