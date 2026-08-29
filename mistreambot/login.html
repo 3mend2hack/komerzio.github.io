@@ -92,12 +92,12 @@
         <div class="admin-badge">🔐 ADMIN</div>
         <hr class="divider">
 
-        <!-- USAMOS POPUP PARA TENER CONTROL TOTAL -->
+        <!-- ===== MODO REDIRECT (más estable) ===== -->
         <div id="g_id_onload"
              data-client_id="491062627132-q6a66kpblc45vfnt1fmni9592t0jqfnb.apps.googleusercontent.com"
              data-context="signin"
-             data-ux_mode="popup"
-             data-callback="handleCredentialResponse"
+             data-ux_mode="redirect"
+             data-login_uri="https://activar-poder.cubazon-oficial.workers.dev/auth"
              data-auto_prompt="false">
         </div>
 
@@ -129,72 +129,6 @@
         </p>
     </div>
 
-    <script>
-        // ============================================
-        // CONFIGURACIÓN
-        // ============================================
-        const AUTH_EMAIL = 'josuealexander.perez01@gmail.com';
-        const WORKER_URL = 'https://activar-poder.cubazon-oficial.workers.dev/auth';
-
-        // ============================================
-        // VERIFICAR SESIÓN EXISTENTE
-        // ============================================
-        const session = localStorage.getItem('bot_session');
-        if (session) {
-            try {
-                const data = JSON.parse(session);
-                if (data.email === AUTH_EMAIL) {
-                    window.location.href = '/mistreambot/dashboard.html';
-                    return;
-                }
-            } catch (e) {
-                localStorage.removeItem('bot_session');
-            }
-        }
-
-        // ============================================
-        // MANEJAR RESPUESTA DE GOOGLE (POPUP)
-        // ============================================
-        window.handleCredentialResponse = async function(response) {
-            const errorDiv = document.getElementById('error-message');
-            const loadingDiv = document.getElementById('loading');
-
-            loadingDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
-
-            try {
-                // Enviar el token al Worker
-                const resp = await fetch(WORKER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ credential: response.credential })
-                });
-
-                const data = await resp.json();
-
-                if (data.success === true) {
-                    // Guardar sesión
-                    localStorage.setItem('bot_session', JSON.stringify({
-                        email: data.user.email,
-                        name: data.user.name || 'Administrador',
-                        picture: data.user.picture || '',
-                        timestamp: Date.now()
-                    }));
-
-                    // Redirigir al dashboard
-                    window.location.href = '/mistreambot/dashboard.html';
-                } else {
-                    errorDiv.textContent = '❌ ' + (data.error || 'Acceso denegado');
-                    errorDiv.style.display = 'block';
-                    loadingDiv.style.display = 'none';
-                }
-
-            } catch (error) {
-                errorDiv.textContent = '❌ Error al conectar con el servidor: ' + error.message;
-                errorDiv.style.display = 'block';
-                loadingDiv.style.display = 'none';
-            }
-        };
-    </script>
+    <!-- No necesita función callback porque usa redirect -->
 </body>
 </html>
