@@ -3,5 +3,4 @@
 /mistreambot/ /mistreambot/index.html 200
 /mistreambot/login /mistreambot/login.html 200
 /mistreambot/dashboard /mistreambot/dashboard.html 200
-/mistreambot/api/* /mistreambot/api/$1 200
 /mistreambot/* /mistreambot/index.html 200
