@@ -6,11 +6,7 @@
     <title>🔐 MiStreamBot - Login</title>
     <script src="https://accounts.google.com/gsi/client"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -33,39 +29,22 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         }
         
-        .login-container .icon {
-            font-size: 56px;
-            margin-bottom: 12px;
-        }
+        .login-container .icon { font-size: 56px; margin-bottom: 12px; }
+        .login-container h1 { color: #e94560; font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+        .login-container .subtitle { color: #a7a9be; font-size: 14px; margin-bottom: 28px; }
+        .login-container .divider { border: none; border-top: 1px solid #0f3460; margin: 20px 0; }
+        .login-container .footer-text { color: #6a6a8e; font-size: 12px; margin-top: 20px; }
+        .login-container .footer-text a { color: #e94560; text-decoration: none; }
         
-        .login-container h1 {
-            color: #e94560;
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-        
-        .login-container .subtitle {
-            color: #a7a9be;
-            font-size: 14px;
-            margin-bottom: 28px;
-        }
-        
-        .login-container .divider {
-            border: none;
-            border-top: 1px solid #0f3460;
-            margin: 20px 0;
-        }
-        
-        .login-container .footer-text {
-            color: #6a6a8e;
-            font-size: 12px;
-            margin-top: 20px;
-        }
-        
-        .login-container .footer-text a {
-            color: #e94560;
-            text-decoration: none;
+        .admin-badge {
+            display: inline-block;
+            background: #e94560;
+            color: white;
+            font-size: 11px;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
         }
         
         .error-message {
@@ -102,27 +81,8 @@
             to { transform: rotate(360deg); }
         }
         
-        .g_id_signin {
-            display: flex;
-            justify-content: center;
-            margin: 12px 0;
-        }
-        
-        .g_id_signin > div {
-            width: 100% !important;
-            max-width: 280px !important;
-        }
-        
-        .admin-badge {
-            display: inline-block;
-            background: #e94560;
-            color: white;
-            font-size: 11px;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
+        .g_id_signin { display: flex; justify-content: center; margin: 12px 0; }
+        .g_id_signin > div { width: 100% !important; max-width: 280px !important; }
         
         .features-mini {
             display: flex;
@@ -131,20 +91,11 @@
             margin: 16px 0;
             flex-wrap: wrap;
         }
-        
-        .features-mini span {
-            color: #6a6a8e;
-            font-size: 12px;
-        }
-        
-        .features-mini .dot {
-            color: #e94560;
-        }
+        .features-mini span { color: #6a6a8e; font-size: 12px; }
+        .features-mini .dot { color: #e94560; }
         
         @media (max-width: 480px) {
-            .login-container {
-                padding: 32px 20px;
-            }
+            .login-container { padding: 32px 20px; }
         }
     </style>
 </head>
@@ -158,7 +109,6 @@
         
         <hr class="divider">
         
-        <!-- ===== GOOGLE LOGIN CON TU CLIENT ID ===== -->
         <div id="g_id_onload"
              data-client_id="491062627132-q6a66kpblc45vfmt1fmni9592t0jqfnb.apps.googleusercontent.com"
              data-context="signin"
@@ -198,16 +148,9 @@
     </div>
     
     <script>
-        // ============================================
-        // CONFIGURACIÓN
-        // ============================================
         const AUTH_EMAIL = 'josuealexander.perez01@gmail.com';
         
-        // ============================================
-        // VERIFICAR SESIÓN EXISTENTE
-        // ============================================
         const session = localStorage.getItem('bot_session');
-        
         if (session) {
             try {
                 const data = JSON.parse(session);
@@ -219,9 +162,6 @@
             }
         }
         
-        // ============================================
-        // MANEJAR RESPUESTA DE GOOGLE
-        // ============================================
         window.handleCredentialResponse = function(response) {
             const errorDiv = document.getElementById('error-message');
             const loadingDiv = document.getElementById('loading');
