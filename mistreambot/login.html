@@ -6,8 +6,12 @@
     <title>🔐 MiStreamBot - Login</title>
     <script src="https://accounts.google.com/gsi/client"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #0f0e17;
@@ -17,7 +21,7 @@
             align-items: center;
             padding: 20px;
         }
-        
+
         .login-container {
             background: #1a1a2e;
             padding: 48px 40px;
@@ -26,16 +30,44 @@
             max-width: 420px;
             width: 100%;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
-        
-        .login-container .icon { font-size: 56px; margin-bottom: 12px; }
-        .login-container h1 { color: #e94560; font-size: 28px; font-weight: 700; margin-bottom: 6px; }
-        .login-container .subtitle { color: #a7a9be; font-size: 14px; margin-bottom: 28px; }
-        .login-container .divider { border: none; border-top: 1px solid #0f3460; margin: 20px 0; }
-        .login-container .footer-text { color: #6a6a8e; font-size: 12px; margin-top: 20px; }
-        .login-container .footer-text a { color: #e94560; text-decoration: none; }
-        
+
+        .login-container .icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+        }
+
+        .login-container h1 {
+            color: #e94560;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .login-container .subtitle {
+            color: #a7a9be;
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+
+        .login-container .divider {
+            border: none;
+            border-top: 1px solid #0f3460;
+            margin: 20px 0;
+        }
+
+        .login-container .footer-text {
+            color: #6a6a8e;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+
+        .login-container .footer-text a {
+            color: #e94560;
+            text-decoration: none;
+        }
+
         .admin-badge {
             display: inline-block;
             background: #e94560;
@@ -46,7 +78,7 @@
             font-weight: 600;
             margin-bottom: 16px;
         }
-        
+
         .error-message {
             color: #e74c3c;
             font-size: 14px;
@@ -57,14 +89,14 @@
             border-radius: 8px;
             border: 1px solid rgba(231, 76, 60, 0.3);
         }
-        
+
         .loading {
             color: #a7a9be;
             font-size: 14px;
             margin-top: 12px;
             display: none;
         }
-        
+
         .loading .spinner {
             display: inline-block;
             width: 20px;
@@ -76,14 +108,24 @@
             vertical-align: middle;
             margin-right: 8px;
         }
-        
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
-        .g_id_signin { display: flex; justify-content: center; margin: 12px 0; }
-        .g_id_signin > div { width: 100% !important; max-width: 280px !important; }
-        
+
+        .g_id_signin {
+            display: flex;
+            justify-content: center;
+            margin: 12px 0;
+        }
+
+        .g_id_signin>div {
+            width: 100% !important;
+            max-width: 280px !important;
+        }
+
         .features-mini {
             display: flex;
             justify-content: center;
@@ -91,11 +133,20 @@
             margin: 16px 0;
             flex-wrap: wrap;
         }
-        .features-mini span { color: #6a6a8e; font-size: 12px; }
-        .features-mini .dot { color: #e94560; }
-        
+
+        .features-mini span {
+            color: #6a6a8e;
+            font-size: 12px;
+        }
+
+        .features-mini .dot {
+            color: #e94560;
+        }
+
         @media (max-width: 480px) {
-            .login-container { padding: 32px 20px; }
+            .login-container {
+                padding: 32px 20px;
+            }
         }
     </style>
 </head>
@@ -104,19 +155,20 @@
         <div class="icon">🎮</div>
         <h1>MiStreamBot</h1>
         <p class="subtitle">Panel de administración</p>
-        
+
         <div class="admin-badge">🔐 ADMIN</div>
-        
+
         <hr class="divider">
-        
+
+        <!-- ===== CLIENT ID CORREGIDO ===== -->
         <div id="g_id_onload"
-             data-client_id="491062627132-q6a66kpblc45vfmt1fmni9592t0jqfnb.apps.googleusercontent.com"
+             data-client_id="491062627132-q6a66kpblc45vfnt1fmni9592t0jqfnb.apps.googleusercontent.com"
              data-context="signin"
              data-ux_mode="redirect"
              data-login_uri="/mistreambot/api/auth"
              data-auto_prompt="false">
         </div>
-        
+
         <div class="g_id_signin"
              data-type="standard"
              data-shape="rectangular"
@@ -125,14 +177,14 @@
              data-size="large"
              data-logo_alignment="left">
         </div>
-        
+
         <div id="error-message" class="error-message"></div>
         <div id="loading" class="loading">
             <span class="spinner"></span> Verificando acceso...
         </div>
-        
+
         <hr class="divider">
-        
+
         <div class="features-mini">
             <span>⚡ Poderes</span>
             <span class="dot">•</span>
@@ -140,16 +192,22 @@
             <span class="dot">•</span>
             <span>🛡️ Anti-Spam</span>
         </div>
-        
+
         <p class="footer-text">
             Solo el administrador puede acceder<br>
             <a href="/">← Volver al inicio</a>
         </p>
     </div>
-    
+
     <script>
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
         const AUTH_EMAIL = 'josuealexander.perez01@gmail.com';
-        
+
+        // ============================================
+        // VERIFICAR SESIÓN EXISTENTE
+        // ============================================
         const session = localStorage.getItem('bot_session');
         if (session) {
             try {
@@ -157,39 +215,42 @@
                 if (data.email === AUTH_EMAIL) {
                     window.location.href = '/mistreambot/dashboard.html';
                 }
-            } catch(e) {
+            } catch (e) {
                 localStorage.removeItem('bot_session');
             }
         }
-        
+
+        // ============================================
+        // MANEJAR RESPUESTA DE GOOGLE
+        // ============================================
         window.handleCredentialResponse = function(response) {
             const errorDiv = document.getElementById('error-message');
             const loadingDiv = document.getElementById('loading');
-            
+
             loadingDiv.style.display = 'block';
             errorDiv.style.display = 'none';
-            
+
             try {
                 const payload = JSON.parse(atob(response.credential.split('.')[1]));
                 const email = payload.email;
-                
+
                 if (email !== AUTH_EMAIL) {
                     errorDiv.textContent = '❌ Acceso denegado. Solo el administrador puede entrar.';
                     errorDiv.style.display = 'block';
                     loadingDiv.style.display = 'none';
                     return;
                 }
-                
+
                 localStorage.setItem('bot_session', JSON.stringify({
                     email: payload.email,
                     name: payload.name || 'Administrador',
                     picture: payload.picture || '',
                     timestamp: Date.now()
                 }));
-                
+
                 window.location.href = '/mistreambot/dashboard.html';
-                
-            } catch(error) {
+
+            } catch (error) {
                 errorDiv.textContent = '❌ Error al iniciar sesión: ' + error.message;
                 errorDiv.style.display = 'block';
                 loadingDiv.style.display = 'none';
