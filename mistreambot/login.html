@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🔐 MiStreamBot - Login</title>
-    <!-- CSS DIRECTAMENTE EN EL HTML para asegurar que se vea bien -->
+    <script src="https://accounts.google.com/gsi/client"></script>
     <style>
         * {
             margin: 0;
@@ -102,7 +102,6 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Estilos para el botón de Google */
         .g_id_signin {
             display: flex;
             justify-content: center;
@@ -159,8 +158,9 @@
         
         <hr class="divider">
         
+        <!-- ===== GOOGLE LOGIN CON TU CLIENT ID ===== -->
         <div id="g_id_onload"
-             data-client_id="491062627132-6mmc3ge796jkgdj9556aqv6mjjhll8ge.apps.googleusercontent.com"
+             data-client_id="491062627132-q6a66kpblc45vfmt1fmni9592t0jqfnb.apps.googleusercontent.com"
              data-context="signin"
              data-ux_mode="redirect"
              data-login_uri="/mistreambot/api/auth"
@@ -197,12 +197,15 @@
         </p>
     </div>
     
-    <script src="https://accounts.google.com/gsi/client"></script>
     <script>
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
+        const AUTH_EMAIL = 'josuealexander.perez01@gmail.com';
+        
         // ============================================
         // VERIFICAR SESIÓN EXISTENTE
         // ============================================
-        const AUTH_EMAIL = 'cubazon.oficial@gmail.com';
         const session = localStorage.getItem('bot_session');
         
         if (session) {
@@ -227,11 +230,9 @@
             errorDiv.style.display = 'none';
             
             try {
-                // Decodificar el token de Google
                 const payload = JSON.parse(atob(response.credential.split('.')[1]));
                 const email = payload.email;
                 
-                // Verificar que sea el email autorizado
                 if (email !== AUTH_EMAIL) {
                     errorDiv.textContent = '❌ Acceso denegado. Solo el administrador puede entrar.';
                     errorDiv.style.display = 'block';
@@ -239,7 +240,6 @@
                     return;
                 }
                 
-                // Guardar sesión
                 localStorage.setItem('bot_session', JSON.stringify({
                     email: payload.email,
                     name: payload.name || 'Administrador',
@@ -247,7 +247,6 @@
                     timestamp: Date.now()
                 }));
                 
-                // Redirigir al dashboard
                 window.location.href = '/mistreambot/dashboard.html';
                 
             } catch(error) {
