@@ -1,18 +1,7 @@
-# ============================================
-# CLOUDFLARE PAGES REDIRECTS
-# ============================================
-
-# Redirigir la raíz al index
-/ /mistreambot/index.html 200
-
-# Manejar rutas del mistreambot
+# Cloudflare Pages redirects
 /mistreambot /mistreambot/index.html 200
 /mistreambot/ /mistreambot/index.html 200
 /mistreambot/login /mistreambot/login.html 200
 /mistreambot/dashboard /mistreambot/dashboard.html 200
-
-# API routes (para que funcionen las peticiones)
 /mistreambot/api/* /mistreambot/api/$1 200
-
-# Regla general: cualquier ruta dentro de mistreambot que no exista, va al index
 /mistreambot/* /mistreambot/index.html 200
