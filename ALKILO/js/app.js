@@ -1,7 +1,7 @@
 /* ============================================================
    ALKILO - FASE 1 + 2 + 3 + 4 + 4.5 + EXTRAS + 5 + 6 + PAGOS
-   Con recuperación de contraseña y confirmación de email
-   + Módulo de choferes cercanos (mapa)
+   Con recuperación de contraseña, confirmación de email,
+   módulo de choferes cercanos y bloqueo por servicio activo.
    ============================================================ */
 
 // ------------------------------------------------------------
@@ -30,6 +30,7 @@ const estado = {
   pagosAdmin: [],
   origenPerfilPublico: "pantalla-perfil",
   modoRecuperacion: false,
+  servicioActivoChofer: false,
 };
 
 const realtime = {
@@ -224,7 +225,7 @@ function conectarNavegacion() {
     cargarMisSolicitudes();
   });
 
-  // Botón "Choferes cercanos" (cliente) → abre el módulo independiente
+  // Botón "Choferes cercanos" (visible para clientes Y choferes)
   document.getElementById("btn-ver-choferes-mapa")?.addEventListener("click", () => {
     if (typeof window.abrirMapaChoferes === "function") {
       window.abrirMapaChoferes();
@@ -377,10 +378,21 @@ function conectarNavegacion() {
   });
 
   el.btn_volver_perfil_publico?.addEventListener("click", () => {
-    mostrarPantalla(estado.origenPerfilPublico || "pantalla-perfil");
-    if (estado.origenPerfilPublico === "pantalla-mis-solicitudes") cargarMisSolicitudes();
-    else if (estado.origenPerfilPublico === "pantalla-mis-servicios") cargarMisServicios();
-    else if (estado.origenPerfilPublico === "pantalla-ver-ofertas") {
+    const origen = estado.origenPerfilPublico || "pantalla-perfil";
+
+    if (origen === "pantalla-choferes-mapa") {
+      if (typeof window.abrirMapaChoferes === "function") {
+        window.abrirMapaChoferes();
+      } else {
+        mostrarPantalla("pantalla-perfil");
+      }
+      return;
+    }
+
+    mostrarPantalla(origen);
+    if (origen === "pantalla-mis-solicitudes") cargarMisSolicitudes();
+    else if (origen === "pantalla-mis-servicios") cargarMisServicios();
+    else if (origen === "pantalla-ver-ofertas") {
       if (oferta.solicitudId) cargarOfertas(oferta.solicitudId);
     }
   });
@@ -537,6 +549,7 @@ async function cerrarSesion() {
   estado.suscripcion = null;
   estado.calificacionesHechas = new Set();
   estado.ubicacionActual = null;
+  estado.servicioActivoChofer = false;
   limpiarMensajes();
   mostrarPantalla("pantalla-login");
 }
@@ -793,12 +806,15 @@ async function cargarMisSolicitudes() {
 }
 
 // ------------------------------------------------------------
-// 16) Cargar disponibles
+// 16) Cargar disponibles (con verificación de servicio activo)
 // ------------------------------------------------------------
 async function cargarSolicitudesDisponibles() {
   const cont = el.lista_disponibles;
   if (!cont) return;
   cont.innerHTML = '<p class="vacio">Cargando...</p>';
+
+  // Verificar si el chofer ya tiene un servicio activo
+  await verificarServicioActivoChofer();
 
   const { data, error } = await db
     .from("solicitudes").select("*")
@@ -812,6 +828,23 @@ async function cargarSolicitudesDisponibles() {
   cont.innerHTML = "";
   data.forEach((s) => cont.appendChild(renderTarjetaSolicitud(s, "chofer")));
   iniciarTemporizadores();
+}
+
+/** Consulta si el chofer actual tiene un servicio en curso */
+async function verificarServicioActivoChofer() {
+  estado.servicioActivoChofer = false;
+  if (!estado.usuario || estado.perfil?.rol !== "chofer") return;
+
+  const { data, error } = await db
+    .from("solicitudes")
+    .select("id")
+    .eq("chofer_id", estado.usuario.id)
+    .in("estado", ["aceptado", "en_camino", "llego", "en_curso"])
+    .limit(1);
+
+  if (!error && data && data.length > 0) {
+    estado.servicioActivoChofer = true;
+  }
 }
 
 // ------------------------------------------------------------
@@ -879,10 +912,16 @@ function renderTarjetaSolicitud(s, modo) {
     }
     accionesHTML += `</div>`;
   } else if (modo === "chofer" && s.estado === "pendiente") {
-    accionesHTML = `<div class="acciones-tarjeta">
-      <button class="btn-aceptar" data-aceptar="${s.id}">Aceptar</button>
-      <button class="btn-oferta" data-oferta="${s.id}">💰 Ofertar</button>
-    </div>`;
+    if (estado.servicioActivoChofer) {
+      accionesHTML = `<div class="aviso-servicio-activo">
+        ⚠️ Tienes un servicio activo. Finalízalo o cancélalo para aceptar otro.
+      </div>`;
+    } else {
+      accionesHTML = `<div class="acciones-tarjeta">
+        <button class="btn-aceptar" data-aceptar="${s.id}">Aceptar</button>
+        <button class="btn-oferta" data-oferta="${s.id}">💰 Ofertar</button>
+      </div>`;
+    }
   } else if (modo === "chofer-servicio") {
     const siguiente = siguienteEstado(s.estado);
     const puedeCancelar = ["aceptado","en_camino","llego","en_curso"].includes(s.estado);
@@ -1025,10 +1064,25 @@ async function cancelarSolicitud(id, modo) {
 }
 
 // ------------------------------------------------------------
-// 20) Aceptar
+// 20) Aceptar (con verificación de servicio activo)
 // ------------------------------------------------------------
 async function aceptarSolicitud(id) {
   if (!estado.usuario) return;
+
+  const { data: activos, error: errAct } = await db
+    .from("solicitudes")
+    .select("id")
+    .eq("chofer_id", estado.usuario.id)
+    .in("estado", ["aceptado", "en_camino", "llego", "en_curso"])
+    .limit(1);
+
+  if (errAct) return alert("Error verificando servicios activos: " + errAct.message);
+  if (activos && activos.length > 0) {
+    alert("Ya tienes un servicio activo. Finalízalo o cancélalo antes de aceptar otro.");
+    cargarSolicitudesDisponibles();
+    return;
+  }
+
   if (!confirm("¿Aceptar esta solicitud?")) return;
 
   const { data, error } = await db
@@ -1614,9 +1668,24 @@ function cerrarChat() {
 }
 
 // ------------------------------------------------------------
-// 30) OFERTAS
+// 30) OFERTAS (con verificación de servicio activo)
 // ------------------------------------------------------------
 async function abrirFormOferta(solicitudId) {
+  if (!estado.usuario) return;
+
+  const { data: activos, error: errAct } = await db
+    .from("solicitudes")
+    .select("id")
+    .eq("chofer_id", estado.usuario.id)
+    .in("estado", ["aceptado", "en_camino", "llego", "en_curso"])
+    .limit(1);
+
+  if (errAct) return alert("Error verificando servicios activos: " + errAct.message);
+  if (activos && activos.length > 0) {
+    alert("Ya tienes un servicio activo. Finalízalo o cancélalo antes de ofertar en otro.");
+    return;
+  }
+
   const { data: sol, error } = await db
     .from("solicitudes").select("*").eq("id", solicitudId).single();
 

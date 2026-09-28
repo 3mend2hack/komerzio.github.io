@@ -1,18 +1,11 @@
 /* ============================================================
    ALKILO - Mapa de choferes cercanos (módulo independiente)
    ============================================================ */
-
 (function () {
   "use strict";
 
-  // ------------------------------------------------------------
-  // Configuración
-  // ------------------------------------------------------------
   const REFRESH_INTERVALO_MS = 15000;
 
-  // ------------------------------------------------------------
-  // Estado interno
-  // ------------------------------------------------------------
   const chm = {
     mapa: null,
     marcadores: {},
@@ -23,24 +16,27 @@
     disponible: false,
     inicializado: false,
     pausado: false,
+    radioKm: 25,
+    miLat: null,
+    miLng: null,
   };
 
-  // ------------------------------------------------------------
-  // Utilidades
-  // ------------------------------------------------------------
   function esc(txt) {
     if (txt == null) return "";
-    return String(txt)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
+    return String(txt).replaceAll("&","&amp;").replaceAll("<","&lt;")
+      .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
   }
 
   function estrellasVisuales(promedio) {
     const llenas = Math.round(Number(promedio) || 0);
     return "★".repeat(llenas) + "☆".repeat(Math.max(0, 5 - llenas));
+  }
+
+  function formatoKm(km) {
+    if (km == null) return "";
+    const n = Number(km);
+    if (n < 1) return Math.round(n * 1000) + " m";
+    return n.toFixed(1) + " km";
   }
 
   function iconoChofer(esYo) {
@@ -53,52 +49,36 @@
     });
   }
 
-  // ------------------------------------------------------------
-  // DOM
-  // ------------------------------------------------------------
   const el = {};
-
   function cachear() {
     [
-      "pantalla-choferes-mapa",
-      "chm-btn-volver",
-      "chm-btn-refrescar",
-      "chm-aviso",
-      "chm-mapa",
-      "chm-overlay",
-      "chm-overlay-texto",
-    ].forEach((id) => { el[id.replace(/-/g, "_")] = document.getElementById(id); });
+      "pantalla-choferes-mapa","chm-btn-volver","chm-btn-refrescar",
+      "chm-aviso","chm-mapa","chm-overlay","chm-overlay-texto",
+      "chm-radio-chips",
+    ].forEach((id) => { el[id.replace(/-/g,"_")] = document.getElementById(id); });
   }
 
-  function mostrarOverlay(texto) {
+  function mostrarOverlay(t) {
     if (!el.chm_overlay) return;
     el.chm_overlay.classList.remove("oculto");
-    if (el.chm_overlay_texto) el.chm_overlay_texto.textContent = texto || "Cargando...";
+    if (el.chm_overlay_texto) el.chm_overlay_texto.textContent = t || "Cargando...";
   }
+  function ocultarOverlay() { el.chm_overlay?.classList.add("oculto"); }
 
-  function ocultarOverlay() {
-    el.chm_overlay?.classList.add("oculto");
-  }
-
-  function setAviso(texto, vacio) {
+  function setAviso(t, vacio) {
     if (!el.chm_aviso) return;
-    el.chm_aviso.textContent = texto || "";
+    el.chm_aviso.textContent = t || "";
     el.chm_aviso.classList.toggle("vacio", !!vacio);
   }
 
-  // ------------------------------------------------------------
-  // Mapa
-  // ------------------------------------------------------------
   function inicializarMapa() {
     if (chm.mapa) return;
-    const contenedor = el.chm_mapa;
-    if (!contenedor) return;
+    const c = el.chm_mapa;
+    if (!c) return;
 
-    chm.mapa = L.map(contenedor, { zoomControl: true }).setView([10.4806, -66.9036], 13);
-
+    chm.mapa = L.map(c, { zoomControl: true }).setView([10.4806, -66.9036], 12);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap",
-      maxZoom: 19,
+      attribution: "© OpenStreetMap", maxZoom: 19,
     }).addTo(chm.mapa);
 
     setTimeout(() => chm.mapa?.invalidateSize(), 250);
@@ -108,14 +88,13 @@
         (pos) => {
           if (!chm.mapa) return;
           const yo = [pos.coords.latitude, pos.coords.longitude];
-          chm.mapa.setView(yo, 14);
-          if (chm.marcadorYo) {
-            chm.marcadorYo.setLatLng(yo);
-          } else {
-            chm.marcadorYo = L.marker(yo, { icon: iconoChofer(true) })
-              .addTo(chm.mapa)
-              .bindPopup("Tú estás aquí");
-          }
+          chm.miLat = pos.coords.latitude;
+          chm.miLng = pos.coords.longitude;
+          chm.mapa.setView(yo, 13);
+          if (chm.marcadorYo) chm.marcadorYo.setLatLng(yo);
+          else chm.marcadorYo = L.marker(yo, { icon: iconoChofer(true) })
+            .addTo(chm.mapa).bindPopup("Tú estás aquí");
+          cargarChoferes();
         },
         () => {},
         { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
@@ -123,28 +102,33 @@
     }
   }
 
-  function crearPopupHTML(chofer) {
-    const foto = chofer.foto_url || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='52' height='52'><rect width='52' height='52' fill='%23e5e7eb'/><text x='50%25' y='60%25' font-size='24' text-anchor='middle' fill='%239ca3af' font-family='sans-serif'>?</text></svg>";
-    const promedio = Number(chofer.promedio || 0).toFixed(1);
-    const total = Number(chofer.total || 0);
+  function crearPopupHTML(ch) {
+    const foto = ch.foto_url || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='52' height='52'><rect width='52' height='52' fill='%23e5e7eb'/><text x='50%25' y='60%25' font-size='24' text-anchor='middle' fill='%239ca3af' font-family='sans-serif'>?</text></svg>";
+    const promedio = Number(ch.promedio || 0).toFixed(1);
+    const total = Number(ch.total || 0);
     const estrellas = estrellasVisuales(promedio);
+    const dist = ch.distancia_km != null ? formatoKm(ch.distancia_km) : "";
+
+    window.__chmChoferes = window.__chmChoferes || {};
+    window.__chmChoferes[ch.chofer_id] = ch;
 
     return `
       <div class="chm-popup">
         <div class="fila">
           <img src="${foto}" alt="Foto" />
           <div class="info">
-            <div class="nombre">${esc(chofer.nombre || "Chofer")}</div>
+            <div class="nombre">${esc(ch.nombre || "Chofer")}</div>
             <div class="estrellas">
               ${estrellas}
               <span class="promedio">${promedio}</span>
               <span class="total">(${total})</span>
             </div>
+            ${dist ? `<div class="distancia">📏 ${dist} de ti</div>` : ""}
           </div>
         </div>
         <div class="acciones">
-          <button class="btn-perfil" data-perfil="${chofer.chofer_id}">👤 Perfil</button>
-          <button class="btn-contactar" data-contactar="${chofer.chofer_id}">💬 Contactar</button>
+          <button class="btn-perfil" type="button" onclick="window.__chmVerPerfil('${ch.chofer_id}'); return false;">👤 Perfil</button>
+          <button class="btn-contactar" type="button" onclick="window.__chmContactar('${ch.chofer_id}'); return false;">💬 Contactar</button>
         </div>
       </div>
     `;
@@ -153,9 +137,9 @@
   function pintarChoferes(lista) {
     if (!chm.mapa) return;
 
-    const idsActuales = new Set(lista.map((c) => c.chofer_id));
+    const idsAct = new Set(lista.map((c) => c.chofer_id));
     Object.keys(chm.marcadores).forEach((id) => {
-      if (!idsActuales.has(id)) {
+      if (!idsAct.has(id)) {
         try { chm.mapa.removeLayer(chm.marcadores[id]); } catch {}
         delete chm.marcadores[id];
       }
@@ -170,39 +154,27 @@
         chm.marcadores[ch.chofer_id].setLatLng(pos).setPopupContent(popup);
       } else {
         const m = L.marker(pos, { icon: iconoChofer(false) })
-          .addTo(chm.mapa)
-          .bindPopup(popup);
-
+          .addTo(chm.mapa).bindPopup(popup);
         m.on("popupopen", (ev) => {
           const popupEl = ev.popup.getElement();
           if (!popupEl) return;
-          popupEl.querySelector("[data-perfil]")?.addEventListener("click", () => {
-            if (typeof window.abrirPerfilPublico === "function") {
-              window.abrirPerfilPublico(ch.chofer_id);
-            }
-          });
-          popupEl.querySelector("[data-contactar]")?.addEventListener("click", () => {
-            contactarChofer(ch);
-          });
+          if (window.L?.DomEvent) {
+            L.DomEvent.disableClickPropagation(popupEl);
+            L.DomEvent.disableScrollPropagation(popupEl);
+          }
         });
-
         chm.marcadores[ch.chofer_id] = m;
       }
     });
 
-    if (lista.length === 0) {
-      setAviso("No hay choferes disponibles cerca ahora mismo.", true);
-    } else {
-      setAviso(`🚗 ${lista.length} chofer${lista.length === 1 ? "" : "es"} disponible${lista.length === 1 ? "" : "s"} ahora`);
-    }
+    const radioTxt = chm.radioKm > 0 ? `en ${chm.radioKm} km` : "en cualquier distancia";
+    if (lista.length === 0) setAviso(`No hay choferes disponibles ${radioTxt}.`, true);
+    else setAviso(`🚗 ${lista.length} chofer${lista.length === 1 ? "" : "es"} disponible${lista.length === 1 ? "" : "s"} ${radioTxt}`);
   }
 
   function contactarChofer(ch) {
     const tel = (ch.telefono || "").replace(/[^0-9+]/g, "");
-    if (!tel) {
-      alert("Este chofer no tiene teléfono público. Pídele un viaje para que te contacte.");
-      return;
-    }
+    if (!tel) return alert("Este chofer no tiene teléfono público.");
     const texto = encodeURIComponent(`Hola ${ch.nombre || ""}, te contacto desde ALKILO.`);
     window.open(`https://wa.me/${tel.replace(/^\+/, "")}?text=${texto}`, "_blank");
   }
@@ -210,28 +182,24 @@
   async function cargarChoferes() {
     if (!chm.mapa || chm.pausado) return;
     try {
-      const { data, error } = await db.rpc("choferes_cercanos", { p_limite: 50 });
-      if (error) {
-        console.warn("[mapa-choferes] error rpc:", error);
-        setAviso("No se pudo cargar la lista de choferes.", true);
-        return;
+      const params = {
+        p_limite: 100,
+        p_radio_km: chm.radioKm > 0 ? chm.radioKm : 0,
+      };
+      if (chm.miLat != null && chm.miLng != null) {
+        params.p_lat = chm.miLat;
+        params.p_lng = chm.miLng;
       }
+      const { data, error } = await db.rpc("choferes_cercanos", params);
+      if (error) { console.warn("[chm] rpc error:", error); setAviso("No se pudo cargar la lista.", true); return; }
       pintarChoferes(data || []);
-    } catch (err) {
-      console.warn("[mapa-choferes] excepción:", err);
-    }
+    } catch (err) { console.warn("[chm] excepción:", err); }
   }
 
-  // ------------------------------------------------------------
-  // Realtime
-  // ------------------------------------------------------------
   function suscribirRealtime() {
     if (chm.canalRealtime) return;
-    chm.canalRealtime = db
-      .channel("choferes-online-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "choferes_online" }, () => {
-        cargarChoferes();
-      })
+    chm.canalRealtime = db.channel("choferes-online-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "choferes_online" }, () => cargarChoferes())
       .subscribe((s) => console.log("[Realtime choferes_online]", s));
   }
 
@@ -242,25 +210,15 @@
     }
   }
 
-  // ------------------------------------------------------------
-  // Abrir / cerrar pantalla
-  // ------------------------------------------------------------
   async function abrir() {
-    if (!el.pantalla_choferes_mapa) {
-      alert("Pantalla no encontrada. Revisa index.html.");
-      return;
-    }
-
-    if (typeof window.mostrarPantalla === "function") {
-      window.mostrarPantalla("pantalla-choferes-mapa");
-    } else {
+    if (!el.pantalla_choferes_mapa) return alert("Pantalla no encontrada.");
+    if (typeof window.mostrarPantalla === "function") window.mostrarPantalla("pantalla-choferes-mapa");
+    else {
       document.querySelectorAll(".pantalla").forEach((p) => p.classList.remove("activa"));
       el.pantalla_choferes_mapa.classList.add("activa");
     }
-
     chm.pausado = false;
     mostrarOverlay("Cargando mapa...");
-
     setTimeout(async () => {
       inicializarMapa();
       suscribirRealtime();
@@ -274,10 +232,8 @@
     chm.pausado = true;
     detenerRealtime();
     detenerRefreshAuto();
-
-    if (typeof window.mostrarPantalla === "function") {
-      window.mostrarPantalla("pantalla-perfil");
-    } else {
+    if (typeof window.mostrarPantalla === "function") window.mostrarPantalla("pantalla-perfil");
+    else {
       document.querySelectorAll(".pantalla").forEach((p) => p.classList.remove("activa"));
       document.getElementById("pantalla-perfil")?.classList.add("activa");
     }
@@ -287,57 +243,44 @@
     detenerRefreshAuto();
     chm.tickRefresh = setInterval(cargarChoferes, REFRESH_INTERVALO_MS);
   }
-
   function detenerRefreshAuto() {
-    if (chm.tickRefresh) {
-      clearInterval(chm.tickRefresh);
-      chm.tickRefresh = null;
-    }
+    if (chm.tickRefresh) { clearInterval(chm.tickRefresh); chm.tickRefresh = null; }
   }
 
-  // ------------------------------------------------------------
-  // Modo chofer: disponibilidad
-  // ------------------------------------------------------------
+  async function tieneServicioActivo() {
+    const { data: u } = await db.auth.getUser();
+    if (!u?.user) return false;
+    const { data, error } = await db.from("solicitudes").select("id")
+      .eq("chofer_id", u.user.id)
+      .in("estado", ["aceptado","en_camino","llego","en_curso"]).limit(1);
+    if (error) { console.warn("[chm] error servicio:", error); return false; }
+    return !!(data && data.length > 0);
+  }
+
   async function activarDisponibilidad() {
-    const { data: userData } = await db.auth.getUser();
-    if (!userData?.user) return false;
-
-    // Verificar que el usuario sea chofer (defensa extra)
-    const { data: perfil } = await db
-      .from("perfiles")
-      .select("rol")
-      .eq("id", userData.user.id)
-      .maybeSingle();
-
-    if (perfil?.rol !== "chofer") {
-      alert("Solo los choferes pueden activar la disponibilidad.");
+    const { data: u } = await db.auth.getUser();
+    if (!u?.user) return false;
+    const { data: p } = await db.from("perfiles").select("rol").eq("id", u.user.id).maybeSingle();
+    if (p?.rol !== "chofer") { alert("Solo los choferes pueden activar la disponibilidad."); return false; }
+    if (await tieneServicioActivo()) {
+      alert("Tienes un servicio activo. Finalízalo o cancélalo antes de ponerte disponible.");
       return false;
     }
-
     const { error } = await db.from("choferes_online").upsert({
-      chofer_id: userData.user.id,
-      activo: true,
-      actualizado_en: new Date().toISOString(),
+      chofer_id: u.user.id, activo: true, actualizado_en: new Date().toISOString(),
     }, { onConflict: "chofer_id" });
-
-    if (error) {
-      alert("No se pudo activar tu disponibilidad: " + error.message);
-      return false;
-    }
-
+    if (error) { alert("No se pudo activar: " + error.message); return false; }
     iniciarEnvioUbicacion();
     chm.disponible = true;
     return true;
   }
 
   async function desactivarDisponibilidad() {
-    const { data: userData } = await db.auth.getUser();
-    if (!userData?.user) return;
-
+    const { data: u } = await db.auth.getUser();
+    if (!u?.user) return;
     await db.from("choferes_online")
       .update({ activo: false, actualizado_en: new Date().toISOString() })
-      .eq("chofer_id", userData.user.id);
-
+      .eq("chofer_id", u.user.id);
     detenerEnvioUbicacion();
     chm.disponible = false;
   }
@@ -345,20 +288,19 @@
   function iniciarEnvioUbicacion() {
     if (chm.watchId != null) return;
     if (!navigator.geolocation) return;
-
     chm.watchId = navigator.geolocation.watchPosition(
       async (pos) => {
-        const { data: userData } = await db.auth.getUser();
-        if (!userData?.user) return;
+        const { data: u } = await db.auth.getUser();
+        if (!u?.user) return;
         await db.from("choferes_online").upsert({
-          chofer_id: userData.user.id,
+          chofer_id: u.user.id,
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
           activo: true,
           actualizado_en: new Date().toISOString(),
         }, { onConflict: "chofer_id" });
       },
-      (err) => console.warn("[mapa-choferes] GPS error:", err),
+      (err) => console.warn("[chm] GPS error:", err),
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
     );
   }
@@ -370,61 +312,66 @@
     }
   }
 
-  // ------------------------------------------------------------
-  // Refrescar el switch
-  // ------------------------------------------------------------
   async function refrescarEstadoSwitch() {
     const sw = document.getElementById("chm-switch-disponible");
+    const card = document.getElementById("chm-switch-wrapper");
+    const sub = card?.querySelector(".chm-switch-sub");
+    const titulo = card?.querySelector(".chm-switch-titulo");
     if (!sw) return;
 
-    // Verificar que sea chofer
-    const { data: userData } = await db.auth.getUser();
-    if (!userData?.user) return;
+    const { data: u } = await db.auth.getUser();
+    if (!u?.user) return;
 
-    const { data: perfil } = await db
-      .from("perfiles")
-      .select("rol")
-      .eq("id", userData.user.id)
-      .maybeSingle();
+    const { data: p } = await db.from("perfiles").select("rol").eq("id", u.user.id).maybeSingle();
+    if (p?.rol !== "chofer") { card?.classList.add("oculto"); return; }
+    card?.classList.remove("oculto");
 
-    // Ocultar el switch si NO es chofer
-    const cardSwitch = document.getElementById("chm-switch-wrapper");
-    if (perfil?.rol !== "chofer") {
-      cardSwitch?.classList.add("oculto");
+    const activo = await tieneServicioActivo();
+    if (activo) {
+      sw.checked = false; sw.disabled = true;
+      if (titulo) titulo.textContent = "🔴 Ocupado con servicio";
+      if (sub) sub.textContent = "Termina el servicio actual para estar disponible";
+      await db.from("choferes_online")
+        .update({ activo: false, actualizado_en: new Date().toISOString() })
+        .eq("chofer_id", u.user.id);
+      detenerEnvioUbicacion();
+      chm.disponible = false;
       return;
     }
-    cardSwitch?.classList.remove("oculto");
 
-    const { data } = await db
-      .from("choferes_online")
-      .select("activo, actualizado_en")
-      .eq("chofer_id", userData.user.id)
-      .maybeSingle();
+    sw.disabled = false;
+    if (titulo) titulo.textContent = "🟢 Estar disponible";
+    if (sub) sub.textContent = "Aparecerás en el mapa de clientes";
 
-    let activo = !!(data?.activo);
+    const { data } = await db.from("choferes_online")
+      .select("activo, actualizado_en").eq("chofer_id", u.user.id).maybeSingle();
 
-    if (activo && data?.actualizado_en) {
-      const diff = Date.now() - new Date(data.actualizado_en).getTime();
-      if (diff > 10 * 60 * 1000) activo = false;
+    let act = !!(data?.activo);
+    if (act && data?.actualizado_en) {
+      const d = Date.now() - new Date(data.actualizado_en).getTime();
+      if (d > 10 * 60 * 1000) act = false;
     }
-
-    sw.checked = activo;
-    chm.disponible = activo;
-
-    if (activo && chm.watchId == null) {
-      iniciarEnvioUbicacion();
-    }
+    sw.checked = act;
+    chm.disponible = act;
+    if (act && chm.watchId == null) iniciarEnvioUbicacion();
   }
 
-  // ------------------------------------------------------------
-  // Eventos
-  // ------------------------------------------------------------
   function conectarEventos() {
     el.chm_btn_volver?.addEventListener("click", cerrar);
     el.chm_btn_refrescar?.addEventListener("click", async () => {
       mostrarOverlay("Actualizando...");
       await cargarChoferes();
       ocultarOverlay();
+    });
+
+    // Chips de radio
+    el.chm_radio_chips?.querySelectorAll(".chm-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        el.chm_radio_chips.querySelectorAll(".chm-chip").forEach((c) => c.classList.remove("activo"));
+        chip.classList.add("activo");
+        chm.radioKm = Number(chip.getAttribute("data-radio")) || 0;
+        cargarChoferes();
+      });
     });
 
     document.addEventListener("change", async (e) => {
@@ -434,10 +381,8 @@
       if (sw.checked) {
         const ok = await activarDisponibilidad();
         if (!ok) sw.checked = false;
-        else console.log("[mapa-choferes] disponible = true");
       } else {
         await desactivarDisponibilidad();
-        console.log("[mapa-choferes] disponible = false");
       }
       sw.disabled = false;
     });
@@ -453,9 +398,6 @@
     });
   }
 
-  // ------------------------------------------------------------
-  // Init
-  // ------------------------------------------------------------
   function init() {
     if (chm.inicializado) return;
     chm.inicializado = true;
@@ -464,6 +406,15 @@
 
     window.abrirMapaChoferes = abrir;
     window.refrescarEstadoSwitchChofer = refrescarEstadoSwitch;
+
+    window.__chmVerPerfil = (id) => {
+      if (typeof window.abrirPerfilPublico === "function") window.abrirPerfilPublico(id);
+      else alert("No se pudo abrir el perfil.");
+    };
+    window.__chmContactar = (id) => {
+      const ch = window.__chmChoferes?.[id];
+      if (ch) contactarChofer(ch);
+    };
 
     console.log("[mapa-choferes] módulo listo");
   }
