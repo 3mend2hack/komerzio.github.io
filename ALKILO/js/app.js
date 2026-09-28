@@ -611,10 +611,10 @@ async function cargarPerfilYMostrar() {
 }
 
 function ajustarBotonesPorRol(rol) {
-  document.querySelectorAll("[data-rol]").forEach((btn) => {
-    const rolBoton = btn.getAttribute("data-rol");
-    const mostrar = (rol === rolBoton);
-    btn.classList.toggle("oculto", !mostrar);
+  document.querySelectorAll("[data-rol]").forEach((elemento) => {
+    const rolElemento = elemento.getAttribute("data-rol");
+    const mostrar = (rol === rolElemento);
+    elemento.classList.toggle("oculto", !mostrar);
   });
 }
 
