@@ -8,15 +8,14 @@
   // ------------------------------------------------------------
   // Configuración
   // ------------------------------------------------------------
-  const REFRESH_INTERVALO_MS   = 15000; // recargar lista cada 15s
-  const HEARTBEAT_INTERVALO_MS = 10000; // no usado por ahora (watchPosition ya emite)
+  const REFRESH_INTERVALO_MS = 15000;
 
   // ------------------------------------------------------------
-  // Estado interno (no interfiere con app.js)
+  // Estado interno
   // ------------------------------------------------------------
   const chm = {
     mapa: null,
-    marcadores: {},       // choferId -> marker
+    marcadores: {},
     marcadorYo: null,
     canalRealtime: null,
     tickRefresh: null,
@@ -104,7 +103,6 @@
 
     setTimeout(() => chm.mapa?.invalidateSize(), 250);
 
-    // Centrar en la ubicación del usuario (cliente)
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -155,7 +153,6 @@
   function pintarChoferes(lista) {
     if (!chm.mapa) return;
 
-    // Limpiar marcadores que ya no están en la lista
     const idsActuales = new Set(lista.map((c) => c.chofer_id));
     Object.keys(chm.marcadores).forEach((id) => {
       if (!idsActuales.has(id)) {
@@ -164,7 +161,6 @@
       }
     });
 
-    // Pintar / actualizar los actuales
     lista.forEach((ch) => {
       if (ch.lat == null || ch.lng == null) return;
       const pos = [Number(ch.lat), Number(ch.lng)];
@@ -227,7 +223,7 @@
   }
 
   // ------------------------------------------------------------
-  // Realtime de choferes_online
+  // Realtime
   // ------------------------------------------------------------
   function suscribirRealtime() {
     if (chm.canalRealtime) return;
@@ -306,6 +302,18 @@
     const { data: userData } = await db.auth.getUser();
     if (!userData?.user) return false;
 
+    // Verificar que el usuario sea chofer (defensa extra)
+    const { data: perfil } = await db
+      .from("perfiles")
+      .select("rol")
+      .eq("id", userData.user.id)
+      .maybeSingle();
+
+    if (perfil?.rol !== "chofer") {
+      alert("Solo los choferes pueden activar la disponibilidad.");
+      return false;
+    }
+
     const { error } = await db.from("choferes_online").upsert({
       chofer_id: userData.user.id,
       activo: true,
@@ -363,14 +371,29 @@
   }
 
   // ------------------------------------------------------------
-  // Refrescar el switch (para cuando el chofer abre su perfil)
+  // Refrescar el switch
   // ------------------------------------------------------------
   async function refrescarEstadoSwitch() {
     const sw = document.getElementById("chm-switch-disponible");
     if (!sw) return;
 
+    // Verificar que sea chofer
     const { data: userData } = await db.auth.getUser();
     if (!userData?.user) return;
+
+    const { data: perfil } = await db
+      .from("perfiles")
+      .select("rol")
+      .eq("id", userData.user.id)
+      .maybeSingle();
+
+    // Ocultar el switch si NO es chofer
+    const cardSwitch = document.getElementById("chm-switch-wrapper");
+    if (perfil?.rol !== "chofer") {
+      cardSwitch?.classList.add("oculto");
+      return;
+    }
+    cardSwitch?.classList.remove("oculto");
 
     const { data } = await db
       .from("choferes_online")
@@ -380,7 +403,6 @@
 
     let activo = !!(data?.activo);
 
-    // Si la fila es vieja (>10 min) lo dejamos como inactivo
     if (activo && data?.actualizado_en) {
       const diff = Date.now() - new Date(data.actualizado_en).getTime();
       if (diff > 10 * 60 * 1000) activo = false;
@@ -405,7 +427,6 @@
       ocultarOverlay();
     });
 
-    // Switch de disponibilidad (delegado para que funcione aunque se inserte después)
     document.addEventListener("change", async (e) => {
       if (!e.target || e.target.id !== "chm-switch-disponible") return;
       const sw = e.target;
@@ -421,7 +442,6 @@
       sw.disabled = false;
     });
 
-    // Desactivar al cerrar/recargar la pestaña
     window.addEventListener("beforeunload", () => {
       if (chm.disponible && window.estado?.usuario?.id) {
         try {
@@ -442,8 +462,7 @@
     cachear();
     conectarEventos();
 
-    // Exponer funciones para que app.js las llame
-    window.abrirMapaChoferes        = abrir;
+    window.abrirMapaChoferes = abrir;
     window.refrescarEstadoSwitchChofer = refrescarEstadoSwitch;
 
     console.log("[mapa-choferes] módulo listo");
