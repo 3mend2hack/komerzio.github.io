@@ -1,6 +1,7 @@
 /* ============================================================
    ALKILO - FASE 1 + 2 + 3 + 4 + 4.5 + EXTRAS + 5 + 6 + PAGOS
    Con recuperación de contraseña y confirmación de email
+   + Módulo de choferes cercanos (mapa)
    ============================================================ */
 
 // ------------------------------------------------------------
@@ -84,6 +85,7 @@ const PANTALLAS = [
   "pantalla-admin-precio",
   "pantalla-admin-pagos",
   "pantalla-perfil-publico",
+  "pantalla-choferes-mapa",
   "pantalla-cargando",
 ];
 
@@ -92,6 +94,7 @@ function mostrarPantalla(id) {
   document.getElementById(id)?.classList.add("activa");
   window.scrollTo({ top: 0, behavior: "instant" });
 }
+window.mostrarPantalla = mostrarPantalla;
 
 function setMensaje(idElemento, texto) {
   const e = document.getElementById(idElemento);
@@ -163,7 +166,6 @@ function cachearElementos() {
     "btn-volver-perfil-publico",
     "pp-foto","pp-nombre","pp-rol","pp-estrellas-visual","pp-promedio","pp-total","pp-miembro",
     "pp-resenas",
-    // Recuperación
     "ir-a-recuperar","ir-a-registro","ir-a-login",
     "ir-a-login-desde-recuperar","ir-a-login-desde-reset",
   ].forEach((id) => { el[id.replace(/-/g,"_")] = document.getElementById(id); });
@@ -220,6 +222,15 @@ function conectarNavegacion() {
   el.btn_ir_mis_solicitudes?.addEventListener("click", () => {
     mostrarPantalla("pantalla-mis-solicitudes");
     cargarMisSolicitudes();
+  });
+
+  // Botón "Choferes cercanos" (cliente) → abre el módulo independiente
+  document.getElementById("btn-ver-choferes-mapa")?.addEventListener("click", () => {
+    if (typeof window.abrirMapaChoferes === "function") {
+      window.abrirMapaChoferes();
+    } else {
+      alert("El módulo de mapa aún no está cargado.");
+    }
   });
 
   el.btn_ir_disponibles?.addEventListener("click", async () => {
@@ -408,7 +419,6 @@ async function registrarUsuario(e) {
 
   if (error) return setMensaje("registro-error", traducirError(error.message));
 
-  // Caso confirmación de email activada
   if (!data.session) {
     setMensaje("registro-error", "");
     setMensaje(
@@ -419,7 +429,6 @@ async function registrarUsuario(e) {
     return;
   }
 
-  // Confirmación desactivada → sesión directa
   await cargarPerfilYMostrar();
 }
 
@@ -449,7 +458,7 @@ async function iniciarSesion(e) {
 }
 
 // ------------------------------------------------------------
-// 8) Recuperar contraseña — solicitar email
+// 8) Recuperar contraseña
 // ------------------------------------------------------------
 async function solicitarRecuperacion(e) {
   e.preventDefault();
@@ -468,7 +477,6 @@ async function solicitarRecuperacion(e) {
   setBotonCargando(boton, false, "Enviar enlace de recuperación");
 
   if (error) {
-    // Por seguridad no revelamos si el correo existe, pero mostramos error genérico si hay problema real
     const m = error.message.toLowerCase();
     if (m.includes("rate limit")) {
       return setMensaje("recuperar-error", "Demasiados intentos. Espera unos minutos.");
@@ -484,7 +492,7 @@ async function solicitarRecuperacion(e) {
 }
 
 // ------------------------------------------------------------
-// 9) Reset de contraseña — guardar nueva
+// 9) Reset de contraseña
 // ------------------------------------------------------------
 async function guardarNuevaPassword(e) {
   e.preventDefault();
@@ -511,7 +519,6 @@ async function guardarNuevaPassword(e) {
   estado.modoRecuperacion = false;
   el.form_reset.reset();
 
-  // Cerrar sesión y volver al login (para que el usuario entre con la nueva)
   setTimeout(async () => {
     await db.auth.signOut();
     limpiarMensajes();
@@ -585,6 +592,11 @@ async function cargarPerfilYMostrar() {
     pintarBannerSuscripcion();
     await cargarCalificacionesHechas();
     iniciarRealtime();
+
+    // Refrescar el switch de disponibilidad si es chofer
+    if (perfil.rol === "chofer" && typeof window.refrescarEstadoSwitchChofer === "function") {
+      setTimeout(() => window.refrescarEstadoSwitchChofer(), 300);
+    }
 
     if (perfil.rol === "chofer" && !estado.suscripcion) {
       mostrarPantalla("pantalla-sin-suscripcion");
@@ -2368,6 +2380,7 @@ async function abrirPerfilPublico(usuarioId) {
   el.pp_resenas.innerHTML = "";
   resenas.forEach((r) => el.pp_resenas.appendChild(renderResena(r)));
 }
+window.abrirPerfilPublico = abrirPerfilPublico;
 
 function dibujarEstrellas(promedio) {
   const llenas = Math.round(promedio);
@@ -2451,7 +2464,6 @@ function escucharAuth() {
   db.auth.onAuthStateChange((evento, session) => {
     console.log("[Auth event]", evento);
 
-    // Recuperación de contraseña: el usuario entró por el link del email
     if (evento === "PASSWORD_RECOVERY") {
       estado.modoRecuperacion = true;
       limpiarMensajes();
@@ -2486,17 +2498,14 @@ async function iniciarApp() {
 
   mostrarPantalla("pantalla-cargando");
 
-  // Detectar si viene de un link de recuperación (hash en la URL)
   const hash = window.location.hash || "";
   const tieneTokenRecuperacion =
     hash.includes("type=recovery") ||
-    hash.includes("access_token=") && hash.includes("type=recovery");
+    (hash.includes("access_token=") && hash.includes("type=recovery"));
 
   if (tieneTokenRecuperacion) {
-    // Supabase dispara PASSWORD_RECOVERY en onAuthStateChange cuando procesa el token
     setTimeout(() => {
       if (!estado.modoRecuperacion) {
-        // Fallback por si el evento tarda
         estado.modoRecuperacion = true;
         limpiarMensajes();
         el.form_reset?.reset();
