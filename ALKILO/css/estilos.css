@@ -1,7 +1,7 @@
 /* ============================================================
-   ALKILO - Estilos
-   FASE 1 + 2 + 3 + 4 + 4.5 + EXTRAS + FASE 5
-   Mobile-first.
+   ALKILO - Estilos globales
+   FASE 1 + 2 + 3 + 4 + 4.5 + EXTRAS + 5 + 6 + PAGOS + MAPA
+   Mobile-first
    ============================================================ */
 
 /* ---------- Reset básico ---------- */
@@ -168,6 +168,18 @@ body {
   text-decoration: none;
 }
 .cambiar-pantalla a:hover { text-decoration: underline; }
+
+.enlace-olvide {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.9rem;
+}
+.enlace-olvide a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+.enlace-olvide a:hover { text-decoration: underline; }
 
 /* ---------- Mensajes ---------- */
 .mensaje-error,
@@ -415,6 +427,7 @@ body {
   cursor: pointer;
   border: none;
 }
+
 .btn-aceptar { background: #16a34a; color: #ffffff; }
 .btn-aceptar:hover { background: #15803d; }
 
@@ -460,8 +473,20 @@ body {
 }
 .btn-otorgar:hover { background: #15803d; }
 
+.btn-ver-perfil {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db !important;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-ver-perfil:hover { background: #e5e7eb; }
+
 /* ============================================================
-   Mapa
+   Mapa en vivo
    ============================================================ */
 .mapa-contenedor {
   flex: 1;
@@ -769,7 +794,7 @@ body {
 }
 
 /* ============================================================
-   FASE 5: Banner de suscripción en el perfil
+   FASE 5: Banner de suscripción
    ============================================================ */
 .banner-suscripcion {
   background: #fef3c7;
@@ -882,7 +907,7 @@ body {
   color: #ffffff;
 }
 
-/* Tarjeta de usuario (admin) */
+/* Tarjeta admin */
 .tarjeta-admin {
   background: #ffffff;
   border: 1px solid #e5e7eb;
@@ -937,19 +962,44 @@ body {
 .estado-suscripcion.expirada  { background: #fee2e2; color: #991b1b; }
 .estado-suscripcion.sin       { background: #f3f4f6; color: #6b7280; }
 
-.tarjeta-admin .acciones-tarjeta {
-  margin-top: 0;
+.tarjeta-admin .acciones-tarjeta { margin-top: 0; }
+
+/* Botón ver comprobante (admin pagos) */
+.btn-ver-comprobante {
+  display: inline-block;
+  padding: 8px 12px;
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+.btn-ver-comprobante:hover { background: #dbeafe; }
+
+.badge-estado-pago {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-estado-pago.pendiente { background: #fef3c7; color: #92400e; }
+.badge-estado-pago.aprobada  { background: #d1fae5; color: #065f46; }
+.badge-estado-pago.rechazada { background: #fee2e2; color: #991b1b; }
+
+.nota-admin {
+  font-size: 0.85rem;
+  color: #4b5563;
+  font-style: italic;
+  border-left: 3px solid #e5e7eb;
+  padding-left: 8px;
+  margin-top: 4px;
 }
 
-/* ---------- Pantallas muy pequeñas ---------- */
-@media (max-width: 360px) {
-  .logo { font-size: 2rem; }
-  body { font-size: 15px; }
-  .barra-superior h2 { font-size: 1rem; }
-  .burbuja { max-width: 85%; }
-  .estrella { font-size: 2rem; }
-  .metrica-valor { font-size: 1.25rem; }
-}
 /* ============================================================
    FASE 6: Perfil público
    ============================================================ */
@@ -966,7 +1016,6 @@ body {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   margin-bottom: 24px;
 }
-
 #pp-foto {
   width: 110px;
   height: 110px;
@@ -975,17 +1024,13 @@ body {
   border: 3px solid #e5e7eb;
   background: #f3f4f6;
 }
-
 #pp-nombre {
   font-size: 1.3rem;
   font-weight: 800;
   color: #111827;
   margin: 4px 0 0;
 }
-
-#pp-rol {
-  margin-bottom: 8px;
-}
+#pp-rol { margin-bottom: 8px; }
 
 .pp-estrellas {
   display: flex;
@@ -993,13 +1038,11 @@ body {
   gap: 10px;
   margin-top: 4px;
 }
-
 #pp-estrellas-visual {
   font-size: 1.5rem;
   color: #f59e0b;
   letter-spacing: 2px;
 }
-
 .pp-promedio {
   font-size: 1.15rem;
   font-weight: 800;
@@ -1030,13 +1073,11 @@ body {
   gap: 8px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
-
 .resena-item .resena-emisor {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
 .resena-item .resena-emisor img {
   width: 38px;
   height: 38px;
@@ -1045,24 +1086,20 @@ body {
   border: 2px solid #e5e7eb;
   background: #f3f4f6;
 }
-
 .resena-item .resena-emisor .nombre {
   font-weight: 700;
   font-size: 0.92rem;
   color: #111827;
 }
-
 .resena-item .resena-emisor .fecha {
   font-size: 0.75rem;
   color: #9ca3af;
 }
-
 .resena-item .resena-estrellas {
   font-size: 1.1rem;
   color: #f59e0b;
   letter-spacing: 1px;
 }
-
 .resena-item .resena-comentario {
   font-size: 0.92rem;
   color: #374151;
@@ -1072,15 +1109,29 @@ body {
   line-height: 1.4;
 }
 
-/* Botón para abrir el perfil público (en tarjetas de oferta) */
-.btn-ver-perfil {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db !important;
+/* ============================================================
+   Aviso: chofer tiene un servicio activo
+   ============================================================ */
+.aviso-servicio-activo {
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  color: #92400e;
+  padding: 10px 12px;
+  border-radius: 10px;
   font-size: 0.85rem;
-  padding: 6px 10px;
-  border-radius: 8px;
-  cursor: pointer;
   font-weight: 600;
+  text-align: center;
+  margin-top: 8px;
 }
-.btn-ver-perfil:hover { background: #e5e7eb; }
+
+/* ============================================================
+   Pantallas muy pequeñas
+   ============================================================ */
+@media (max-width: 360px) {
+  .logo { font-size: 2rem; }
+  body { font-size: 15px; }
+  .barra-superior h2 { font-size: 1rem; }
+  .burbuja { max-width: 85%; }
+  .estrella { font-size: 2rem; }
+  .metrica-valor { font-size: 1.25rem; }
+}

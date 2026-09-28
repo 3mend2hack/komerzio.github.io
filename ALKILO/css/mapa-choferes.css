@@ -53,7 +53,41 @@
 }
 .chm-btn-refrescar:hover { background: #f9fafb; }
 
-/* ---------- Aviso de estado (arriba del mapa) ---------- */
+/* ---------- Chips de radio de búsqueda ---------- */
+.chm-radio-chips {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+.chm-radio-chips::-webkit-scrollbar { display: none; }
+.chm-chip {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.chm-chip:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+.chm-chip.activo {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+/* ---------- Aviso de estado ---------- */
 .chm-aviso {
   padding: 8px 16px;
   background: #eff6ff;
@@ -145,10 +179,16 @@
   font-size: 0.75rem;
   margin-left: 4px;
 }
+.chm-popup .distancia {
+  font-size: 0.78rem;
+  color: #2563eb;
+  font-weight: 700;
+  margin-top: 2px;
+}
 .chm-popup .acciones {
   display: flex;
   gap: 6px;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 .chm-popup .acciones button {
   flex: 1;
