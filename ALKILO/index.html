@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>ALKILO</title>
   <link rel="stylesheet" href="css/estilos.css" />
+  <link rel="stylesheet" href="css/mapa-choferes.css" />
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -85,7 +86,7 @@
   </section>
 
   <!-- ============================================================
-       PANTALLA: RECUPERAR CONTRASEÑA (solicitar email)
+       PANTALLA: RECUPERAR CONTRASEÑA
        ============================================================ -->
   <section id="pantalla-recuperar" class="pantalla">
     <div class="contenedor">
@@ -113,7 +114,7 @@
   </section>
 
   <!-- ============================================================
-       PANTALLA: RESET (nueva contraseña tras venir del email)
+       PANTALLA: RESET (nueva contraseña)
        ============================================================ -->
   <section id="pantalla-reset" class="pantalla">
     <div class="contenedor">
@@ -164,21 +165,42 @@
       <div id="perfil-banner-suscripcion" class="banner-suscripcion oculto"></div>
 
       <div class="acciones-perfil">
+
         <button id="btn-ir-nueva-solicitud" class="btn-accion" data-rol="cliente">
           🚗 Pedir servicio
         </button>
+
         <button id="btn-ir-mis-solicitudes" class="btn-accion" data-rol="cliente">
           📋 Mis solicitudes
         </button>
+
+        <button id="btn-ver-choferes-mapa" class="btn-accion" data-rol="cliente">
+          🗺️ Choferes cercanos
+        </button>
+
+        <div id="chm-switch-wrapper" class="chm-switch-card" data-rol="chofer">
+          <div class="chm-switch-info">
+            <span class="chm-switch-titulo">🟢 Estar disponible</span>
+            <span class="chm-switch-sub">Aparecerás en el mapa de clientes</span>
+          </div>
+          <label class="chm-switch">
+            <input type="checkbox" id="chm-switch-disponible" />
+            <span class="chm-slider"></span>
+          </label>
+        </div>
+
         <button id="btn-ir-disponibles" class="btn-accion" data-rol="chofer">
           🔎 Solicitudes disponibles
         </button>
+
         <button id="btn-ir-mis-servicios" class="btn-accion" data-rol="chofer">
           🚕 Mis servicios aceptados
         </button>
+
         <button id="btn-ir-mi-suscripcion" class="btn-accion" data-rol="chofer">
           💳 Mi suscripción
         </button>
+
         <button id="btn-ir-panel-admin" class="btn-accion btn-admin" data-rol="admin">
           ⚙️ Panel de administrador
         </button>
@@ -657,6 +679,25 @@
   </section>
 
   <!-- ============================================================
+       PANTALLA: CHOFERES CERCANOS (cliente)
+       ============================================================ -->
+  <section id="pantalla-choferes-mapa" class="pantalla pantalla-choperes-mapa">
+    <header class="chm-cabecera">
+      <button class="chm-btn-volver" id="chm-btn-volver">← Volver</button>
+      <h2>Choferes cercanos</h2>
+      <button class="chm-btn-refrescar" id="chm-btn-refrescar">↻</button>
+    </header>
+
+    <div class="chm-aviso" id="chm-aviso">Cargando choferes…</div>
+
+    <div id="chm-mapa" class="chm-mapa"></div>
+
+    <div class="chm-overlay" id="chm-overlay">
+      <div class="caja" id="chm-overlay-texto">Cargando...</div>
+    </div>
+  </section>
+
+  <!-- ============================================================
        PANTALLA: CARGANDO
        ============================================================ -->
   <section id="pantalla-cargando" class="pantalla">
@@ -666,5 +707,6 @@
   </section>
 
   <script src="js/app.js"></script>
+  <script src="js/mapa-choferes.js"></script>
 </body>
 </html>
