@@ -260,3 +260,8 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Cuando el switch no aplica al rol del usuario, se oculta */
+.chm-switch-card.oculto {
+  display: none;
+}
