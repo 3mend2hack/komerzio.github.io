@@ -1,1 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ALKILO</title>
+  <link rel="stylesheet" href="css/estilos.css" />
 
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ============================================================
+       PANTALLA: LOGIN
+       ============================================================ -->
+  <section id="pantalla-login" class="pantalla activa">
+    <div class="contenedor">
+      <h1 class="logo">ALKILO</h1>
+      <p class="subtitulo">Inicia sesión</p>
+
+      <form id="form-login" class="formulario">
+        <label for="login-email">Correo</label>
+        <input type="email" id="login-email" required placeholder="tucorreo@ejemplo.com" autocomplete="email" />
+
+        <label for="login-password">Contraseña</label>
+        <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password" />
+
+        <button type="submit" class="btn-principal">Entrar</button>
+      </form>
+
+      <p class="mensaje-error" id="login-error"></p>
+
+      <p class="cambiar-pantalla">
+        ¿No tienes cuenta?
+        <a href="#" id="ir-a-registro">Regístrate</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: REGISTRO
+       ============================================================ -->
+  <section id="pantalla-registro" class="pantalla">
+    <div class="contenedor">
+      <h1 class="logo">ALKILO</h1>
+      <p class="subtitulo">Crear cuenta</p>
+
+      <form id="form-registro" class="formulario">
+        <label for="reg-nombre">Nombre completo</label>
+        <input type="text" id="reg-nombre" required placeholder="Juan Pérez" autocomplete="name" />
+
+        <label for="reg-telefono">Teléfono</label>
+        <input type="tel" id="reg-telefono" required placeholder="+58 412 000 0000" autocomplete="tel" />
+
+        <label for="reg-email">Correo</label>
+        <input type="email" id="reg-email" required placeholder="tucorreo@ejemplo.com" autocomplete="email" />
+
+        <label for="reg-password">Contraseña (mín. 6 caracteres)</label>
+        <input type="password" id="reg-password" required minlength="6" placeholder="••••••••" autocomplete="new-password" />
+
+        <label for="reg-rol">Quiero registrarme como</label>
+        <select id="reg-rol" required>
+          <option value="cliente">Cliente (gratis)</option>
+          <option value="chofer">Chofer (requiere suscripción)</option>
+        </select>
+
+        <button type="submit" class="btn-principal">Crear cuenta</button>
+      </form>
+
+      <p class="mensaje-error" id="registro-error"></p>
+
+      <p class="cambiar-pantalla">
+        ¿Ya tienes cuenta?
+        <a href="#" id="ir-a-login">Inicia sesión</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: PERFIL
+       ============================================================ -->
+  <section id="pantalla-perfil" class="pantalla">
+    <header class="barra-superior">
+      <h2>Mi perfil</h2>
+      <button id="btn-cerrar-sesion" class="btn-secundario">Salir</button>
+    </header>
+
+    <div class="contenedor">
+      <div class="avatar-contenedor">
+        <img id="perfil-foto" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='120' height='120' fill='%23e5e7eb'/><text x='50%25' y='55%25' font-size='60' text-anchor='middle' fill='%239ca3af' font-family='sans-serif'>?</text></svg>" alt="Foto de perfil" />
+        <label for="perfil-foto-input" class="btn-foto">Cambiar foto</label>
+        <input type="file" id="perfil-foto-input" accept="image/*" hidden />
+      </div>
+
+      <p id="perfil-rol" class="etiqueta-rol">—</p>
+
+      <div id="perfil-banner-suscripcion" class="banner-suscripcion oculto"></div>
+
+      <div class="acciones-perfil">
+        <button id="btn-ir-nueva-solicitud" class="btn-accion" data-rol="cliente">
+          🚗 Pedir servicio
+        </button>
+        <button id="btn-ir-mis-solicitudes" class="btn-accion" data-rol="cliente">
+          📋 Mis solicitudes
+        </button>
+        <button id="btn-ir-disponibles" class="btn-accion" data-rol="chofer">
+          🔎 Solicitudes disponibles
+        </button>
+        <button id="btn-ir-mis-servicios" class="btn-accion" data-rol="chofer">
+          🚕 Mis servicios aceptados
+        </button>
+        <button id="btn-ir-mi-suscripcion" class="btn-accion" data-rol="chofer">
+          💳 Mi suscripción
+        </button>
+        <button id="btn-ir-panel-admin" class="btn-accion btn-admin" data-rol="admin">
+          ⚙️ Panel de administrador
+        </button>
+      </div>
+
+      <form id="form-perfil" class="formulario">
+        <label for="perfil-nombre">Nombre</label>
+        <input type="text" id="perfil-nombre" required />
+
+        <label for="perfil-telefono">Teléfono</label>
+        <input type="tel" id="perfil-telefono" required />
+
+        <label for="perfil-email">Correo (no editable)</label>
+        <input type="email" id="perfil-email" disabled />
+
+        <button type="submit" class="btn-principal">Guardar cambios</button>
+      </form>
+
+      <p class="mensaje-exito" id="perfil-exito"></p>
+      <p class="mensaje-error" id="perfil-error"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: SIN SUSCRIPCIÓN
+       ============================================================ -->
+  <section id="pantalla-sin-suscripcion" class="pantalla">
+    <div class="contenedor">
+      <h1 class="logo">ALKILO</h1>
+      <div class="bloqueo-suscripcion">
+        <p class="icono-bloqueo">🔒</p>
+        <h2>Sin suscripción activa</h2>
+        <p class="texto-bloqueo">
+          Para ver y aceptar solicitudes necesitas una suscripción de chofer vigente.
+        </p>
+        <p class="texto-bloqueo">
+          Paga desde aquí, envía tu comprobante y el admin te activará el acceso.
+        </p>
+        <button id="btn-pagar-suscripcion" class="btn-principal" style="background:#16a34a">
+          💳 Pagar / Renovar suscripción
+        </button>
+        <button id="btn-salir-suscripcion" class="btn-secundario" style="width:100%">
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: NUEVA SOLICITUD
+       ============================================================ -->
+  <section id="pantalla-nueva-solicitud" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" data-volver="pantalla-perfil">← Volver</button>
+      <h2>Nuevo pedido</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div class="contenedor">
+      <form id="form-solicitud" class="formulario">
+        <label>Tipo de servicio</label>
+        <div class="opciones-tipo">
+          <label class="opcion-tipo">
+            <input type="radio" name="tipo" value="viaje" checked />
+            <span>🚗 Viaje</span>
+          </label>
+          <label class="opcion-tipo">
+            <input type="radio" name="tipo" value="delivery" />
+            <span>📦 Delivery / Recoger</span>
+          </label>
+        </div>
+
+        <label for="solicitud-origen">Origen (texto)</label>
+        <input type="text" id="solicitud-origen" required placeholder="Calle, número, referencia" />
+
+        <p class="texto-ayuda">
+          📍 El chofer te recogerá en tu <strong>ubicación actual en vivo</strong>.
+          Si quieres que vaya a otro lado, escríbelo arriba.
+        </p>
+
+        <label for="solicitud-destino">Destino (texto)</label>
+        <input type="text" id="solicitud-destino" required placeholder="A dónde va" />
+
+        <button type="button" id="btn-marcar-recogida" class="btn-accion">
+          📍 Marcar destino exacto en el mapa
+        </button>
+        <p class="texto-ayuda" id="estado-punto-recogida">
+          Sin punto de destino marcado en el mapa. (Opcional)
+        </p>
+
+        <label for="solicitud-notas">Notas (opcional)</label>
+        <textarea id="solicitud-notas" rows="3" placeholder="Detalles adicionales"></textarea>
+
+        <label for="solicitud-presupuesto">Presupuesto sugerido (opcional)</label>
+        <input type="number" id="solicitud-presupuesto" min="0" step="0.01" placeholder="Ej: 5.00" />
+
+        <button type="submit" class="btn-principal">Publicar solicitud</button>
+      </form>
+
+      <p class="mensaje-error" id="solicitud-error"></p>
+      <p class="mensaje-exito" id="solicitud-exito"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: MIS SOLICITUDES
+       ============================================================ -->
+  <section id="pantalla-mis-solicitudes" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" data-volver="pantalla-perfil">← Volver</button>
+      <h2>Mis solicitudes</h2>
+      <button id="btn-refrescar-mis" class="btn-secundario">↻</button>
+    </header>
+
+    <div class="contenedor">
+      <div id="lista-mis-solicitudes" class="lista-solicitudes">
+        <p class="vacio">Cargando...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: DISPONIBLES
+       ============================================================ -->
+  <section id="pantalla-solicitudes-disponibles" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" data-volver="pantalla-perfil">← Volver</button>
+      <h2>Disponibles</h2>
+      <button id="btn-refrescar-disponibles" class="btn-secundario">↻</button>
+    </header>
+
+    <div class="contenedor">
+      <div id="lista-disponibles" class="lista-solicitudes">
+        <p class="vacio">Cargando...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: MIS SERVICIOS
+       ============================================================ -->
+  <section id="pantalla-mis-servicios" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" data-volver="pantalla-perfil">← Volver</button>
+      <h2>Mis servicios</h2>
+      <button id="btn-refrescar-servicios" class="btn-secundario">↻</button>
+    </header>
+
+    <div class="contenedor">
+      <div id="lista-mis-servicios" class="lista-solicitudes">
+        <p class="vacio">Cargando...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: MAPA EN VIVO
+       ============================================================ -->
+  <section id="pantalla-mapa" class="pantalla pantalla-mapa-completa">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-mapa">← Volver</button>
+      <h2>En vivo</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div id="mapa" class="mapa-contenedor"></div>
+
+    <div class="info-mapa">
+      <p id="info-mapa-texto">Esperando ubicación…</p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: MAPA DESTINO
+       ============================================================ -->
+  <section id="pantalla-mapa-recogida" class="pantalla pantalla-mapa-completa">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-cancelar-recogida">← Cancelar</button>
+      <h2>Marcar destino</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div id="mapa-recogida" class="mapa-contenedor"></div>
+
+    <div class="info-mapa">
+      <p id="info-recogida-texto">Toca el mapa para marcar el destino exacto.</p>
+      <button id="btn-confirmar-recogida" class="btn-principal btn-confirmar-recogida" disabled>
+        Confirmar destino
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: CHAT
+       ============================================================ -->
+  <section id="pantalla-chat" class="pantalla pantalla-chat">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-chat">← Volver</button>
+      <h2 id="chat-titulo">Chat</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div id="chat-mensajes" class="chat-mensajes"></div>
+
+    <form id="form-chat" class="chat-form">
+      <input type="text" id="chat-input" placeholder="Escribe un mensaje…" autocomplete="off" required />
+      <button type="submit" class="btn-enviar">➤</button>
+    </form>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: OFERTA
+       ============================================================ -->
+  <section id="pantalla-oferta" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-oferta">← Volver</button>
+      <h2>Enviar oferta</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div class="contenedor">
+      <div id="oferta-resumen" class="resumen-solicitud"></div>
+
+      <form id="form-oferta" class="formulario">
+        <label for="oferta-monto">Monto propuesto ($)</label>
+        <input type="number" id="oferta-monto" min="0" step="0.01" required placeholder="Ej: 8.00" />
+
+        <label for="oferta-mensaje">Mensaje (opcional)</label>
+        <textarea id="oferta-mensaje" rows="3" placeholder="Ej: Incluye espera de 5 minutos"></textarea>
+
+        <button type="submit" class="btn-principal">Enviar oferta</button>
+      </form>
+
+      <p class="mensaje-error" id="oferta-error"></p>
+      <p class="mensaje-exito" id="oferta-exito"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: VER OFERTAS
+       ============================================================ -->
+  <section id="pantalla-ver-ofertas" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-ver-ofertas">← Volver</button>
+      <h2>Ofertas recibidas</h2>
+      <button id="btn-refrescar-ofertas" class="btn-secundario">↻</button>
+    </header>
+
+    <div class="contenedor">
+      <div id="lista-ofertas" class="lista-solicitudes">
+        <p class="vacio">Cargando...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: CALIFICAR
+       ============================================================ -->
+  <section id="pantalla-calificar" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-calificar">← Volver</button>
+      <h2>Calificar</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div class="contenedor">
+      <p id="calificar-titulo" class="subtitulo">¿Cómo estuvo el servicio?</p>
+
+      <div id="calificar-destinatario" class="resumen-solicitud"></div>
+
+      <div class="estrellas-contenedor" id="estrellas-contenedor">
+        <button type="button" class="estrella" data-valor="1">★</button>
+        <button type="button" class="estrella" data-valor="2">★</button>
+        <button type="button" class="estrella" data-valor="3">★</button>
+        <button type="button" class="estrella" data-valor="4">★</button>
+        <button type="button" class="estrella" data-valor="5">★</button>
+      </div>
+      <p id="estrellas-texto" class="texto-ayuda">Toca para calificar</p>
+
+      <form id="form-calificar" class="formulario">
+        <label for="calificar-comentario">Comentario (opcional)</label>
+        <textarea id="calificar-comentario" rows="3" placeholder="Cuéntanos tu experiencia"></textarea>
+
+        <button type="submit" class="btn-principal">Enviar calificación</button>
+      </form>
+
+      <p class="mensaje-error" id="calificar-error"></p>
+      <p class="mensaje-exito" id="calificar-exito"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: VER CALIFICACIÓN YA HECHA
+       ============================================================ -->
+  <section id="pantalla-ver-calificacion" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-ver-calificacion">← Volver</button>
+      <h2>Calificación enviada</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div class="contenedor">
+      <div id="ver-calificacion-contenido"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: PANEL ADMIN
+       ============================================================ -->
+  <section id="pantalla-admin" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" data-volver="pantalla-perfil">← Volver</button>
+      <h2>Panel admin</h2>
+      <button id="btn-refrescar-admin" class="btn-secundario">↻</button>
+    </header>
+
+    <div class="contenedor">
+      <div class="grid-metricas" id="admin-metricas">
+        <div class="metrica"><span class="metrica-valor" id="m-usuarios">—</span><span class="metrica-label">Usuarios</span></div>
+        <div class="metrica"><span class="metrica-valor" id="m-choferes">—</span><span class="metrica-label">Choferes</span></div>
+        <div class="metrica"><span class="metrica-valor" id="m-activos">—</span><span class="metrica-label">Suscrip. activas</span></div>
+        <div class="metrica"><span class="metrica-valor" id="m-solicitudes">—</span><span class="metrica-label">Solicitudes</span></div>
+        <div class="metrica"><span class="metrica-valor" id="m-completados">—</span><span class="metrica-label">Completados</span></div>
+        <div class="metrica"><span class="metrica-valor" id="m-ingresos">—</span><span class="metrica-label">Ingresos</span></div>
+      </div>
+
+      <div class="acciones-perfil" style="margin-top:20px">
+        <button id="btn-admin-usuarios" class="btn-accion">👥 Gestionar usuarios / choferes</button>
+        <button id="btn-admin-pagos" class="btn-accion">💰 Pagos pendientes</button>
+        <button id="btn-admin-solicitudes" class="btn-accion">📋 Ver todas las solicitudes</button>
+        <button id="btn-admin-precio" class="btn-accion">💵 Precios y tasas</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: ADMIN USUARIOS
+       ============================================================ -->
+  <section id="pantalla-admin-usuarios" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-admin-usuarios">← Volver</button>
+      <h2>Usuarios</h2>
+      <button id="btn-refrescar-admin-usuarios" class="btn-secundario">↻</button>
+    </header>
+
+    <div class="contenedor">
+      <div class="filtros-admin">
+        <button class="chip-filtro activo" data-filtro="todos">Todos</button>
+        <button class="chip-filtro" data-filtro="cliente">Clientes</button>
+        <button class="chip-filtro" data-filtro="chofer">Choferes</button>
+        <button class="chip-filtro" data-filtro="admin">Admins</button>
+      </div>
+
+      <div id="lista-admin-usuarios" class="lista-solicitudes">
+        <p class="vacio">Cargando...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: ADMIN SOLICITUDES
+       ============================================================ -->
+  <section id="pantalla-admin-solicitudes" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-admin-solicitudes">← Volver</button>
+      <h2>Solicitudes</h2>
+      <button id="btn-refrescar-admin-solicitudes" class="btn-secundario">↻</button>
+    </header>
+
+    <div class="contenedor">
+      <div id="lista-admin-solicitudes" class="lista-solicitudes">
+        <p class="vacio">Cargando...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: ADMIN PRECIOS Y TASAS
+       ============================================================ -->
+  <section id="pantalla-admin-precio" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-admin-precio">← Volver</button>
+      <h2>Precios y tasas</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div class="contenedor">
+
+      <form id="form-admin-precio" class="formulario">
+
+        <h3 class="titulo-seccion">Tasa cripto</h3>
+        <p class="texto-ayuda">
+          Cuánto saldo se acredita por cada USDT recibido.
+        </p>
+
+        <label for="admin-tasa-input">1 USDT = ? de saldo</label>
+        <input type="number" id="admin-tasa-input" min="0.01" step="0.01" required placeholder="Ej: 300" />
+
+        <h3 class="titulo-seccion" style="margin-top:24px">Precios de planes (en saldo)</h3>
+        <p class="texto-ayuda">
+          Estos son los precios que el chofer verá al activar su plan usando saldo interno.
+        </p>
+
+        <label for="admin-plan-1">1 mes</label>
+        <input type="number" id="admin-plan-1" min="0" step="0.01" required placeholder="Ej: 200" />
+
+        <label for="admin-plan-3">3 meses</label>
+        <input type="number" id="admin-plan-3" min="0" step="0.01" required placeholder="Ej: 700" />
+
+        <label for="admin-plan-6">6 meses</label>
+        <input type="number" id="admin-plan-6" min="0" step="0.01" required placeholder="Ej: 1200" />
+
+        <label for="admin-plan-12">12 meses</label>
+        <input type="number" id="admin-plan-12" min="0" step="0.01" required placeholder="Ej: 2000" />
+
+        <button type="submit" class="btn-principal">💾 Guardar todos los cambios</button>
+      </form>
+
+      <p class="mensaje-exito" id="admin-precio-exito"></p>
+      <p class="mensaje-error" id="admin-precio-error"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: ADMIN - PAGOS PENDIENTES
+       ============================================================ -->
+  <section id="pantalla-admin-pagos" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-admin-pagos">← Volver</button>
+      <h2>Pagos pendientes</h2>
+      <button id="btn-refrescar-admin-pagos" class="btn-secundario">↻</button>
+    </header>
+
+    <div class="contenedor">
+      <div class="filtros-admin">
+        <button class="chip-filtro-pago activo" data-filtro-pago="pendiente">Pendientes</button>
+        <button class="chip-filtro-pago" data-filtro-pago="aprobada">Aprobadas</button>
+        <button class="chip-filtro-pago" data-filtro-pago="rechazada">Rechazadas</button>
+        <button class="chip-filtro-pago" data-filtro-pago="todas">Todas</button>
+      </div>
+
+      <div id="lista-admin-pagos" class="lista-solicitudes">
+        <p class="vacio">Cargando...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: PERFIL PÚBLICO
+       ============================================================ -->
+  <section id="pantalla-perfil-publico" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-perfil-publico">← Volver</button>
+      <h2>Perfil</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div class="contenedor">
+      <div class="perfil-publico-cabecera">
+        <img id="pp-foto" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='120' height='120' fill='%23e5e7eb'/><text x='50%25' y='55%25' font-size='60' text-anchor='middle' fill='%239ca3af' font-family='sans-serif'>?</text></svg>" alt="Foto" />
+        <h2 id="pp-nombre">—</h2>
+        <p id="pp-rol" class="etiqueta-rol">—</p>
+
+        <div class="pp-estrellas">
+          <span id="pp-estrellas-visual">★★★★★</span>
+          <span id="pp-promedio" class="pp-promedio">0.0</span>
+        </div>
+        <p id="pp-total" class="texto-ayuda">Sin calificaciones aún</p>
+        <p id="pp-miembro" class="texto-ayuda"></p>
+      </div>
+
+      <h3 class="titulo-seccion">Reseñas</h3>
+      <div id="pp-resenas" class="lista-solicitudes">
+        <p class="vacio">Cargando...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: CARGANDO
+       ============================================================ -->
+  <section id="pantalla-cargando" class="pantalla">
+    <div class="contenedor centrado">
+      <p>Cargando...</p>
+    </div>
+  </section>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
