@@ -1,6 +1,6 @@
 /* ============================================================
    ALKILO - FASE 1 + 2 + 3 + 4 + 4.5 + EXTRAS + 5 + 6 + PAGOS
-   Con saldo interno, tasas configurables y aprobación de recargas
+   Con recuperación de contraseña y confirmación de email
    ============================================================ */
 
 // ------------------------------------------------------------
@@ -28,6 +28,7 @@ const estado = {
   usuariosAdmin: [],
   pagosAdmin: [],
   origenPerfilPublico: "pantalla-perfil",
+  modoRecuperacion: false,
 };
 
 const realtime = {
@@ -62,6 +63,8 @@ const calificacion = {
 const PANTALLAS = [
   "pantalla-login",
   "pantalla-registro",
+  "pantalla-recuperar",
+  "pantalla-reset",
   "pantalla-perfil",
   "pantalla-sin-suscripcion",
   "pantalla-nueva-solicitud",
@@ -96,7 +99,10 @@ function setMensaje(idElemento, texto) {
 }
 
 function limpiarMensajes() {
-  ["login-error","registro-error","perfil-error","perfil-exito",
+  ["login-error","registro-error","registro-exito",
+   "recuperar-error","recuperar-exito",
+   "reset-error","reset-exito",
+   "perfil-error","perfil-exito",
    "solicitud-error","solicitud-exito",
    "oferta-error","oferta-exito",
    "calificar-error","calificar-exito",
@@ -117,7 +123,11 @@ const el = {};
 function cachearElementos() {
   [
     "form-login","form-registro","form-perfil","form-solicitud",
-    "login-error","registro-error","perfil-error","perfil-exito",
+    "form-recuperar","form-reset",
+    "login-error","registro-error","registro-exito",
+    "recuperar-error","recuperar-exito","recuperar-email",
+    "reset-error","reset-exito","reset-password","reset-password2",
+    "perfil-error","perfil-exito",
     "solicitud-error","solicitud-exito",
     "perfil-foto","perfil-foto-input","perfil-rol",
     "perfil-nombre","perfil-telefono","perfil-email",
@@ -153,6 +163,9 @@ function cachearElementos() {
     "btn-volver-perfil-publico",
     "pp-foto","pp-nombre","pp-rol","pp-estrellas-visual","pp-promedio","pp-total","pp-miembro",
     "pp-resenas",
+    // Recuperación
+    "ir-a-recuperar","ir-a-registro","ir-a-login",
+    "ir-a-login-desde-recuperar","ir-a-login-desde-reset",
   ].forEach((id) => { el[id.replace(/-/g,"_")] = document.getElementById(id); });
 }
 
@@ -165,6 +178,19 @@ function conectarNavegacion() {
   });
   document.getElementById("ir-a-login")?.addEventListener("click", (e) => {
     e.preventDefault(); limpiarMensajes(); mostrarPantalla("pantalla-login");
+  });
+  document.getElementById("ir-a-recuperar")?.addEventListener("click", (e) => {
+    e.preventDefault(); limpiarMensajes();
+    el.form_recuperar?.reset();
+    mostrarPantalla("pantalla-recuperar");
+  });
+  document.getElementById("ir-a-login-desde-recuperar")?.addEventListener("click", (e) => {
+    e.preventDefault(); limpiarMensajes(); mostrarPantalla("pantalla-login");
+  });
+  document.getElementById("ir-a-login-desde-reset")?.addEventListener("click", (e) => {
+    e.preventDefault(); limpiarMensajes();
+    estado.modoRecuperacion = false;
+    mostrarPantalla("pantalla-login");
   });
 
   document.querySelectorAll("[data-volver]").forEach((btn) => {
@@ -269,13 +295,11 @@ function conectarNavegacion() {
     });
   });
 
-  // Bloqueo / pagar suscripción
   el.btn_salir_suscripcion?.addEventListener("click", cerrarSesion);
   el.btn_pagar_suscripcion?.addEventListener("click", () => {
     window.location.href = URL_SUSCRIPCION;
   });
 
-  // Admin
   el.btn_ir_panel_admin?.addEventListener("click", () => {
     mostrarPantalla("pantalla-admin");
     cargarMetricasAdmin();
@@ -341,7 +365,6 @@ function conectarNavegacion() {
     });
   });
 
-  // Perfil público
   el.btn_volver_perfil_publico?.addEventListener("click", () => {
     mostrarPantalla(estado.origenPerfilPublico || "pantalla-perfil");
     if (estado.origenPerfilPublico === "pantalla-mis-solicitudes") cargarMisSolicitudes();
@@ -375,19 +398,28 @@ async function registrarUsuario(e) {
 
   const { data, error } = await db.auth.signUp({
     email, password,
-    options: { data: { nombre, telefono, rol } },
+    options: {
+      data: { nombre, telefono, rol },
+      emailRedirectTo: window.location.href.replace(/[^/]*$/, ""),
+    },
   });
 
   setBotonCargando(boton, false, "Crear cuenta");
 
   if (error) return setMensaje("registro-error", traducirError(error.message));
 
+  // Caso confirmación de email activada
   if (!data.session) {
-    setMensaje("registro-error", "Cuenta creada. Revisa tu correo para confirmarla.");
+    setMensaje("registro-error", "");
+    setMensaje(
+      "registro-exito",
+      "✅ Cuenta creada. Revisa tu correo y confirma tu cuenta antes de iniciar sesión."
+    );
     el.form_registro.reset();
     return;
   }
 
+  // Confirmación desactivada → sesión directa
   await cargarPerfilYMostrar();
 }
 
@@ -417,7 +449,78 @@ async function iniciarSesion(e) {
 }
 
 // ------------------------------------------------------------
-// 8) Cerrar sesión
+// 8) Recuperar contraseña — solicitar email
+// ------------------------------------------------------------
+async function solicitarRecuperacion(e) {
+  e.preventDefault();
+  limpiarMensajes();
+
+  const email = el.recuperar_email.value.trim();
+  if (!email) return setMensaje("recuperar-error", "Escribe tu correo.");
+
+  const boton = el.form_recuperar.querySelector("button[type=submit]");
+  setBotonCargando(boton, true, "Enviando...");
+
+  const { error } = await db.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.href.split("?")[0].split("#")[0],
+  });
+
+  setBotonCargando(boton, false, "Enviar enlace de recuperación");
+
+  if (error) {
+    // Por seguridad no revelamos si el correo existe, pero mostramos error genérico si hay problema real
+    const m = error.message.toLowerCase();
+    if (m.includes("rate limit")) {
+      return setMensaje("recuperar-error", "Demasiados intentos. Espera unos minutos.");
+    }
+    return setMensaje("recuperar-error", traducirError(error.message));
+  }
+
+  setMensaje(
+    "recuperar-exito",
+    "✅ Si ese correo está registrado, recibirás un enlace para restablecer tu contraseña en unos minutos."
+  );
+  el.form_recuperar.reset();
+}
+
+// ------------------------------------------------------------
+// 9) Reset de contraseña — guardar nueva
+// ------------------------------------------------------------
+async function guardarNuevaPassword(e) {
+  e.preventDefault();
+  limpiarMensajes();
+
+  const p1 = el.reset_password.value;
+  const p2 = el.reset_password2.value;
+
+  if (!p1 || !p2) return setMensaje("reset-error", "Completa ambos campos.");
+  if (p1.length < 6) return setMensaje("reset-error", "Mínimo 6 caracteres.");
+  if (p1 !== p2) return setMensaje("reset-error", "Las contraseñas no coinciden.");
+
+  const boton = el.form_reset.querySelector("button[type=submit]");
+  setBotonCargando(boton, true, "Guardando...");
+
+  const { error } = await db.auth.updateUser({ password: p1 });
+
+  setBotonCargando(boton, false, "Guardar nueva contraseña");
+
+  if (error) return setMensaje("reset-error", traducirError(error.message));
+
+  setMensaje("reset-exito", "✅ Contraseña actualizada. Redirigiendo...");
+
+  estado.modoRecuperacion = false;
+  el.form_reset.reset();
+
+  // Cerrar sesión y volver al login (para que el usuario entre con la nueva)
+  setTimeout(async () => {
+    await db.auth.signOut();
+    limpiarMensajes();
+    mostrarPantalla("pantalla-login");
+  }, 1200);
+}
+
+// ------------------------------------------------------------
+// 10) Cerrar sesión
 // ------------------------------------------------------------
 async function cerrarSesion() {
   detenerRealtime();
@@ -432,7 +535,7 @@ async function cerrarSesion() {
 }
 
 // ------------------------------------------------------------
-// 9) Cargar perfil
+// 11) Cargar perfil
 // ------------------------------------------------------------
 async function cargarPerfilYMostrar() {
   try {
@@ -529,7 +632,7 @@ function pintarBannerSuscripcion() {
 }
 
 // ------------------------------------------------------------
-// 10) Guardar perfil
+// 12) Guardar perfil
 // ------------------------------------------------------------
 async function guardarPerfil(e) {
   e.preventDefault();
@@ -554,7 +657,7 @@ async function guardarPerfil(e) {
 }
 
 // ------------------------------------------------------------
-// 11) Subir foto
+// 13) Subir foto
 // ------------------------------------------------------------
 async function subirFotoPerfil(e) {
   const archivo = e.target.files?.[0];
@@ -596,7 +699,7 @@ async function subirFotoPerfil(e) {
 }
 
 // ------------------------------------------------------------
-// 12) Crear solicitud
+// 14) Crear solicitud
 // ------------------------------------------------------------
 async function crearSolicitud(e) {
   e.preventDefault();
@@ -654,7 +757,7 @@ async function crearSolicitud(e) {
 }
 
 // ------------------------------------------------------------
-// 13) Cargar mis solicitudes
+// 15) Cargar mis solicitudes
 // ------------------------------------------------------------
 async function cargarMisSolicitudes() {
   const cont = el.lista_mis_solicitudes;
@@ -678,7 +781,7 @@ async function cargarMisSolicitudes() {
 }
 
 // ------------------------------------------------------------
-// 14) Cargar disponibles
+// 16) Cargar disponibles
 // ------------------------------------------------------------
 async function cargarSolicitudesDisponibles() {
   const cont = el.lista_disponibles;
@@ -700,7 +803,7 @@ async function cargarSolicitudesDisponibles() {
 }
 
 // ------------------------------------------------------------
-// 15) Cargar mis servicios
+// 17) Cargar mis servicios
 // ------------------------------------------------------------
 async function cargarMisServicios() {
   const cont = el.lista_mis_servicios;
@@ -723,7 +826,7 @@ async function cargarMisServicios() {
 }
 
 // ------------------------------------------------------------
-// 16) Render tarjeta
+// 18) Render tarjeta
 // ------------------------------------------------------------
 function renderTarjetaSolicitud(s, modo) {
   const card = document.createElement("div");
@@ -885,7 +988,7 @@ function siguienteEstado(estadoActual) {
 }
 
 // ------------------------------------------------------------
-// 17) Cancelar
+// 19) Cancelar
 // ------------------------------------------------------------
 async function cancelarSolicitud(id, modo) {
   const esChofer = modo === "chofer-servicio";
@@ -910,7 +1013,7 @@ async function cancelarSolicitud(id, modo) {
 }
 
 // ------------------------------------------------------------
-// 18) Aceptar
+// 20) Aceptar
 // ------------------------------------------------------------
 async function aceptarSolicitud(id) {
   if (!estado.usuario) return;
@@ -933,7 +1036,7 @@ async function aceptarSolicitud(id) {
 }
 
 // ------------------------------------------------------------
-// 19) Avanzar estado
+// 21) Avanzar estado
 // ------------------------------------------------------------
 async function avanzarEstado(id, nuevoEstado) {
   const etiquetas = {
@@ -957,7 +1060,7 @@ async function avanzarEstado(id, nuevoEstado) {
 }
 
 // ------------------------------------------------------------
-// 20) Distancias
+// 22) Distancias
 // ------------------------------------------------------------
 function distanciaKm(lat1, lng1, lat2, lng2) {
   const R = 6371;
@@ -1008,7 +1111,7 @@ function obtenerUbicacionActualConTimeout(ms) {
 }
 
 // ------------------------------------------------------------
-// 21) Temporizadores
+// 23) Temporizadores
 // ------------------------------------------------------------
 function iniciarTemporizadores() {
   if (realtime.tickTemporizadores) clearInterval(realtime.tickTemporizadores);
@@ -1034,7 +1137,7 @@ function actualizarTemporizadores() {
 }
 
 // ------------------------------------------------------------
-// 22) REALTIME
+// 24) REALTIME
 // ------------------------------------------------------------
 function iniciarRealtime() {
   detenerRealtime();
@@ -1115,7 +1218,7 @@ function manejarCambioSolicitud(payload) {
 }
 
 // ------------------------------------------------------------
-// 23) MAPA en vivo
+// 25) MAPA en vivo
 // ------------------------------------------------------------
 async function abrirMapa(solicitudId) {
   const { data: sol, error } = await db
@@ -1230,7 +1333,7 @@ function centrarMapa() {
 }
 
 // ------------------------------------------------------------
-// 24) UBICACIÓN: enviar
+// 26) UBICACIÓN: enviar
 // ------------------------------------------------------------
 function iniciarEnvioUbicacion(solicitudId) {
   if (!navigator.geolocation) {
@@ -1287,7 +1390,7 @@ function enviarUbicacion(pos, solicitudId) {
 }
 
 // ------------------------------------------------------------
-// 25) UBICACIÓN: escuchar
+// 27) UBICACIÓN: escuchar
 // ------------------------------------------------------------
 function suscribirUbicacion(solicitudId) {
   if (realtime.canalUbicacion) { db.removeChannel(realtime.canalUbicacion); realtime.canalUbicacion = null; }
@@ -1313,7 +1416,7 @@ function suscribirUbicacion(solicitudId) {
 }
 
 // ------------------------------------------------------------
-// 26) MAPA selector de DESTINO
+// 28) MAPA selector de DESTINO
 // ------------------------------------------------------------
 function abrirSelectorDestino() {
   mostrarPantalla("pantalla-mapa-recogida");
@@ -1387,7 +1490,7 @@ function cerrarSelectorDestino() {
 }
 
 // ------------------------------------------------------------
-// 27) CHAT
+// 29) CHAT
 // ------------------------------------------------------------
 async function abrirChat(solicitudId) {
   const { data: sol, error } = await db
@@ -1499,7 +1602,7 @@ function cerrarChat() {
 }
 
 // ------------------------------------------------------------
-// 28) OFERTAS
+// 30) OFERTAS
 // ------------------------------------------------------------
 async function abrirFormOferta(solicitudId) {
   const { data: sol, error } = await db
@@ -1665,7 +1768,7 @@ function suscribirOfertas(solicitudId) {
 }
 
 // ------------------------------------------------------------
-// 29) CALIFICACIONES
+// 31) CALIFICACIONES
 // ------------------------------------------------------------
 async function abrirCalificar(solicitudId, receptorId) {
   if (!estado.usuario) return;
@@ -1804,7 +1907,7 @@ function volverDeCalificar() {
 }
 
 // ============================================================
-// 30) PANEL ADMIN: MÉTRICAS
+// 32) PANEL ADMIN: MÉTRICAS
 // ============================================================
 async function cargarMetricasAdmin() {
   if (estado.perfil?.rol !== "admin") return;
@@ -1840,7 +1943,7 @@ async function cargarMetricasAdmin() {
 }
 
 // ============================================================
-// 31) PANEL ADMIN: USUARIOS
+// 33) PANEL ADMIN: USUARIOS
 // ============================================================
 async function cargarUsuariosAdmin() {
   if (estado.perfil?.rol !== "admin") return;
@@ -1965,7 +2068,7 @@ async function revocarSuscripcion(choferId) {
 }
 
 // ============================================================
-// 32) PANEL ADMIN: SOLICITUDES
+// 34) PANEL ADMIN: SOLICITUDES
 // ============================================================
 async function cargarSolicitudesAdmin() {
   if (estado.perfil?.rol !== "admin") return;
@@ -1990,7 +2093,7 @@ async function cargarSolicitudesAdmin() {
 }
 
 // ============================================================
-// 33) PANEL ADMIN: PRECIOS Y TASAS
+// 35) PANEL ADMIN: PRECIOS Y TASAS
 // ============================================================
 async function cargarPrecioAdmin() {
   const { data } = await db
@@ -2006,11 +2109,11 @@ async function cargarPrecioAdmin() {
   const cfg = {};
   (data || []).forEach((c) => { cfg[c.clave] = c.valor; });
 
-  el.admin_tasa_input.value   = cfg["tasa_usdt_saldo"]     || "1.00";
-  el.admin_plan_1.value       = cfg["precio_saldo_1mes"]   || "200.00";
-  el.admin_plan_3.value       = cfg["precio_saldo_3meses"] || "700.00";
-  el.admin_plan_6.value       = cfg["precio_saldo_6meses"] || "1200.00";
-  el.admin_plan_12.value      = cfg["precio_saldo_12meses"]|| "2000.00";
+  el.admin_tasa_input.value   = cfg["tasa_usdt_saldo"]      || "1.00";
+  el.admin_plan_1.value       = cfg["precio_saldo_1mes"]    || "200.00";
+  el.admin_plan_3.value       = cfg["precio_saldo_3meses"]  || "700.00";
+  el.admin_plan_6.value       = cfg["precio_saldo_6meses"]  || "1200.00";
+  el.admin_plan_12.value      = cfg["precio_saldo_12meses"] || "2000.00";
 
   setMensaje("admin-precio-exito", "");
   setMensaje("admin-precio-error", "");
@@ -2051,7 +2154,7 @@ async function guardarPrecioAdmin(e) {
 }
 
 // ============================================================
-// 34) PANEL ADMIN: PAGOS PENDIENTES
+// 36) PANEL ADMIN: PAGOS PENDIENTES
 // ============================================================
 async function cargarPagosAdmin() {
   if (estado.perfil?.rol !== "admin") return;
@@ -2150,7 +2253,6 @@ function renderTarjetaPagoAdmin(p) {
 }
 
 async function aprobarPagoAdmin(solicitudId) {
-  // Encontrar la solicitud para sugerir el monto
   const sol = estado.pagosAdmin.find((p) => p.id === solicitudId);
   if (!sol) return alert("Solicitud no encontrada en memoria.");
 
@@ -2188,7 +2290,6 @@ async function rechazarPagoAdmin(solicitudId) {
   const nota = prompt("Motivo del rechazo (opcional):", "") || null;
   if (!confirm("¿Rechazar esta solicitud de recarga?")) return;
 
-  // Rechazar directamente (función RPC que ya existía)
   const { error } = await db.rpc("rechazar_solicitud_pago", {
     p_solicitud_id: solicitudId,
     p_notas_admin: nota,
@@ -2200,7 +2301,7 @@ async function rechazarPagoAdmin(solicitudId) {
 }
 
 // ============================================================
-// 35) PERFIL PÚBLICO
+// 37) PERFIL PÚBLICO
 // ============================================================
 async function abrirPerfilPublico(usuarioId) {
   if (!usuarioId) return;
@@ -2296,7 +2397,7 @@ function renderResena(r) {
 }
 
 // ------------------------------------------------------------
-// 36) Traducciones y utilidades
+// 38) Traducciones y utilidades
 // ------------------------------------------------------------
 function traducirEstado(e) {
   const map = {
@@ -2344,19 +2445,30 @@ function traducirError(msg) {
 }
 
 // ------------------------------------------------------------
-// 37) Auth
+// 39) Auth
 // ------------------------------------------------------------
 function escucharAuth() {
   db.auth.onAuthStateChange((evento, session) => {
+    console.log("[Auth event]", evento);
+
+    // Recuperación de contraseña: el usuario entró por el link del email
+    if (evento === "PASSWORD_RECOVERY") {
+      estado.modoRecuperacion = true;
+      limpiarMensajes();
+      el.form_reset?.reset();
+      mostrarPantalla("pantalla-reset");
+      return;
+    }
+
     if (evento === "SIGNED_OUT" || !session) {
       detenerRealtime();
-      mostrarPantalla("pantalla-login");
+      if (!estado.modoRecuperacion) mostrarPantalla("pantalla-login");
     }
   });
 }
 
 // ------------------------------------------------------------
-// 38) Inicio
+// 40) Inicio
 // ------------------------------------------------------------
 async function iniciarApp() {
   cachearElementos();
@@ -2367,10 +2479,33 @@ async function iniciarApp() {
   el.form_registro.addEventListener("submit", registrarUsuario);
   el.form_perfil.addEventListener("submit", guardarPerfil);
   el.form_solicitud.addEventListener("submit", crearSolicitud);
+  el.form_recuperar.addEventListener("submit", solicitarRecuperacion);
+  el.form_reset.addEventListener("submit", guardarNuevaPassword);
   el.btn_cerrar_sesion.addEventListener("click", cerrarSesion);
   el.perfil_foto_input.addEventListener("change", subirFotoPerfil);
 
   mostrarPantalla("pantalla-cargando");
+
+  // Detectar si viene de un link de recuperación (hash en la URL)
+  const hash = window.location.hash || "";
+  const tieneTokenRecuperacion =
+    hash.includes("type=recovery") ||
+    hash.includes("access_token=") && hash.includes("type=recovery");
+
+  if (tieneTokenRecuperacion) {
+    // Supabase dispara PASSWORD_RECOVERY en onAuthStateChange cuando procesa el token
+    setTimeout(() => {
+      if (!estado.modoRecuperacion) {
+        // Fallback por si el evento tarda
+        estado.modoRecuperacion = true;
+        limpiarMensajes();
+        el.form_reset?.reset();
+        mostrarPantalla("pantalla-reset");
+      }
+    }, 800);
+    return;
+  }
+
   const { data } = await db.auth.getSession();
   if (data?.session) await cargarPerfilYMostrar();
   else mostrarPantalla("pantalla-login");
