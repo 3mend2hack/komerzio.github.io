@@ -220,13 +220,13 @@
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   pointer-events: none;
 }
-.chm-overlay.oculto { display: none; }
+.chm-overlay.activo { display: flex; }
 .chm-overlay .caja {
   background: #ffffff;
   padding: 20px 28px;
