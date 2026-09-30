@@ -1,9 +1,8 @@
 /* ============================================================
    ALKILO - Página de suscripción y recargas
-   Estilos independientes de la app principal
+   Con estilos de datos bancarios y pago móvil
    ============================================================ */
 
-/* ---------- Variables (mismas que la app) ---------- */
 :root {
   --primary: #4f46e5;
   --primary-dark: #4338ca;
@@ -29,7 +28,6 @@
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
   --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
   --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
 }
 
 /* ---------- Reset ---------- */
@@ -521,6 +519,97 @@ body {
 }
 
 /* ============================================================
+   Datos destino (transferencia / pago móvil)
+   ============================================================ */
+.sus-datos-destino {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1.5px solid rgba(37, 99, 235, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sus-datos-destino-titulo {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #1e40af;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 4px;
+}
+
+.sus-datos-fila {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sus-datos-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #1e3a8a;
+}
+
+.sus-datos-valor {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  word-break: break-all;
+  letter-spacing: 0.5px;
+  font-family: "Courier New", monospace;
+}
+
+.sus-datos-valor-con-boton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+.sus-datos-valor-con-boton .sus-datos-valor {
+  flex: 1;
+  min-width: 0;
+}
+
+.sus-btn-copiar-inline {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.15s, transform 0.1s;
+}
+.sus-btn-copiar-inline:hover { filter: brightness(1.08); }
+.sus-btn-copiar-inline:active { transform: scale(0.95); }
+
+.sus-datos-nota {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* ============================================================
    Historial de recargas
    ============================================================ */
 .sus-lista {
@@ -577,7 +666,6 @@ body {
   padding-left: 10px;
 }
 
-/* Badges de estado */
 .sus-badge-estado {
   display: inline-block;
   font-size: 0.7rem;
@@ -618,4 +706,5 @@ body {
   .sus-card-saldo-monto { font-size: 1.5rem; }
   .sus-plan-precio { font-size: 1rem; }
   .sus-tab { font-size: 0.76rem; padding: 9px 12px; }
+  .sus-datos-valor { font-size: 0.92rem; }
 }

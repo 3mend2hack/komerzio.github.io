@@ -9,18 +9,14 @@
 </head>
 <body>
 
-  <!-- ============================================================
-       PANTALLA: CARGANDO
-       ============================================================ -->
+  <!-- PANTALLA: CARGANDO -->
   <section id="pantalla-cargando" class="pantalla activa">
     <div class="sus-contenedor">
       <p class="sus-cargando-texto">Cargando…</p>
     </div>
   </section>
 
-  <!-- ============================================================
-       PANTALLA: NO AUTORIZADO
-       ============================================================ -->
+  <!-- PANTALLA: NO AUTORIZADO -->
   <section id="pantalla-no-autorizado" class="pantalla">
     <div class="sus-contenedor">
       <div class="sus-bloqueo">
@@ -32,9 +28,7 @@
     </div>
   </section>
 
-  <!-- ============================================================
-       PANTALLA: PRINCIPAL
-       ============================================================ -->
+  <!-- PANTALLA: PRINCIPAL -->
   <section id="pantalla-principal" class="pantalla">
 
     <header class="sus-cabecera">
@@ -45,9 +39,7 @@
 
     <main class="sus-contenedor">
 
-      <!-- ══════════════════════════════════════════════════
-           CARD DE SALDO
-           ══════════════════════════════════════════════════ -->
+      <!-- Card de saldo -->
       <div class="sus-card-saldo">
         <div class="sus-card-saldo-izq">
           <span class="sus-card-saldo-emoji">💰</span>
@@ -58,9 +50,7 @@
         </div>
       </div>
 
-      <!-- ══════════════════════════════════════════════════
-           ESTADO DE LA SUSCRIPCIÓN ACTUAL
-           ══════════════════════════════════════════════════ -->
+      <!-- Suscripción actual -->
       <div id="bloque-suscripcion-actual" class="sus-suscripcion-actual oculto">
         <div class="sus-suscripcion-actual-izq">
           <span class="sus-suscripcion-actual-emoji" id="sus-estado-emoji">✅</span>
@@ -71,9 +61,7 @@
         </div>
       </div>
 
-      <!-- ══════════════════════════════════════════════════
-           PLANES PARA COMPRAR
-           ══════════════════════════════════════════════════ -->
+      <!-- Planes -->
       <h2 class="sus-titulo-seccion">Comprar / Renovar suscripción</h2>
       <p class="sus-ayuda">Paga con tu saldo. Los precios se actualizan desde el panel admin.</p>
 
@@ -102,9 +90,7 @@
       <p class="sus-mensaje-error" id="compra-error"></p>
       <p class="sus-mensaje-exito" id="compra-exito"></p>
 
-      <!-- ══════════════════════════════════════════════════
-           RECARGAR SALDO — TABS DE MÉTODOS
-           ══════════════════════════════════════════════════ -->
+      <!-- Recargar saldo -->
       <h2 class="sus-titulo-seccion">Recargar saldo</h2>
       <p class="sus-ayuda">Elige el método. Los pagos manuales los aprueba el admin.</p>
 
@@ -115,7 +101,7 @@
         <button class="sus-tab" data-metodo="efectivo">💵 Efectivo</button>
       </div>
 
-      <!-- ─── Formulario USDT ────────────────────────────── -->
+      <!-- ============ USDT ============ -->
       <div class="sus-form-metodo" id="form-usdt">
         <div class="sus-usdt-bloque">
           <p class="sus-usdt-instruccion">
@@ -139,11 +125,36 @@
         </div>
       </div>
 
-      <!-- ─── Formulario Transferencia ───────────────────── -->
+      <!-- ============ TRANSFERENCIA ============ -->
       <div class="sus-form-metodo oculto" id="form-transferencia">
-        <p class="sus-ayuda-form">
-          Transfiere al número de tarjeta del admin, sube el comprobante y espera la aprobación.
-        </p>
+
+        <div class="sus-datos-destino">
+          <h3 class="sus-datos-destino-titulo">📌 Datos para transferir</h3>
+
+          <div class="sus-datos-fila">
+            <span class="sus-datos-label">Banco</span>
+            <span class="sus-datos-valor" id="transf-banco">—</span>
+          </div>
+
+          <div class="sus-datos-fila">
+            <span class="sus-datos-label">Número de tarjeta</span>
+            <div class="sus-datos-valor-con-boton">
+              <span class="sus-datos-valor" id="transf-tarjeta">—</span>
+              <button type="button" class="sus-btn-copiar-inline" data-copiar="transf-tarjeta">📋</button>
+            </div>
+          </div>
+
+          <div class="sus-datos-fila">
+            <span class="sus-datos-label">Número a confirmar</span>
+            <div class="sus-datos-valor-con-boton">
+              <span class="sus-datos-valor" id="transf-confirmar">—</span>
+              <button type="button" class="sus-btn-copiar-inline" data-copiar="transf-confirmar">📋</button>
+            </div>
+          </div>
+
+          <p class="sus-datos-nota">⏱️ Se revisará su solicitud dentro de 1 - 24 horas</p>
+        </div>
+
         <label for="tr-monto">Monto que pagaste ($)</label>
         <input type="number" id="tr-monto" min="0" step="0.01" placeholder="Ej: 200.00" />
 
@@ -161,11 +172,23 @@
         </button>
       </div>
 
-      <!-- ─── Formulario Pago móvil ──────────────────────── -->
+      <!-- ============ PAGO MÓVIL ============ -->
       <div class="sus-form-metodo oculto" id="form-pago_movil">
-        <p class="sus-ayuda-form">
-          Haz un pago móvil (Transfermóvil o EnZona), sube el comprobante y espera la aprobación.
-        </p>
+
+        <div class="sus-datos-destino">
+          <h3 class="sus-datos-destino-titulo">📌 Debes transferir a este número</h3>
+
+          <div class="sus-datos-fila">
+            <span class="sus-datos-label">Teléfono</span>
+            <div class="sus-datos-valor-con-boton">
+              <span class="sus-datos-valor" id="pagomovil-telefono">—</span>
+              <button type="button" class="sus-btn-copiar-inline" data-copiar="pagomovil-telefono">📋</button>
+            </div>
+          </div>
+
+          <p class="sus-datos-nota">⏱️ Se revisará su solicitud dentro de 1 - 24 horas</p>
+        </div>
+
         <label for="pm-monto">Monto que pagaste ($)</label>
         <input type="number" id="pm-monto" min="0" step="0.01" placeholder="Ej: 200.00" />
 
@@ -183,7 +206,7 @@
         </button>
       </div>
 
-      <!-- ─── Formulario Efectivo ────────────────────────── -->
+      <!-- ============ EFECTIVO ============ -->
       <div class="sus-form-metodo oculto" id="form-efectivo">
         <p class="sus-ayuda-form">
           Entrega el efectivo al admin en persona. Sube una foto del recibo si te dieron uno.
@@ -208,16 +231,13 @@
       <p class="sus-mensaje-error" id="recarga-error"></p>
       <p class="sus-mensaje-exito" id="recarga-exito"></p>
 
-      <!-- ══════════════════════════════════════════════════
-           HISTORIAL DE RECARGAS
-           ══════════════════════════════════════════════════ -->
+      <!-- Historial -->
       <h2 class="sus-titulo-seccion">Historial de recargas</h2>
       <div id="lista-recargas" class="sus-lista">
         <p class="sus-vacio">Cargando…</p>
       </div>
 
     </main>
-
   </section>
 
   <script src="suscripcion.js"></script>
