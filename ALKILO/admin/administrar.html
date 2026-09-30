@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ALKILO · Panel avanzado</title>
+
+  <link rel="stylesheet" href="administrar.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ============================================================
+       PANTALLA: CARGANDO
+       ============================================================ -->
+  <section id="pantalla-cargando" class="pantalla activa">
+    <p class="texto-cargando">Verificando acceso…</p>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: NO AUTORIZADO
+       ============================================================ -->
+  <section id="pantalla-no-autorizado" class="pantalla">
+    <div class="aviso-error">
+      <p class="icono-aviso">🚫</p>
+      <h2 id="no-autorizado-titulo">Acceso restringido</h2>
+      <p id="no-autorizado-texto" class="texto-aviso">
+        Esta página es solo para administradores.
+      </p>
+      <button id="btn-ir-app" class="btn-principal">Ir a la app principal</button>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANTALLA: PRINCIPAL
+       ============================================================ -->
+  <section id="pantalla-principal" class="pantalla">
+
+    <header class="adm-cabecera">
+      <div class="adm-cabecera-top">
+        <h1>⚙️ Panel admin</h1>
+        <div class="adm-cabecera-acciones">
+          <button id="adm-refrescar" class="btn-secundario">↻</button>
+          <button id="adm-cerrar-sesion" class="btn-secundario">Salir</button>
+        </div>
+      </div>
+      <nav class="adm-tabs" id="adm-tabs">
+        <button class="adm-tab activo" data-tab="tab-dashboard">📊 Dashboard</button>
+        <button class="adm-tab" data-tab="tab-pendientes">🕓 Pendientes <span id="badge-pendientes" class="adm-badge oculto">0</span></button>
+        <button class="adm-tab" data-tab="tab-reportes">🚨 Reportes <span id="badge-reportes" class="adm-badge oculto">0</span></button>
+        <button class="adm-tab" data-tab="tab-usuarios">👥 Usuarios</button>
+        <button class="adm-tab" data-tab="tab-solicitudes">📋 Solicitudes</button>
+        <button class="adm-tab" data-tab="tab-config">💵 Configuración</button>
+        <button class="adm-tab" data-tab="tab-acciones">⚡ Acciones</button>
+      </nav>
+    </header>
+
+    <main class="adm-contenido" id="adm-contenido">
+
+      <!-- ====================================================
+           TAB: DASHBOARD
+           ==================================================== -->
+      <section id="tab-dashboard" class="adm-panel activo">
+        <h2 class="adm-titulo-seccion">Métricas generales</h2>
+
+        <div class="adm-grid-metricas" id="adm-metricas">
+          <div class="adm-metrica">
+            <span class="adm-metrica-valor" id="mm-usuarios">—</span>
+            <span class="adm-metrica-label">Usuarios totales</span>
+          </div>
+          <div class="adm-metrica">
+            <span class="adm-metrica-valor" id="mm-clientes">—</span>
+            <span class="adm-metrica-label">Clientes</span>
+          </div>
+          <div class="adm-metrica">
+            <span class="adm-metrica-valor" id="mm-choferes">—</span>
+            <span class="adm-metrica-label">Choferes totales</span>
+          </div>
+          <div class="adm-metrica">
+            <span class="adm-metrica-valor" id="mm-choferes-activos">—</span>
+            <span class="adm-metrica-label">Choferes activos</span>
+          </div>
+          <div class="adm-metrica warning">
+            <span class="adm-metrica-valor" id="mm-choferes-pendientes">—</span>
+            <span class="adm-metrica-label">Choferes pendientes</span>
+          </div>
+        </div>
+
+        <h2 class="adm-titulo-seccion" style="margin-top:28px">Actividad</h2>
+        <div class="adm-grid-metricas">
+          <div class="adm-metrica">
+            <span class="adm-metrica-valor" id="mm-solicitudes-hoy">—</span>
+            <span class="adm-metrica-label">Solicitudes hoy</span>
+          </div>
+          <div class="adm-metrica">
+            <span class="adm-metrica-valor" id="mm-solicitudes-semana">—</span>
+            <span class="adm-metrica-label">Solicitudes 7 días</span>
+          </div>
+          <div class="adm-metrica">
+            <span class="adm-metrica-valor" id="mm-solicitudes-mes">—</span>
+            <span class="adm-metrica-label">Solicitudes 30 días</span>
+          </div>
+          <div class="adm-metrica">
+            <span class="adm-metrica-valor" id="mm-completados-mes">—</span>
+            <span class="adm-metrica-label">Completados 30 días</span>
+          </div>
+        </div>
+
+        <h2 class="adm-titulo-seccion" style="margin-top:28px">Ingresos</h2>
+        <div class="adm-grid-metricas">
+          <div class="adm-metrica verde">
+            <span class="adm-metrica-valor" id="mm-ingresos-hoy">—</span>
+            <span class="adm-metrica-label">Hoy</span>
+          </div>
+          <div class="adm-metrica verde">
+            <span class="adm-metrica-valor" id="mm-ingresos-semana">—</span>
+            <span class="adm-metrica-label">7 días</span>
+          </div>
+          <div class="adm-metrica verde">
+            <span class="adm-metrica-valor" id="mm-ingresos-mes">—</span>
+            <span class="adm-metrica-label">30 días</span>
+          </div>
+          <div class="adm-metrica verde">
+            <span class="adm-metrica-valor" id="mm-ingresos-total">—</span>
+            <span class="adm-metrica-label">Total histórico</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           TAB: PENDIENTES
+           ==================================================== -->
+      <section id="tab-pendientes" class="adm-panel">
+        <h2 class="adm-titulo-seccion">Choferes pendientes de aprobación</h2>
+        <p class="adm-ayuda">Estos usuarios eligieron "Chofer" al registrarse. Revísalos y aprueba o rechaza.</p>
+
+        <div id="adm-lista-pendientes" class="adm-lista">
+          <p class="adm-vacio">Cargando…</p>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           TAB: REPORTES
+           ==================================================== -->
+      <section id="tab-reportes" class="adm-panel">
+        <h2 class="adm-titulo-seccion">Reportes de usuarios</h2>
+        <p class="adm-ayuda">Revisa los reportes enviados por los usuarios. Puedes advertir, suspender, banear, eliminar o ajustar saldo al reportado.</p>
+
+        <div class="adm-chips">
+          <button class="adm-chip activo" data-filtro-reporte="pendiente">Pendientes</button>
+          <button class="adm-chip" data-filtro-reporte="en_revision">En revisión</button>
+          <button class="adm-chip" data-filtro-reporte="resuelto">Resueltos</button>
+          <button class="adm-chip" data-filtro-reporte="desestimado">Desestimados</button>
+          <button class="adm-chip" data-filtro-reporte="todos">Todos</button>
+        </div>
+
+        <div id="adm-lista-reportes" class="adm-lista">
+          <p class="adm-vacio">Cargando…</p>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           TAB: USUARIOS
+           ==================================================== -->
+      <section id="tab-usuarios" class="adm-panel">
+        <h2 class="adm-titulo-seccion">Gestión de usuarios</h2>
+
+        <div class="adm-buscador">
+          <input type="text" id="adm-buscar-usuario" placeholder="Buscar por nombre, correo o teléfono…" />
+        </div>
+
+        <div class="adm-chips">
+          <button class="adm-chip activo" data-filtro-usuario="todos">Todos</button>
+          <button class="adm-chip" data-filtro-usuario="cliente">Clientes</button>
+          <button class="adm-chip" data-filtro-usuario="chofer">Choferes</button>
+          <button class="adm-chip" data-filtro-usuario="admin">Admins</button>
+        </div>
+
+        <div class="adm-chips adm-chips-secundarios">
+          <button class="adm-chip-sm activo" data-filtro-estado="todos">Cualquier estado</button>
+          <button class="adm-chip-sm" data-filtro-estado="activo">Activos</button>
+          <button class="adm-chip-sm" data-filtro-estado="pendiente_aprobacion">Pendientes</button>
+          <button class="adm-chip-sm" data-filtro-estado="suspendido">Suspendidos</button>
+          <button class="adm-chip-sm" data-filtro-estado="baneado">Baneados</button>
+        </div>
+
+        <div id="adm-lista-usuarios" class="adm-lista">
+          <p class="adm-vacio">Cargando…</p>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           TAB: SOLICITUDES
+           ==================================================== -->
+      <section id="tab-solicitudes" class="adm-panel">
+        <h2 class="adm-titulo-seccion">Historial de solicitudes</h2>
+
+        <div class="adm-chips">
+          <button class="adm-chip activo" data-filtro-sol="todas">Todas</button>
+          <button class="adm-chip" data-filtro-sol="pendiente">Pendientes</button>
+          <button class="adm-chip" data-filtro-sol="en_curso">En curso</button>
+          <button class="adm-chip" data-filtro-sol="completado">Completadas</button>
+          <button class="adm-chip" data-filtro-sol="cancelado">Canceladas</button>
+        </div>
+
+        <div id="adm-lista-solicitudes" class="adm-lista">
+          <p class="adm-vacio">Cargando…</p>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           TAB: CONFIGURACIÓN
+           ==================================================== -->
+      <section id="tab-config" class="adm-panel">
+        <h2 class="adm-titulo-seccion">Precios y tasas</h2>
+
+        <form id="adm-form-config" class="adm-formulario">
+          <h3 class="adm-subtitulo">Tasa cripto</h3>
+          <p class="adm-ayuda">Cuánto saldo se acredita por cada USDT recibido.</p>
+          <label for="adm-cfg-tasa">1 USDT = ? de saldo</label>
+          <input type="number" id="adm-cfg-tasa" min="0.01" step="0.01" required />
+
+          <h3 class="adm-subtitulo" style="margin-top:20px">Precios de planes (en saldo)</h3>
+          <label for="adm-cfg-plan1">1 mes</label>
+          <input type="number" id="adm-cfg-plan1" min="0" step="0.01" required />
+
+          <label for="adm-cfg-plan3">3 meses</label>
+          <input type="number" id="adm-cfg-plan3" min="0" step="0.01" required />
+
+          <label for="adm-cfg-plan6">6 meses</label>
+          <input type="number" id="adm-cfg-plan6" min="0" step="0.01" required />
+
+          <label for="adm-cfg-plan12">12 meses</label>
+          <input type="number" id="adm-cfg-plan12" min="0" step="0.01" required />
+
+          <button type="submit" class="btn-principal">💾 Guardar cambios</button>
+        </form>
+
+        <p class="adm-msg-exito" id="adm-cfg-exito"></p>
+        <p class="adm-msg-error" id="adm-cfg-error"></p>
+      </section>
+
+      <!-- ====================================================
+           TAB: ACCIONES RÁPIDAS
+           ==================================================== -->
+      <section id="tab-acciones" class="adm-panel">
+        <h2 class="adm-titulo-seccion">Acciones rápidas</h2>
+
+        <div class="adm-accion-card">
+          <h3>🧹 Limpiar viajes antiguos</h3>
+          <p>Elimina solicitudes completadas o canceladas con más de X días. <strong>NO borra las calificaciones (estrellas)</strong>.</p>
+          <label for="adm-dias-limpieza">Días de antigüedad</label>
+          <input type="number" id="adm-dias-limpieza" min="1" max="365" value="60" />
+          <button id="adm-btn-limpieza" class="btn-peligro">🗑 Eliminar viajes antiguos</button>
+        </div>
+
+        <div class="adm-accion-card">
+          <h3>📊 Recargar métricas</h3>
+          <p>Vuelve a calcular todas las métricas del dashboard.</p>
+          <button id="adm-btn-refrescar-metricas" class="btn-secundario">↻ Recargar</button>
+        </div>
+
+        <div class="adm-accion-card">
+          <h3>🔗 Ir a la app principal</h3>
+          <p>Abre la app pública de ALKILO.</p>
+          <button id="adm-btn-ir-app" class="btn-secundario">Ir a la app</button>
+        </div>
+      </section>
+
+    </main>
+  </section>
+
+  <script src="administrar.js"></script>
+</body>
+</html>
