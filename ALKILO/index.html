@@ -258,8 +258,14 @@
       <div id="perfil-banner-premium" class="banner-premium oculto" style="display:none"></div>
 
       <div class="acciones-perfil">
-        <button id="btn-ir-nueva-solicitud" class="btn-accion" data-rol="cliente">🚗 Pedir servicio</button>
-        <button id="btn-ir-mis-solicitudes" class="btn-accion" data-rol="cliente">📋 Mis solicitudes</button>
+        <button id="btn-ir-nueva-solicitud" class="btn-accion" data-rol="cliente">
+          🚗 Pedir servicio
+          <span id="badge-mis-activas" class="badge-rojo oculto">0</span>
+        </button>
+        <button id="btn-ir-mis-solicitudes" class="btn-accion" data-rol="cliente">
+          📋 Mis solicitudes
+          <span id="badge-mis-solicitudes" class="badge-rojo oculto">0</span>
+        </button>
         <button id="btn-ir-plan-premium" class="btn-accion" data-rol="cliente">⭐ Plan Premium</button>
 
         <div id="chm-switch-wrapper" class="chm-switch-card" data-rol="chofer">
@@ -273,8 +279,14 @@
           </label>
         </div>
 
-        <button id="btn-ir-disponibles" class="btn-accion" data-rol="chofer">🔎 Solicitudes disponibles</button>
-        <button id="btn-ir-mis-servicios" class="btn-accion" data-rol="chofer">🚕 Mis servicios aceptados</button>
+        <button id="btn-ir-disponibles" class="btn-accion" data-rol="chofer">
+          🔎 Solicitudes disponibles
+          <span id="badge-disponibles" class="badge-rojo oculto">0</span>
+        </button>
+        <button id="btn-ir-mis-servicios" class="btn-accion" data-rol="chofer">
+          🚕 Mis servicios aceptados
+          <span id="badge-servicios-activos" class="badge-rojo oculto">0</span>
+        </button>
         <button id="btn-ir-mi-suscripcion" class="btn-accion" data-rol="chofer">💳 Mi suscripción</button>
 
         <button id="btn-ver-choferes-mapa" class="btn-accion">🗺️ Choferes cercanos</button>
