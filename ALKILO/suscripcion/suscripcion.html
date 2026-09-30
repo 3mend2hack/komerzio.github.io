@@ -4,209 +4,220 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>ALKILO · Mi suscripción</title>
-
   <link rel="stylesheet" href="suscripcion.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
   <!-- ============================================================
-       CABECERA
-       ============================================================ -->
-  <header class="cabecera">
-    <button id="btn-volver" class="btn-volver">← Volver</button>
-    <h1>ALKILO</h1>
-    <div id="saldo-chip" class="saldo-chip oculto">
-      <span class="saldo-chip-label">Saldo</span>
-      <span id="saldo-chip-monto" class="saldo-chip-monto">$0.00</span>
-    </div>
-  </header>
-
-  <!-- ============================================================
-       CARGANDO
+       PANTALLA: CARGANDO
        ============================================================ -->
   <section id="pantalla-cargando" class="pantalla activa">
-    <p class="texto-cargando">Cargando...</p>
+    <div class="sus-contenedor">
+      <p class="sus-cargando-texto">Cargando…</p>
+    </div>
   </section>
 
   <!-- ============================================================
-       NO AUTORIZADO
+       PANTALLA: NO AUTORIZADO
        ============================================================ -->
   <section id="pantalla-no-autorizado" class="pantalla">
-    <div class="aviso-error">
-      <p class="icono-aviso">🚫</p>
-      <h2 id="no-autorizado-titulo">Acceso no autorizado</h2>
-      <p id="no-autorizado-texto" class="texto-aviso">
-        Esta página es solo para choferes registrados.
-      </p>
-      <button id="btn-ir-login" class="btn-principal">Volver al inicio</button>
+    <div class="sus-contenedor">
+      <div class="sus-bloqueo">
+        <p class="sus-bloqueo-icono">🔒</p>
+        <h2>Acceso restringido</h2>
+        <p class="sus-bloqueo-texto">Inicia sesión en ALKILO para ver esta página.</p>
+        <button id="btn-ir-login" class="sus-btn-principal">Volver al login</button>
+      </div>
     </div>
   </section>
 
   <!-- ============================================================
-       PÁGINA PRINCIPAL
+       PANTALLA: PRINCIPAL
        ============================================================ -->
   <section id="pantalla-principal" class="pantalla">
-    <div class="contenedor">
 
-      <!-- Estado actual -->
-      <div id="estado-suscripcion" class="estado-suscripcion-card"></div>
+    <header class="sus-cabecera">
+      <button id="btn-volver" class="sus-btn-volver">← Volver</button>
+      <h1>Mi suscripción</h1>
+      <span style="width:70px"></span>
+    </header>
 
-      <!-- =========================================================
-           SECCIÓN 1: RECARGAR SALDO
-           ========================================================= -->
-      <h2 class="titulo-seccion">1. Recargar saldo</h2>
-      <p class="texto-ayuda">
-        Elige un método de recarga. Todo se acumula en tu <strong>saldo</strong>
-        y con él activas cualquier plan.
-      </p>
+    <main class="sus-contenedor">
 
-      <div class="recarga-info">
-        <div class="recarga-info-linea">
-          <span class="label">Saldo actual:</span>
-          <span id="saldo-actual-display" class="valor">$0.00</span>
-        </div>
-        <div class="recarga-info-linea" id="info-tasa-linea">
-          <span class="label">Tasa cripto:</span>
-          <span id="info-tasa" class="valor-chico">1 USDT = 1.00</span>
-        </div>
-      </div>
-
-      <!-- Grid de métodos -->
-      <div class="grid-recarga-metodos" id="grid-recarga-metodos">
-        <button class="metodo-recarga" data-metodo="cripto">
-          <span class="metodo-icono">₿</span>
-          <span class="metodo-nombre">USDT (BEP20)</span>
-          <span class="metodo-sub">Automático</span>
-        </button>
-        <button class="metodo-recarga" data-metodo="transferencia">
-          <span class="metodo-icono">🏦</span>
-          <span class="metodo-nombre">Transferencia</span>
-          <span class="metodo-sub">Manual</span>
-        </button>
-        <button class="metodo-recarga" data-metodo="pago_movil">
-          <span class="metodo-icono">📱</span>
-          <span class="metodo-nombre">Pago móvil</span>
-          <span class="metodo-sub">Manual</span>
-        </button>
-        <button class="metodo-recarga" data-metodo="efectivo">
-          <span class="metodo-icono">💵</span>
-          <span class="metodo-nombre">Efectivo</span>
-          <span class="metodo-sub">Manual</span>
-        </button>
-      </div>
-
-      <!-- Panel dinámico de recarga -->
-      <div id="panel-recarga" class="panel-recarga oculto">
-
-        <!-- CRIPTO -->
-        <div id="panel-cripto" class="panel-interno oculto">
-          <h3 class="subtitulo-panel">Recarga con USDT (BEP20)</h3>
-
-          <div id="wallet-placeholder" class="wallet-placeholder">
-            <p>Toca para generar tu dirección personal de depósito.</p>
-            <button id="btn-obtener-wallet" class="btn-principal">
-              🔑 Obtener mi dirección de depósito
-            </button>
-          </div>
-
-          <div id="wallet-card" class="wallet-card oculto">
-            <div class="wallet-title">📍 Tu dirección de depósito</div>
-
-            <div class="wallet-address">
-              <span id="wallet-address-text">—</span>
-              <button class="copy-btn" id="copy-wallet-btn">Copiar</button>
-            </div>
-
-            <div class="wallet-qr">
-              <img id="wallet-qr-img" src="" alt="QR" />
-            </div>
-
-            <div class="wallet-aviso">
-              <p><strong>⚠️ Importante:</strong></p>
-              <ul>
-                <li>Solo envía <strong>USDT por BEP20 (BNB Chain)</strong>.</li>
-                <li><strong>Mínimo recomendado: 1 USDT.</strong></li>
-                <li>La red cobra ~$0.07 de comisión. Menos de 1 USDT se lo come la comisión.</li>
-                <li>Se acredita automáticamente tras 15 confirmaciones (~1 min).</li>
-                <li>La tasa aplicada se muestra arriba.</li>
-                <li>Si envías por otra red, el dinero se pierde.</li>
-              </ul>
-            </div>
+      <!-- ══════════════════════════════════════════════════
+           CARD DE SALDO
+           ══════════════════════════════════════════════════ -->
+      <div class="sus-card-saldo">
+        <div class="sus-card-saldo-izq">
+          <span class="sus-card-saldo-emoji">💰</span>
+          <div>
+            <span class="sus-card-saldo-label">Saldo disponible</span>
+            <span class="sus-card-saldo-monto" id="saldo-actual">$0.00</span>
           </div>
         </div>
+      </div>
 
-        <!-- MANUAL (transferencia / pago_movil / efectivo) -->
-        <div id="panel-manual" class="panel-interno oculto">
-          <h3 class="subtitulo-panel" id="manual-titulo">Recarga manual</h3>
-
-          <div id="manual-datos" class="datos-destino"></div>
-
-          <form id="form-recarga-manual" class="formulario">
-            <label for="recarga-monto">Monto que pagaste (en la moneda del método)</label>
-            <input type="number" id="recarga-monto" min="1" step="0.01" required placeholder="Ej: 500" />
-
-            <div id="manual-campos"></div>
-
-            <label for="recarga-comprobante">Comprobante (foto, recomendado)</label>
-            <input type="file" id="recarga-comprobante" accept="image/*" />
-
-            <button type="submit" class="btn-principal">Enviar para aprobación</button>
-          </form>
-
-          <p class="mensaje-error" id="recarga-error"></p>
-          <p class="mensaje-exito" id="recarga-exito"></p>
-
-          <div class="aviso-admin">
-            ⏳ El admin revisará tu pago y acreditará el saldo manualmente.
+      <!-- ══════════════════════════════════════════════════
+           ESTADO DE LA SUSCRIPCIÓN ACTUAL
+           ══════════════════════════════════════════════════ -->
+      <div id="bloque-suscripcion-actual" class="sus-suscripcion-actual oculto">
+        <div class="sus-suscripcion-actual-izq">
+          <span class="sus-suscripcion-actual-emoji" id="sus-estado-emoji">✅</span>
+          <div>
+            <span class="sus-suscripcion-actual-titulo" id="sus-estado-titulo">Suscripción activa</span>
+            <span class="sus-suscripcion-actual-fecha" id="sus-estado-fecha">—</span>
           </div>
         </div>
-
       </div>
 
-      <!-- =========================================================
-           SECCIÓN 2: PAGAR PLANES CON SALDO
-           ========================================================= -->
-      <h2 class="titulo-seccion">2. Activar plan con saldo</h2>
-      <p class="texto-ayuda">
-        Usa tu saldo para activar tu suscripción. La activación es <strong>inmediata</strong>.
-      </p>
+      <!-- ══════════════════════════════════════════════════
+           PLANES PARA COMPRAR
+           ══════════════════════════════════════════════════ -->
+      <h2 class="sus-titulo-seccion">Comprar / Renovar suscripción</h2>
+      <p class="sus-ayuda">Paga con tu saldo. Los precios se actualizan desde el panel admin.</p>
 
-      <div class="grid-planes" id="grid-planes-saldo">
-        <button class="plan" data-meses="1">
-          <span class="plan-nombre">1 mes</span>
-          <span class="plan-precio">$—</span>
+      <div class="sus-grid-planes" id="grid-planes">
+        <button class="sus-plan" data-meses="1">
+          <span class="sus-plan-meses">1 mes</span>
+          <span class="sus-plan-precio" id="precio-1">—</span>
         </button>
-        <button class="plan" data-meses="3">
-          <span class="plan-nombre">3 meses</span>
-          <span class="plan-precio">$—</span>
+        <button class="sus-plan" data-meses="3">
+          <span class="sus-plan-meses">3 meses</span>
+          <span class="sus-plan-precio" id="precio-3">—</span>
         </button>
-        <button class="plan" data-meses="6">
-          <span class="plan-nombre">6 meses</span>
-          <span class="plan-precio">$—</span>
+        <button class="sus-plan" data-meses="6">
+          <span class="sus-plan-meses">6 meses</span>
+          <span class="sus-plan-precio" id="precio-6">—</span>
         </button>
-        <button class="plan" data-meses="12">
-          <span class="plan-nombre">12 meses</span>
-          <span class="plan-precio">$—</span>
+        <button class="sus-plan" data-meses="12">
+          <span class="sus-plan-meses">12 meses</span>
+          <span class="sus-plan-precio" id="precio-12">—</span>
         </button>
       </div>
 
-      <button id="btn-pagar-saldo" class="btn-principal btn-pagar" disabled>
-        💳 Pagar con saldo
+      <button id="btn-comprar-suscripcion" class="sus-btn-principal" disabled>
+        💳 Comprar con saldo
       </button>
+      <p class="sus-mensaje-error" id="compra-error"></p>
+      <p class="sus-mensaje-exito" id="compra-exito"></p>
 
-      <p class="mensaje-error" id="pago-saldo-error"></p>
-      <p class="mensaje-exito" id="pago-saldo-exito"></p>
+      <!-- ══════════════════════════════════════════════════
+           RECARGAR SALDO — TABS DE MÉTODOS
+           ══════════════════════════════════════════════════ -->
+      <h2 class="sus-titulo-seccion">Recargar saldo</h2>
+      <p class="sus-ayuda">Elige el método. Los pagos manuales los aprueba el admin.</p>
 
-      <!-- =========================================================
-           SECCIÓN 3: HISTORIAL
-           ========================================================= -->
-      <h2 class="titulo-seccion">Historial de recargas</h2>
-      <div id="lista-historial" class="lista-historial">
-        <p class="vacio">Cargando...</p>
+      <div class="sus-tabs-metodos" id="tabs-metodos">
+        <button class="sus-tab activo" data-metodo="usdt">🔗 USDT BEP20</button>
+        <button class="sus-tab" data-metodo="transferencia">🏦 Transferencia</button>
+        <button class="sus-tab" data-metodo="pago_movil">📱 Pago móvil</button>
+        <button class="sus-tab" data-metodo="efectivo">💵 Efectivo</button>
       </div>
 
-    </div>
+      <!-- ─── Formulario USDT ────────────────────────────── -->
+      <div class="sus-form-metodo" id="form-usdt">
+        <div class="sus-usdt-bloque">
+          <p class="sus-usdt-instruccion">
+            Envía USDT por la red <strong>BEP20 (BSC)</strong> a tu dirección única.
+            El saldo se acredita automáticamente en 1-2 minutos.
+          </p>
+          <div class="sus-usdt-direccion">
+            <label>Tu dirección USDT BEP20</label>
+            <div class="sus-usdt-direccion-fila">
+              <input type="text" id="usdt-direccion" readonly placeholder="Cargando…" />
+              <button type="button" id="btn-copiar-usdt" class="sus-btn-copiar">📋</button>
+            </div>
+          </div>
+          <p class="sus-usdt-aviso">
+            ⚠️ Envía SOLO USDT por BEP20. Otros tokens o redes se pierden.
+          </p>
+          <button type="button" id="btn-generar-wallet" class="sus-btn-secundario">
+            🔄 Generar dirección
+          </button>
+          <p class="sus-ayuda" id="wallet-estado"></p>
+        </div>
+      </div>
+
+      <!-- ─── Formulario Transferencia ───────────────────── -->
+      <div class="sus-form-metodo oculto" id="form-transferencia">
+        <p class="sus-ayuda-form">
+          Transfiere al número de tarjeta del admin, sube el comprobante y espera la aprobación.
+        </p>
+        <label for="tr-monto">Monto que pagaste ($)</label>
+        <input type="number" id="tr-monto" min="0" step="0.01" placeholder="Ej: 200.00" />
+
+        <label for="tr-referencia">Número de referencia</label>
+        <input type="text" id="tr-referencia" maxlength="30" placeholder="Últimos 4 dígitos, número de operación…" />
+
+        <label for="tr-comprobante">Comprobante (foto)</label>
+        <input type="file" id="tr-comprobante" accept="image/*" />
+
+        <label for="tr-notas">Notas (opcional)</label>
+        <textarea id="tr-notas" rows="2" placeholder="Ej: Pagué desde la cuenta de mi mamá"></textarea>
+
+        <button type="button" class="sus-btn-principal btn-enviar-recarga" data-metodo="transferencia">
+          📤 Enviar solicitud
+        </button>
+      </div>
+
+      <!-- ─── Formulario Pago móvil ──────────────────────── -->
+      <div class="sus-form-metodo oculto" id="form-pago_movil">
+        <p class="sus-ayuda-form">
+          Haz un pago móvil (Transfermóvil o EnZona), sube el comprobante y espera la aprobación.
+        </p>
+        <label for="pm-monto">Monto que pagaste ($)</label>
+        <input type="number" id="pm-monto" min="0" step="0.01" placeholder="Ej: 200.00" />
+
+        <label for="pm-referencia">Número de referencia / operación</label>
+        <input type="text" id="pm-referencia" maxlength="30" placeholder="Ej: 12345678" />
+
+        <label for="pm-comprobante">Comprobante (foto)</label>
+        <input type="file" id="pm-comprobante" accept="image/*" />
+
+        <label for="pm-notas">Notas (opcional)</label>
+        <textarea id="pm-notas" rows="2" placeholder="Ej: Pago realizado a las 3:15 pm"></textarea>
+
+        <button type="button" class="sus-btn-principal btn-enviar-recarga" data-metodo="pago_movil">
+          📤 Enviar solicitud
+        </button>
+      </div>
+
+      <!-- ─── Formulario Efectivo ────────────────────────── -->
+      <div class="sus-form-metodo oculto" id="form-efectivo">
+        <p class="sus-ayuda-form">
+          Entrega el efectivo al admin en persona. Sube una foto del recibo si te dieron uno.
+        </p>
+        <label for="ef-monto">Monto entregado ($)</label>
+        <input type="number" id="ef-monto" min="0" step="0.01" placeholder="Ej: 200.00" />
+
+        <label for="ef-referencia">Descripción / quién lo recibió</label>
+        <input type="text" id="ef-referencia" maxlength="40" placeholder="Ej: Entregado a Josué el 30/09" />
+
+        <label for="ef-comprobante">Foto (opcional)</label>
+        <input type="file" id="ef-comprobante" accept="image/*" />
+
+        <label for="ef-notas">Notas (opcional)</label>
+        <textarea id="ef-notas" rows="2" placeholder="Detalles adicionales"></textarea>
+
+        <button type="button" class="sus-btn-principal btn-enviar-recarga" data-metodo="efectivo">
+          📤 Enviar solicitud
+        </button>
+      </div>
+
+      <p class="sus-mensaje-error" id="recarga-error"></p>
+      <p class="sus-mensaje-exito" id="recarga-exito"></p>
+
+      <!-- ══════════════════════════════════════════════════
+           HISTORIAL DE RECARGAS
+           ══════════════════════════════════════════════════ -->
+      <h2 class="sus-titulo-seccion">Historial de recargas</h2>
+      <div id="lista-recargas" class="sus-lista">
+        <p class="sus-vacio">Cargando…</p>
+      </div>
+
+    </main>
+
   </section>
 
   <script src="suscripcion.js"></script>

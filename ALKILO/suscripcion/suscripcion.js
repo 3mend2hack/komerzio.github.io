@@ -1,10 +1,9 @@
 /* ============================================================
-   ALKILO - Página de suscripción del chofer
-   Modelo: recargar saldo → activar plan con saldo
+   ALKILO - Lógica de la página de suscripción y recargas
    ============================================================ */
 
 // ------------------------------------------------------------
-// 1) Supabase
+// 1) Cliente Supabase
 // ------------------------------------------------------------
 const SUPABASE_URL = "https://ghuvgtgykyoovkgwxduc.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdodXZndGd5a3lvb3ZrZ3d4ZHVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MzcxOTAsImV4cCI6MjEwNjExMzE5MH0.f4j5lwfBjwK1sY-yCC7TkFC-h6dHFusGOkrMAmCnbmI";
@@ -12,113 +11,37 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const EDGE_WALLET_URL = `${SUPABASE_URL}/functions/v1/crear-wallet`;
-
 // ------------------------------------------------------------
-// 2) DATOS DE PAGO DE MÉTODOS MANUALES
-//    Edítalos con tus datos reales.
+// 2) Estado local
 // ------------------------------------------------------------
-const CONFIG_MANUAL = {
-  transferencia: {
-    titulo: "🏦 Transferencia bancaria",
-    instrucciones: "Realiza la transferencia y guarda el comprobante.",
-    datos: [
-      { label: "Banco",   valor: "Banesco" },
-      { label: "Titular", valor: "Josué Pérez" },
-      { label: "Cédula",  valor: "V-00.000.000" },
-      { label: "Cuenta",  valor: "0134-0000-00-0000000000" },
-      { label: "Tipo",    valor: "Corriente" },
-    ],
-    campos: [
-      { id: "referencia", label: "Número de referencia", type: "text", placeholder: "Ej: 123456789", required: true },
-    ],
-  },
-  pago_movil: {
-    titulo: "📱 Pago móvil",
-    instrucciones: "Haz el pago móvil y guarda la captura del SMS/app.",
-    datos: [
-      { label: "Banco destino", valor: "Banesco" },
-      { label: "Teléfono",      valor: "0414-000-0000" },
-      { label: "Cédula",        valor: "V-00.000.000" },
-      { label: "Titular",       valor: "Josué Pérez" },
-    ],
-    campos: [
-      { id: "referencia", label: "Número de referencia", type: "text", placeholder: "Ej: 000123456", required: true },
-      { id: "telefono_origen", label: "Teléfono desde el que pagaste (opcional)", type: "tel", placeholder: "0414-123-4567", required: false },
-    ],
-  },
-  efectivo: {
-    titulo: "💵 Pago en efectivo",
-    instrucciones: "Coordina con el admin para entregar el efectivo en persona.",
-    datos: [
-      { label: "Contacto", valor: "Josué Pérez" },
-      { label: "Teléfono", valor: "+53 56940021" },
-      { label: "Zona",     valor: "A convenir con el admin" },
-    ],
-    campos: [
-      { id: "notas", label: "Notas / disponibilidad", type: "textarea", placeholder: "Ej: Puedo pagar mañana a las 5pm", required: false },
-    ],
-  },
-};
-
-// ------------------------------------------------------------
-// 3) Estado
-// ------------------------------------------------------------
-const estado = {
+const susEstado = {
   usuario: null,
   perfil: null,
-  suscripcion: null,
   saldo: 0,
-  preciosPlan: {},          // { 1: 200, 3: 700, 6: 1200, 12: 2000 }
-  tasaUsdt: 1,              // 1 USDT = X saldo
-  planSaldoSeleccionado: null,
-  metodoRecarga: null,      // 'cripto' | 'transferencia' | 'pago_movil' | 'efectivo'
-  archivo: null,
-  canalSaldo: null,
+  planSeleccionado: 0,
+  precios: { 1: 0, 3: 0, 6: 0, 12: 0 },
+  metodoActivo: "usdt",
 };
 
 // ------------------------------------------------------------
-// 4) Elementos
+// 3) Utilidades
 // ------------------------------------------------------------
-const el = {};
-
-function cachearElementos() {
-  [
-    "btn-volver","saldo-chip","saldo-chip-monto",
-    "pantalla-cargando","pantalla-no-autorizado",
-    "no-autorizado-titulo","no-autorizado-texto","btn-ir-login",
-    "pantalla-principal","estado-suscripcion",
-    "saldo-actual-display","info-tasa","info-tasa-linea",
-    "grid-recarga-metodos","panel-recarga",
-    "panel-cripto","panel-manual",
-    "wallet-placeholder","btn-obtener-wallet",
-    "wallet-card","wallet-address-text","copy-wallet-btn","wallet-qr-img",
-    "manual-titulo","manual-datos",
-    "form-recarga-manual","recarga-monto","manual-campos",
-    "recarga-comprobante","recarga-error","recarga-exito",
-    "grid-planes-saldo","btn-pagar-saldo",
-    "pago-saldo-error","pago-saldo-exito",
-    "lista-historial",
-  ].forEach((id) => { el[id.replace(/-/g,"_")] = document.getElementById(id); });
-}
-
 function mostrarPantalla(id) {
-  ["pantalla-cargando","pantalla-no-autorizado","pantalla-principal"]
+  ["pantalla-cargando", "pantalla-no-autorizado", "pantalla-principal"]
     .forEach((p) => document.getElementById(p)?.classList.remove("activa"));
   document.getElementById(id)?.classList.add("activa");
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
 function setMensaje(id, texto) {
-  const e = document.getElementById(id);
-  if (e) e.textContent = texto || "";
+  const el = document.getElementById(id);
+  if (el) el.textContent = texto || "";
 }
 
-function limpiarMensajes() {
-  setMensaje("recarga-error", "");
-  setMensaje("recarga-exito", "");
-  setMensaje("pago-saldo-error", "");
-  setMensaje("pago-saldo-exito", "");
+function setBotonCargando(btn, cargando, textoOriginal) {
+  if (!btn) return;
+  btn.disabled = cargando;
+  btn.textContent = cargando ? "Procesando..." : textoOriginal;
 }
 
 function escapar(txt) {
@@ -133,604 +56,512 @@ function escapar(txt) {
 
 function formatearFecha(iso) {
   try {
-    return new Date(iso).toLocaleString("es-ES", {
-      day: "2-digit", month: "short", year: "numeric",
-      hour: "2-digit", minute: "2-digit",
+    const d = new Date(iso);
+    return d.toLocaleString("es-ES", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   } catch { return ""; }
 }
 
+function formatearPrecio(n) {
+  return "$" + Number(n || 0).toFixed(2);
+}
+
 // ------------------------------------------------------------
-// 5) Inicio
+// 4) Init
 // ------------------------------------------------------------
 async function iniciar() {
-  cachearElementos();
-  conectarEventos();
-
-  mostrarPantalla("pantalla-cargando");
-
-  // Sesión
+  // 1) Verificar sesión
   const { data: { session } } = await db.auth.getSession();
   if (!session) {
-    return noAutorizado("Inicia sesión primero en ALKILO y vuelve a esta página.");
+    mostrarPantalla("pantalla-no-autorizado");
+    return;
   }
-  estado.usuario = { id: session.user.id, email: session.user.email };
+  susEstado.usuario = { id: session.user.id, email: session.user.email };
 
-  // Perfil
-  const { data: perfil } = await db
-    .from("perfiles").select("*").eq("id", estado.usuario.id).maybeSingle();
-
-  if (!perfil) return noAutorizado("No se encontró tu perfil. Vuelve a iniciar sesión.");
-  estado.perfil = perfil;
-
-  if (perfil.rol !== "chofer") {
-    return noAutorizado("Esta sección es exclusiva para choferes.");
+  // 2) Cargar perfil
+  const { data: perfil } = await db.from("perfiles").select("*")
+    .eq("id", susEstado.usuario.id).maybeSingle();
+  if (!perfil) {
+    mostrarPantalla("pantalla-no-autorizado");
+    return;
   }
+  susEstado.perfil = perfil;
 
-  // Cargar datos
+  // 3) Conectar botones/eventos
+  conectarEventos();
+
+  // 4) Cargar todo en paralelo
   await Promise.all([
-    cargarSuscripcion(),
     cargarSaldo(),
-    cargarConfiguracion(),
+    cargarPrecios(),
+    cargarSuscripcionActual(),
+    cargarHistorialRecargas(),
+    cargarDireccionUSDT(),
   ]);
 
-  pintarEstadoSuscripcion();
-  pintarSaldoEnUI();
-  pintarPreciosPlanes();
-  pintarInfoTasa();
-
-  // Verificar wallet cripto existente
-  await verificarWalletExistente();
-
-  // Escuchar cambios de saldo
-  suscribirSaldo();
-
-  // Historial
-  await cargarHistorial();
-
+  // 5) Mostrar pantalla principal
   mostrarPantalla("pantalla-principal");
 }
 
-function noAutorizado(mensaje) {
-  setMensaje("no-autorizado-titulo", "No autorizado");
-  setMensaje("no-autorizado-texto", mensaje);
-  mostrarPantalla("pantalla-no-autorizado");
+// ------------------------------------------------------------
+// 5) Conectar eventos
+// ------------------------------------------------------------
+function conectarEventos() {
+  // Botón volver → a la app principal
+  document.getElementById("btn-volver")?.addEventListener("click", () => {
+    window.location.href = "../index.html";
+  });
+  document.getElementById("btn-ir-login")?.addEventListener("click", () => {
+    window.location.href = "../index.html";
+  });
+
+  // Selección de plan
+  document.querySelectorAll("#grid-planes .sus-plan").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#grid-planes .sus-plan").forEach((b) => b.classList.remove("seleccionado"));
+      btn.classList.add("seleccionado");
+      susEstado.planSeleccionado = Number(btn.getAttribute("data-meses"));
+      actualizarBotonComprar();
+    });
+  });
+
+  // Comprar suscripción con saldo
+  document.getElementById("btn-comprar-suscripcion")?.addEventListener("click", comprarSuscripcionConSaldo);
+
+  // Tabs de métodos de recarga
+  document.querySelectorAll("#tabs-metodos .sus-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const metodo = tab.getAttribute("data-metodo");
+      cambiarMetodo(metodo);
+    });
+  });
+
+  // Copiar dirección USDT
+  document.getElementById("btn-copiar-usdt")?.addEventListener("click", copiarDireccionUSDT);
+
+  // Generar / obtener wallet USDT
+  document.getElementById("btn-generar-wallet")?.addEventListener("click", generarWalletUSDT);
+
+  // Botones "Enviar solicitud" de cada método
+  document.querySelectorAll(".btn-enviar-recarga").forEach((btn) => {
+    btn.addEventListener("click", () => enviarRecargaManual(btn.getAttribute("data-metodo")));
+  });
 }
 
 // ------------------------------------------------------------
-// 6) Cargar datos
+// 6) Cargar saldo
 // ------------------------------------------------------------
-async function cargarSuscripcion() {
-  const { data } = await db
-    .from("suscripciones").select("*")
-    .eq("chofer_id", estado.usuario.id)
+async function cargarSaldo() {
+  const { data } = await db.from("saldos").select("monto")
+    .eq("usuario_id", susEstado.usuario.id).maybeSingle();
+  susEstado.saldo = Number(data?.monto || 0);
+
+  const el = document.getElementById("saldo-actual");
+  if (el) el.textContent = formatearPrecio(susEstado.saldo);
+}
+
+// ------------------------------------------------------------
+// 7) Cargar precios de los planes
+// ------------------------------------------------------------
+async function cargarPrecios() {
+  const { data } = await db.from("configuracion")
+    .select("clave, valor")
+    .in("clave", [
+      "precio_saldo_1mes",
+      "precio_saldo_3meses",
+      "precio_saldo_6meses",
+      "precio_saldo_12meses",
+    ]);
+
+  const cfg = {};
+  (data || []).forEach((c) => { cfg[c.clave] = Number(c.valor) || 0; });
+
+  susEstado.precios = {
+    1: cfg["precio_saldo_1mes"] || 0,
+    3: cfg["precio_saldo_3meses"] || 0,
+    6: cfg["precio_saldo_6meses"] || 0,
+    12: cfg["precio_saldo_12meses"] || 0,
+  };
+
+  const el1 = document.getElementById("precio-1");
+  const el3 = document.getElementById("precio-3");
+  const el6 = document.getElementById("precio-6");
+  const el12 = document.getElementById("precio-12");
+
+  if (el1) el1.textContent = formatearPrecio(susEstado.precios[1]);
+  if (el3) el3.textContent = formatearPrecio(susEstado.precios[3]);
+  if (el6) el6.textContent = formatearPrecio(susEstado.precios[6]);
+  if (el12) el12.textContent = formatearPrecio(susEstado.precios[12]);
+}
+
+// ------------------------------------------------------------
+// 8) Cargar suscripción actual (solo choferes)
+// ------------------------------------------------------------
+async function cargarSuscripcionActual() {
+  if (susEstado.perfil?.rol !== "chofer") return;
+
+  const { data: susc } = await db.from("suscripciones").select("*")
+    .eq("chofer_id", susEstado.usuario.id)
     .eq("estado", "activa")
     .gt("fecha_vencimiento", new Date().toISOString())
     .order("fecha_vencimiento", { ascending: false })
     .maybeSingle();
-  estado.suscripcion = data || null;
-}
 
-async function cargarSaldo() {
-  const { data } = await db
-    .from("saldos").select("monto").eq("usuario_id", estado.usuario.id).maybeSingle();
-  estado.saldo = Number(data?.monto || 0);
-}
+  const bloque = document.getElementById("bloque-suscripcion-actual");
+  const titulo = document.getElementById("sus-estado-titulo");
+  const fecha = document.getElementById("sus-estado-fecha");
+  const emoji = document.getElementById("sus-estado-emoji");
 
-async function cargarConfiguracion() {
-  // Precios de planes
-  const { data: precios } = await db.rpc("obtener_precios_saldo");
-  const plan = {};
-  (precios || []).forEach((p) => { plan[Number(p.meses)] = Number(p.precio); });
-  estado.preciosPlan = plan;
+  if (!bloque) return;
 
-  // Tasa USDT
-  const { data: tasas } = await db.rpc("obtener_tasas");
-  const t = (tasas || []).find((x) => x.clave === "tasa_usdt_saldo");
-  estado.tasaUsdt = Number(t?.valor || 1);
-}
-
-// ------------------------------------------------------------
-// 7) Pintar UI
-// ------------------------------------------------------------
-function pintarEstadoSuscripcion() {
-  const cont = el.estado_suscripcion;
-  if (!cont) return;
-
-  if (estado.suscripcion) {
-    const venc = new Date(estado.suscripcion.fecha_vencimiento);
+  if (susc) {
+    const venc = new Date(susc.fecha_vencimiento);
     const dias = Math.ceil((venc - new Date()) / 86400000);
-    cont.className = "estado-suscripcion-card activa";
-    cont.innerHTML = `
-      <h3>✅ Suscripción activa</h3>
-      <p class="info">Vence el <span class="fecha">${venc.toLocaleDateString("es-ES")}</span></p>
-      <p class="info">Te quedan <strong>${dias} día${dias === 1 ? "" : "s"}</strong> de acceso.</p>
-      <p class="info" style="font-size:0.83rem;color:#6b7280">
-        Puedes extenderla activando otro plan cuando quieras.
-      </p>
-    `;
+    bloque.classList.remove("oculto", "expirada");
+    if (emoji) emoji.textContent = "✅";
+    if (titulo) titulo.textContent = `Suscripción activa · ${dias} día${dias === 1 ? "" : "s"}`;
+    if (fecha) fecha.textContent = `Vence el ${venc.toLocaleDateString("es-ES")}`;
   } else {
-    cont.className = "estado-suscripcion-card inactiva";
-    cont.innerHTML = `
-      <h3>⚠️ Sin suscripción activa</h3>
-      <p class="info">No puedes ver ni aceptar solicitudes hasta activar tu plan.</p>
-      <p class="info" style="font-size:0.83rem;color:#6b7280">
-        Recarga saldo y activa tu plan abajo.
-      </p>
-    `;
-  }
-}
+    // Ver si alguna vez tuvo alguna (para mostrar "expirada")
+    const { data: ultima } = await db.from("suscripciones").select("*")
+      .eq("chofer_id", susEstado.usuario.id)
+      .order("fecha_vencimiento", { ascending: false })
+      .limit(1).maybeSingle();
 
-function pintarSaldoEnUI() {
-  const montoTxt = "$" + estado.saldo.toFixed(2);
-  if (el.saldo_chip_monto) el.saldo_chip_monto.textContent = montoTxt;
-  if (el.saldo_chip) el.saldo_chip.classList.remove("oculto");
-  if (el.saldo_actual_display) el.saldo_actual_display.textContent = montoTxt;
-  actualizarBotonPagarSaldo();
-}
-
-function pintarInfoTasa() {
-  if (el.info_tasa) {
-    el.info_tasa.textContent = `1 USDT = ${estado.tasaUsdt.toFixed(2)} de saldo`;
-  }
-}
-
-function pintarPreciosPlanes() {
-  document.querySelectorAll("#grid-planes-saldo .plan").forEach((p) => {
-    const meses = Number(p.getAttribute("data-meses"));
-    const precio = estado.preciosPlan[meses];
-    const precioEl = p.querySelector(".plan-precio");
-    if (precioEl && precio != null) {
-      precioEl.textContent = "$" + Number(precio).toFixed(2);
+    if (ultima) {
+      bloque.classList.remove("oculto");
+      bloque.classList.add("expirada");
+      if (emoji) emoji.textContent = "⚠️";
+      if (titulo) titulo.textContent = "Suscripción expirada";
+      if (fecha) fecha.textContent = "Renuévala para seguir aceptando servicios";
+    } else {
+      bloque.classList.add("oculto");
     }
-  });
-  actualizarBotonPagarSaldo();
+  }
 }
 
-function actualizarBotonPagarSaldo() {
-  const btn = el.btn_pagar_saldo;
+// ------------------------------------------------------------
+// 9) Botón "Comprar con saldo" — habilitado/deshabilitado
+// ------------------------------------------------------------
+function actualizarBotonComprar() {
+  const btn = document.getElementById("btn-comprar-suscripcion");
   if (!btn) return;
 
-  if (!estado.planSaldoSeleccionado) {
+  const meses = susEstado.planSeleccionado;
+  const precio = susEstado.precios[meses] || 0;
+
+  if (!meses) {
     btn.disabled = true;
-    btn.textContent = "💳 Pagar con saldo";
+    btn.textContent = "💳 Selecciona un plan";
     return;
   }
 
-  const precio = estado.preciosPlan[estado.planSaldoSeleccionado];
-  if (precio == null) { btn.disabled = true; return; }
-
-  if (estado.saldo < precio) {
+  if (susEstado.saldo < precio) {
     btn.disabled = true;
-    btn.textContent = `Saldo insuficiente (faltan $${(precio - estado.saldo).toFixed(2)})`;
-  } else {
-    btn.disabled = false;
-    btn.textContent = `💳 Pagar $${Number(precio).toFixed(2)} con saldo`;
-  }
-}
-
-// ------------------------------------------------------------
-// 8) Eventos
-// ------------------------------------------------------------
-function conectarEventos() {
-  el.btn_volver?.addEventListener("click", () => {
-    window.location.href = "../index.html";
-  });
-  el.btn_ir_login?.addEventListener("click", () => {
-    window.location.href = "../index.html";
-  });
-
-  // Métodos de recarga
-  document.querySelectorAll(".metodo-recarga").forEach((m) => {
-    m.addEventListener("click", () => {
-      document.querySelectorAll(".metodo-recarga").forEach((b) => b.classList.remove("activo"));
-      m.classList.add("activo");
-      estado.metodoRecarga = m.getAttribute("data-metodo");
-      mostrarPanelRecarga();
-    });
-  });
-
-  // Wallet cripto
-  el.btn_obtener_wallet?.addEventListener("click", obtenerWallet);
-  el.copy_wallet_btn?.addEventListener("click", copiarWallet);
-
-  // Formulario manual
-  el.form_recarga_manual?.addEventListener("submit", enviarRecargaManual);
-  el.recarga_comprobante?.addEventListener("change", (e) => {
-    estado.archivo = e.target.files?.[0] || null;
-  });
-
-  // Planes
-  document.querySelectorAll("#grid-planes-saldo .plan").forEach((p) => {
-    p.addEventListener("click", () => {
-      document.querySelectorAll("#grid-planes-saldo .plan").forEach((b) => b.classList.remove("activo"));
-      p.classList.add("activo");
-      estado.planSaldoSeleccionado = Number(p.getAttribute("data-meses"));
-      actualizarBotonPagarSaldo();
-    });
-  });
-
-  // Pagar
-  el.btn_pagar_saldo?.addEventListener("click", pagarConSaldo);
-}
-
-// ------------------------------------------------------------
-// 9) Panel dinámico de recarga
-// ------------------------------------------------------------
-function mostrarPanelRecarga() {
-  const panel = el.panel_recarga;
-  const pCripto = el.panel_cripto;
-  const pManual = el.panel_manual;
-
-  if (!estado.metodoRecarga) { panel.classList.add("oculto"); return; }
-  panel.classList.remove("oculto");
-  limpiarMensajes();
-
-  if (estado.metodoRecarga === "cripto") {
-    pCripto.classList.remove("oculto");
-    pManual.classList.add("oculto");
-  } else {
-    pCripto.classList.add("oculto");
-    pManual.classList.remove("oculto");
-    renderPanelManual(estado.metodoRecarga);
+    btn.textContent = `💳 Sin saldo suficiente (${formatearPrecio(precio)})`;
+    return;
   }
 
-  setTimeout(() => panel.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+  btn.disabled = false;
+  btn.textContent = `💳 Pagar ${formatearPrecio(precio)} con saldo`;
 }
 
-function renderPanelManual(metodo) {
-  const cfg = CONFIG_MANUAL[metodo];
-  if (!cfg) return;
+// ------------------------------------------------------------
+// 10) Comprar suscripción con saldo
+// ------------------------------------------------------------
+async function comprarSuscripcionConSaldo() {
+  setMensaje("compra-error", "");
+  setMensaje("compra-exito", "");
 
-  el.manual_titulo.textContent = cfg.titulo;
+  const meses = susEstado.planSeleccionado;
+  const precio = susEstado.precios[meses] || 0;
 
-  const lineas = cfg.datos.map((d) => `
-    <div class="linea">
-      <span class="label">${escapar(d.label)}</span>
-      <span class="valor">
-        ${escapar(d.valor)}
-        <button type="button" class="copy-btn" data-copy="${escapar(d.valor)}">Copiar</button>
-      </span>
-    </div>
-  `).join("");
+  if (!meses || !precio) {
+    setMensaje("compra-error", "Selecciona un plan primero.");
+    return;
+  }
+  if (susEstado.saldo < precio) {
+    setMensaje("compra-error", "Saldo insuficiente. Recarga primero.");
+    return;
+  }
 
-  el.manual_datos.innerHTML = `
-    <p style="margin-bottom:8px;font-size:0.85rem">${escapar(cfg.instrucciones)}</p>
-    ${lineas}
-  `;
+  if (!confirm(`¿Comprar ${meses} mes${meses === 1 ? "" : "es"} por ${formatearPrecio(precio)}?`)) return;
 
-  const campos = cfg.campos.map((c) => {
-    if (c.type === "textarea") {
-      return `
-        <label for="campo-${c.id}">${escapar(c.label)}</label>
-        <textarea id="campo-${c.id}" data-campo="${c.id}" placeholder="${escapar(c.placeholder || "")}" ${c.required ? "required" : ""}></textarea>
-      `;
-    }
-    return `
-      <label for="campo-${c.id}">${escapar(c.label)}</label>
-      <input type="${c.type}" id="campo-${c.id}" data-campo="${c.id}" placeholder="${escapar(c.placeholder || "")}" ${c.required ? "required" : ""} />
-    `;
-  }).join("");
+  const btn = document.getElementById("btn-comprar-suscripcion");
+  setBotonCargando(btn, true, "Procesando...");
 
-  el.manual_campos.innerHTML = campos;
-
-  // Botones copiar
-  el.manual_datos.querySelectorAll("[data-copy]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(btn.getAttribute("data-copy"));
-        const orig = btn.textContent;
-        btn.textContent = "✓";
-        setTimeout(() => (btn.textContent = orig), 1200);
-      } catch {}
-    });
+  const { data, error } = await db.rpc("pagar_suscripcion_con_saldo", {
+    p_plan_meses: meses,
   });
+
+  if (btn) setBotonCargando(btn, false, "💳 Comprar con saldo");
+
+  if (error) {
+    setMensaje("compra-error", "Error: " + error.message);
+    return;
+  }
+
+  setMensaje("compra-exito", "✅ ¡Suscripción activada! Redirigiendo…");
+
+  // Recargar datos
+  await cargarSaldo();
+  await cargarSuscripcionActual();
+
+  // Redirigir a la app después de 1.5s
+  setTimeout(() => {
+    window.location.href = "../index.html";
+  }, 1500);
 }
 
 // ------------------------------------------------------------
-// 10) Wallet cripto
+// 11) Cambio de método (tabs)
 // ------------------------------------------------------------
-async function verificarWalletExistente() {
-  const { data } = await db
-    .from("wallets_cripto").select("direccion")
-    .eq("usuario_id", estado.usuario.id)
+function cambiarMetodo(metodo) {
+  susEstado.metodoActivo = metodo;
+
+  document.querySelectorAll("#tabs-metodos .sus-tab").forEach((tab) => {
+    tab.classList.toggle("activo", tab.getAttribute("data-metodo") === metodo);
+  });
+
+  ["usdt", "transferencia", "pago_movil", "efectivo"].forEach((m) => {
+    const bloque = document.getElementById("form-" + m);
+    if (bloque) bloque.classList.toggle("oculto", m !== metodo);
+  });
+
+  setMensaje("recarga-error", "");
+  setMensaje("recarga-exito", "");
+}
+
+// ------------------------------------------------------------
+// 12) USDT — cargar dirección / generar wallet
+// ------------------------------------------------------------
+async function cargarDireccionUSDT() {
+  const input = document.getElementById("usdt-direccion");
+  const estado = document.getElementById("wallet-estado");
+  if (!input) return;
+
+  const { data } = await db.from("wallets_cripto")
+    .select("direccion, red, activa")
+    .eq("usuario_id", susEstado.usuario.id)
     .eq("activa", true)
+    .limit(1)
     .maybeSingle();
 
   if (data?.direccion) {
-    mostrarWallet(data.direccion);
+    input.value = data.direccion;
+    if (estado) estado.textContent = `Red: ${data.red || "BEP20"}`;
+    const btnGen = document.getElementById("btn-generar-wallet");
+    if (btnGen) btnGen.classList.add("oculto");
+  } else {
+    input.value = "";
+    input.placeholder = "Toca 'Generar dirección' para crear tu wallet USDT";
+    if (estado) estado.textContent = "";
   }
 }
 
-async function obtenerWallet() {
-  const btn = el.btn_obtener_wallet;
-  const textoOriginal = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = "Generando dirección...";
+async function copiarDireccionUSDT() {
+  const input = document.getElementById("usdt-direccion");
+  const dir = input?.value?.trim();
+  if (!dir) {
+    alert("Aún no tienes dirección USDT. Toca 'Generar dirección' primero.");
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(dir);
+    alert("✅ Dirección copiada: " + dir);
+  } catch {
+    alert("Tu dirección es:\n" + dir);
+  }
+}
+
+async function generarWalletUSDT() {
+  const input = document.getElementById("usdt-direccion");
+  const estado = document.getElementById("wallet-estado");
+  const btn = document.getElementById("btn-generar-wallet");
+
+  if (input?.value) {
+    alert("Ya tienes una dirección USDT asociada.");
+    return;
+  }
+
+  if (btn) setBotonCargando(btn, true, "Generando...");
+  if (estado) estado.textContent = "Creando tu dirección única en la red BEP20…";
 
   try {
-    const { data: { session } } = await db.auth.getSession();
-    if (!session) throw new Error("No hay sesión");
-
-    const res = await fetch(EDGE_WALLET_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + session.access_token,
-      },
+    const { data, error } = await db.functions.invoke("crear-wallet", {
+      body: {},
     });
 
-    const data = await res.json();
+    if (error) throw error;
 
-    if (!res.ok || !data.success || !data.wallet_address) {
-      throw new Error(data.error || "No se pudo generar la dirección");
+    if (data?.direccion) {
+      if (input) input.value = data.direccion;
+      if (estado) estado.textContent = `Red: ${data.red || "BEP20"}`;
+      if (btn) btn.classList.add("oculto");
+    } else {
+      if (estado) estado.textContent = "No se recibió dirección. Intenta de nuevo.";
     }
-
-    mostrarWallet(data.wallet_address);
   } catch (err) {
-    alert("Error: " + (err?.message || err));
-    btn.disabled = false;
-    btn.textContent = textoOriginal;
+    console.error("[wallet] error:", err);
+    if (estado) estado.textContent = "Error al generar. Intenta más tarde.";
+    alert("No se pudo generar la dirección:\n" + (err?.message || err));
+  } finally {
+    if (btn) setBotonCargando(btn, false, "🔄 Generar dirección");
   }
-}
-
-function mostrarWallet(direccion) {
-  el.wallet_placeholder?.classList.add("oculto");
-  el.wallet_card?.classList.remove("oculto");
-  if (el.wallet_address_text) el.wallet_address_text.textContent = direccion;
-
-  if (el.wallet_qr_img) {
-    el.wallet_qr_img.src =
-      "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(direccion);
-  }
-}
-
-function copiarWallet() {
-  const txt = el.wallet_address_text?.textContent || "";
-  if (!txt) return;
-  navigator.clipboard.writeText(txt).then(() => {
-    const btn = el.copy_wallet_btn;
-    const orig = btn.textContent;
-    btn.textContent = "✓ Copiado";
-    setTimeout(() => (btn.textContent = orig), 1200);
-  }).catch(() => alert("No se pudo copiar"));
 }
 
 // ------------------------------------------------------------
-// 11) Enviar recarga manual
+// 13) Enviar recarga manual (transferencia / pago móvil / efectivo)
 // ------------------------------------------------------------
-async function enviarRecargaManual(e) {
-  e.preventDefault();
-  limpiarMensajes();
+async function enviarRecargaManual(metodo) {
+  setMensaje("recarga-error", "");
+  setMensaje("recarga-exito", "");
 
-  if (!estado.usuario || !estado.metodoRecarga) return;
+  // Prefijos según método
+  const prefijo = metodo === "transferencia" ? "tr"
+    : metodo === "pago_movil" ? "pm"
+    : "ef";
 
-  const metodo = estado.metodoRecarga;
-  if (metodo === "cripto") return; // no aplica aquí
+  const montoInput = document.getElementById(prefijo + "-monto");
+  const referenciaInput = document.getElementById(prefijo + "-referencia");
+  const comprobanteInput = document.getElementById(prefijo + "-comprobante");
+  const notasInput = document.getElementById(prefijo + "-notas");
 
-  const cfg = CONFIG_MANUAL[metodo];
-  if (!cfg) return;
+  const monto = Number(montoInput?.value || 0);
+  const referencia = (referenciaInput?.value || "").trim() || null;
+  const archivo = comprobanteInput?.files?.[0] || null;
+  const notas = (notasInput?.value || "").trim() || null;
 
-  const montoPago = Number(el.recarga_monto.value);
-  if (!montoPago || montoPago <= 0) {
-    return setMensaje("recarga-error", "Indica el monto que pagaste.");
+  if (!monto || monto <= 0) {
+    setMensaje("recarga-error", "Ingresa un monto válido.");
+    return;
+  }
+  if (metodo !== "efectivo" && !referencia) {
+    setMensaje("recarga-error", "Ingresa el número de referencia.");
+    return;
+  }
+  if (metodo !== "efectivo" && !archivo) {
+    setMensaje("recarga-error", "Sube una foto del comprobante.");
+    return;
   }
 
-  // Leer campos dinámicos
-  const datos = {};
-  for (const c of cfg.campos) {
-    const input = el.manual_campos.querySelector(`[data-campo="${c.id}"]`);
-    const val = input?.value?.trim() || "";
-    if (c.required && !val)
-      return setMensaje("recarga-error", `El campo "${c.label}" es obligatorio.`);
-    datos[c.id] = val;
-  }
+  const btn = document.querySelector(`.btn-enviar-recarga[data-metodo="${metodo}"]`);
+  const textoOriginal = btn?.textContent || "Enviar";
+  setBotonCargando(btn, true, "Enviando…");
 
-  const boton = el.form_recarga_manual.querySelector("button[type=submit]");
-  const textoOriginal = boton.textContent;
-  boton.disabled = true;
-  boton.textContent = "Enviando...";
-
-  // Subir comprobante (opcional)
   let comprobanteUrl = null;
-  if (estado.archivo) {
-    if (estado.archivo.size > 4 * 1024 * 1024) {
-      boton.disabled = false;
-      boton.textContent = textoOriginal;
-      return setMensaje("recarga-error", "El comprobante no debe superar 4 MB.");
+
+  // Subir comprobante si hay
+  if (archivo) {
+    if (archivo.size > 5 * 1024 * 1024) {
+      setBotonCargando(btn, false, textoOriginal);
+      setMensaje("recarga-error", "La imagen no debe superar 5 MB.");
+      return;
     }
-    const ext = (estado.archivo.name.split(".").pop() || "jpg").toLowerCase();
-    const ruta = `${estado.usuario.id}/${Date.now()}.${ext}`;
+
+    const ext = (archivo.name.split(".").pop() || "jpg").toLowerCase();
+    const ruta = `${susEstado.usuario.id}/${Date.now()}.${ext}`;
 
     const { error: errUp } = await db.storage
       .from("comprobantes")
-      .upload(ruta, estado.archivo, { upsert: false, contentType: estado.archivo.type });
+      .upload(ruta, archivo, { upsert: true, contentType: archivo.type });
 
     if (errUp) {
-      boton.disabled = false;
-      boton.textContent = textoOriginal;
-      return setMensaje("recarga-error", "Error al subir comprobante: " + errUp.message);
+      setBotonCargando(btn, false, textoOriginal);
+      setMensaje("recarga-error", "Error subiendo comprobante: " + errUp.message);
+      return;
     }
 
     const { data: pub } = db.storage.from("comprobantes").getPublicUrl(ruta);
     comprobanteUrl = pub?.publicUrl || null;
   }
 
-  // Notas combinadas
-  const notasPartes = [];
-  if (datos.notas) notasPartes.push(datos.notas);
-  if (datos.telefono_origen) notasPartes.push("Tel: " + datos.telefono_origen);
-
-  // Insertar en solicitudes_pago
-  // plan_meses se guarda como 1 (dummy) porque este modelo es de recarga, no de plan directo.
-  const { error } = await db.from("solicitudes_pago").insert({
-    chofer_id:       estado.usuario.id,
-    plan_meses:      1,
-    monto:           montoPago,
-    metodo:          metodo,
-    referencia:      datos.referencia || null,
-    notas_chofer:    notasPartes.join(" | ") || null,
+  // Insertar solicitud de pago
+  const { error: errIns } = await db.from("solicitudes_pago").insert({
+    chofer_id: susEstado.usuario.id,
+    plan_meses: 1,              // recarga de saldo, no plan específico
+    monto: monto,
+    metodo: metodo,
+    referencia: referencia,
     comprobante_url: comprobanteUrl,
-    estado:          "pendiente",
+    notas_chofer: notas,
+    estado: "pendiente",
   });
 
-  boton.disabled = false;
-  boton.textContent = textoOriginal;
+  setBotonCargando(btn, false, textoOriginal);
 
-  if (error) return setMensaje("recarga-error", traducirError(error.message));
-
-  setMensaje("recarga-exito", "✅ Enviado. El admin lo revisará y acreditará tu saldo.");
-
-  // Reset
-  el.form_recarga_manual.reset();
-  estado.archivo = null;
-
-  await cargarHistorial();
-}
-
-// ------------------------------------------------------------
-// 12) Pagar con saldo
-// ------------------------------------------------------------
-async function pagarConSaldo() {
-  limpiarMensajes();
-
-  if (!estado.planSaldoSeleccionado) return;
-
-  const precio = estado.preciosPlan[estado.planSaldoSeleccionado];
-  if (precio == null) return setMensaje("pago-saldo-error", "Precio no disponible.");
-  if (estado.saldo < precio) return setMensaje("pago-saldo-error", "Saldo insuficiente.");
-
-  const ok = confirm(
-    `¿Pagar $${precio.toFixed(2)} con tu saldo para activar ${estado.planSaldoSeleccionado} mes(es)?`
-  );
-  if (!ok) return;
-
-  const btn = el.btn_pagar_saldo;
-  const textoOriginal = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = "Procesando...";
-
-  const { error } = await db.rpc("pagar_suscripcion_con_saldo", {
-    p_plan_meses: estado.planSaldoSeleccionado,
-  });
-
-  if (error) {
-    btn.disabled = false;
-    btn.textContent = textoOriginal;
-    return setMensaje("pago-saldo-error", traducirError(error.message));
+  if (errIns) {
+    setMensaje("recarga-error", "Error al enviar: " + errIns.message);
+    return;
   }
 
-  setMensaje("pago-saldo-exito", "✅ ¡Suscripción activada!");
+  setMensaje("recarga-exito", "✅ Solicitud enviada. El admin la aprobará pronto.");
 
-  // Recargar
-  await Promise.all([cargarSuscripcion(), cargarSaldo()]);
-  pintarEstadoSuscripcion();
-  pintarSaldoEnUI();
+  // Limpiar campos
+  if (montoInput) montoInput.value = "";
+  if (referenciaInput) referenciaInput.value = "";
+  if (comprobanteInput) comprobanteInput.value = "";
+  if (notasInput) notasInput.value = "";
 
-  // Reset
-  estado.planSaldoSeleccionado = null;
-  document.querySelectorAll("#grid-planes-saldo .plan").forEach((b) => b.classList.remove("activo"));
-  actualizarBotonPagarSaldo();
-
-  await cargarHistorial();
+  // Recargar historial
+  setTimeout(cargarHistorialRecargas, 1000);
 }
 
 // ------------------------------------------------------------
-// 13) Realtime: saldo
+// 14) Historial de recargas
 // ------------------------------------------------------------
-function suscribirSaldo() {
-  if (estado.canalSaldo) return;
+async function cargarHistorialRecargas() {
+  const cont = document.getElementById("lista-recargas");
+  if (!cont) return;
+  cont.innerHTML = '<p class="sus-vacio">Cargando…</p>';
 
-  estado.canalSaldo = db
-    .channel("saldo-live-" + estado.usuario.id)
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "saldos", filter: `usuario_id=eq.${estado.usuario.id}` },
-      (payload) => {
-        const nuevo = Number(payload.new?.monto || 0);
-        if (nuevo !== estado.saldo) {
-          estado.saldo = nuevo;
-          pintarSaldoEnUI();
-          actualizarBotonPagarSaldo();
-        }
-      }
-    )
-    .subscribe((status) => console.log("[Realtime saldo]", status));
-}
-
-// ------------------------------------------------------------
-// 14) Historial
-// ------------------------------------------------------------
-async function cargarHistorial() {
-  const cont = el.lista_historial;
-  if (!cont || !estado.usuario) return;
-  cont.innerHTML = '<p class="vacio">Cargando...</p>';
-
-  const { data, error } = await db
-    .from("solicitudes_pago").select("*")
-    .eq("chofer_id", estado.usuario.id)
+  const { data, error } = await db.from("solicitudes_pago")
+    .select("id, monto, metodo, estado, notas_admin, notas_chofer, creado_en")
+    .eq("chofer_id", susEstado.usuario.id)
     .order("creado_en", { ascending: false })
     .limit(30);
 
   if (error) {
-    cont.innerHTML = `<p class="vacio">Error: ${escapar(error.message)}</p>`;
+    cont.innerHTML = `<p class="sus-vacio">Error: ${escapar(error.message)}</p>`;
     return;
   }
   if (!data || data.length === 0) {
-    cont.innerHTML = '<p class="vacio">Aún no has enviado solicitudes de recarga.</p>';
+    cont.innerHTML = '<p class="sus-vacio">Aún no has hecho recargas.</p>';
     return;
   }
 
-  cont.innerHTML = "";
-  data.forEach((s) => cont.appendChild(renderHistorial(s)));
-}
-
-function renderHistorial(s) {
-  const div = document.createElement("div");
-  div.className = "tarjeta-historial";
-
-  const metodos = {
+  const ETIQ_METODO = {
     transferencia: "🏦 Transferencia",
-    pago_movil:    "📱 Pago móvil",
-    efectivo:      "💵 Efectivo",
+    pago_movil: "📱 Pago móvil",
+    efectivo: "💵 Efectivo",
+    cripto: "₿ Cripto (USDT)",
   };
 
-  // Nota: si en el futuro diferencias recargas de pagos de plan, ajusta aquí.
-  const esRecarga = s.metodo !== "cripto_auto" && s.plan_meses === 1;
-
-  div.innerHTML = `
-    <div class="fila-superior">
-      <span class="plan">${esRecarga ? "Recarga de saldo" : `Plan ${s.plan_meses} mes(es)`}</span>
-      <span class="badge-estado-pago ${s.estado}">${s.estado}</span>
-    </div>
-    <div class="meta">
-      <span class="monto">$${Number(s.monto).toFixed(2)}</span>
-      · <span>${escapar(metodos[s.metodo] || s.metodo)}</span>
-    </div>
-    <div class="meta">${formatearFecha(s.creado_en)}</div>
-    ${s.referencia ? `<div class="meta">Ref: ${escapar(s.referencia)}</div>` : ""}
-    ${s.notas_admin ? `<div class="nota-admin">Admin: ${escapar(s.notas_admin)}</div>` : ""}
-  `;
-
-  return div;
+  cont.innerHTML = "";
+  data.forEach((r) => {
+    const card = document.createElement("div");
+    card.className = "sus-card-recarga";
+    card.innerHTML = `
+      <div class="fila">
+        <span class="metodo">${escapar(ETIQ_METODO[r.metodo] || r.metodo)}</span>
+        <span class="monto">${formatearPrecio(r.monto)}</span>
+      </div>
+      <div class="fila">
+        <span class="fecha">${formatearFecha(r.creado_en)}</span>
+        <span class="sus-badge-estado ${r.estado}">${escapar(r.estado)}</span>
+      </div>
+      ${r.notas_admin ? `<div class="notas">Admin: ${escapar(r.notas_admin)}</div>` : ""}
+    `;
+    cont.appendChild(card);
+  });
 }
 
 // ------------------------------------------------------------
-// 15) Traducir errores
-// ------------------------------------------------------------
-function traducirError(msg) {
-  if (!msg) return "Ocurrió un error inesperado.";
-  const m = msg.toLowerCase();
-  if (m.includes("saldo insuficiente"))    return "Saldo insuficiente para este plan.";
-  if (m.includes("precio no configurado")) return "El precio de ese plan no está configurado.";
-  if (m.includes("no autenticado"))        return "Inicia sesión de nuevo.";
-  if (m.includes("row-level security") || m.includes("new row violates"))
-    return "No tienes permiso para esta acción.";
-  if (m.includes("duplicate")) return "Ya existe un registro igual.";
-  return msg;
-}
-
-// ------------------------------------------------------------
-// 16) Arrancar
+// 15) Arrancar
 // ------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", iniciar);
