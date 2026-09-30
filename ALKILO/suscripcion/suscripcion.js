@@ -393,17 +393,17 @@ async function generarWalletUSDT() {
   if (estado) estado.textContent = "Creando tu dirección única en la red BEP20…";
 
   try {
-    const { data, error } = await db.functions.invoke("crear-wallet", {
+    const { error } = await db.functions.invoke("crear-wallet", {
       body: {},
     });
 
     if (error) throw error;
 
-    if (data?.direccion) {
-      if (input) input.value = data.direccion;
-      if (estado) estado.textContent = `Red: ${data.red || "BEP20"}`;
-      if (btn) btn.classList.add("oculto");
-    } else {
+    // ✅ En lugar de intentar leer la respuesta, recargamos desde la BD
+    await cargarDireccionUSDT();
+
+    // Si después de recargar seguimos sin dirección, mostrar aviso
+    if (!input?.value) {
       if (estado) estado.textContent = "No se recibió dirección. Intenta de nuevo.";
     }
   } catch (err) {
