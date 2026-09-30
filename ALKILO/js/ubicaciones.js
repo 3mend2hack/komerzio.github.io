@@ -1,42 +1,60 @@
 /* ============================================================
-   ALKILO - Provincias y municipios de Cuba
-   Fuente: División político-administrativa oficial (2011)
-   Total: 15 provincias + Isla de la Juventud = 168 municipios
+   ALKILO - Ubicaciones de Cuba
+   Provincias y municipios oficiales (15 + Isla de la Juventud)
    ============================================================ */
 
-const PROVINCIAS_CUBA = {
+/** Lista de las 16 provincias de Cuba */
+const LISTA_PROVINCIAS = [
+  "Pinar del Río",
+  "Artemisa",
+  "La Habana",
+  "Mayabeque",
+  "Matanzas",
+  "Villa Clara",
+  "Cienfuegos",
+  "Sancti Spíritus",
+  "Ciego de Ávila",
+  "Camagüey",
+  "Las Tunas",
+  "Holguín",
+  "Granma",
+  "Santiago de Cuba",
+  "Guantánamo",
+  "Isla de la Juventud"
+];
+
+/** Mapa de provincia → array de municipios */
+const MUNICIPIOS_POR_PROVINCIA = {
   "Pinar del Río": [
     "Consolación del Sur", "Guane", "La Palma", "Los Palacios",
-    "Mantua", "Minas de Matahambre", "Pinar del Río",
-    "San Juan y Martínez", "San Luis", "Sandino", "Viñales"
+    "Mantua", "Minas de Matahambre", "Pinar del Río", "San Juan y Martínez",
+    "San Luis", "Sandino", "Viñales"
   ],
   "Artemisa": [
-    "Alquízar", "Artemisa", "Bahía Honda", "Bauta", "Caimito",
-    "Candelaria", "Guanajay", "Güira de Melena", "Mariel",
-    "San Antonio de los Baños", "San Cristóbal"
+    "Alquízar", "Artemisa", "Bauta", "Caimito", "Candelaria",
+    "Guanajay", "Güira de Melena", "Mariel", "San Antonio de los Baños",
+    "San Cristóbal", "Bahía Honda"
   ],
   "La Habana": [
     "Arroyo Naranjo", "Boyeros", "Centro Habana", "Cerro", "Cotorro",
-    "Diez de Octubre", "Guanabacoa", "Habana del Este",
-    "La Habana Vieja", "La Lisa", "Marianao", "Playa",
-    "Plaza de la Revolución", "Regla", "San Miguel del Padrón"
+    "Diez de Octubre", "Guanabacoa", "Habana del Este", "Habana Vieja",
+    "La Lisa", "Marianao", "Playa", "Plaza de la Revolución",
+    "Regla", "San Miguel del Padrón"
   ],
   "Mayabeque": [
     "Batabanó", "Bejucal", "Güines", "Jaruco", "Madruga",
-    "Melena del Sur", "Nueva Paz", "Quivicán",
-    "San José de las Lajas", "San Nicolás", "Santa Cruz del Norte"
+    "Melena del Sur", "Nueva Paz", "Quivicán", "San José de las Lajas",
+    "San Nicolás", "Santa Cruz del Norte"
   ],
   "Matanzas": [
-    "Calimete", "Cárdenas", "Ciénaga de Zapata", "Colón",
-    "Jagüey Grande", "Jovellanos", "Limonar", "Los Arabos",
-    "Martí", "Matanzas", "Pedro Betancourt", "Perico",
-    "Unión de Reyes"
+    "Calimete", "Cárdenas", "Ciénaga de Zapata", "Colón", "Jagüey Grande",
+    "Jovellanos", "Limonar", "Los Arabos", "Martí", "Matanzas",
+    "Pedro Betancourt", "Perico", "Unión de Reyes"
   ],
   "Villa Clara": [
-    "Caibarién", "Camajuaní", "Cifuentes", "Corralillo",
-    "Encrucijada", "Manicaragua", "Placetas", "Quemado de Güines",
-    "Ranchuelo", "Remedios", "Sagua la Grande", "Santa Clara",
-    "Santo Domingo"
+    "Caibarién", "Camajuaní", "Cifuentes", "Corralillo", "Encrucijada",
+    "Manicaragua", "Placetas", "Quemado de Güines", "Ranchuelo",
+    "Remedios", "Sagua la Grande", "Santa Clara", "Santo Domingo"
   ],
   "Cienfuegos": [
     "Abreus", "Aguada de Pasajeros", "Cienfuegos", "Cruces",
@@ -54,18 +72,16 @@ const PROVINCIAS_CUBA = {
   "Camagüey": [
     "Camagüey", "Carlos M. de Céspedes", "Esmeralda", "Florida",
     "Guáimaro", "Jimaguayú", "Minas", "Najasa", "Nuevitas",
-    "Santa Cruz del Sur", "Sibanicú", "Sierra de Cubitas",
-    "Vertientes"
+    "Santa Cruz del Sur", "Sibanicú", "Sierra de Cubitas", "Vertientes"
   ],
   "Las Tunas": [
     "Amancio", "Colombia", "Jesús Menéndez", "Jobabo",
     "Las Tunas", "Majibacoa", "Manatí", "Puerto Padre"
   ],
   "Holguín": [
-    "Antilla", "Báguanos", "Banes", "Cacocum",
-    "Calixto García", "Cueto", "Frank País", "Gibara",
-    "Holguín", "Mayarí", "Moa", "Rafael Freyre",
-    "Sagua de Tánamo", "Urbano Noris"
+    "Antilla", "Báguanos", "Banes", "Cacocum", "Calixto García",
+    "Cueto", "Frank País", "Gibara", "Holguín", "Mayarí",
+    "Moa", "Rafael Freyre", "Sagua de Tánamo", "Urbano Noris"
   ],
   "Granma": [
     "Bartolomé Masó", "Bayamo", "Buey Arriba", "Campechuela",
@@ -84,22 +100,28 @@ const PROVINCIAS_CUBA = {
   ],
   "Isla de la Juventud": [
     "Isla de la Juventud"
-  ],
+  ]
 };
 
-/** Lista ordenada alfabéticamente de provincias */
-const LISTA_PROVINCIAS = Object.keys(PROVINCIAS_CUBA).sort();
-
-/** Devuelve los municipios de una provincia ordenados alfabéticamente */
+/** Devuelve el array de municipios de una provincia */
 function obtenerMunicipios(provincia) {
-  if (!provincia || !PROVINCIAS_CUBA[provincia]) return [];
-  return [...PROVINCIAS_CUBA[provincia]].sort();
+  if (!provincia) return [];
+  return MUNICIPIOS_POR_PROVINCIA[provincia] || [];
 }
 
-/** Verifica que una combinación provincia/municipio sea válida */
+/** Valida que una combinación provincia/municipio sea real */
 function esUbicacionValida(provincia, municipio) {
   if (!provincia || !municipio) return false;
-  const muns = PROVINCIAS_CUBA[provincia];
-  if (!muns) return false;
+  if (!LISTA_PROVINCIAS.includes(provincia)) return false;
+  const muns = MUNICIPIOS_POR_PROVINCIA[provincia] || [];
   return muns.includes(municipio);
+}
+
+/** Devuelve la provincia de un municipio (búsqueda inversa) */
+function provinciaDeMunicipio(municipio) {
+  if (!municipio) return null;
+  for (const prov in MUNICIPIOS_POR_PROVINCIA) {
+    if (MUNICIPIOS_POR_PROVINCIA[prov].includes(municipio)) return prov;
+  }
+  return null;
 }

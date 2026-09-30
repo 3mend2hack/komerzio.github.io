@@ -1,6 +1,7 @@
 /* ============================================================
    ALKILO - App principal
-   FASE 1 a 6 + extras + pagos + mapa + reportes + referidos + Premium
+   FASE 1 a 6 + extras + pagos + mapa + reportes
+   Módulos Referidos y Premium viven en archivos aparte
    ============================================================ */
 
 // ------------------------------------------------------------
@@ -82,6 +83,7 @@ function setMensaje(idElemento, texto) {
   const e = document.getElementById(idElemento);
   if (e) e.textContent = texto || "";
 }
+window.setMensaje = setMensaje;
 
 function limpiarMensajes() {
   ["login-error","registro-error","registro-exito",
@@ -99,6 +101,7 @@ function setBotonCargando(boton, cargando, textoOriginal) {
   boton.disabled = cargando;
   boton.textContent = cargando ? "Procesando..." : textoOriginal;
 }
+window.setBotonCargando = setBotonCargando;
 
 const CATEGORIAS_REPORTE = {
   mal_comportamiento: "😠 Mal comportamiento",
@@ -167,12 +170,13 @@ function cachearElementos() {
     "reportar-categoria","reportar-descripcion","reportar-error","reportar-exito",
     "lista-mis-reportes","btn-refrescar-mis-reportes","lista-advertencias",
     "btn-refrescar-advertencias",
-    // Premium
     "premium-estado-card","premium-estado-titulo","premium-estado-texto",
     "premium-mi-saldo","premium-precio","btn-comprar-premium",
     "premium-error","premium-exito",
+    "perfil-saldo","btn-recargar-saldo",
   ].forEach((id) => { el[id.replace(/-/g,"_")] = document.getElementById(id); });
 }
+window.el = el;
 
 // ------------------------------------------------------------
 // 5) Utilidades de teléfono
@@ -228,23 +232,17 @@ function llenarSelectMunicipios(select, provincia, valorSeleccionado) {
   select.disabled = false;
 }
 
-/** Sincroniza el bloque de vehículo con el rol seleccionado en el registro */
 function refrescarBloqueChofer() {
   const esChofer = el.reg_rol?.value === "chofer";
   el.reg_bloque_chofer?.classList.toggle("oculto", !esChofer);
 }
 
-/** Resetea el formulario de registro a su estado inicial limpio */
 function resetFormularioRegistro() {
   el.form_registro?.reset();
-
-  // Municipio vuelve a estado deshabilitado
   if (el.reg_municipio) {
     el.reg_municipio.disabled = true;
     el.reg_municipio.innerHTML = '<option value="">— Primero elige provincia —</option>';
   }
-
-  // Sincronizar bloque de chofer (el select vuelve a "cliente" tras reset)
   refrescarBloqueChofer();
 }
 
@@ -279,7 +277,6 @@ function conectarNavegacion() {
     cerrarSesion();
   });
 
-  // Selector de rol → usa la función reutilizable
   el.reg_rol?.addEventListener("change", refrescarBloqueChofer);
 
   el.reg_telefono?.addEventListener("input", (e) => {
@@ -328,7 +325,6 @@ function conectarNavegacion() {
     cargarMisSolicitudes();
   });
 
-  // Choferes cercanos — requiere Premium para clientes
   document.getElementById("btn-ver-choferes-mapa")?.addEventListener("click", () => {
     if (estado.perfil?.rol === "cliente" && !estado.esPremium) {
       alert("⭐ El mapa de choferes cercanos es exclusivo del Plan Premium.\n\nActívalo por $100/mes desde tu perfil.");
@@ -353,16 +349,13 @@ function conectarNavegacion() {
     window.location.href = URL_SUSCRIPCION;
   });
 
-  // Plan Premium
-  el.btn_ir_plan_premium?.addEventListener("click", () => {
-    mostrarPantalla("pantalla-plan-premium");
-    cargarPlanPremium();
+  // Botón recargar del card de saldo → va a suscripción
+  el.btn_recargar_saldo?.addEventListener("click", () => {
+    window.location.href = URL_SUSCRIPCION;
   });
-  el.perfil_banner_premium?.addEventListener("click", () => {
-    mostrarPantalla("pantalla-plan-premium");
-    cargarPlanPremium();
-  });
-  el.btn_comprar_premium?.addEventListener("click", comprarPlanPremium);
+
+  // Los listeners de Plan Premium (btn-ir-plan-premium, banner, btn-comprar)
+  // ahora viven en js/premium.js
 
   el.btn_refrescar_mis?.addEventListener("click", cargarMisSolicitudes);
   el.btn_refrescar_disponibles?.addEventListener("click", async () => {
@@ -524,7 +517,6 @@ function conectarNavegacion() {
     mostrarPantalla("pantalla-mis-advertencias"); cargarMisAdvertencias();
   });
 
-  // COMPLETAR UBICACIÓN
   el.form_completar_ubicacion?.addEventListener("submit", guardarUbicacionObligatoria);
 }
 
@@ -823,7 +815,9 @@ async function cargarPerfilYMostrar() {
 
     ajustarBotonesPorRol(perfil.rol);
     pintarBannerSuscripcion();
-    pintarBannerPremium();
+    // Pintar banner premium — vive en js/premium.js
+    if (typeof window.pintarBannerPremium === "function") window.pintarBannerPremium();
+    await cargarSaldo();
     await cargarCalificacionesHechas();
     await actualizarBadgeAdvertencias();
     iniciarRealtime();
@@ -858,6 +852,20 @@ async function cargarCalificacionesHechas() {
   estado.calificacionesHechas = new Set((data || []).map((c) => c.solicitud_id));
 }
 
+/** Carga el saldo del usuario y lo pinta en el card del perfil */
+async function cargarSaldo() {
+  if (!estado.usuario) return;
+  const montoEl = el.perfil_saldo;
+  if (!montoEl) return;
+
+  const { data } = await db.from("saldos").select("monto")
+    .eq("usuario_id", estado.usuario.id).maybeSingle();
+
+  const monto = Number(data?.monto || 0);
+  montoEl.textContent = "$" + monto.toFixed(2);
+}
+window.cargarSaldo = cargarSaldo;
+
 function pintarBannerSuscripcion() {
   const b = el.perfil_banner_suscripcion;
   if (!b) return;
@@ -870,28 +878,6 @@ function pintarBannerSuscripcion() {
   } else {
     b.className = "banner-suscripcion expirada";
     b.textContent = "⚠️ Sin suscripción activa. Ve a 💳 Mi suscripción para renovar.";
-  }
-}
-
-function pintarBannerPremium() {
-  const b = el.perfil_banner_premium;
-  if (!b) return;
-  if (estado.perfil?.rol !== "cliente") { b.classList.add("oculto"); b.style.display = "none"; return; }
-
-  if (estado.esPremium && estado.planPremium) {
-    const venc = new Date(estado.planPremium.fecha_vencimiento);
-    const dias = Math.ceil((venc - new Date()) / 86400000);
-    if (dias <= 5) {
-      b.style.display = "";
-      b.classList.remove("oculto");
-      b.innerHTML = `⭐ Tu plan Premium vence en <strong>${dias} día${dias === 1 ? "" : "s"}</strong>. Toca para renovar.`;
-    } else {
-      b.style.display = "none";
-      b.classList.add("oculto");
-    }
-  } else {
-    b.style.display = "none";
-    b.classList.add("oculto");
   }
 }
 
@@ -1549,7 +1535,7 @@ function iniciarRealtime() {
             .order("fecha_vencimiento", { ascending: false }).maybeSingle();
           estado.planPremium = plan || null;
           estado.esPremium = !!plan;
-          pintarBannerPremium();
+          if (typeof window.pintarBannerPremium === "function") window.pintarBannerPremium();
         }).subscribe((s) => console.log("[Realtime planes]", s));
   }
 
@@ -2325,95 +2311,7 @@ function renderTarjetaAdvertencia(a) {
 }
 
 // ============================================================
-// 36) PLAN CLIENTE PREMIUM
-// ============================================================
-async function cargarPlanPremium() {
-  if (!estado.usuario) return;
-
-  setMensaje("premium-error", "");
-  setMensaje("premium-exito", "");
-
-  const { data: saldoRow } = await db.from("saldos").select("monto")
-    .eq("usuario_id", estado.usuario.id).maybeSingle();
-  const saldo = Number(saldoRow?.monto || 0);
-
-  const { data: cfg } = await db.from("configuracion").select("valor")
-    .eq("clave", "precio_plan_cliente").maybeSingle();
-  const precio = Number(cfg?.valor || 100);
-
-  const { data: plan } = await db.from("planes_cliente").select("*")
-    .eq("cliente_id", estado.usuario.id).eq("estado", "activo")
-    .gt("fecha_vencimiento", new Date().toISOString())
-    .order("fecha_vencimiento", { ascending: false }).maybeSingle();
-
-  estado.planPremium = plan || null;
-  estado.esPremium = !!plan;
-
-  if (el.premium_mi_saldo) el.premium_mi_saldo.textContent = "$" + saldo.toFixed(2);
-  if (el.premium_precio)   el.premium_precio.textContent   = "$" + precio.toFixed(2);
-
-  const cardEstado = el.premium_estado_card;
-  const titulo = el.premium_estado_titulo;
-  const texto  = el.premium_estado_texto;
-  const boton  = el.btn_comprar_premium;
-
-  if (plan) {
-    const venc = new Date(plan.fecha_vencimiento);
-    const dias = Math.ceil((venc - new Date()) / 86400000);
-    cardEstado?.classList.add("activo");
-    if (titulo) titulo.textContent = "¡Eres Premium!";
-    if (texto)  texto.textContent = `Tu plan vence en ${dias} día${dias === 1 ? "" : "s"} (${venc.toLocaleDateString("es-ES")}). Puedes renovar para extender.`;
-    if (boton) {
-      boton.textContent = "🔄 Renovar 30 días más";
-      boton.disabled = saldo < precio;
-    }
-  } else {
-    cardEstado?.classList.remove("activo");
-    if (titulo) titulo.textContent = "Hazte Premium";
-    if (texto)  texto.textContent = `Desbloquea todos los beneficios por $${precio.toFixed(2)} al mes.`;
-    if (boton) {
-      boton.textContent = "⭐ Activar Plan Premium";
-      boton.disabled = saldo < precio;
-    }
-  }
-
-  if (saldo < precio && !plan) {
-    setMensaje("premium-error",
-      `Saldo insuficiente. Necesitas $${precio.toFixed(2)} y tienes $${saldo.toFixed(2)}.`);
-  }
-}
-
-async function comprarPlanPremium() {
-  if (!estado.usuario) return;
-  setMensaje("premium-error", "");
-  setMensaje("premium-exito", "");
-
-  const btn = el.btn_comprar_premium;
-  const original = btn?.textContent || "Activar";
-
-  if (estado.esPremium) {
-    if (!confirm("¿Renovar 30 días más de Plan Premium?")) return;
-  } else {
-    if (!confirm("¿Activar el Plan Premium por $100? Se descontará de tu saldo.")) return;
-  }
-
-  if (btn) { btn.disabled = true; btn.textContent = "Procesando..."; }
-
-  const { data, error } = await db.rpc("pagar_plan_cliente_con_saldo");
-
-  if (btn) { btn.disabled = false; btn.textContent = original; }
-
-  if (error) {
-    return setMensaje("premium-error", traducirError(error.message));
-  }
-
-  setMensaje("premium-exito", "✅ Plan Premium activado. ¡Disfruta los beneficios!");
-  await cargarPlanPremium();
-  pintarBannerPremium();
-}
-
-// ============================================================
-// 37) PANEL ADMIN (integrado en index.html)
+// 36) PANEL ADMIN (integrado en index.html)
 // ============================================================
 async function cargarMetricasAdmin() {
   if (estado.perfil?.rol !== "admin") return;
@@ -2699,7 +2597,7 @@ async function rechazarPagoAdmin(solicitudId) {
 }
 
 // ============================================================
-// 38) PERFIL PÚBLICO
+// 37) PERFIL PÚBLICO
 // ============================================================
 async function abrirPerfilPublico(usuarioId) {
   if (!usuarioId) return;
@@ -2848,145 +2746,8 @@ function escucharAuth() {
   });
 }
 
-// ============================================================
-// 41) MÓDULO DE REFERIDOS
-// ============================================================
-async function cargarMisReferidos() {
-  if (!estado.usuario) return;
-
-  const codigoEl      = document.getElementById("ref-codigo");
-  const invitadosEl   = document.getElementById("ref-total-invitados");
-  const ganadoEl      = document.getElementById("ref-total-ganado");
-  const listaEl       = document.getElementById("lista-ref-comisiones");
-  const bloqueAplicar = document.getElementById("ref-aplicar-bloque");
-
-  const { data: perfil } = await db.from("perfiles")
-    .select("codigo_referido, referido_por, creado_en")
-    .eq("id", estado.usuario.id).maybeSingle();
-
-  if (codigoEl) codigoEl.textContent = perfil?.codigo_referido || "—";
-
-  if (bloqueAplicar) {
-    const sinReferidor = !perfil?.referido_por;
-    const dentro3dias  = perfil?.creado_en
-      ? new Date(perfil.creado_en).getTime() + 3 * 24 * 60 * 60 * 1000 > Date.now()
-      : false;
-    bloqueAplicar.classList.toggle("oculto", !(sinReferidor && dentro3dias));
-  }
-
-  const { data: stats } = await db.rpc("mis_referidos");
-  const s = Array.isArray(stats) ? stats[0] : stats;
-  if (invitadosEl) invitadosEl.textContent = s?.total_referidos ?? "0";
-  if (ganadoEl)    ganadoEl.textContent    = "$" + Number(s?.total_ganado || 0).toFixed(2);
-
-  if (!listaEl) return;
-  listaEl.innerHTML = '<p class="vacio">Cargando...</p>';
-
-  const { data: comisiones, error } = await db.from("referidos_comisiones")
-    .select("id, tipo, monto, creado_en")
-    .eq("referidor_id", estado.usuario.id)
-    .order("creado_en", { ascending: false })
-    .limit(50);
-
-  if (error) {
-    listaEl.innerHTML = `<p class="vacio">Error: ${escapar(error.message)}</p>`;
-    return;
-  }
-  if (!comisiones || comisiones.length === 0) {
-    listaEl.innerHTML = '<p class="vacio">Aún no has ganado comisiones. Comparte tu código para empezar.</p>';
-    return;
-  }
-
-  const ETIQ = {
-    bienvenida_cliente: "🎁 Bono bienvenida (cliente)",
-    invitador_cliente:  "👤 Comisión por invitar cliente",
-    bienvenida_chofer:  "🎁 Bono bienvenida (chofer)",
-    invitador_chofer:   "🚗 Comisión por invitar chofer",
-  };
-
-  listaEl.innerHTML = "";
-  comisiones.forEach((c) => {
-    const div = document.createElement("div");
-    div.className = "tarjeta-solicitud";
-    div.innerHTML = `
-      <div class="fila-superior">
-        <span class="badge-tipo delivery">${escapar(ETIQ[c.tipo] || c.tipo)}</span>
-        <span class="precio-final">+$${Number(c.monto).toFixed(2)}</span>
-      </div>
-      <div class="meta"><span>${formatearFecha(c.creado_en)}</span></div>
-    `;
-    listaEl.appendChild(div);
-  });
-}
-
-async function copiarCodigoReferido() {
-  const codigo = document.getElementById("ref-codigo")?.textContent?.trim();
-  if (!codigo || codigo === "—") return;
-  try {
-    await navigator.clipboard.writeText(codigo);
-    alert("✅ Código copiado: " + codigo);
-  } catch {
-    alert("Tu código es: " + codigo);
-  }
-}
-
-async function compartirCodigoReferido() {
-  const codigo = document.getElementById("ref-codigo")?.textContent?.trim();
-  if (!codigo || codigo === "—") return;
-  const texto = `¡Únete a ALKILO! Usa mi código ${codigo} y gana saldo al completar tu primer servicio. 🚗📦`;
-  const url   = window.location.origin + window.location.pathname;
-  if (navigator.share) {
-    try { await navigator.share({ title: "ALKILO", text: texto, url }); }
-    catch { /* usuario canceló */ }
-  } else {
-    window.open("https://wa.me/?text=" + encodeURIComponent(texto + " " + url), "_blank");
-  }
-}
-
-async function aplicarCodigoReferido() {
-  const input = document.getElementById("ref-aplicar-input");
-  const errEl = document.getElementById("ref-aplicar-error");
-  const okEl  = document.getElementById("ref-aplicar-exito");
-  const btn   = document.getElementById("btn-aplicar-referido");
-
-  if (errEl) errEl.textContent = "";
-  if (okEl)  okEl.textContent  = "";
-
-  const codigo = (input?.value || "").trim().toUpperCase();
-  if (!codigo) { if (errEl) errEl.textContent = "Escribe un código."; return; }
-
-  if (btn) { btn.disabled = true; btn.textContent = "Aplicando..."; }
-
-  const { error } = await db.rpc("aplicar_codigo_referido", { p_codigo: codigo });
-
-  if (btn) { btn.disabled = false; btn.textContent = "Aplicar"; }
-
-  if (error) {
-    if (errEl) errEl.textContent = traducirError(error.message);
-    return;
-  }
-
-  if (okEl) okEl.textContent = "✅ Código aplicado. Ganarás tu bono al completar tu primer servicio.";
-  if (input) input.value = "";
-  setTimeout(cargarMisReferidos, 1500);
-}
-
-function inicializarReferidos() {
-  document.getElementById("btn-ver-mis-referidos")?.addEventListener("click", () => {
-    mostrarPantalla("pantalla-mis-referidos");
-    cargarMisReferidos();
-  });
-  document.getElementById("btn-refrescar-referidos")?.addEventListener("click", cargarMisReferidos);
-  document.getElementById("btn-copiar-referido")?.addEventListener("click", copiarCodigoReferido);
-  document.getElementById("btn-compartir-referido")?.addEventListener("click", compartirCodigoReferido);
-  document.getElementById("btn-aplicar-referido")?.addEventListener("click", aplicarCodigoReferido);
-  document.getElementById("ref-aplicar-input")?.addEventListener("input", (e) => {
-    e.target.value = e.target.value.toUpperCase();
-  });
-}
-
 // ------------------------------------------------------------
-// 42) Inicio
+// 41) Inicio
 // ------------------------------------------------------------
 async function iniciarApp() {
   cachearElementos();
@@ -2997,7 +2758,6 @@ async function iniciarApp() {
   llenarSelectProvincias(el.cu_provincia);
   llenarSelectProvincias(el.perfil_provincia);
 
-  // Asegura el estado inicial limpio del formulario de registro
   resetFormularioRegistro();
 
   el.form_login.addEventListener("submit", iniciarSesion);
@@ -3033,4 +2793,3 @@ async function iniciarApp() {
 }
 
 document.addEventListener("DOMContentLoaded", iniciarApp);
-document.addEventListener("DOMContentLoaded", inicializarReferidos);

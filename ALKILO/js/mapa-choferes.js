@@ -1,423 +1,395 @@
 /* ============================================================
-   ALKILO - Mapa de choferes cercanos (módulo independiente)
+   ALKILO - Módulo de Choferes Cercanos
+   - Pantalla con mapa de choferes disponibles (para clientes Premium)
+   - Switch "Estar disponible" para choferes
+   - Seguimiento de ubicación de choferes disponibles
    ============================================================ */
-(function () {
-  "use strict";
 
-  const REFRESH_INTERVALO_MS = 15000;
+// ------------------------------------------------------------
+// Estado interno del módulo
+// ------------------------------------------------------------
+const chmEstado = {
+  mapa: null,
+  capaMarcadores: null,
+  marcadorYo: null,
+  radioKm: 25,
+  watchId: null,
+  ticker: null,
+  iniciado: false,
+};
 
-  const chm = {
-    mapa: null,
-    marcadores: {},
-    marcadorYo: null,
-    canalRealtime: null,
-    tickRefresh: null,
-    watchId: null,
-    disponible: false,
-    inicializado: false,
-    pausado: false,
-    radioKm: 25,
-    miLat: null,
-    miLng: null,
-  };
+// ------------------------------------------------------------
+// 1) Inicialización general (una sola vez)
+// ------------------------------------------------------------
+function inicializarMapaChoferes() {
+  if (chmEstado.iniciado) return;
+  chmEstado.iniciado = true;
 
-  function esc(txt) {
-    if (txt == null) return "";
-    return String(txt).replaceAll("&","&amp;").replaceAll("<","&lt;")
-      .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+  // Botón "Volver" en la pantalla del mapa
+  document.getElementById("chm-btn-volver")?.addEventListener("click", cerrarMapaChoferes);
+  // Botón "Refrescar" en la pantalla del mapa
+  document.getElementById("chm-btn-refrescar")?.addEventListener("click", () => {
+    cargarChoferesCercanos();
+  });
+
+  // Chips de radio (5, 10, 25, 50, 100, Todo)
+  document.querySelectorAll("#chm-radio-chips .chm-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll("#chm-radio-chips .chm-chip").forEach((c) => c.classList.remove("activo"));
+      chip.classList.add("activo");
+      chmEstado.radioKm = Number(chip.getAttribute("data-radio")) || 25;
+      cargarChoferesCercanos();
+    });
+  });
+
+  // Switch "Estar disponible" en el perfil
+  document.getElementById("chm-switch-disponible")?.addEventListener("change", (e) => {
+    toggleDisponibilidadChofer(e.target.checked);
+  });
+
+  // Refrescar cada 30s mientras la pantalla está abierta
+  chmEstado.ticker = setInterval(() => {
+    if (document.querySelector(".pantalla.activa")?.id === "pantalla-choferes-mapa") {
+      cargarChoferesCercanos();
+    }
+  }, 30000);
+}
+
+// ------------------------------------------------------------
+// 2) Abrir la pantalla del mapa (llamada desde app.js)
+// ------------------------------------------------------------
+async function abrirMapaChoferes() {
+  if (!estado.usuario) return;
+
+  // Solo clientes Premium pueden acceder (la validación también está en app.js)
+  if (estado.perfil?.rol === "cliente" && !estado.esPremium) {
+    alert("⭐ El mapa de choferes cercanos es exclusivo del Plan Premium.\n\nActívalo por $10/mes desde tu perfil.");
+    return;
   }
 
-  function estrellasVisuales(promedio) {
-    const llenas = Math.round(Number(promedio) || 0);
-    return "★".repeat(llenas) + "☆".repeat(Math.max(0, 5 - llenas));
+  // Mostrar la pantalla
+  if (typeof window.mostrarPantalla === "function") {
+    window.mostrarPantalla("pantalla-choferes-mapa");
   }
 
-  function formatoKm(km) {
-    if (km == null) return "";
-    const n = Number(km);
-    if (n < 1) return Math.round(n * 1000) + " m";
-    return n.toFixed(1) + " km";
+  // Mostrar overlay mientras carga
+  mostrarOverlay("📍 Cargando choferes cercanos...");
+
+  // Crear el mapa (o limpiar el anterior)
+  setTimeout(async () => {
+    await inicializarMapaLeaflet();
+    await cargarChoferesCercanos();
+  }, 150);
+}
+
+// ------------------------------------------------------------
+// 3) Inicializar el mapa Leaflet
+// ------------------------------------------------------------
+async function inicializarMapaLeaflet() {
+  const contenedor = document.getElementById("chm-mapa");
+  if (!contenedor || typeof L === "undefined") return;
+
+  // Si ya existe, lo destruimos para recrearlo limpio
+  if (chmEstado.mapa) {
+    chmEstado.mapa.remove();
+    chmEstado.mapa = null;
   }
 
-  function iconoChofer(esYo) {
-    return L.divIcon({
+  // Centro inicial: ubicación del usuario (o La Habana por defecto)
+  let centro = [23.1136, -82.3666]; // La Habana
+  if (estado.ubicacionActual) {
+    centro = [estado.ubicacionActual.lat, estado.ubicacionActual.lng];
+  } else {
+    // Intentar obtener ubicación actual
+    const ubi = await obtenerUbicacion();
+    if (ubi) centro = [ubi.lat, ubi.lng];
+  }
+
+  chmEstado.mapa = L.map(contenedor, { zoomControl: true, attributionControl: false })
+    .setView(centro, 12);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap",
+    maxZoom: 19,
+  }).addTo(chmEstado.mapa);
+
+  // Capa para los marcadores de choferes
+  chmEstado.capaMarcadores = L.layerGroup().addTo(chmEstado.mapa);
+
+  // Marcador de "mi ubicación" (azul)
+  const iconoYo = L.divIcon({
+    className: "",
+    html: `<div style="width:16px;height:16px;border-radius:50%;background:#4f46e5;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>`,
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  });
+  chmEstado.marcadorYo = L.marker(centro, { icon: iconoYo }).addTo(chmEstado.mapa);
+
+  // Ajustar tamaño después de que el contenedor se vea
+  setTimeout(() => chmEstado.mapa?.invalidateSize(), 250);
+}
+
+// ------------------------------------------------------------
+// 4) Cargar choferes cercanos según el radio
+// ------------------------------------------------------------
+async function cargarChoferesCercanos() {
+  if (!estado.usuario || !chmEstado.mapa) return;
+
+  // Necesitamos ubicación
+  const ubi = estado.ubicacionActual || await obtenerUbicacion();
+  if (!ubi) {
+    mostrarOverlay("⚠️ No pudimos obtener tu ubicación.\nActiva el GPS y vuelve a intentar.");
+    ocultarOverlayAuto(3000);
+    return;
+  }
+
+  // Actualizar mi marcador
+  if (chmEstado.marcadorYo) {
+    chmEstado.marcadorYo.setLatLng([ubi.lat, ubi.lng]);
+  }
+
+  // Limpiar marcadores anteriores
+  chmEstado.capaMarcadores?.clearLayers();
+
+  // Llamar a la RPC que trae los choferes cercanos
+  const { data, error } = await db.rpc("choferes_cercanos", {
+    p_lat: ubi.lat,
+    p_lng: ubi.lng,
+    p_radio_km: chmEstado.radioKm,
+    p_limite: 50,
+  });
+
+  if (error) {
+    console.warn("[mapa-choferes] error RPC:", error);
+    mostrarOverlay("❌ No se pudieron cargar los choferes.\n" + error.message);
+    ocultarOverlayAuto(3000);
+    return;
+  }
+
+  const lista = data || [];
+  const aviso = document.getElementById("chm-aviso");
+
+  if (aviso) {
+    aviso.textContent = lista.length === 0
+      ? "🔍 No hay choferes disponibles en este radio."
+      : `🟢 ${lista.length} chofer${lista.length === 1 ? "" : "es"} disponible${lista.length === 1 ? "" : "s"}`;
+  }
+
+  // Colocar marcadores
+  lista.forEach((ch) => {
+    if (ch.lat == null || ch.lng == null) return;
+
+    const icono = L.divIcon({
       className: "",
-      html: `<div class="chm-marcador ${esYo ? "mi-ubicacion" : ""}">${esYo ? "📍" : "🚗"}</div>`,
-      iconSize: [42, 42],
-      iconAnchor: [21, 21],
-      popupAnchor: [0, -22],
+      html: `<div style="width:36px;height:36px;border-radius:50%;background:#4f46e5;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:1.05rem;color:#fff;box-shadow:0 2px 8px rgba(15,23,42,0.3)">🚗</div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
     });
-  }
 
-  const el = {};
-  function cachear() {
-    [
-      "pantalla-choferes-mapa","chm-btn-volver","chm-btn-refrescar",
-      "chm-aviso","chm-mapa","chm-overlay","chm-overlay-texto",
-      "chm-radio-chips",
-    ].forEach((id) => { el[id.replace(/-/g,"_")] = document.getElementById(id); });
-  }
+    const marcador = L.marker([Number(ch.lat), Number(ch.lng)], { icon: icono });
+    const nombre = ch.nombre || "Chofer";
+    const vehiculo = ch.tipo_vehiculo ? ` · ${ch.tipo_vehiculo}` : "";
+    const prom = ch.promedio != null ? Number(ch.promedio).toFixed(1) : "—";
+    const estrellas = ch.promedio != null ? "★".repeat(Math.round(ch.promedio)) : "";
 
-  function mostrarOverlay(t) {
-    if (!el.chm_overlay) return;
-    el.chm_overlay.classList.remove("oculto");
-    if (el.chm_overlay_texto) el.chm_overlay_texto.textContent = t || "Cargando...";
-  }
-  function ocultarOverlay() { el.chm_overlay?.classList.add("oculto"); }
-
-  function setAviso(t, vacio) {
-    if (!el.chm_aviso) return;
-    el.chm_aviso.textContent = t || "";
-    el.chm_aviso.classList.toggle("vacio", !!vacio);
-  }
-
-  function inicializarMapa() {
-    if (chm.mapa) return;
-    const c = el.chm_mapa;
-    if (!c) return;
-
-    chm.mapa = L.map(c, { zoomControl: true }).setView([10.4806, -66.9036], 12);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap", maxZoom: 19,
-    }).addTo(chm.mapa);
-
-    setTimeout(() => chm.mapa?.invalidateSize(), 250);
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          if (!chm.mapa) return;
-          const yo = [pos.coords.latitude, pos.coords.longitude];
-          chm.miLat = pos.coords.latitude;
-          chm.miLng = pos.coords.longitude;
-          chm.mapa.setView(yo, 13);
-          if (chm.marcadorYo) chm.marcadorYo.setLatLng(yo);
-          else chm.marcadorYo = L.marker(yo, { icon: iconoChofer(true) })
-            .addTo(chm.mapa).bindPopup("Tú estás aquí");
-          cargarChoferes();
-        },
-        () => {},
-        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
-      );
-    }
-  }
-
-  function crearPopupHTML(ch) {
-    const foto = ch.foto_url || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='52' height='52'><rect width='52' height='52' fill='%23e5e7eb'/><text x='50%25' y='60%25' font-size='24' text-anchor='middle' fill='%239ca3af' font-family='sans-serif'>?</text></svg>";
-    const promedio = Number(ch.promedio || 0).toFixed(1);
-    const total = Number(ch.total || 0);
-    const estrellas = estrellasVisuales(promedio);
-    const dist = ch.distancia_km != null ? formatoKm(ch.distancia_km) : "";
-
-    window.__chmChoferes = window.__chmChoferes || {};
-    window.__chmChoferes[ch.chofer_id] = ch;
-
-    return `
+    marcador.bindPopup(`
       <div class="chm-popup">
-        <div class="fila">
-          <img src="${foto}" alt="Foto" />
-          <div class="info">
-            <div class="nombre">${esc(ch.nombre || "Chofer")}</div>
-            <div class="estrellas">
-              ${estrellas}
-              <span class="promedio">${promedio}</span>
-              <span class="total">(${total})</span>
-            </div>
-            ${dist ? `<div class="distancia">📏 ${dist} de ti</div>` : ""}
-          </div>
-        </div>
-        <div class="acciones">
-          <button class="btn-perfil" type="button" onclick="window.__chmVerPerfil('${ch.chofer_id}'); return false;">👤 Perfil</button>
-          <button class="btn-contactar" type="button" onclick="window.__chmContactar('${ch.chofer_id}'); return false;">💬 Contactar</button>
-        </div>
+        <div class="nombre">${escapar(nombre)}</div>
+        <div class="vehiculo">${escapar(vehiculo.replace(/^ · /, ""))}</div>
+        ${estrellas ? `<div class="estrellas">${estrellas}</div>` : ""}
+        <div class="promedio">${prom} promedio</div>
       </div>
-    `;
-  }
+    `);
 
-  function pintarChoferes(lista) {
-    if (!chm.mapa) return;
+    marcador.addTo(chmEstado.capaMarcadores);
+  });
 
-    const idsAct = new Set(lista.map((c) => c.chofer_id));
-    Object.keys(chm.marcadores).forEach((id) => {
-      if (!idsAct.has(id)) {
-        try { chm.mapa.removeLayer(chm.marcadores[id]); } catch {}
-        delete chm.marcadores[id];
-      }
-    });
-
+  // Ajustar la vista
+  if (lista.length > 0 && chmEstado.mapa) {
+    const puntos = [[ubi.lat, ubi.lng]];
     lista.forEach((ch) => {
-      if (ch.lat == null || ch.lng == null) return;
-      const pos = [Number(ch.lat), Number(ch.lng)];
-      const popup = crearPopupHTML(ch);
-
-      if (chm.marcadores[ch.chofer_id]) {
-        chm.marcadores[ch.chofer_id].setLatLng(pos).setPopupContent(popup);
-      } else {
-        const m = L.marker(pos, { icon: iconoChofer(false) })
-          .addTo(chm.mapa).bindPopup(popup);
-        m.on("popupopen", (ev) => {
-          const popupEl = ev.popup.getElement();
-          if (!popupEl) return;
-          if (window.L?.DomEvent) {
-            L.DomEvent.disableClickPropagation(popupEl);
-            L.DomEvent.disableScrollPropagation(popupEl);
-          }
-        });
-        chm.marcadores[ch.chofer_id] = m;
-      }
+      if (ch.lat != null && ch.lng != null) puntos.push([Number(ch.lat), Number(ch.lng)]);
     });
-
-    const radioTxt = chm.radioKm > 0 ? `en ${chm.radioKm} km` : "en cualquier distancia";
-    if (lista.length === 0) setAviso(`No hay choferes disponibles ${radioTxt}.`, true);
-    else setAviso(`🚗 ${lista.length} chofer${lista.length === 1 ? "" : "es"} disponible${lista.length === 1 ? "" : "s"} ${radioTxt}`);
-  }
-
-  function contactarChofer(ch) {
-    const tel = (ch.telefono || "").replace(/[^0-9+]/g, "");
-    if (!tel) return alert("Este chofer no tiene teléfono público.");
-    const texto = encodeURIComponent(`Hola ${ch.nombre || ""}, te contacto desde ALKILO.`);
-    window.open(`https://wa.me/${tel.replace(/^\+/, "")}?text=${texto}`, "_blank");
-  }
-
-  async function cargarChoferes() {
-    if (!chm.mapa || chm.pausado) return;
     try {
-      const params = {
-        p_limite: 100,
-        p_radio_km: chm.radioKm > 0 ? chm.radioKm : 0,
-      };
-      if (chm.miLat != null && chm.miLng != null) {
-        params.p_lat = chm.miLat;
-        params.p_lng = chm.miLng;
-      }
-      const { data, error } = await db.rpc("choferes_cercanos", params);
-      if (error) { console.warn("[chm] rpc error:", error); setAviso("No se pudo cargar la lista.", true); return; }
-      pintarChoferes(data || []);
-    } catch (err) { console.warn("[chm] excepción:", err); }
+      chmEstado.mapa.fitBounds(L.latLngBounds(puntos), { padding: [50, 50], maxZoom: 15 });
+    } catch { /* ignore */ }
   }
 
-  function suscribirRealtime() {
-    if (chm.canalRealtime) return;
-    chm.canalRealtime = db.channel("choferes-online-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "choferes_online" }, () => cargarChoferes())
-      .subscribe((s) => console.log("[Realtime choferes_online]", s));
+  ocultarOverlay();
+}
+
+// ------------------------------------------------------------
+// 5) Cerrar la pantalla del mapa
+// ------------------------------------------------------------
+function cerrarMapaChoferes() {
+  if (chmEstado.mapa) {
+    chmEstado.mapa.remove();
+    chmEstado.mapa = null;
+    chmEstado.capaMarcadores = null;
+    chmEstado.marcadorYo = null;
+  }
+  if (typeof window.mostrarPantalla === "function") {
+    window.mostrarPantalla("pantalla-perfil");
+  }
+}
+
+// ------------------------------------------------------------
+// 6) Switch "Estar disponible" para choferes
+// ------------------------------------------------------------
+async function toggleDisponibilidadChofer(disponible) {
+  if (!estado.usuario || estado.perfil?.rol !== "chofer") return;
+
+  const switchEl = document.getElementById("chm-switch-disponible");
+
+  // Si intenta activar, comprobar suscripción
+  if (disponible && !estado.suscripcion) {
+    alert("⚠️ Necesitas una suscripción activa para estar disponible.");
+    if (switchEl) switchEl.checked = false;
+    return;
   }
 
-  function detenerRealtime() {
-    if (chm.canalRealtime) {
-      try { db.removeChannel(chm.canalRealtime); } catch {}
-      chm.canalRealtime = null;
-    }
-  }
-
-  async function abrir() {
-    if (!el.pantalla_choferes_mapa) return alert("Pantalla no encontrada.");
-    if (typeof window.mostrarPantalla === "function") window.mostrarPantalla("pantalla-choferes-mapa");
-    else {
-      document.querySelectorAll(".pantalla").forEach((p) => p.classList.remove("activa"));
-      el.pantalla_choferes_mapa.classList.add("activa");
-    }
-    chm.pausado = false;
-    mostrarOverlay("Cargando mapa...");
-    setTimeout(async () => {
-      inicializarMapa();
-      suscribirRealtime();
-      await cargarChoferes();
-      ocultarOverlay();
-      iniciarRefreshAuto();
-    }, 200);
-  }
-
-  function cerrar() {
-    chm.pausado = true;
-    detenerRealtime();
-    detenerRefreshAuto();
-    if (typeof window.mostrarPantalla === "function") window.mostrarPantalla("pantalla-perfil");
-    else {
-      document.querySelectorAll(".pantalla").forEach((p) => p.classList.remove("activa"));
-      document.getElementById("pantalla-perfil")?.classList.add("activa");
-    }
-  }
-
-  function iniciarRefreshAuto() {
-    detenerRefreshAuto();
-    chm.tickRefresh = setInterval(cargarChoferes, REFRESH_INTERVALO_MS);
-  }
-  function detenerRefreshAuto() {
-    if (chm.tickRefresh) { clearInterval(chm.tickRefresh); chm.tickRefresh = null; }
-  }
-
-  async function tieneServicioActivo() {
-    const { data: u } = await db.auth.getUser();
-    if (!u?.user) return false;
-    const { data, error } = await db.from("solicitudes").select("id")
-      .eq("chofer_id", u.user.id)
-      .in("estado", ["aceptado","en_camino","llego","en_curso"]).limit(1);
-    if (error) { console.warn("[chm] error servicio:", error); return false; }
-    return !!(data && data.length > 0);
-  }
-
-  async function activarDisponibilidad() {
-    const { data: u } = await db.auth.getUser();
-    if (!u?.user) return false;
-    const { data: p } = await db.from("perfiles").select("rol").eq("id", u.user.id).maybeSingle();
-    if (p?.rol !== "chofer") { alert("Solo los choferes pueden activar la disponibilidad."); return false; }
-    if (await tieneServicioActivo()) {
-      alert("Tienes un servicio activo. Finalízalo o cancélalo antes de ponerte disponible.");
-      return false;
-    }
-    const { error } = await db.from("choferes_online").upsert({
-      chofer_id: u.user.id, activo: true, actualizado_en: new Date().toISOString(),
-    }, { onConflict: "chofer_id" });
-    if (error) { alert("No se pudo activar: " + error.message); return false; }
-    iniciarEnvioUbicacion();
-    chm.disponible = true;
-    return true;
-  }
-
-  async function desactivarDisponibilidad() {
-    const { data: u } = await db.auth.getUser();
-    if (!u?.user) return;
-    await db.from("choferes_online")
-      .update({ activo: false, actualizado_en: new Date().toISOString() })
-      .eq("chofer_id", u.user.id);
-    detenerEnvioUbicacion();
-    chm.disponible = false;
-  }
-
-  function iniciarEnvioUbicacion() {
-    if (chm.watchId != null) return;
-    if (!navigator.geolocation) return;
-    chm.watchId = navigator.geolocation.watchPosition(
-      async (pos) => {
-        const { data: u } = await db.auth.getUser();
-        if (!u?.user) return;
-        await db.from("choferes_online").upsert({
-          chofer_id: u.user.id,
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          activo: true,
-          actualizado_en: new Date().toISOString(),
-        }, { onConflict: "chofer_id" });
-      },
-      (err) => console.warn("[chm] GPS error:", err),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
-    );
-  }
-
-  function detenerEnvioUbicacion() {
-    if (chm.watchId != null) {
-      navigator.geolocation.clearWatch(chm.watchId);
-      chm.watchId = null;
-    }
-  }
-
-  async function refrescarEstadoSwitch() {
-    const sw = document.getElementById("chm-switch-disponible");
-    const card = document.getElementById("chm-switch-wrapper");
-    const sub = card?.querySelector(".chm-switch-sub");
-    const titulo = card?.querySelector(".chm-switch-titulo");
-    if (!sw) return;
-
-    const { data: u } = await db.auth.getUser();
-    if (!u?.user) return;
-
-    const { data: p } = await db.from("perfiles").select("rol").eq("id", u.user.id).maybeSingle();
-    if (p?.rol !== "chofer") { card?.classList.add("oculto"); return; }
-    card?.classList.remove("oculto");
-
-    const activo = await tieneServicioActivo();
-    if (activo) {
-      sw.checked = false; sw.disabled = true;
-      if (titulo) titulo.textContent = "🔴 Ocupado con servicio";
-      if (sub) sub.textContent = "Termina el servicio actual para estar disponible";
-      await db.from("choferes_online")
-        .update({ activo: false, actualizado_en: new Date().toISOString() })
-        .eq("chofer_id", u.user.id);
-      detenerEnvioUbicacion();
-      chm.disponible = false;
+  // Obtener ubicación si va a activarse
+  let ubi = null;
+  if (disponible) {
+    ubi = estado.ubicacionActual || await obtenerUbicacion();
+    if (!ubi) {
+      alert("⚠️ Activa el GPS para estar disponible.");
+      if (switchEl) switchEl.checked = false;
       return;
     }
+  }
 
-    sw.disabled = false;
-    if (titulo) titulo.textContent = "🟢 Estar disponible";
-    if (sub) sub.textContent = "Aparecerás en el mapa de clientes";
+  if (switchEl) switchEl.disabled = true;
 
-    const { data } = await db.from("choferes_online")
-      .select("activo, actualizado_en").eq("chofer_id", u.user.id).maybeSingle();
+  try {
+    if (disponible) {
+      // Insertar o actualizar fila en choferes_online
+      const { error } = await db.from("choferes_online").upsert(
+        {
+          chofer_id: estado.usuario.id,
+          lat: ubi.lat,
+          lng: ubi.lng,
+          activo: true,
+          actualizado_en: new Date().toISOString(),
+        },
+        { onConflict: "chofer_id" }
+      );
+      if (error) throw error;
 
-    let act = !!(data?.activo);
-    if (act && data?.actualizado_en) {
-      const d = Date.now() - new Date(data.actualizado_en).getTime();
-      if (d > 10 * 60 * 1000) act = false;
+      // Empezar a rastrear ubicación mientras esté disponible
+      iniciarRastreoDisponible();
+    } else {
+      // Desactivar
+      const { error } = await db.from("choferes_online")
+        .update({ activo: false, actualizado_en: new Date().toISOString() })
+        .eq("chofer_id", estado.usuario.id);
+      if (error) throw error;
+
+      detenerRastreoDisponible();
     }
-    sw.checked = act;
-    chm.disponible = act;
-    if (act && chm.watchId == null) iniciarEnvioUbicacion();
+  } catch (err) {
+    console.error("[mapa-choferes] toggle error:", err);
+    alert("No se pudo cambiar la disponibilidad:\n" + (err?.message || err));
+    if (switchEl) switchEl.checked = !disponible;
+  } finally {
+    if (switchEl) switchEl.disabled = false;
   }
+}
 
-  function conectarEventos() {
-    el.chm_btn_volver?.addEventListener("click", cerrar);
-    el.chm_btn_refrescar?.addEventListener("click", async () => {
-      mostrarOverlay("Actualizando...");
-      await cargarChoferes();
-      ocultarOverlay();
-    });
+// ------------------------------------------------------------
+// 7) Rastreo de ubicación mientras el chofer está disponible
+// ------------------------------------------------------------
+function iniciarRastreoDisponible() {
+  if (chmEstado.watchId !== null) return; // ya activo
+  if (!navigator.geolocation) return;
 
-    // Chips de radio
-    el.chm_radio_chips?.querySelectorAll(".chm-chip").forEach((chip) => {
-      chip.addEventListener("click", () => {
-        el.chm_radio_chips.querySelectorAll(".chm-chip").forEach((c) => c.classList.remove("activo"));
-        chip.classList.add("activo");
-        chm.radioKm = Number(chip.getAttribute("data-radio")) || 0;
-        cargarChoferes();
-      });
-    });
+  chmEstado.watchId = navigator.geolocation.watchPosition(
+    async (pos) => {
+      const { latitude, longitude } = pos.coords;
+      estado.ubicacionActual = { lat: latitude, lng: longitude };
+      // Actualizar en BD (silencioso)
+      try {
+        await db.from("choferes_online")
+          .update({
+            lat: latitude,
+            lng: longitude,
+            actualizado_en: new Date().toISOString(),
+          })
+          .eq("chofer_id", estado.usuario.id);
+      } catch { /* ignore */ }
+    },
+    (err) => console.warn("[mapa-choferes] watch error:", err),
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+  );
+}
 
-    document.addEventListener("change", async (e) => {
-      if (!e.target || e.target.id !== "chm-switch-disponible") return;
-      const sw = e.target;
-      sw.disabled = true;
-      if (sw.checked) {
-        const ok = await activarDisponibilidad();
-        if (!ok) sw.checked = false;
-      } else {
-        await desactivarDisponibilidad();
-      }
-      sw.disabled = false;
-    });
-
-    window.addEventListener("beforeunload", () => {
-      if (chm.disponible && window.estado?.usuario?.id) {
-        try {
-          db.from("choferes_online")
-            .update({ activo: false, actualizado_en: new Date().toISOString() })
-            .eq("chofer_id", window.estado.usuario.id);
-        } catch {}
-      }
-    });
+function detenerRastreoDisponible() {
+  if (chmEstado.watchId !== null) {
+    navigator.geolocation.clearWatch(chmEstado.watchId);
+    chmEstado.watchId = null;
   }
+}
 
-  function init() {
-    if (chm.inicializado) return;
-    chm.inicializado = true;
-    cachear();
-    conectarEventos();
+// ------------------------------------------------------------
+// 8) Refrescar estado visual del switch (llamado desde app.js)
+// ------------------------------------------------------------
+async function refrescarEstadoSwitchChofer() {
+  if (!estado.usuario || estado.perfil?.rol !== "chofer") return;
 
-    window.abrirMapaChoferes = abrir;
-    window.refrescarEstadoSwitchChofer = refrescarEstadoSwitch;
+  const switchEl = document.getElementById("chm-switch-disponible");
+  if (!switchEl) return;
 
-    window.__chmVerPerfil = (id) => {
-      if (typeof window.abrirPerfilPublico === "function") window.abrirPerfilPublico(id);
-      else alert("No se pudo abrir el perfil.");
-    };
-    window.__chmContactar = (id) => {
-      const ch = window.__chmChoferes?.[id];
-      if (ch) contactarChofer(ch);
-    };
+  const { data } = await db.from("choferes_online")
+    .select("activo")
+    .eq("chofer_id", estado.usuario.id)
+    .maybeSingle();
 
-    console.log("[mapa-choferes] módulo listo");
-  }
+  switchEl.checked = !!data?.activo;
 
-  document.addEventListener("DOMContentLoaded", init);
-})();
+  // Si está activo, retomar el rastreo de ubicación
+  if (data?.activo) iniciarRastreoDisponible();
+}
+
+// ------------------------------------------------------------
+// 9) Helpers: overlay + ubicación
+// ------------------------------------------------------------
+function mostrarOverlay(texto) {
+  const ov = document.getElementById("chm-overlay");
+  const tx = document.getElementById("chm-overlay-texto");
+  if (tx) tx.textContent = texto;
+  if (ov) ov.classList.add("activo");
+}
+
+function ocultarOverlay() {
+  document.getElementById("chm-overlay")?.classList.remove("activo");
+}
+
+function ocultarOverlayAuto(ms = 3000) {
+  setTimeout(ocultarOverlay, ms);
+}
+
+function obtenerUbicacion() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const u = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        estado.ubicacionActual = u;
+        resolve(u);
+      },
+      () => resolve(null),
+      { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
+    );
+  });
+}
+
+// ------------------------------------------------------------
+// 10) Exponer funciones globales para que app.js las use
+// ------------------------------------------------------------
+window.abrirMapaChoferes = abrirMapaChoferes;
+window.refrescarEstadoSwitchChofer = refrescarEstadoSwitchChofer;
+
+// ------------------------------------------------------------
+// 11) Inicialización al cargar el DOM
+// ------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", inicializarMapaChoferes);
