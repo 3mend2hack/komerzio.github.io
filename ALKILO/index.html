@@ -242,6 +242,17 @@
       <p id="perfil-rol" class="etiqueta-rol">—</p>
       <p id="perfil-ubicacion" class="texto-ayuda" style="margin-top:-14px;margin-bottom:18px">—</p>
 
+      <div class="saldo-card" id="perfil-saldo-card">
+        <div class="saldo-card-izq">
+          <span class="saldo-card-emoji">💰</span>
+          <div>
+            <span class="saldo-card-label">Tu saldo</span>
+            <span class="saldo-card-monto" id="perfil-saldo">—</span>
+          </div>
+        </div>
+        <button class="saldo-card-btn" id="btn-recargar-saldo">+ Recargar</button>
+      </div>
+
       <div id="perfil-banner-suscripcion" class="banner-suscripcion oculto"></div>
       <div id="perfil-banner-advertencias" class="banner-advertencias oculto" style="display:none"></div>
       <div id="perfil-banner-premium" class="banner-premium oculto" style="display:none"></div>
@@ -687,7 +698,6 @@
 
     <div class="contenedor">
 
-      <!-- Estado del plan actual -->
       <div id="premium-estado-card" class="premium-estado-card">
         <p class="premium-estado-icono">⭐</p>
         <h3 id="premium-estado-titulo">Hazte Premium</h3>
@@ -696,7 +706,6 @@
         </p>
       </div>
 
-      <!-- Beneficios -->
       <h3 class="titulo-seccion">Beneficios</h3>
       <ul class="premium-beneficios">
         <li>
@@ -736,7 +745,6 @@
         </li>
       </ul>
 
-      <!-- Info de saldo -->
       <div class="premium-saldo-card">
         <div class="premium-saldo-fila">
           <span>💰 Tu saldo actual:</span>
@@ -748,7 +756,6 @@
         </div>
       </div>
 
-      <!-- Botón principal -->
       <button id="btn-comprar-premium" class="btn-principal premium-btn-comprar">
         ⭐ Activar Plan Premium
       </button>
@@ -932,9 +939,11 @@
     <div class="contenedor centrado"><p>Cargando...</p></div>
   </section>
 
-   <script src="js/ubicaciones.js"></script>
+  <script src="js/ubicaciones.js"></script>
   <script src="js/app.js"></script>
   <script src="js/mapa-choferes.js"></script>
   <script src="js/notificaciones.js"></script>
+  <script src="js/referidos.js"></script>
+  <script src="js/premium.js"></script>
 </body>
 </html>
