@@ -483,7 +483,6 @@ async function ajustarSaldoDesdeReporte(r) {
 
   const motivo = prompt("Motivo del ajuste (opcional):", "Compensación por reporte") || null;
 
-  // Ajustar saldo
   const { error: errSaldo } = await db.rpc("ajustar_saldo_manual", {
     p_usuario_id: usuarioAjustar,
     p_monto: monto,
@@ -491,7 +490,6 @@ async function ajustarSaldoDesdeReporte(r) {
   });
   if (errSaldo) return alert("Error al ajustar saldo: " + errSaldo.message);
 
-  // Marcar reporte como resuelto con acción "ajuste_saldo"
   const { error: errRep } = await db.rpc("resolver_reporte", {
     p_reporte_id: r.id,
     p_accion: "ajuste_saldo",
