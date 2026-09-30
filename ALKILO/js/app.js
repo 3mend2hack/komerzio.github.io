@@ -1,7 +1,6 @@
 /* ============================================================
    ALKILO - App principal
-   FASE 1 a 6 + extras + pagos + mapa + reportes
-   Módulos Referidos y Premium viven en archivos aparte
+   FASE 1 a 6 + badges en perfil
    ============================================================ */
 
 // ------------------------------------------------------------
@@ -46,6 +45,7 @@ const realtime = {
   canalReportes: null, canalPlanes: null, watchId: null,
   ultimaUbicacionEnviada: 0, ultimaPersistencia: 0,
   solicitudActivaId: null, tickTemporizadores: null,
+  tickBadges: null,
 };
 
 const mapa = { instancia: null, marcadorChofer: null, marcadorCliente: null, marcadorDestino: null };
@@ -174,6 +174,9 @@ function cachearElementos() {
     "premium-mi-saldo","premium-precio","btn-comprar-premium",
     "premium-error","premium-exito",
     "perfil-saldo","btn-recargar-saldo",
+    // Badges nuevos
+    "badge-mis-activas","badge-mis-solicitudes",
+    "badge-disponibles","badge-servicios-activos",
   ].forEach((id) => { el[id.replace(/-/g,"_")] = document.getElementById(id); });
 }
 window.el = el;
@@ -247,6 +250,102 @@ function resetFormularioRegistro() {
 }
 
 // ------------------------------------------------------------
+// 6b) BADGES DEL PERFIL
+// ------------------------------------------------------------
+/**
+ * Cuenta y pinta los 4 badges del perfil:
+ * - badge-mis-activas (cliente): solicitudes activas
+ * - badge-mis-solicitudes (cliente): igual que activas
+ * - badge-disponibles (chofer): solicitudes pendientes en su zona
+ * - badge-servicios-activos (chofer): servicios activos propios
+ */
+async function actualizarBadgesPerfil() {
+  if (!estado.usuario || !estado.perfil) return;
+
+  const esChofer = estado.perfil.rol === "chofer";
+  const esCliente = estado.perfil.rol === "cliente";
+
+  // ---- Cliente: solicitudes activas ----
+  if (esCliente) {
+    const { count } = await db.from("solicitudes")
+      .select("*", { count: "exact", head: true })
+      .eq("cliente_id", estado.usuario.id)
+      .in("estado", ["pendiente","aceptado","en_camino","llego","en_curso"]);
+
+    const n = Number(count || 0);
+    actualizarBadge("badge-mis-activas", n);
+    actualizarBadge("badge-mis-solicitudes", n);
+  } else {
+    actualizarBadge("badge-mis-activas", 0);
+    actualizarBadge("badge-mis-solicitudes", 0);
+  }
+
+  // ---- Chofer: solicitudes disponibles en su zona ----
+  if (esChofer) {
+    // Obtener solicitudes pendientes no expiradas
+    const { data: pendientes } = await db.from("solicitudes")
+      .select("id, cliente:cliente_id ( municipio, provincia )")
+      .eq("estado", "pendiente")
+      .gt("expira_en", new Date().toISOString());
+
+    const miMun = estado.perfil.municipio || "";
+    const miProv = estado.perfil.provincia || "";
+
+    // Contar las del mismo municipio (o provincia si no hay municipio)
+    const enMiZona = (pendientes || []).filter((s) => {
+      const mun = s.cliente?.municipio || "";
+      const prov = s.cliente?.provincia || "";
+      if (miMun && mun === miMun) return true;
+      if (!miMun && miProv && prov === miProv) return true;
+      return false;
+    }).length;
+
+    actualizarBadge("badge-disponibles", enMiZona);
+
+    // Servicios activos propios
+    const { count: activos } = await db.from("solicitudes")
+      .select("*", { count: "exact", head: true })
+      .eq("chofer_id", estado.usuario.id)
+      .in("estado", ["aceptado","en_camino","llego","en_curso"]);
+
+    actualizarBadge("badge-servicios-activos", Number(activos || 0));
+  } else {
+    actualizarBadge("badge-disponibles", 0);
+    actualizarBadge("badge-servicios-activos", 0);
+  }
+}
+window.actualizarBadgesPerfil = actualizarBadgesPerfil;
+
+/** Pinta un badge (lo muestra si n > 0, lo oculta si n === 0) */
+function actualizarBadge(idBadge, n) {
+  const b = document.getElementById(idBadge);
+  if (!b) return;
+  const valor = Number(n || 0);
+  if (valor > 0) {
+    b.textContent = valor > 99 ? "99+" : valor;
+    b.classList.remove("oculto");
+  } else {
+    b.textContent = "0";
+    b.classList.add("oculto");
+  }
+}
+
+/** Arranca un ticker de 30s que refresca badges mientras el usuario está logueado */
+function iniciarTickBadges() {
+  if (realtime.tickBadges) clearInterval(realtime.tickBadges);
+  realtime.tickBadges = setInterval(() => {
+    if (estado.usuario) actualizarBadgesPerfil();
+  }, 30000);
+}
+
+function detenerTickBadges() {
+  if (realtime.tickBadges) {
+    clearInterval(realtime.tickBadges);
+    realtime.tickBadges = null;
+  }
+}
+
+// ------------------------------------------------------------
 // 7) Navegación
 // ------------------------------------------------------------
 function conectarNavegacion() {
@@ -301,7 +400,10 @@ function conectarNavegacion() {
     btn.addEventListener("click", () => {
       const destino = btn.getAttribute("data-volver");
       mostrarPantalla(destino);
-      if (destino === "pantalla-perfil") cargarPerfilYMostrar();
+      if (destino === "pantalla-perfil") {
+        cargarPerfilYMostrar();
+        actualizarBadgesPerfil();
+      }
     });
   });
 
@@ -349,13 +451,9 @@ function conectarNavegacion() {
     window.location.href = URL_SUSCRIPCION;
   });
 
-  // Botón recargar del card de saldo → va a suscripción
   el.btn_recargar_saldo?.addEventListener("click", () => {
     window.location.href = URL_SUSCRIPCION;
   });
-
-  // Los listeners de Plan Premium (btn-ir-plan-premium, banner, btn-comprar)
-  // ahora viven en js/premium.js
 
   el.btn_refrescar_mis?.addEventListener("click", cargarMisSolicitudes);
   el.btn_refrescar_disponibles?.addEventListener("click", async () => {
@@ -701,6 +799,7 @@ async function guardarNuevaPassword(e) {
 // ------------------------------------------------------------
 async function cerrarSesion() {
   detenerRealtime();
+  detenerTickBadges();
   await db.auth.signOut();
   estado.usuario = null; estado.perfil = null;
   estado.suscripcion = null;
@@ -815,12 +914,13 @@ async function cargarPerfilYMostrar() {
 
     ajustarBotonesPorRol(perfil.rol);
     pintarBannerSuscripcion();
-    // Pintar banner premium — vive en js/premium.js
     if (typeof window.pintarBannerPremium === "function") window.pintarBannerPremium();
     await cargarSaldo();
     await cargarCalificacionesHechas();
     await actualizarBadgeAdvertencias();
+    await actualizarBadgesPerfil();
     iniciarRealtime();
+    iniciarTickBadges();
 
     if (perfil.rol === "chofer" && typeof window.refrescarEstadoSwitchChofer === "function") {
       setTimeout(() => window.refrescarEstadoSwitchChofer(), 300);
@@ -852,7 +952,6 @@ async function cargarCalificacionesHechas() {
   estado.calificacionesHechas = new Set((data || []).map((c) => c.solicitud_id));
 }
 
-/** Carga el saldo del usuario y lo pinta en el card del perfil */
 async function cargarSaldo() {
   if (!estado.usuario) return;
   const montoEl = el.perfil_saldo;
@@ -1060,6 +1159,7 @@ async function crearSolicitud(e) {
   mapaDestino.lat = null; mapaDestino.lng = null;
   setMensaje("estado-punto-recogida", "Sin destino marcado en el mapa. (Opcional)");
   setMensaje("solicitud-exito", "Solicitud publicada ✔");
+  actualizarBadgesPerfil();
 
   setTimeout(() => {
     mostrarPantalla("pantalla-mis-solicitudes");
@@ -1091,7 +1191,7 @@ async function cargarMisSolicitudes() {
 }
 
 // ------------------------------------------------------------
-// 19) Cargar disponibles (con RELEVANCIA GEOGRÁFICA + PREMIUM)
+// 19) Cargar disponibles
 // ------------------------------------------------------------
 async function cargarSolicitudesDisponibles() {
   const cont = el.lista_disponibles;
@@ -1377,6 +1477,8 @@ async function cancelarSolicitud(id, modo) {
   if (esChofer) { alert("Servicio cancelado. Vuelve a estar disponible 10 minutos."); cargarMisServicios(); }
   else if (modo === "cliente") cargarMisSolicitudes();
   else cargarSolicitudesDisponibles();
+
+  actualizarBadgesPerfil();
 }
 
 // ------------------------------------------------------------
@@ -1406,6 +1508,7 @@ async function aceptarSolicitud(id) {
   }
   alert("¡Solicitud aceptada!");
   cargarSolicitudesDisponibles();
+  actualizarBadgesPerfil();
 }
 
 // ------------------------------------------------------------
@@ -1427,6 +1530,7 @@ async function avanzarEstado(id, nuevoEstado) {
     if (realtime.solicitudActivaId === id) cerrarMapa();
   }
   cargarMisServicios();
+  actualizarBadgesPerfil();
 }
 
 // ------------------------------------------------------------
@@ -1505,7 +1609,10 @@ function iniciarRealtime() {
 
   realtime.canalSolicitudes = db.channel("solicitudes-live-" + estado.usuario.id)
     .on("postgres_changes", { event: "*", schema: "public", table: "solicitudes" },
-      (payload) => manejarCambioSolicitud(payload))
+      (payload) => {
+        manejarCambioSolicitud(payload);
+        actualizarBadgesPerfil();
+      })
     .subscribe((s) => console.log("[Realtime solicitudes]", s));
 
   if (estado.perfil?.rol === "chofer") {
@@ -1996,6 +2103,7 @@ async function aceptarOfertaRpc(ofertaId) {
   if (error) return alert("Error al aceptar oferta: " + error.message);
   alert("¡Oferta aceptada! El chofer fue asignado.");
   if (oferta.solicitudId) await cargarOfertas(oferta.solicitudId);
+  actualizarBadgesPerfil();
 }
 
 async function rechazarOferta(ofertaId) {
@@ -2741,6 +2849,7 @@ function escucharAuth() {
     }
     if (evento === "SIGNED_OUT" || !session) {
       detenerRealtime();
+      detenerTickBadges();
       if (!estado.modoRecuperacion) mostrarPantalla("pantalla-login");
     }
   });
