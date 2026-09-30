@@ -10,16 +10,10 @@
 </head>
 <body>
 
-  <!-- ============================================================
-       PANTALLA: CARGANDO
-       ============================================================ -->
   <section id="pantalla-cargando" class="pantalla activa">
     <p class="texto-cargando">Verificando acceso…</p>
   </section>
 
-  <!-- ============================================================
-       PANTALLA: NO AUTORIZADO
-       ============================================================ -->
   <section id="pantalla-no-autorizado" class="pantalla">
     <div class="aviso-error">
       <p class="icono-aviso">🚫</p>
@@ -31,9 +25,6 @@
     </div>
   </section>
 
-  <!-- ============================================================
-       PANTALLA: PRINCIPAL
-       ============================================================ -->
   <section id="pantalla-principal" class="pantalla">
 
     <header class="adm-cabecera">
@@ -57,9 +48,7 @@
 
     <main class="adm-contenido" id="adm-contenido">
 
-      <!-- ====================================================
-           TAB: DASHBOARD
-           ==================================================== -->
+      <!-- TAB: DASHBOARD -->
       <section id="tab-dashboard" class="adm-panel activo">
         <h2 class="adm-titulo-seccion">Métricas generales</h2>
 
@@ -127,9 +116,7 @@
         </div>
       </section>
 
-      <!-- ====================================================
-           TAB: PENDIENTES
-           ==================================================== -->
+      <!-- TAB: PENDIENTES -->
       <section id="tab-pendientes" class="adm-panel">
         <h2 class="adm-titulo-seccion">Choferes pendientes de aprobación</h2>
         <p class="adm-ayuda">Estos usuarios eligieron "Chofer" al registrarse. Revísalos y aprueba o rechaza.</p>
@@ -139,9 +126,7 @@
         </div>
       </section>
 
-      <!-- ====================================================
-           TAB: REPORTES
-           ==================================================== -->
+      <!-- TAB: REPORTES -->
       <section id="tab-reportes" class="adm-panel">
         <h2 class="adm-titulo-seccion">Reportes de usuarios</h2>
         <p class="adm-ayuda">Revisa los reportes enviados por los usuarios. Puedes advertir, suspender, banear, eliminar o ajustar saldo al reportado.</p>
@@ -159,9 +144,7 @@
         </div>
       </section>
 
-      <!-- ====================================================
-           TAB: USUARIOS
-           ==================================================== -->
+      <!-- TAB: USUARIOS -->
       <section id="tab-usuarios" class="adm-panel">
         <h2 class="adm-titulo-seccion">Gestión de usuarios</h2>
 
@@ -189,9 +172,7 @@
         </div>
       </section>
 
-      <!-- ====================================================
-           TAB: SOLICITUDES
-           ==================================================== -->
+      <!-- TAB: SOLICITUDES -->
       <section id="tab-solicitudes" class="adm-panel">
         <h2 class="adm-titulo-seccion">Historial de solicitudes</h2>
 
@@ -208,9 +189,7 @@
         </div>
       </section>
 
-      <!-- ====================================================
-           TAB: CONFIGURACIÓN
-           ==================================================== -->
+      <!-- TAB: CONFIGURACIÓN -->
       <section id="tab-config" class="adm-panel">
         <h2 class="adm-titulo-seccion">Precios y tasas</h2>
 
@@ -238,11 +217,51 @@
 
         <p class="adm-msg-exito" id="adm-cfg-exito"></p>
         <p class="adm-msg-error" id="adm-cfg-error"></p>
+
+        <!-- ═══════════════════════════════════════════════════
+             DATOS BANCARIOS PARA TRANSFERENCIAS
+             ═══════════════════════════════════════════════════ -->
+        <h2 class="adm-titulo-seccion" style="margin-top:32px">Datos bancarios (transferencias)</h2>
+        <p class="adm-ayuda">Estos datos los verán los usuarios cuando elijan recargar por transferencia.</p>
+
+        <form id="adm-form-banco" class="adm-formulario">
+          <label for="adm-cfg-banco">Banco</label>
+          <input type="text" id="adm-cfg-banco" maxlength="80"
+                 placeholder="Ej: Banco Popular de Ahorro (BPA)" required />
+
+          <label for="adm-cfg-tarjeta">Número de tarjeta</label>
+          <input type="text" id="adm-cfg-tarjeta" maxlength="40"
+                 placeholder="Ej: 9229 5678 1234 5678" required />
+
+          <label for="adm-cfg-confirmar">Número a confirmar</label>
+          <input type="text" id="adm-cfg-confirmar" maxlength="40"
+                 placeholder="Ej: +53 5555 1234" required />
+
+          <button type="submit" class="btn-principal">💾 Guardar datos bancarios</button>
+        </form>
+
+        <p class="adm-msg-exito" id="adm-banco-exito"></p>
+        <p class="adm-msg-error" id="adm-banco-error"></p>
+
+        <!-- ═══════════════════════════════════════════════════
+             PAGO MÓVIL
+             ═══════════════════════════════════════════════════ -->
+        <h2 class="adm-titulo-seccion" style="margin-top:32px">Pago móvil</h2>
+        <p class="adm-ayuda">Número de teléfono al que los usuarios deben enviar el pago móvil.</p>
+
+        <form id="adm-form-pagomovil" class="adm-formulario">
+          <label for="adm-cfg-pagomovil">Teléfono para pago móvil</label>
+          <input type="text" id="adm-cfg-pagomovil" maxlength="40"
+                 placeholder="Ej: +53 5555 1234" required />
+
+          <button type="submit" class="btn-principal">💾 Guardar teléfono</button>
+        </form>
+
+        <p class="adm-msg-exito" id="adm-pagomovil-exito"></p>
+        <p class="adm-msg-error" id="adm-pagomovil-error"></p>
       </section>
 
-      <!-- ====================================================
-           TAB: ACCIONES RÁPIDAS
-           ==================================================== -->
+      <!-- TAB: ACCIONES RÁPIDAS -->
       <section id="tab-acciones" class="adm-panel">
         <h2 class="adm-titulo-seccion">Acciones rápidas</h2>
 

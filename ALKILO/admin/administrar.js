@@ -1,6 +1,6 @@
 /* ============================================================
    ALKILO - Panel admin avanzado (independiente)
-   Con módulo de reportes completo
+   Con módulo de reportes + datos bancarios + pago móvil
    ============================================================ */
 
 // ------------------------------------------------------------
@@ -29,7 +29,6 @@ const estado = {
   busqueda: "",
 };
 
-// Etiquetas de vehículos y categorías
 const ETIQUETAS_VEHICULO = {
   moto: "🛵 Moto",
   motor_electrico: "⚡ Motor eléctrico",
@@ -136,6 +135,8 @@ async function cargarTodo() {
     cargarUsuarios(),
     cargarSolicitudes(),
     cargarConfiguracion(),
+    cargarDatosBanco(),
+    cargarDatosPagoMovil(),
   ]);
 }
 
@@ -263,7 +264,6 @@ async function cargarReportes() {
 
   estado.reportes = data || [];
 
-  // Contar pendientes para badge
   const pendientes = estado.reportes.filter((r) => r.estado === "pendiente").length;
   const badge = document.getElementById("badge-reportes");
   if (badge) {
@@ -301,17 +301,14 @@ function renderReporteCard(r) {
 
   const catTexto = CATEGORIAS_REPORTE[r.categoria] || r.categoria;
 
-  // Badge del estado del reporte
   const badgeClase =
     r.estado === "resuelto" ? "activo" :
     r.estado === "desestimado" ? "baneado" :
     r.estado === "en_revision" ? "suspendido" :
     "pendiente_aprobacion";
 
-  // Estado del receptor
   const estadoReceptor = r.receptor?.estado_cuenta || "activo";
 
-  // Respuesta del reportado
   const respuestaHTML = r.respuesta_reportado ? `
     <div class="adm-card-linea" style="flex-direction:column;align-items:flex-start;background:#eff6ff;padding:10px;border-radius:8px;border-left:3px solid #93c5fd">
       <span class="label" style="color:#1e3a8a;font-weight:800;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px">Respuesta del reportado</span>
@@ -319,7 +316,6 @@ function renderReporteCard(r) {
     </div>
   ` : "";
 
-  // Resolución (si ya fue procesado)
   let resolucionHTML = "";
   if (r.estado === "resuelto" || r.estado === "desestimado") {
     resolucionHTML = `
@@ -333,7 +329,6 @@ function renderReporteCard(r) {
     `;
   }
 
-  // Botones de acción (solo si está pendiente o en revisión)
   let accionesHTML = "";
   const puedeActuar = (r.estado === "pendiente" || r.estado === "en_revision");
 
@@ -801,6 +796,84 @@ async function guardarConfiguracion(e) {
 }
 
 // ============================================================
+// 9b) DATOS BANCARIOS (transferencias)
+// ============================================================
+async function cargarDatosBanco() {
+  const { data } = await db.from("configuracion").select("clave, valor")
+    .in("clave", ["transf_banco", "transf_numero_tarjeta", "transf_numero_confirmar"]);
+
+  const cfg = {};
+  (data || []).forEach((c) => { cfg[c.clave] = c.valor; });
+
+  const g = (id) => document.getElementById(id);
+  if (g("adm-cfg-banco"))     g("adm-cfg-banco").value     = cfg["transf_banco"] || "";
+  if (g("adm-cfg-tarjeta"))   g("adm-cfg-tarjeta").value   = cfg["transf_numero_tarjeta"] || "";
+  if (g("adm-cfg-confirmar")) g("adm-cfg-confirmar").value = cfg["transf_numero_confirmar"] || "";
+
+  setMensaje("adm-banco-exito", "");
+  setMensaje("adm-banco-error", "");
+}
+
+async function guardarDatosBanco(e) {
+  e.preventDefault();
+  setMensaje("adm-banco-error", "");
+  setMensaje("adm-banco-exito", "");
+
+  const banco     = document.getElementById("adm-cfg-banco")?.value?.trim() || "";
+  const tarjeta   = document.getElementById("adm-cfg-tarjeta")?.value?.trim() || "";
+  const confirmar = document.getElementById("adm-cfg-confirmar")?.value?.trim() || "";
+
+  if (!banco)     return setMensaje("adm-banco-error", "El banco es obligatorio.");
+  if (!tarjeta)   return setMensaje("adm-banco-error", "El número de tarjeta es obligatorio.");
+  if (!confirmar) return setMensaje("adm-banco-error", "El número a confirmar es obligatorio.");
+
+  setMensaje("adm-banco-exito", "Guardando…");
+
+  const { error } = await db.from("configuracion").upsert([
+    { clave: "transf_banco",            valor: banco },
+    { clave: "transf_numero_tarjeta",   valor: tarjeta },
+    { clave: "transf_numero_confirmar", valor: confirmar },
+  ]);
+
+  if (error) return setMensaje("adm-banco-error", "Error: " + error.message);
+  setMensaje("adm-banco-exito", "✅ Datos bancarios guardados.");
+}
+
+// ============================================================
+// 9c) PAGO MÓVIL
+// ============================================================
+async function cargarDatosPagoMovil() {
+  const { data } = await db.from("configuracion").select("clave, valor")
+    .eq("clave", "pagomovil_telefono")
+    .maybeSingle();
+
+  const g = document.getElementById("adm-cfg-pagomovil");
+  if (g) g.value = data?.valor || "";
+
+  setMensaje("adm-pagomovil-exito", "");
+  setMensaje("adm-pagomovil-error", "");
+}
+
+async function guardarDatosPagoMovil(e) {
+  e.preventDefault();
+  setMensaje("adm-pagomovil-error", "");
+  setMensaje("adm-pagomovil-exito", "");
+
+  const telefono = document.getElementById("adm-cfg-pagomovil")?.value?.trim() || "";
+
+  if (!telefono) return setMensaje("adm-pagomovil-error", "El teléfono es obligatorio.");
+
+  setMensaje("adm-pagomovil-exito", "Guardando…");
+
+  const { error } = await db.from("configuracion").upsert([
+    { clave: "pagomovil_telefono", valor: telefono },
+  ]);
+
+  if (error) return setMensaje("adm-pagomovil-error", "Error: " + error.message);
+  setMensaje("adm-pagomovil-exito", "✅ Teléfono guardado.");
+}
+
+// ============================================================
 // 10) ACCIONES RÁPIDAS
 // ============================================================
 async function limpiarViajesAntiguos() {
@@ -894,8 +967,14 @@ function conectarEventos() {
     renderUsuarios();
   });
 
-  // Configuración
+  // Configuración (precios)
   document.getElementById("adm-form-config")?.addEventListener("submit", guardarConfiguracion);
+
+  // Datos bancarios
+  document.getElementById("adm-form-banco")?.addEventListener("submit", guardarDatosBanco);
+
+  // Pago móvil
+  document.getElementById("adm-form-pagomovil")?.addEventListener("submit", guardarDatosPagoMovil);
 
   // Acciones rápidas
   document.getElementById("adm-btn-limpieza")?.addEventListener("click", limpiarViajesAntiguos);
