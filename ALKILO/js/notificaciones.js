@@ -4,7 +4,7 @@
    ============================================================ */
 
 // Clave pública VAPID
-const VAPID_PUBLIC_KEY = "BHCuNL8kVC38JWS5Gvwjr5V-hCfoYrDLifTW22dvj2M9lYLW6rAGVki2P8Vyq1G83cpsfZImoKRGFugdEvw5L00";
+const VAPID_PUBLIC_KEY = "BL2UobDv1uAIQp0HLwJBgTNtig1OKvPo-o05wd87l6go2dQqsb7oorCnIhtbuuwb2is_FeejuybvJW-DJQvubbM";
 
 // ------------------------------------------------------------
 // Utilidades internas
