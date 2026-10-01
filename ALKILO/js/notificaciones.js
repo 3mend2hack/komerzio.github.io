@@ -1,10 +1,14 @@
 /* ============================================================
    ALKILO - Módulo de Notificaciones Push
    Con toggle activar/desactivar + rotación de VAPID
+   Usa sw-v2.js para forzar limpieza de suscripciones viejas
    ============================================================ */
 
 // Clave pública VAPID
 const VAPID_PUBLIC_KEY = "BEEPWcIfM4jhWQohs2wbfwjaI-ldpvLd3f24Ib4l11zPhyFxve7lWTpXtT0ijUqFqw5Sl67Nr7xc_51celn-TWY";
+
+// Nombre del Service Worker (cambiar aquí si se necesita más rotación)
+const SW_FILENAME = "./sw-v2.js";
 
 // ------------------------------------------------------------
 // Utilidades internas
@@ -27,13 +31,77 @@ function soportaPush() {
   );
 }
 
+/** Registrar el SW con timeout por si se cuelga */
 async function obtenerRegistroSW() {
-  return navigator.serviceWorker.register("./sw.js");
+  const reg = await navigator.serviceWorker.register(SW_FILENAME);
+  // Esperar a que esté activo
+  await esperarSWActivo(reg);
+  return reg;
+}
+
+function esperarSWActivo(reg, timeoutMs = 5000) {
+  return new Promise((resolve, reject) => {
+    if (reg.active) return resolve(reg);
+    const timer = setTimeout(() => reject(new Error("Timeout esperando SW activo")), timeoutMs);
+    reg.addEventListener("updatefound", () => {
+      const nuevo = reg.installing;
+      if (!nuevo) return;
+      nuevo.addEventListener("statechange", () => {
+        if (nuevo.state === "activated") {
+          clearTimeout(timer);
+          resolve(reg);
+        }
+      });
+    });
+    // Por si acaso ya está activo
+    if (reg.active) {
+      clearTimeout(timer);
+      resolve(reg);
+    }
+  });
 }
 
 async function obtenerSuscripcionActual() {
-  const reg = await navigator.serviceWorker.ready;
-  return reg.pushManager.getSubscription();
+  try {
+    const reg = await navigator.serviceWorker.getRegistration();
+    if (!reg) return null;
+    return await reg.pushManager.getSubscription();
+  } catch {
+    return null;
+  }
+}
+
+// ------------------------------------------------------------
+// Limpieza total (suscripción + SWs viejos)
+// ------------------------------------------------------------
+async function limpiarTodo() {
+  // 1) Cancelar cualquier suscripción existente
+  try {
+    const reg = await navigator.serviceWorker.getRegistration();
+    if (reg) {
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        console.log("[push] cancelando suscripción vieja:", sub.endpoint);
+        await sub.unsubscribe();
+      }
+    }
+  } catch (e) {
+    console.warn("[push] error cancelando suscripción:", e);
+  }
+
+  // 2) Desregistrar TODOS los SWs
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for (const r of regs) {
+      console.log("[push] desregistrando SW:", r.scope);
+      await r.unregister();
+    }
+  } catch (e) {
+    console.warn("[push] error desregistrando SW:", e);
+  }
+
+  // 3) Esperar a que Chrome limpie todo
+  await new Promise((r) => setTimeout(r, 1000));
 }
 
 // ------------------------------------------------------------
@@ -43,7 +111,6 @@ async function guardarSuscripcionEnBD(suscripcion) {
   const json = suscripcion.toJSON();
   const uid = estado.usuario.id;
 
-  // 1) ¿Ya existe una fila con ese endpoint?
   const { data: existente } = await db
     .from("push_subscriptions")
     .select("id, usuario_id")
@@ -66,7 +133,6 @@ async function guardarSuscripcionEnBD(suscripcion) {
     return;
   }
 
-  // 2) Insertar nueva
   const { error } = await db.from("push_subscriptions").insert({
     usuario_id: uid,
     endpoint: json.endpoint,
@@ -103,38 +169,41 @@ async function activarNotificaciones() {
       return;
     }
 
-    // ⭐ 2) DESREGISTRAR TODOS LOS SERVICE WORKERS
-    // Esto fuerza a Chrome a soltar la suscripción vieja cacheada
-    // (crítico cuando se regeneran las claves VAPID).
-    const regs = await navigator.serviceWorker.getRegistrations();
-    for (const r of regs) {
-      try { await r.unregister(); } catch (e) { console.warn("[push] unregister:", e); }
+    // 2) Limpieza total (cancela suscripción + desregistra SWs viejos)
+    if (btn) btn.textContent = "Limpiando...";
+    await limpiarTodo();
+
+    // 3) Registrar el SW v2 (fresco)
+    if (btn) btn.textContent = "Registrando...";
+    const reg = await obtenerRegistroSW();
+
+    // 4) Crear suscripción NUEVA con la clave pública actual
+    if (btn) btn.textContent = "Suscribiendo...";
+    let sub;
+    try {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: vapidKeyToUint8Array(VAPID_PUBLIC_KEY),
+      });
+    } catch (errSub) {
+      console.error("[push] subscribe error:", errSub);
+      // Si falla por "existing subscription", cancelar y reintentar
+      const existing = await reg.pushManager.getSubscription();
+      if (existing) {
+        await existing.unsubscribe();
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: vapidKeyToUint8Array(VAPID_PUBLIC_KEY),
+        });
+      } else {
+        throw errSub;
+      }
     }
 
-    // ⭐ 3) También cancelar cualquier suscripción push colgada
-    try {
-      const regTemp = await navigator.serviceWorker.ready;
-      const subTemp = await regTemp.pushManager.getSubscription();
-      if (subTemp) await subTemp.unsubscribe();
-    } catch { /* ignore */ }
-
-    // 4) Esperar a que el navegador limpie todo
-    await new Promise((r) => setTimeout(r, 800));
-
-    // 5) Registrar el SW de nuevo (fresco)
-    await navigator.serviceWorker.register("./sw.js");
-    const reg = await navigator.serviceWorker.ready;
-
-    // 6) Crear suscripción NUEVA con la clave pública actual
-    const sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: vapidKeyToUint8Array(VAPID_PUBLIC_KEY),
-    });
-
-    // 7) Guardar en Supabase
+    // 5) Guardar en Supabase
     await guardarSuscripcionEnBD(sub);
 
-    // 8) Notificación de prueba
+    // 6) Notificación de prueba
     try {
       await db.functions.invoke("enviar-push", {
         body: {
@@ -184,7 +253,6 @@ async function desactivarNotificaciones() {
         .eq("endpoint", json.endpoint);
       await sub.unsubscribe();
     }
-
     alert("🔕 Notificaciones desactivadas en este dispositivo.");
   } catch (err) {
     console.error("[push] error al desactivar:", err);
@@ -248,7 +316,7 @@ async function actualizarEstadoBotonNotificaciones() {
 }
 
 // ------------------------------------------------------------
-// Click handler (toggle)
+// Click handler
 // ------------------------------------------------------------
 async function alternarNotificaciones() {
   const btn = document.getElementById("btn-activar-notificaciones");
@@ -269,7 +337,6 @@ function inicializarNotificaciones() {
     btn.dataset.modo = "activar";
     btn.addEventListener("click", alternarNotificaciones);
   }
-
   setTimeout(actualizarEstadoBotonNotificaciones, 1500);
 }
 
