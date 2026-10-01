@@ -12,11 +12,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- qrcode con fallback: intenta unpkg, si falla usa jsdelivr -->
-  <script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"
-          onerror="this.onerror=null; this.src='https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
@@ -957,12 +953,9 @@
   </section>
 
   <!-- ============================================================
-       ============================================================
-       MÓDULO TERMINAL — PANTALLAS NUEVAS
-       ============================================================
+       MÓDULO TERMINAL — PANTALLAS
        ============================================================ -->
 
-  <!-- PANTALLA: TERMINAL (menú dinámico) -->
   <section id="pantalla-terminal" class="pantalla">
     <header class="barra-superior">
       <button class="btn-volver" data-volver="pantalla-perfil">← Volver</button>
@@ -971,7 +964,6 @@
     </header>
 
     <div class="contenedor">
-      <!-- Menú para chofer -->
       <div id="terminal-menu-chofer" class="oculto">
         <div class="term-hero">
           <p class="term-hero-emoji">🚐</p>
@@ -1000,7 +992,6 @@
         </div>
       </div>
 
-      <!-- Menú para cliente -->
       <div id="terminal-menu-cliente" class="oculto">
         <div class="term-hero">
           <p class="term-hero-emoji">🚐</p>
@@ -1020,7 +1011,6 @@
     </div>
   </section>
 
-  <!-- PANTALLA: TERMINAL — PUBLICAR VIAJE -->
   <section id="pantalla-terminal-publicar" class="pantalla">
     <header class="barra-superior">
       <button class="btn-volver" id="btn-volver-terminal-publicar">← Volver</button>
@@ -1097,7 +1087,6 @@
     </div>
   </section>
 
-  <!-- PANTALLA: TERMINAL — MAPA PUNTO DE ENCUENTRO -->
   <section id="pantalla-terminal-mapa-punto" class="pantalla pantalla-mapa-completa">
     <header class="barra-superior">
       <button class="btn-volver" id="btn-cancelar-mapa-punto">← Cancelar</button>
@@ -1113,7 +1102,6 @@
     </div>
   </section>
 
-  <!-- PANTALLA: TERMINAL — MI VIAJE ACTIVO (chofer) -->
   <section id="pantalla-terminal-mi-viaje" class="pantalla">
     <header class="barra-superior">
       <button class="btn-volver" data-volver="pantalla-terminal">← Volver</button>
@@ -1148,7 +1136,6 @@
     </div>
   </section>
 
-  <!-- PANTALLA: TERMINAL — ESCANEAR QR (chofer) -->
   <section id="pantalla-terminal-escanear" class="pantalla">
     <header class="barra-superior">
       <button class="btn-volver" data-volver="pantalla-terminal">← Volver</button>
@@ -1172,7 +1159,6 @@
     </div>
   </section>
 
-  <!-- PANTALLA: TERMINAL — BUSCAR VIAJES (cliente) -->
   <section id="pantalla-terminal-buscar" class="pantalla">
     <header class="barra-superior">
       <button class="btn-volver" data-volver="pantalla-terminal">← Volver</button>
@@ -1205,7 +1191,6 @@
     </div>
   </section>
 
-  <!-- PANTALLA: TERMINAL — DETALLE VIAJE (cliente) -->
   <section id="pantalla-terminal-detalle" class="pantalla">
     <header class="barra-superior">
       <button class="btn-volver" id="btn-volver-detalle-viaje">← Volver</button>
@@ -1233,7 +1218,6 @@
     </div>
   </section>
 
-  <!-- PANTALLA: TERMINAL — RESERVAR (cliente) -->
   <section id="pantalla-terminal-reservar" class="pantalla">
     <header class="barra-superior">
       <button class="btn-volver" id="btn-volver-reservar">← Volver</button>
@@ -1283,7 +1267,6 @@
     </div>
   </section>
 
-  <!-- PANTALLA: TERMINAL — MIS RESERVAS (cliente) -->
   <section id="pantalla-terminal-mis-reservas" class="pantalla">
     <header class="barra-superior">
       <button class="btn-volver" data-volver="pantalla-terminal">← Volver</button>
@@ -1298,7 +1281,6 @@
     </div>
   </section>
 
-  <!-- PANTALLA: TERMINAL — VER QR (cliente) -->
   <section id="pantalla-terminal-ver-qr" class="pantalla">
     <header class="barra-superior">
       <button class="btn-volver" id="btn-volver-ver-qr">← Volver</button>
