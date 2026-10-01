@@ -6,11 +6,14 @@
   <title>ALKILO</title>
   <link rel="stylesheet" href="css/estilos.css" />
   <link rel="stylesheet" href="css/mapa-choferes.css" />
+  <link rel="stylesheet" href="css/terminal.css" />
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
 
@@ -288,6 +291,11 @@
           <span id="badge-servicios-activos" class="badge-rojo oculto">0</span>
         </button>
         <button id="btn-ir-mi-suscripcion" class="btn-accion" data-rol="chofer">💳 Mi suscripción</button>
+
+        <button id="btn-ir-terminal" class="btn-accion">
+          🚐 Terminal
+          <span id="badge-terminal" class="badge-rojo oculto">0</span>
+        </button>
 
         <button id="btn-ver-choferes-mapa" class="btn-accion">🗺️ Choferes cercanos</button>
         <button id="btn-ver-mis-referidos" class="btn-accion">🎁 Invitar y ganar</button>
@@ -945,8 +953,375 @@
   </section>
 
   <!-- ============================================================
-       PANTALLA: CARGANDO
+       ============================================================
+       MÓDULO TERMINAL — PANTALLAS NUEVAS
+       ============================================================
        ============================================================ -->
+
+  <!-- PANTALLA: TERMINAL (menú dinámico) -->
+  <section id="pantalla-terminal" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" data-volver="pantalla-perfil">← Volver</button>
+      <h2>🚐 Terminal</h2>
+      <button id="btn-refrescar-terminal" class="btn-secundario">↻</button>
+    </header>
+
+    <div class="contenedor">
+      <!-- Menú para chofer -->
+      <div id="terminal-menu-chofer" class="oculto">
+        <div class="term-hero">
+          <p class="term-hero-emoji">🚐</p>
+          <h3>Publica tu viaje interprovincial</h3>
+          <p class="term-hero-texto">
+            Por $50 publicas tu viaje y todos los clientes de tu zona lo ven.
+            Ellos reservan su asiento con $20 y tú cobras el pasaje en efectivo al subir.
+          </p>
+        </div>
+
+        <div id="terminal-sin-viaje" class="term-bloque">
+          <button id="btn-publicar-viaje" class="btn-principal term-btn-principal">
+            ➕ Publicar viaje programado
+          </button>
+          <p class="texto-ayuda" style="margin-top:10px">
+            Costo de publicación: <strong>$50</strong> descontados de tu saldo.
+          </p>
+        </div>
+
+        <div id="terminal-con-viaje" class="oculto">
+          <p class="texto-ayuda" style="text-align:left;margin-bottom:10px">
+            Ya tienes un viaje activo. Gestiónalo desde aquí.
+          </p>
+          <button id="btn-ver-mi-viaje" class="btn-accion">🚌 Ver mi viaje activo</button>
+          <button id="btn-escanear-qr" class="btn-accion">📷 Escanear QR de pasajero</button>
+        </div>
+      </div>
+
+      <!-- Menú para cliente -->
+      <div id="terminal-menu-cliente" class="oculto">
+        <div class="term-hero">
+          <p class="term-hero-emoji">🚐</p>
+          <h3>Encuentra tu viaje</h3>
+          <p class="term-hero-texto">
+            Mira los viajes programados por choferes y reserva tu asiento por $20.
+            Pagas el pasaje al chofer en efectivo cuando subas.
+          </p>
+        </div>
+
+        <button id="btn-buscar-viajes" class="btn-accion">🔍 Buscar viajes disponibles</button>
+        <button id="btn-mis-reservas" class="btn-accion">
+          🎫 Mis reservas
+          <span id="badge-mis-reservas" class="badge-rojo oculto">0</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANTALLA: TERMINAL — PUBLICAR VIAJE -->
+  <section id="pantalla-terminal-publicar" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-terminal-publicar">← Volver</button>
+      <h2>Publicar viaje</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div class="contenedor">
+      <form id="form-terminal-publicar" class="formulario">
+
+        <h3 class="titulo-seccion">Origen</h3>
+        <label for="term-origen-provincia">Provincia *</label>
+        <select id="term-origen-provincia" required>
+          <option value="">— Elige provincia —</option>
+        </select>
+
+        <label for="term-origen-municipio">Municipio (opcional)</label>
+        <select id="term-origen-municipio" disabled>
+          <option value="">— Cualquier municipio —</option>
+        </select>
+
+        <h3 class="titulo-seccion" style="margin-top:20px">Destino</h3>
+        <label for="term-destino-provincia">Provincia *</label>
+        <select id="term-destino-provincia" required>
+          <option value="">— Elige provincia —</option>
+        </select>
+
+        <label for="term-destino-municipio">Municipio (opcional)</label>
+        <select id="term-destino-municipio" disabled>
+          <option value="">— Cualquier municipio —</option>
+        </select>
+
+        <h3 class="titulo-seccion" style="margin-top:20px">Punto de encuentro</h3>
+        <button type="button" id="term-btn-marcar-punto" class="btn-accion">
+          📍 Marcar punto en el mapa
+        </button>
+        <p class="texto-ayuda" id="term-estado-punto">
+          Sin punto marcado. Toca el botón de arriba para elegirlo en el mapa.
+        </p>
+
+        <label for="term-punto-texto">Referencia del punto *</label>
+        <input type="text" id="term-punto-texto" required maxlength="80"
+               placeholder="Ej: Esquina Calle Maceo y Frexes" />
+
+        <h3 class="titulo-seccion" style="margin-top:20px">Fecha y hora</h3>
+        <label for="term-fecha">Fecha de salida *</label>
+        <input type="date" id="term-fecha" required />
+
+        <label for="term-hora">Hora de salida * (mínimo 3 horas desde ahora)</label>
+        <input type="time" id="term-hora" required />
+
+        <h3 class="titulo-seccion" style="margin-top:20px">Detalles del viaje</h3>
+        <label for="term-capacidad">Capacidad máxima * (1-50)</label>
+        <input type="number" id="term-capacidad" min="1" max="50" required
+               placeholder="Ej: 20" />
+
+        <label for="term-precio">Precio del pasaje por persona * ($)</label>
+        <input type="number" id="term-precio" min="0" step="0.01" required
+               placeholder="Ej: 500.00" />
+
+        <label for="term-notas">Notas (opcional)</label>
+        <textarea id="term-notas" rows="3" maxlength="300"
+                  placeholder="Ej: Llevo equipaje grande sin costo"></textarea>
+
+        <p class="texto-ayuda" style="margin-top:14px;padding:12px;background:#fef3c7;border-radius:8px;color:#92400e;font-weight:700">
+          ⚠️ Al publicar se te descontarán <strong>$50</strong> de tu saldo.
+        </p>
+
+        <button type="submit" class="btn-principal">🚐 Publicar viaje ($50)</button>
+      </form>
+
+      <p class="mensaje-error" id="term-publicar-error"></p>
+      <p class="mensaje-exito" id="term-publicar-exito"></p>
+    </div>
+  </section>
+
+  <!-- PANTALLA: TERMINAL — MAPA PUNTO DE ENCUENTRO -->
+  <section id="pantalla-terminal-mapa-punto" class="pantalla pantalla-mapa-completa">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-cancelar-mapa-punto">← Cancelar</button>
+      <h2>Marcar punto</h2>
+      <span style="width:60px"></span>
+    </header>
+    <div id="mapa-punto-terminal" class="mapa-contenedor"></div>
+    <div class="info-mapa">
+      <p id="info-punto-terminal">Toca el mapa para marcar el punto de encuentro exacto.</p>
+      <button id="btn-confirmar-punto-terminal" class="btn-principal btn-confirmar-recogida" disabled>
+        Confirmar punto
+      </button>
+    </div>
+  </section>
+
+  <!-- PANTALLA: TERMINAL — MI VIAJE ACTIVO (chofer) -->
+  <section id="pantalla-terminal-mi-viaje" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" data-volver="pantalla-terminal">← Volver</button>
+      <h2>Mi viaje</h2>
+      <button id="btn-refrescar-mi-viaje" class="btn-secundario">↻</button>
+    </header>
+
+    <div class="contenedor">
+      <div id="term-mi-viaje-info" class="term-card-info">
+        <p class="vacio">Cargando...</p>
+      </div>
+
+      <div id="term-mi-viaje-acciones" class="oculto">
+        <button id="btn-term-cerrar-viaje" class="btn-principal term-btn-cerrar">
+          🔒 Cerrar viaje (no más reservas)
+        </button>
+        <button id="btn-term-iniciar-viaje" class="btn-principal term-btn-iniciar oculto">
+          🚗 Iniciar viaje
+        </button>
+        <button id="btn-term-finalizar-viaje" class="btn-principal term-btn-finalizar oculto">
+          🏁 Finalizar viaje
+        </button>
+        <button id="btn-term-cancelar-viaje" class="btn-secundario term-btn-cancelar">
+          ❌ Cancelar viaje
+        </button>
+      </div>
+
+      <h3 class="titulo-seccion">Pasajeros</h3>
+      <div id="term-lista-pasajeros" class="lista-solicitudes">
+        <p class="vacio">Cargando...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANTALLA: TERMINAL — ESCANEAR QR (chofer) -->
+  <section id="pantalla-terminal-escanear" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" data-volver="pantalla-terminal">← Volver</button>
+      <h2>Escanear pasaje</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div class="contenedor">
+      <p class="texto-ayuda" style="text-align:left;margin-bottom:14px">
+        Apunta la cámara al código QR del pasajero. Funciona incluso sin internet
+        si ya validaste antes en este mismo viaje.
+      </p>
+
+      <div id="term-reader-qr" class="term-reader"></div>
+
+      <button id="btn-term-escanear-manual" class="btn-secundario">
+        🔢 Ingresar código manualmente
+      </button>
+
+      <div id="term-resultado-escaneo" class="oculto"></div>
+    </div>
+  </section>
+
+  <!-- PANTALLA: TERMINAL — BUSCAR VIAJES (cliente) -->
+  <section id="pantalla-terminal-buscar" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" data-volver="pantalla-terminal">← Volver</button>
+      <h2>Buscar viajes</h2>
+      <button id="btn-refrescar-buscar-viajes" class="btn-secundario">↻</button>
+    </header>
+
+    <div class="contenedor">
+
+      <div class="term-filtros">
+        <label for="term-filtro-origen">Provincia origen (opcional)</label>
+        <select id="term-filtro-origen">
+          <option value="">— Todas —</option>
+        </select>
+
+        <label for="term-filtro-destino">Provincia destino (opcional)</label>
+        <select id="term-filtro-destino">
+          <option value="">— Todas —</option>
+        </select>
+
+        <label for="term-filtro-fecha">Fecha (opcional)</label>
+        <input type="date" id="term-filtro-fecha" />
+
+        <button id="btn-aplicar-filtros-terminal" class="btn-principal">🔍 Aplicar filtros</button>
+      </div>
+
+      <div id="term-lista-viajes" class="lista-solicitudes">
+        <p class="vacio">Cargando...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANTALLA: TERMINAL — DETALLE VIAJE (cliente) -->
+  <section id="pantalla-terminal-detalle" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-detalle-viaje">← Volver</button>
+      <h2>Detalle del viaje</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div class="contenedor">
+      <div id="term-detalle-info" class="term-card-info">
+        <p class="vacio">Cargando...</p>
+      </div>
+
+      <div id="term-detalle-mapa-punto" class="term-mini-mapa"></div>
+
+      <button id="btn-term-reservar" class="btn-principal">
+        🎫 Reservar asiento ($20)
+      </button>
+
+      <p class="texto-ayuda" style="margin-top:8px">
+        Puedes añadir hasta 2 familiares más. Cada uno lleva su propio QR.
+      </p>
+
+      <p class="mensaje-error" id="term-detalle-error"></p>
+      <p class="mensaje-exito" id="term-detalle-exito"></p>
+    </div>
+  </section>
+
+  <!-- PANTALLA: TERMINAL — RESERVAR (cliente) -->
+  <section id="pantalla-terminal-reservar" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-reservar">← Volver</button>
+      <h2>Reservar asiento</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div class="contenedor">
+      <div id="term-reservar-resumen" class="resumen-solicitud"></div>
+
+      <form id="form-terminal-reservar" class="formulario">
+        <label class="term-check-familiar">
+          <input type="checkbox" id="term-es-familiar" />
+          <span>Reservar como familiar (hasta 3 asientos)</span>
+        </label>
+
+        <div id="term-pasajeros-bloque">
+          <div class="term-pasajero-row" data-index="0">
+            <label>Pasajero 1 *</label>
+            <input type="text" class="term-pasajero-nombre" data-index="0" required
+                   placeholder="Nombre completo" />
+          </div>
+        </div>
+
+        <button type="button" id="btn-term-añadir-pasajero" class="btn-secundario oculto">
+          ➕ Añadir otro pasajero
+        </button>
+
+        <div class="term-total-card">
+          <div class="premium-saldo-fila">
+            <span>Total a pagar:</span>
+            <strong id="term-total-pagar">$20.00</strong>
+          </div>
+          <div class="premium-saldo-fila">
+            <span>Tu saldo actual:</span>
+            <strong id="term-mi-saldo">—</strong>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-principal">
+          ✅ Confirmar reserva
+        </button>
+      </form>
+
+      <p class="mensaje-error" id="term-reservar-error"></p>
+      <p class="mensaje-exito" id="term-reservar-exito"></p>
+    </div>
+  </section>
+
+  <!-- PANTALLA: TERMINAL — MIS RESERVAS (cliente) -->
+  <section id="pantalla-terminal-mis-reservas" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" data-volver="pantalla-terminal">← Volver</button>
+      <h2>Mis reservas</h2>
+      <button id="btn-refrescar-mis-reservas" class="btn-secundario">↻</button>
+    </header>
+
+    <div class="contenedor">
+      <div id="term-lista-mis-reservas" class="lista-solicitudes">
+        <p class="vacio">Cargando...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANTALLA: TERMINAL — VER QR (cliente) -->
+  <section id="pantalla-terminal-ver-qr" class="pantalla">
+    <header class="barra-superior">
+      <button class="btn-volver" id="btn-volver-ver-qr">← Volver</button>
+      <h2>Tu pasaje</h2>
+      <span style="width:60px"></span>
+    </header>
+
+    <div class="contenedor">
+      <div id="term-qr-info" class="term-card-info">
+        <p class="vacio">Cargando...</p>
+      </div>
+
+      <div class="term-qr-caja">
+        <canvas id="term-qr-canvas"></canvas>
+      </div>
+
+      <p class="texto-ayuda" style="text-align:center;margin-bottom:14px">
+        Muestra este QR al chofer al subir al vehículo.
+      </p>
+
+      <button id="btn-term-descargar-qr" class="btn-principal">
+        💾 Guardar pasaje en el teléfono
+      </button>
+    </div>
+  </section>
+
+  <!-- PANTALLA: CARGANDO -->
   <section id="pantalla-cargando" class="pantalla">
     <div class="contenedor centrado"><p>Cargando...</p></div>
   </section>
@@ -957,5 +1332,6 @@
   <script src="js/notificaciones.js"></script>
   <script src="js/referidos.js"></script>
   <script src="js/premium.js"></script>
+  <script src="js/terminal.js"></script>
 </body>
 </html>
