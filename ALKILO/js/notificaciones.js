@@ -1,11 +1,10 @@
 /* ============================================================
    ALKILO - Módulo de Notificaciones Push
-   Archivo independiente. Se carga DESPUÉS de app.js.
-   Con toggle activar/desactivar + manejo de endpoint duplicado
+   Con toggle activar/desactivar + rotación de VAPID
    ============================================================ */
 
 // Clave pública VAPID
-const VAPID_PUBLIC_KEY = "BEEPWcIfM4jhWQohs2wbfwjaI-ldpvLd3f24Ib4l11zPhyFxve7lWTpXtT0ijUqFqw5Sl67Nr7xc_51celn-TWY";
+const VAPID_PUBLIC_KEY = "BHCuNL8kVC38JWS5Gvwjr5V-hCfoYrDLifTW22dvj2M9lYLW6rAGVki2P8Vyq1G83cpsfZImoKRGFugdEvw5L00";
 
 // ------------------------------------------------------------
 // Utilidades internas
@@ -44,7 +43,7 @@ async function guardarSuscripcionEnBD(suscripcion) {
   const json = suscripcion.toJSON();
   const uid = estado.usuario.id;
 
-  // 1) Buscar si ya existe una fila con ese endpoint (de cualquier usuario)
+  // 1) ¿Ya existe una fila con ese endpoint?
   const { data: existente } = await db
     .from("push_subscriptions")
     .select("id, usuario_id")
@@ -52,7 +51,6 @@ async function guardarSuscripcionEnBD(suscripcion) {
     .maybeSingle();
 
   if (existente) {
-    // Existe: actualizar para reasignarla al usuario actual
     const { error } = await db
       .from("push_subscriptions")
       .update({
@@ -68,7 +66,7 @@ async function guardarSuscripcionEnBD(suscripcion) {
     return;
   }
 
-  // 2) No existe: insertar nueva
+  // 2) Insertar nueva
   const { error } = await db.from("push_subscriptions").insert({
     usuario_id: uid,
     endpoint: json.endpoint,
@@ -109,19 +107,32 @@ async function activarNotificaciones() {
       return;
     }
 
-    // 3) Suscribir al navegador (si no está ya suscrito)
-    let sub = await reg.pushManager.getSubscription();
-    if (!sub) {
-      sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: vapidKeyToUint8Array(VAPID_PUBLIC_KEY),
-      });
+    // ⭐ 3) CANCELAR la suscripción vieja (si existe) para forzar una nueva
+    // Esto es CRÍTICO cuando se regeneran las claves VAPID.
+    const subVieja = await reg.pushManager.getSubscription();
+    if (subVieja) {
+      try {
+        // Borrar de la BD también (por endpoint)
+        const jsonViejo = subVieja.toJSON();
+        await db.from("push_subscriptions")
+          .delete()
+          .eq("endpoint", jsonViejo.endpoint);
+      } catch { /* ignore */ }
+
+      // Cancelar en el navegador
+      await subVieja.unsubscribe();
     }
 
-    // 4) Guardar/reasignar en Supabase
+    // 4) Crear suscripción NUEVA con la clave pública actual
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: vapidKeyToUint8Array(VAPID_PUBLIC_KEY),
+    });
+
+    // 5) Guardar en Supabase
     await guardarSuscripcionEnBD(sub);
 
-    // 5) Notificación de prueba
+    // 6) Notificación de prueba
     try {
       await db.functions.invoke("enviar-push", {
         body: {
@@ -163,17 +174,12 @@ async function desactivarNotificaciones() {
   if (btn) { btn.disabled = true; btn.textContent = "Desactivando..."; }
 
   try {
-    // 1) Obtener suscripción actual del navegador
     const sub = await obtenerSuscripcionActual();
-
-    // 2) Borrar de la BD (por endpoint)
     if (sub) {
       const json = sub.toJSON();
       await db.from("push_subscriptions")
         .delete()
         .eq("endpoint", json.endpoint);
-
-      // 3) Cancelar la suscripción en el navegador
       await sub.unsubscribe();
     }
 
@@ -212,7 +218,6 @@ async function actualizarEstadoBotonNotificaciones() {
   try {
     const sub = await obtenerSuscripcionActual();
     if (sub && estado.usuario) {
-      // Verificar que en BD la suscripción pertenece a este usuario
       const json = sub.toJSON();
       const { data } = await db.from("push_subscriptions")
         .select("usuario_id")
@@ -263,7 +268,6 @@ function inicializarNotificaciones() {
     btn.addEventListener("click", alternarNotificaciones);
   }
 
-  // Esperar a que app.js cargue el perfil
   setTimeout(actualizarEstadoBotonNotificaciones, 1500);
 }
 
