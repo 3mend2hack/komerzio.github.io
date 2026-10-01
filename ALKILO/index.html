@@ -12,7 +12,11 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+  <!-- qrcode con fallback: intenta unpkg, si falla usa jsdelivr -->
+  <script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"
+          onerror="this.onerror=null; this.src='https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';"></script>
+
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
