@@ -1,0 +1,522 @@
+/* ============================================================
+   ALKILO - Módulo Terminal (viajes programados)
+   Estilos para las pantallas nuevas
+   ============================================================ */
+
+/* ============================================================
+   Hero de la pantalla principal de Terminal
+   ============================================================ */
+.term-hero {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  border-radius: 20px;
+  padding: 28px 22px;
+  text-align: center;
+  color: #ffffff;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+}
+.term-hero-emoji {
+  font-size: 3.2rem;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.term-hero h3 {
+  font-size: 1.25rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+.term-hero-texto {
+  font-size: 0.9rem;
+  opacity: 0.95;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Bloques dentro de Terminal
+   ============================================================ */
+.term-bloque {
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.term-btn-principal {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+/* ============================================================
+   Botones de acción del chofer sobre su viaje
+   ============================================================ */
+.term-btn-cerrar {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.term-btn-iniciar {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.term-btn-finalizar {
+  background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.term-btn-cancelar {
+  color: #991b1b;
+  border-color: #fecaca !important;
+}
+.term-btn-cancelar:hover {
+  background: #fef2f2;
+}
+
+/* ============================================================
+   Card de información (viaje, reserva, detalle)
+   ============================================================ */
+.term-card-info {
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
+}
+
+.term-card-info .term-titulo {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.term-card-info .term-linea {
+  display: flex;
+  gap: 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  align-items: baseline;
+}
+.term-card-info .term-linea .label {
+  color: var(--gray-500);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.term-card-info .term-linea .valor {
+  color: var(--gray-900);
+  word-break: break-word;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Badge de estado del viaje programado */
+.term-badge-estado {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.term-badge-estado.programado { background: #dbeafe; color: #1e40af; }
+.term-badge-estado.completo   { background: #fef3c7; color: #92400e; }
+.term-badge-estado.en_curso   { background: #e0e7ff; color: #3730a3; }
+.term-badge-estado.finalizado { background: #d1fae5; color: #065f46; }
+.term-badge-estado.cancelado  { background: #fee2e2; color: #991b1b; }
+
+/* ============================================================
+   Filtros de búsqueda
+   ============================================================ */
+.term-filtros {
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.term-filtros label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gray-700);
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+.term-filtros label:first-of-type {
+  margin-top: 0;
+}
+.term-filtros select,
+.term-filtros input[type="date"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: #ffffff;
+  color: var(--gray-900);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.term-filtros select:focus,
+.term-filtros input[type="date"]:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+}
+.term-filtros .btn-principal {
+  margin-top: 14px;
+}
+
+/* ============================================================
+   Mini mapa (detalle del viaje)
+   ============================================================ */
+.term-mini-mapa {
+  width: 100%;
+  height: 180px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 18px;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  background: var(--gray-200);
+}
+
+/* ============================================================
+   Check "Reservar como familiar"
+   ============================================================ */
+.term-check-familiar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1.5px solid rgba(37, 99, 235, 0.25);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #1e40af;
+  margin-bottom: 12px;
+  transition: background 0.15s;
+}
+.term-check-familiar:hover {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+.term-check-familiar input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Filas de pasajeros en el formulario de reserva */
+.term-pasajero-row {
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.term-pasajero-row label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gray-700);
+  margin: 0;
+}
+.term-pasajero-row input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.term-pasajero-row input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+}
+.term-pasajero-row .term-pasajero-quitar {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  color: #991b1b;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-top: 4px;
+}
+.term-pasajero-row .term-pasajero-quitar:hover {
+  text-decoration: underline;
+}
+
+/* Card del total a pagar */
+.term-total-card {
+  background: var(--primary-light);
+  border: 1.5px solid rgba(79, 70, 229, 0.25);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0 8px;
+}
+.term-total-card .premium-saldo-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  color: var(--primary-dark);
+}
+.term-total-card .premium-saldo-fila strong {
+  font-weight: 900;
+  color: var(--primary-dark);
+  font-size: 1.05rem;
+}
+
+/* ============================================================
+   Lector de QR (escanear)
+   ============================================================ */
+.term-reader {
+  width: 100%;
+  min-height: 280px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #000000;
+  margin-bottom: 14px;
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+
+/* Contenedor del QR en "Ver pasaje" */
+.term-qr-caja {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin: 14px 0;
+  box-shadow: var(--shadow-sm);
+}
+#term-qr-canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ============================================================
+   Resultado del escaneo QR (chofer)
+   ============================================================ */
+#term-resultado-escaneo {
+  margin-top: 16px;
+  padding: 18px 16px;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+}
+#term-resultado-escaneo.ok {
+  background: #f0fdf4;
+  border-color: #10b981;
+}
+#term-resultado-escaneo.error {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+#term-resultado-escaneo .icono-resultado {
+  font-size: 3rem;
+  line-height: 1;
+  text-align: center;
+  margin-bottom: 8px;
+}
+#term-resultado-escaneo .titulo-resultado {
+  font-size: 1.05rem;
+  font-weight: 900;
+  text-align: center;
+  color: var(--gray-900);
+  margin-bottom: 12px;
+}
+#term-resultado-escaneo .detalle-pasajero {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.92rem;
+  color: var(--gray-700);
+}
+#term-resultado-escaneo .detalle-pasajero .fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+#term-resultado-escaneo .detalle-pasajero .fila .lbl {
+  color: var(--gray-500);
+  font-weight: 700;
+}
+#term-resultado-escaneo .detalle-pasajero .fila .val {
+  color: var(--gray-900);
+  font-weight: 800;
+  text-align: right;
+}
+
+/* ============================================================
+   Filtros admin en Terminal (por si después añadimos admin)
+   ============================================================ */
+.term-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.term-tabs::-webkit-scrollbar { display: none; }
+.term-tab {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--gray-200);
+  background: #ffffff;
+  color: var(--gray-700);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.term-tab:hover { background: var(--gray-50); }
+.term-tab.activo {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+/* ============================================================
+   Tarjetas de viaje (búsqueda de cliente)
+   ============================================================ */
+.term-viaje-card {
+  background: #ffffff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s, transform 0.1s;
+  cursor: pointer;
+}
+.term-viaje-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+.term-viaje-card .ruta {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.term-viaje-card .ruta .flecha {
+  color: var(--primary);
+  font-size: 1.1rem;
+}
+.term-viaje-card .fecha-hora {
+  font-size: 0.88rem;
+  color: var(--gray-600);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.term-viaje-card .precio {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--accent-dark);
+}
+.term-viaje-card .info-inferior {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--gray-200);
+  font-size: 0.82rem;
+  color: var(--gray-500);
+}
+.term-viaje-card .chofer-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.term-viaje-card .chofer-info img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--gray-200);
+  background: var(--gray-100);
+  flex-shrink: 0;
+}
+.term-viaje-card .asientos-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+.term-viaje-card .asientos-badge.disponible {
+  background: #d1fae5;
+  color: #065f46;
+}
+.term-viaje-card .asientos-badge.pocos {
+  background: #fef3c7;
+  color: #92400e;
+}
+.term-viaje-card .asientos-badge.lleno {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ============================================================
+   Utilidad
+   ============================================================ */
+.term-oculto { display: none !important; }
+
+/* ============================================================
+   Media queries pequeños
+   ============================================================ */
+@media (max-width: 360px) {
+  .term-hero { padding: 22px 18px; }
+  .term-hero-emoji { font-size: 2.6rem; }
+  .term-viaje-card { padding: 14px; }
+  .term-viaje-card .ruta { font-size: 0.94rem; }
+}
