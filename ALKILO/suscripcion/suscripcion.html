@@ -33,7 +33,7 @@
 
     <header class="sus-cabecera">
       <button id="btn-volver" class="sus-btn-volver">← Volver</button>
-      <h1>Mi suscripción</h1>
+      <h1 id="sus-titulo-cabecera">Mi suscripción</h1>
       <span style="width:70px"></span>
     </header>
 
@@ -50,7 +50,7 @@
         </div>
       </div>
 
-      <!-- Suscripción actual -->
+      <!-- Suscripción actual (solo se muestra para choferes) -->
       <div id="bloque-suscripcion-actual" class="sus-suscripcion-actual oculto">
         <div class="sus-suscripcion-actual-izq">
           <span class="sus-suscripcion-actual-emoji" id="sus-estado-emoji">✅</span>
@@ -61,36 +61,42 @@
         </div>
       </div>
 
-      <!-- Planes -->
-      <h2 class="sus-titulo-seccion">Comprar / Renovar suscripción</h2>
-      <p class="sus-ayuda">Paga con tu saldo. Los precios se actualizan desde el panel admin.</p>
+      <!-- ============================================================
+           PLANES (SOLO VISIBLES PARA CHOFERES)
+           ============================================================ -->
+      <div id="bloque-planes-chofer">
+        <h2 class="sus-titulo-seccion">Comprar / Renovar suscripción</h2>
+        <p class="sus-ayuda">Paga con tu saldo. Los precios se actualizan desde el panel admin.</p>
 
-      <div class="sus-grid-planes" id="grid-planes">
-        <button class="sus-plan" data-meses="1">
-          <span class="sus-plan-meses">1 mes</span>
-          <span class="sus-plan-precio" id="precio-1">—</span>
+        <div class="sus-grid-planes" id="grid-planes">
+          <button class="sus-plan" data-meses="1">
+            <span class="sus-plan-meses">1 mes</span>
+            <span class="sus-plan-precio" id="precio-1">—</span>
+          </button>
+          <button class="sus-plan" data-meses="3">
+            <span class="sus-plan-meses">3 meses</span>
+            <span class="sus-plan-precio" id="precio-3">—</span>
+          </button>
+          <button class="sus-plan" data-meses="6">
+            <span class="sus-plan-meses">6 meses</span>
+            <span class="sus-plan-precio" id="precio-6">—</span>
+          </button>
+          <button class="sus-plan" data-meses="12">
+            <span class="sus-plan-meses">12 meses</span>
+            <span class="sus-plan-precio" id="precio-12">—</span>
+          </button>
+        </div>
+
+        <button id="btn-comprar-suscripcion" class="sus-btn-principal" disabled>
+          💳 Comprar con saldo
         </button>
-        <button class="sus-plan" data-meses="3">
-          <span class="sus-plan-meses">3 meses</span>
-          <span class="sus-plan-precio" id="precio-3">—</span>
-        </button>
-        <button class="sus-plan" data-meses="6">
-          <span class="sus-plan-meses">6 meses</span>
-          <span class="sus-plan-precio" id="precio-6">—</span>
-        </button>
-        <button class="sus-plan" data-meses="12">
-          <span class="sus-plan-meses">12 meses</span>
-          <span class="sus-plan-precio" id="precio-12">—</span>
-        </button>
+        <p class="sus-mensaje-error" id="compra-error"></p>
+        <p class="sus-mensaje-exito" id="compra-exito"></p>
       </div>
 
-      <button id="btn-comprar-suscripcion" class="sus-btn-principal" disabled>
-        💳 Comprar con saldo
-      </button>
-      <p class="sus-mensaje-error" id="compra-error"></p>
-      <p class="sus-mensaje-exito" id="compra-exito"></p>
-
-      <!-- Recargar saldo -->
+      <!-- ============================================================
+           RECARGAR SALDO (para todos)
+           ============================================================ -->
       <h2 class="sus-titulo-seccion">Recargar saldo</h2>
       <p class="sus-ayuda">Elige el método. Los pagos manuales los aprueba el admin.</p>
 
