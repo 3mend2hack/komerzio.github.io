@@ -1,6 +1,7 @@
 /* ============================================================
    ALKILO - Lógica de la página de suscripción y recargas
    Con compresor + datos bancarios + pago móvil
+   + Ocultar planes de suscripción para clientes
    ============================================================ */
 
 // ------------------------------------------------------------
@@ -163,6 +164,14 @@ async function iniciar() {
     return;
   }
   susEstado.perfil = perfil;
+
+  // ⭐ Si NO es chofer, ocultar la sección de planes de suscripción
+  // y cambiar el título de la cabecera
+  if (perfil.rol !== "chofer") {
+    document.getElementById("bloque-planes-chofer")?.classList.add("oculto");
+    const titulo = document.getElementById("sus-titulo-cabecera");
+    if (titulo) titulo.textContent = "Mi saldo";
+  }
 
   conectarEventos();
 
